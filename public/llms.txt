@@ -1,0 +1,23 @@
+# SolarMatch Thailand
+
+SolarMatch Thailand is a bilingual prototype that helps homeowners understand a possible rooftop-solar system-size and savings range before speaking with an installer.
+
+Canonical public routes:
+- Thai home: https://solarmatch-thailand.deluxejahseh.workers.dev/
+- English home: https://solarmatch-thailand.deluxejahseh.workers.dev/en
+- Thai estimator: https://solarmatch-thailand.deluxejahseh.workers.dev/estimate
+- English estimator: https://solarmatch-thailand.deluxejahseh.workers.dev/en/estimate
+- Thai methodology: https://solarmatch-thailand.deluxejahseh.workers.dev/methodology
+- English methodology: https://solarmatch-thailand.deluxejahseh.workers.dev/en/methodology
+- Thai resources: https://solarmatch-thailand.deluxejahseh.workers.dev/resources
+- English resources: https://solarmatch-thailand.deluxejahseh.workers.dev/en/resources
+
+Prototype limitations:
+- Results are educational estimates, not engineering designs, quotations, or guarantees.
+- Current assumptions are versioned and may change after buyer and market validation.
+- Surplus-purchase income and tax relief are conditional and excluded from base headline results.
+- The contact form validates locally and discards the values; it does not store or transmit a lead.
+- There is no live installer matching, payment, advertising, analytics, CRM, LINE, email, OTP, or database integration.
+- The website is marked noindex while validation continues.
+
+This file is descriptive only. It is not an access-control or security policy.

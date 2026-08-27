@@ -31,13 +31,14 @@ export const metadata: Metadata = {
   },
   description:
     'ประเมินขนาดระบบโซลาร์และช่วงเงินที่อาจประหยัดได้เบื้องต้น ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: true },
+  icons: { icon: '/favicon.svg' },
   openGraph: {
     type: 'website',
     locale: 'th_TH',
     title: 'SolarMatch Thailand',
     description: 'เริ่มเข้าใจ Solar Rooftop จากค่าไฟและรูปแบบการใช้ไฟของบ้านคุณ',
-    images: [{ url: '/og.png', width: 1200, height: 630 }],
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'AI-generated illustrative rooftop-solar scene for the SolarMatch Thailand prototype' }],
   },
 };
 
@@ -53,7 +54,7 @@ export default function RootLayout({
       >
         <LanguageDocumentSync />
         <SiteHeader />
-        <div id="main-content">{children}</div>
+        <div id="main-content" tabIndex={-1}>{children}</div>
         <SiteFooter />
       </body>
     </html>

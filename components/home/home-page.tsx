@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import {
   ArrowRight,
   BarChart3,
@@ -58,7 +57,7 @@ const copy: Record<Locale, HomeCopy> = {
     titleEmphasis: 'เหมาะกับโซลาร์แค่ไหน?',
     lede: 'ประเมินขนาดระบบและช่วงเงินที่อาจประหยัดได้เบื้องต้น ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
     photoAlt: 'บ้านพักอาศัยที่ติดตั้งแผงโซลาร์บนหลังคา ท่ามกลางต้นไม้และแสงธรรมชาติ',
-    photoCaption: 'ภาพประกอบบ้านที่ติดโซลาร์ · สภาพหลังคาจริงต้องสำรวจหน้างาน',
+    photoCaption: 'ภาพจำลองสร้างด้วย AI เพื่อประกอบเนื้อหา · สภาพหลังคาจริงต้องสำรวจหน้างาน',
     example: 'ตัวอย่างช่วงผลประเมิน',
     exampleNote: 'ไม่ใช่คำสัญญาหรือใบเสนอราคา',
     trust: ['ดูผลก่อนกรอกเบอร์', 'ไม่ต้องอัปโหลดบิล', 'ไม่มีค่าใช้จ่ายสำหรับเจ้าของบ้าน'],
@@ -108,7 +107,7 @@ const copy: Record<Locale, HomeCopy> = {
     titleEmphasis: 'a good fit for your home?',
     lede: 'See an initial system-size and possible savings range before deciding whether to speak with an installer.',
     photoAlt: 'A residential home with rooftop solar panels surrounded by greenery in natural daylight',
-    photoCaption: 'Illustrative solar home · your roof still requires a site survey',
+    photoCaption: 'AI-generated illustrative scene · your roof still requires a site survey',
     example: 'Example estimate range',
     exampleNote: 'Not a promise or quotation',
     trust: ['See results before entering a phone number', 'No bill upload required', 'Free for homeowners'],
@@ -171,7 +170,23 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
             <PrototypeNotice compact locale={locale} />
           </div>
           <figure className="hero-photo">
-            <img src="/images/solar-home-hero.jpg" width="1600" height="1067" alt={text.photoAlt} fetchPriority="high" />
+            <picture>
+              <source
+                type="image/webp"
+                srcSet="/images/solar-home-ai-768.webp 768w, /images/solar-home-ai-1440.webp 1440w"
+                sizes="(max-width: 700px) 100vw, (max-width: 980px) 67vw, 58vw"
+              />
+              <img
+                src="/images/solar-home-ai-1440.webp"
+                srcSet="/images/solar-home-ai-768.webp 768w, /images/solar-home-ai-1440.webp 1440w"
+                sizes="(max-width: 700px) 100vw, (max-width: 980px) 67vw, 58vw"
+                width="1440"
+                height="960"
+                alt={text.photoAlt}
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
             <figcaption>{text.photoCaption}</figcaption>
             <div className="sunline" aria-hidden="true" />
             <div className="result-peek result-peek-v2"><span>{text.example}</span><strong>3–5 <small>kW</small></strong><p>{text.exampleNote}</p></div>
@@ -187,7 +202,7 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
 
       <section className="home-process process-editorial"><div className="site-shell"><div className="process-heading"><p className="eyebrow">{text.processEyebrow}</p><h2>{text.processTitle}</h2><p>{text.processBody}</p></div><div className="process-sequence">{text.steps.map((item, index) => { const Icon = stepIcons[index]; return <article key={item.title}><span className="process-number">0{index + 1}</span><Icon aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.body}</p></div></article>; })}</div></div></section>
 
-      <section className="savings-preview-section"><div className="site-shell savings-preview-grid"><div><p className="eyebrow">{text.previewEyebrow}</p><h2>{text.previewTitle}</h2><p>{text.previewBody}</p><small>{text.previewDisclaimer}</small><Link className="button" href={link('/estimate')}>{text.previewCta} <ArrowRight size={18} aria-hidden="true" /></Link></div><div className="preview-chart" role="img" aria-label={text.previewDisclaimer}><div className="preview-bar before"><span>{text.before}</span><i style={{ '--bar-height': '86%' } as React.CSSProperties} /><strong>฿5,000</strong></div><div className="preview-bar after"><span>{text.after}</span><i style={{ '--bar-height': '48%' } as React.CSSProperties} /><strong>฿2,800</strong></div><div className="preview-baseline" aria-hidden="true" /></div></div></section>
+      <section className="savings-preview-section"><div className="site-shell savings-preview-grid"><div><p className="eyebrow">{text.previewEyebrow}</p><h2>{text.previewTitle}</h2><p>{text.previewBody}</p><small>{text.previewDisclaimer}</small><Link className="button" href={link('/estimate')}>{text.previewCta} <ArrowRight size={18} aria-hidden="true" /></Link></div><div className="preview-chart" role="img" aria-label={`${text.previewDisclaimer} ${text.before}: ฿5,000. ${text.after}: ฿2,800.`}><div className="preview-bar before"><span>{text.before}</span><i style={{ '--bar-height': '86%' } as React.CSSProperties} /><strong>฿5,000</strong></div><div className="preview-bar after"><span>{text.after}</span><i style={{ '--bar-height': '48%' } as React.CSSProperties} /><strong>฿2,800</strong></div><div className="preview-baseline" aria-hidden="true" /></div></div></section>
 
       <section className="evidence-section"><div className="site-shell evidence-grid"><div className="evidence-heading"><p className="eyebrow">{text.evidenceEyebrow}</p><h2>{text.evidenceTitle}</h2><p>{text.evidenceBody}</p></div><div className="evidence-list">{text.evidence.map((item, index) => <article key={item.title}>{index === 0 ? <FileSearch /> : <ShieldCheck />}<div><h3>{item.title}</h3><p>{item.body}</p></div></article>)}</div></div></section>
 

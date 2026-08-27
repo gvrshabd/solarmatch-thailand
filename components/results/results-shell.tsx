@@ -32,19 +32,25 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   const money = (value: number) => `${value < 0 ? '−' : ''}฿${Math.abs(value).toLocaleString(numberLocale)}`;
   const number = (value: number) => value.toLocaleString(numberLocale);
   const [answers, setAnswers] = useState<EstimateAnswers | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem('solarmatch:estimate');
-    if (!saved) return;
     try {
+      const saved = sessionStorage.getItem('solarmatch:estimate');
+      if (!saved) return;
       const parsed = estimateAnswersSchema.safeParse(JSON.parse(saved));
       // Browser storage is an external system; hydrate it after the server-safe first render.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (parsed.success) setAnswers(parsed.data);
     } catch { /* An empty state is safer than guessing. */ }
+    finally {
+      setHydrated(true);
+    }
   }, []);
   const result = useMemo<EstimateResult | null>(() => answers ? calculateEstimate(answers) : null, [answers]);
   useEffect(() => { if (result) track('estimate_result_viewed', { confidence: result.confidence }); }, [result]);
+
+  if (!hydrated) return <main className="empty-result result-loading" aria-busy="true"><div className="site-shell"><p className="eyebrow">{english ? 'Loading saved estimate' : 'กำลังโหลดผลที่บันทึกไว้'}</p><h1>{english ? 'Preparing your transparent result' : 'กำลังเตรียมผลประเมินอย่างโปร่งใส'}</h1><p>{english ? 'Your non-sensitive answers stay in this browser session.' : 'คำตอบที่ไม่อ่อนไหวของคุณอยู่ในเซสชันเบราว์เซอร์นี้'}</p></div></main>;
 
   if (!result) return <main className="empty-result"><div className="site-shell"><p className="eyebrow">{english ? 'No estimate data yet' : 'ยังไม่มีข้อมูลประเมิน'}</p><h1>{english ? 'Complete the estimate before viewing results' : 'เริ่มแบบประเมินก่อนดูผล'}</h1><p>{english ? 'We do not invent figures from incomplete information, so the prototype result stays transparent.' : 'เราไม่สร้างตัวเลขจากข้อมูลที่ไม่ครบ เพื่อให้ผลต้นแบบตรงไปตรงมาที่สุด'}</p><Link className="button" href={localizedPath('/estimate', locale)}>{english ? 'Start estimate' : 'เริ่มประเมิน'}</Link></div></main>;
 
@@ -111,7 +117,9 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
         <div className="lifetime-heading"><div><p className="eyebrow">{english ? `${solarAssumptions.analysisYears}-year view` : `มุมมอง ${solarAssumptions.analysisYears} ปี`}</p><h2 id="lifetime-title">{english ? 'Cumulative household electricity cost' : 'ต้นทุนไฟฟ้าสะสมของบ้าน'}</h2></div><div className="lifetime-range"><span>{english ? 'Estimated net difference after 25 years' : 'ส่วนต่างสุทธิประมาณการหลัง 25 ปี'}</span><strong>{money(result.estimatedLifetimeNetBenefitThb.min)} – {money(result.estimatedLifetimeNetBenefitThb.max)}</strong></div></div>
         <p className="chart-explainer">{english ? 'The two solar lines show the cost range, including the installed-cost range and annual upkeep. The comparison excludes export income, tax relief, finance, major component replacement, and electricity-price growth.' : 'เส้นโซลาร์สองเส้นแสดงช่วงต้นทุน โดยรวมช่วงราคาติดตั้งและค่าเผื่อดูแลรายปี การเปรียบเทียบนี้ไม่รวมรายได้ขายไฟ สิทธิภาษี เงินกู้ การเปลี่ยนอุปกรณ์หลัก และการเพิ่มขึ้นของค่าไฟ'}</p>
         <LifetimeCostChart data={result.lifetimeCostSeries} locale={locale} />
-        <table className="chart-data-table"><caption>{english ? 'Accessible cumulative-cost data at five-year intervals' : 'ข้อมูลต้นทุนสะสมทุกห้าปี'}</caption><thead><tr><th>{english ? 'Year' : 'ปี'}</th><th>{english ? 'Without solar' : 'ไม่ติดโซลาร์'}</th><th>{english ? 'With solar · lower' : 'ติดโซลาร์ · ช่วงต่ำ'}</th><th>{english ? 'With solar · higher' : 'ติดโซลาร์ · ช่วงสูง'}</th></tr></thead><tbody>{lifetimeRows.map((point) => <tr key={point.year}><th>{point.year}</th><td>{money(point.withoutSolarThb)}</td><td>{money(point.withSolarLowThb)}</td><td>{money(point.withSolarHighThb)}</td></tr>)}</tbody></table>
+        <div className="chart-table-scroll" role="region" aria-label={english ? 'Scrollable cumulative-cost data table' : 'ตารางข้อมูลต้นทุนสะสมที่เลื่อนได้'} tabIndex={0}>
+          <table className="chart-data-table"><caption>{english ? 'Accessible cumulative-cost data at five-year intervals' : 'ข้อมูลต้นทุนสะสมทุกห้าปี'}</caption><thead><tr><th>{english ? 'Year' : 'ปี'}</th><th>{english ? 'Without solar' : 'ไม่ติดโซลาร์'}</th><th>{english ? 'With solar · lower' : 'ติดโซลาร์ · ช่วงต่ำ'}</th><th>{english ? 'With solar · higher' : 'ติดโซลาร์ · ช่วงสูง'}</th></tr></thead><tbody>{lifetimeRows.map((point) => <tr key={point.year}><th>{point.year}</th><td>{money(point.withoutSolarThb)}</td><td>{money(point.withSolarLowThb)}</td><td>{money(point.withSolarHighThb)}</td></tr>)}</tbody></table>
+        </div>
       </section>}
 
       <section className="policy-note"><div className="site-shell policy-note-inner"><Info size={24} aria-hidden="true" /><div><h2>{english ? 'Surplus purchase and tax relief are conditional—not assumed' : 'การรับซื้อไฟส่วนเกินและสิทธิภาษีมีเงื่อนไข—ไม่ถูกสมมติให้โดยอัตโนมัติ'}</h2><p>{english ? `The 2026 residential programme first serves home consumption. If approved, eligible surplus may be purchased separately at ฿${solarAssumptions.fit.rateThbPerKwh}/kWh for ${solarAssumptions.fit.termYears} years, subject to a ${solarAssumptions.fit.maxAcKw} kW AC export limit, quota, and utility approval. That limit is not a general solar-system size cap. Royal Decree No. 805 provides a qualifying personal-income-tax deduction capped at ${money(solarAssumptions.tax.deductionCapThb)}; it is not a cash refund. Neither item is included above.` : `โครงการภาคประชาชนปี 2569 ให้ผลิตไฟเพื่อใช้ในบ้านก่อน หากได้รับอนุมัติ ไฟส่วนเกินที่เข้าเงื่อนไขอาจขายแยกได้ที่ ${solarAssumptions.fit.rateThbPerKwh} บาท/หน่วย นาน ${solarAssumptions.fit.termYears} ปี ภายใต้เพดานส่งออก ${solarAssumptions.fit.maxAcKw} kW AC โควตา และการอนุมัติของการไฟฟ้า เพดานนี้ไม่ใช่เพดานขนาดระบบทั่วไป ส่วนพระราชกฤษฎีกาฯ ฉบับที่ 805 เป็นสิทธิลดหย่อน/ยกเว้นภาษีเงินได้ตามค่าใช้จ่ายที่เข้าเงื่อนไข สูงสุด ${money(solarAssumptions.tax.deductionCapThb)} ไม่ใช่เงินคืน ทั้งสองส่วนยังไม่รวมในผลด้านบน`}</p><p className="policy-links"><a href={solarAssumptions.fit.sources[0]} target="_blank" rel="noreferrer">PEA</a><a href={solarAssumptions.fit.sources[1]} target="_blank" rel="noreferrer">MEA</a><a href={solarAssumptions.tax.source} target="_blank" rel="noreferrer">{english ? 'Revenue Department' : 'กรมสรรพากร'}</a><a href={activeResidentialTariff.source} target="_blank" rel="noreferrer">{english ? 'Tariff reference' : 'อัตราค่าไฟอ้างอิง'}</a></p><small>{english ? 'Sources last checked' : 'ตรวจแหล่งข้อมูลล่าสุด'} {solarAssumptions.assumptionsLastVerified}</small></div></div></section>

@@ -19,7 +19,7 @@ export function LifetimeCostChart({ data, locale = 'th' }: { data: LifetimeCostP
   return (
     <div className="lifetime-chart" aria-hidden="true">
       <ResponsiveContainer width="100%" height={360}>
-        <LineChart data={data} margin={{ top: 12, right: 18, left: 4, bottom: 8 }}>
+        <LineChart accessibilityLayer={false} data={data} margin={{ top: 12, right: 18, left: 4, bottom: 8 }}>
           <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#d8e2dc" />
           <XAxis dataKey="year" ticks={[0, 5, 10, 15, 20, 25]} tick={{ fill: '#617169', fontSize: 11 }} tickFormatter={(value) => english ? `Year ${value}` : `ปี ${value}`} />
           <YAxis tick={{ fill: '#617169', fontSize: 11 }} width={72} tickFormatter={compactMoney} />

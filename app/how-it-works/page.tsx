@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
 import Link from '@/components/site/internal-link';
 import { ArrowRight, Calculator, ClipboardList, MessagesSquare } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
+import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
-export const metadata: Metadata = { title: 'วิธีการทำงาน' };
+export const metadata = thaiMetadata('วิธีการทำงาน', '/how-it-works');
 export default function HowItWorksPage() {
   return <main><PageHero eyebrow="How it works" title="เข้าใจบ้านของคุณ ก่อนเริ่มขอราคา"><p>SolarMatch แบ่งข้อมูลที่ซับซ้อนออกเป็นสามช่วง เพื่อให้คุณเห็นสิ่งที่รู้ สิ่งที่ยังต้องตรวจ และคำถามที่ควรถามผู้ติดตั้ง</p></PageHero>
     <section className="site-shell numbered-sections">

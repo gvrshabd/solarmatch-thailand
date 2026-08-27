@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: EnglishRouteProps): Promise<M
     title: titles[key] ?? 'SolarMatch Thailand',
     description: 'Understand a possible rooftop solar system size and savings range for a home in Thailand before speaking with an installer.',
     alternates: { canonical: englishUrl, languages: { 'en-US': englishUrl, 'th-TH': thaiUrl } },
-    openGraph: { locale: 'en_US', url: englishUrl, title: titles[key] ?? 'SolarMatch Thailand', description: 'Start with your electricity bill and daytime usage to understand a possible rooftop solar range.' },
+    openGraph: { type: 'website', locale: 'en_US', url: englishUrl, title: titles[key] ?? 'SolarMatch Thailand', description: 'Start with your electricity bill and daytime usage to understand a possible rooftop solar range.', images: [{ url: '/og.png', width: 1200, height: 630, alt: 'AI-generated illustrative rooftop-solar scene for the SolarMatch Thailand prototype' }] },
   };
 }
 

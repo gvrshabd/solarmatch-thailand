@@ -91,7 +91,7 @@ function EnglishHome() {
           <SectionHeading eyebrow="Frequently asked questions" title="Start without already knowing solar" />
           <div className="faq-list">
             <details open><summary>How accurate is this estimate?</summary><p>It is an initial screen based on electricity cost and usage patterns. Accuracy improves with roof, load, and site-survey information.</p></details>
-            <details><summary>Do I need to enter a phone number before seeing results?</summary><p>No. You see the estimate first. The contact form appears afterwards and currently validates then discards submissions.</p></details>
+            <details><summary>Do I need to enter a phone number before seeing results?</summary><p>No. You see the estimate first. The contact form appears afterwards and currently validates in the browser, then discards the values without transmitting them.</p></details>
             <details><summary>Is SolarMatch an installer?</summary><p>No. This prototype is testing a tool that helps homeowners understand their needs before speaking with service providers.</p></details>
             <details><summary>Why is payback not calculated yet?</summary><p>Installation price, warranty structure, maintenance, and policy all matter. We will not publish a payback figure until the market assumptions are validated.</p></details>
           </div>
@@ -227,7 +227,7 @@ function EnglishResources() {
       </PageHero>
       <section className="site-shell resource-list">
         {resources.map((resource) => (
-          <a key={resource.name} href={resource.href} target="_blank" rel="noreferrer">
+          <a key={resource.name} href={resource.href} target="_blank" rel="noreferrer" aria-label={`${resource.name} (opens in a new tab)`}>
             <div><h2>{resource.name}</h2><p>{resource.note}</p></div>
             <ExternalLink size={20} aria-hidden="true" />
           </a>
@@ -242,7 +242,7 @@ function EnglishResources() {
 }
 
 function EnglishPrivacy() {
-  return <LegalShell locale="en" title="Privacy notice" summary="This page describes the principles intended for any future live system. The current contact form is a prototype and does not store submissions."><h2>1. Prototype status</h2><p>Estimate answers are kept in your browser’s session storage to produce a result on your device. The contact form sends to a test endpoint that validates the format and immediately discards the data. It is not stored, forwarded, or used for marketing.</p><h2>2. Information that may be collected in a live service</h2><p>Name, phone number, preferred contact channel and time, estimate answers, and consent records. A data controller, retention period, and recipients must be defined before this is enabled.</p><h2>3. Intended purposes</h2><p>Producing an estimate, responding to a user request, and—only with explicit consent—sending necessary information to an identified service provider.</p><h2>4. Your rights</h2><p>A live service must provide a channel to request access, correction, consent withdrawal, deletion, or objection under applicable law.</p><h2>5. Still to be defined</h2><p>The responsible legal entity, address, privacy contact, legal bases, processors, retention periods, transfers, and data-subject request procedures.</p></LegalShell>;
+  return <LegalShell locale="en" title="Privacy notice" summary="This page describes the principles intended for any future live system. The current contact form is a prototype and does not store submissions."><h2>1. Prototype status</h2><p>Estimate answers are kept in your browser’s session storage to produce a result on your device. The current contact form validates its format locally in the browser and immediately discards the values without sending them to a server. They are not stored, forwarded, or used for marketing.</p><h2>2. Information that may be collected in a live service</h2><p>Name, phone number, preferred contact channel and time, estimate answers, and consent records. A data controller, retention period, and recipients must be defined before this is enabled.</p><h2>3. Intended purposes</h2><p>Producing an estimate, responding to a user request, and—only with explicit consent—sending necessary information to an identified service provider.</p><h2>4. Your rights</h2><p>A live service must provide a channel to request access, correction, consent withdrawal, deletion, or objection under applicable law.</p><h2>5. Still to be defined</h2><p>The responsible legal entity, address, privacy contact, legal bases, processors, retention periods, transfers, and data-subject request procedures.</p></LegalShell>;
 }
 
 function EnglishTerms() {

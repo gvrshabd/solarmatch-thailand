@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
 import Link from '@/components/site/internal-link';
 import { ArrowRight } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
+import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
-export const metadata: Metadata = { title: 'คู่มือ Solar Rooftop สำหรับบ้าน' };
+export const metadata = thaiMetadata('คู่มือ Solar Rooftop สำหรับบ้าน', '/solar-guide');
 export default function SolarGuidePage() {
   return <main><PageHero eyebrow="Solar guide" title="Solar Rooftop เริ่มจากการใช้ไฟ ไม่ใช่แค่พื้นที่หลังคา"><p>ระบบที่เหมาะกับบ้านหนึ่งหลังขึ้นกับหลายอย่าง คู่มือนี้อธิบายกรอบคิดเบื้องต้นโดยไม่ชี้นำยี่ห้อหรือผู้ติดตั้ง</p></PageHero>
     <section className="site-shell guide-layout"><nav className="guide-index" aria-label="สารบัญ"><strong>ในหน้านี้</strong><a href="#daytime">ไฟช่วงกลางวัน</a><a href="#roof">หลังคาและเงา</a><a href="#size">ขนาดระบบ</a><a href="#quotes">ก่อนเปรียบเทียบราคา</a></nav>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -28,11 +28,11 @@ import { estimateFlow, estimateFlowEn } from '@/config/estimate-flow';
 import { featureFlags } from '@/config/feature-flags';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { track } from '@/lib/analytics/track';
-import { estimateAnswersSchema } from '@/lib/validation/estimate';
+import { estimateAnswersSchema, estimateDraftSchema } from '@/lib/validation/estimate';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 
 type Draft = Partial<EstimateAnswers>;
-type SavedDraft = { answers: Draft; step: number };
+type SavedDraft = { version: 1; answers: Draft; step: number };
 
 const resultStorageKey = 'solarmatch:estimate';
 const draftStorageKey = 'solarmatch:estimate-draft';
@@ -77,9 +77,17 @@ const shadeOptions: { value: NonNullable<EstimateAnswers['shade']>; th: string; 
   { value: 'unknown', th: 'ไม่แน่ใจ', en: 'Not sure', icon: CircleHelp },
 ];
 
-function safeParse<T>(value: string | null): T | null {
+function parseJson(value: string | null): unknown {
   if (!value) return null;
-  try { return JSON.parse(value) as T; } catch { return null; }
+  try { return JSON.parse(value) as unknown; } catch { return null; }
+}
+
+function readSessionValue(key: string) {
+  try { return sessionStorage.getItem(key); } catch { return null; }
+}
+
+function removeSessionValue(key: string) {
+  try { sessionStorage.removeItem(key); } catch { /* Storage may be unavailable. */ }
 }
 
 export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
@@ -96,28 +104,38 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
   const question = visibleFlow[step];
 
   useEffect(() => {
-    const starter = safeParse<Draft>(sessionStorage.getItem(starterStorageKey));
-    const savedDraft = safeParse<SavedDraft>(sessionStorage.getItem(draftStorageKey));
-    const completed = safeParse<Draft>(sessionStorage.getItem(resultStorageKey));
+    const starterResult = estimateAnswersSchema.partial().safeParse(parseJson(readSessionValue(starterStorageKey)));
+    const rawSavedDraft = parseJson(readSessionValue(draftStorageKey));
+    const migratedSavedDraft = rawSavedDraft && typeof rawSavedDraft === 'object' && !('version' in rawSavedDraft)
+      ? { ...rawSavedDraft, version: 1 }
+      : rawSavedDraft;
+    const savedDraftResult = estimateDraftSchema.safeParse(migratedSavedDraft);
+    const completedResult = estimateAnswersSchema.safeParse(parseJson(readSessionValue(resultStorageKey)));
+    const starter = starterResult.success ? starterResult.data : null;
+    const savedDraft = savedDraftResult.success ? savedDraftResult.data : null;
+    const completed = completedResult.success ? completedResult.data : null;
     const restored = starter ?? savedDraft?.answers ?? completed ?? {};
 
     // Browser storage hydrates only after the server-safe initial render.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft(restored);
     if (!starter && savedDraft) setStep(Math.min(Math.max(savedDraft.step, 0), visibleFlow.length - 1));
-    sessionStorage.removeItem(starterStorageKey);
+    removeSessionValue(starterStorageKey);
     track('estimate_started', { source: starter ? 'home' : savedDraft ? 'resume' : completed ? 'edit' : 'estimate' });
     queueMicrotask(() => setReady(true));
   }, [visibleFlow.length]);
 
   useEffect(() => {
     if (!ready) return;
-    sessionStorage.setItem(draftStorageKey, JSON.stringify({ answers: draft, step } satisfies SavedDraft));
+    try {
+      sessionStorage.setItem(draftStorageKey, JSON.stringify({ version: 1, answers: draft, step } satisfies SavedDraft));
+    } catch { /* The estimator remains usable without browser storage. */ }
   }, [draft, ready, step]);
 
   useEffect(() => {
     if (!ready) return;
-    questionHeadingRef.current?.focus({ preventScroll: true });
+    const frame = requestAnimationFrame(() => questionHeadingRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
   }, [ready, step]);
 
   function setValue<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K]) {
@@ -126,7 +144,10 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
   }
 
   function validCurrent() {
-    if (question.type === 'number') return Number(draft.monthlyBillThb) >= 500;
+    if (question.type === 'number') {
+      const amount = Number(draft.monthlyBillThb);
+      return Number.isFinite(amount) && amount >= 500 && amount <= 50000;
+    }
     if (question.type === 'roof') return typeof draft.roofKnown === 'boolean';
     return Boolean(draft[question.id as keyof Draft]);
   }
@@ -134,7 +155,7 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
   function next() {
     if (!validCurrent()) {
       setError(question.type === 'number'
-        ? (english ? 'Please enter an electricity bill of at least ฿500.' : 'กรุณากรอกค่าไฟตั้งแต่ 500 บาทขึ้นไป')
+        ? (english ? 'Please enter a monthly electricity bill from ฿500 to ฿50,000.' : 'กรุณากรอกค่าไฟต่อเดือนระหว่าง 500–50,000 บาท')
         : (english ? 'Please choose an answer before continuing.' : 'กรุณาเลือกคำตอบก่อนดำเนินการต่อ'));
       return;
     }
@@ -150,9 +171,45 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
       setError(english ? 'Some information is still incomplete. Please check your answers.' : 'ยังมีข้อมูลบางส่วนไม่ครบ กรุณาตรวจสอบอีกครั้ง');
       return;
     }
-    sessionStorage.setItem(resultStorageKey, JSON.stringify(parsed.data));
-    sessionStorage.removeItem(draftStorageKey);
+    try { sessionStorage.setItem(resultStorageKey, JSON.stringify(parsed.data)); } catch { /* Navigation still shows the safe empty state if storage is unavailable. */ }
+    removeSessionValue(draftStorageKey);
     window.location.assign(localizedPath('/estimate/results', locale));
+  }
+
+  function previous() {
+    setStep((current) => Math.max(0, current - 1));
+    setError('');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+
+  function restart() {
+    removeSessionValue(starterStorageKey);
+    removeSessionValue(draftStorageKey);
+    removeSessionValue(resultStorageKey);
+    setDraft({});
+    setStep(0);
+    setError('');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    requestAnimationFrame(() => questionHeadingRef.current?.focus());
+  }
+
+  function handleRadioKeys(event: KeyboardEvent<HTMLDivElement>) {
+    if (!['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+    const radios = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]:not(:disabled)'));
+    if (radios.length === 0) return;
+    const currentIndex = Math.max(0, radios.indexOf(document.activeElement as HTMLButtonElement));
+    const nextIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? radios.length - 1
+        : ['ArrowDown', 'ArrowRight'].includes(event.key)
+          ? (currentIndex + 1) % radios.length
+          : (currentIndex - 1 + radios.length) % radios.length;
+    event.preventDefault();
+    radios[nextIndex].focus();
+    radios[nextIndex].click();
   }
 
   const selected = (id: string, value: string) => draft[id as keyof Draft] === value;
@@ -180,11 +237,12 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
                 <p><CircleHelp size={17} aria-hidden="true" /> {question.reason}</p>
               </div>
 
-              {question.type === 'choice' && <div className={`choice-grid visual-options visual-options-${question.id}`} role="radiogroup" aria-labelledby="estimate-question">
+              {question.type === 'choice' && <div className={`choice-grid visual-options visual-options-${question.id}`} role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>
                 {question.options?.map((option) => {
                   const isSelected = selected(question.id, option.value);
+                  const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value));
                   const Icon = optionIcons[option.value] ?? CircleHelp;
-                  return <button key={option.value} type="button" role="radio" aria-checked={isSelected} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => setValue(question.id as keyof EstimateAnswers, option.value)}>
+                  return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && option === question.options?.[0]) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => setValue(question.id as keyof EstimateAnswers, option.value)}>
                     <Icon className="choice-icon" size={22} aria-hidden="true" />
                     <span><strong>{option.label}</strong>{option.description && <small>{option.description}</small>}</span>
                     <span className="choice-indicator" aria-hidden="true">{isSelected && <Check size={15} />}</span>
@@ -194,15 +252,15 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
 
               {question.type === 'number' && <div className="bill-question">
                 <label htmlFor="monthly-bill">{english ? 'Average monthly electricity bill' : 'ค่าไฟเฉลี่ยต่อเดือน'}</label>
-                <div className="large-currency-input"><span>฿</span><input id="monthly-bill" type="number" inputMode="numeric" min="500" max="50000" value={draft.monthlyBillThb ?? ''} placeholder="3,500" onChange={(event) => setValue('monthlyBillThb', Number(event.target.value))} /><small>{english ? '/ month' : '/ เดือน'}</small></div>
+                <div className="large-currency-input"><span>฿</span><input id="monthly-bill" type="number" inputMode="numeric" min="500" max="50000" value={draft.monthlyBillThb ?? ''} placeholder="3,500" aria-invalid={Boolean(error)} aria-describedby={error ? 'estimate-error' : undefined} onChange={(event) => setValue('monthlyBillThb', Number(event.target.value))} /><small>{english ? '/ month' : '/ เดือน'}</small></div>
                 <input className="bill-slider" aria-label={english ? 'Adjust electricity bill' : 'ปรับค่าไฟ'} type="range" min="500" max="20000" step="100" value={draft.monthlyBillThb ?? 3500} onChange={(event) => setValue('monthlyBillThb', Number(event.target.value))} />
                 <div className="range-labels"><span>฿500</span><span>฿20,000+</span></div>
               </div>}
 
               {question.type === 'roof' && <div className="roof-question">
-                <div className="choice-grid two" role="radiogroup" aria-label={english ? 'Knowledge of roof details' : 'ความรู้เกี่ยวกับหลังคา'}>
-                  <button type="button" role="radio" aria-checked={draft.roofKnown === true} className={`choice-card visual-choice ${draft.roofKnown === true ? 'selected' : ''}`} onClick={() => setValue('roofKnown', true)}><House className="choice-icon" /><strong>{english ? 'I know some details' : 'พอรู้ข้อมูล'}</strong><span className="choice-indicator">{draft.roofKnown === true && <Check size={15} />}</span></button>
-                  <button type="button" role="radio" aria-checked={draft.roofKnown === false} className={`choice-card visual-choice ${draft.roofKnown === false ? 'selected' : ''}`} onClick={() => { setValue('roofKnown', false); setValue('shade', 'unknown'); }}><CircleHelp className="choice-icon" /><strong>{english ? 'Not sure / skip details' : 'ไม่แน่ใจ / ข้ามได้'}</strong><span className="choice-indicator">{draft.roofKnown === false && <Check size={15} />}</span></button>
+                <div className="choice-grid two" role="radiogroup" aria-label={english ? 'Knowledge of roof details' : 'ความรู้เกี่ยวกับหลังคา'} aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>
+                  <button type="button" role="radio" aria-checked={draft.roofKnown === true} tabIndex={draft.roofKnown !== false ? 0 : -1} className={`choice-card visual-choice ${draft.roofKnown === true ? 'selected' : ''}`} onClick={() => setValue('roofKnown', true)}><House className="choice-icon" /><strong>{english ? 'I know some details' : 'พอรู้ข้อมูล'}</strong><span className="choice-indicator">{draft.roofKnown === true && <Check size={15} />}</span></button>
+                  <button type="button" role="radio" aria-checked={draft.roofKnown === false} tabIndex={draft.roofKnown === false ? 0 : -1} className={`choice-card visual-choice ${draft.roofKnown === false ? 'selected' : ''}`} onClick={() => { setValue('roofKnown', false); setValue('shade', 'unknown'); }}><CircleHelp className="choice-icon" /><strong>{english ? 'Not sure / skip details' : 'ไม่แน่ใจ / ข้ามได้'}</strong><span className="choice-indicator">{draft.roofKnown === false && <Check size={15} />}</span></button>
                 </div>
                 {draft.roofKnown === true && <div className="roof-visual-details">
                   <div><p>{english ? 'Roof material' : 'วัสดุหลังคา'}</p><div className="compact-choice-grid">{roofMaterials.map((item) => { const Icon = item.icon; const active = draft.roofMaterial === item.value; return <button key={item.value} type="button" aria-pressed={active} className={active ? 'selected' : ''} onClick={() => setValue('roofMaterial', item.value)}><Icon /><span>{english ? item.en : item.th}</span></button>; })}</div></div>
@@ -210,14 +268,14 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
                 </div>}
               </div>}
 
-              {error && <p className="form-error" role="alert">{error}</p>}
+              {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
               <div className="estimate-actions">
-                <button className="button button-secondary" type="button" disabled={step === 0 || !ready} onClick={() => { setStep((current) => Math.max(0, current - 1)); setError(''); }}><ArrowLeft size={18} /> {english ? 'Back' : 'ย้อนกลับ'}</button>
+                <button className="button button-secondary" type="button" disabled={step === 0 || !ready} onClick={previous}><ArrowLeft size={18} /> {english ? 'Back' : 'ย้อนกลับ'}</button>
                 <button className="button" type="button" disabled={!ready} onClick={next}>{step === visibleFlow.length - 1 ? (english ? 'See estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight size={18} /></button>
               </div>
             </div>
           </fieldset>
-          <div className="estimate-prototype-line"><FlaskConical size={16} aria-hidden="true" /><span>{english ? 'Prototype: answers stay in this browser session and are not sent to an installer.' : 'เวอร์ชันต้นแบบ: คำตอบอยู่ในเซสชันเบราว์เซอร์นี้และยังไม่ส่งให้ผู้ติดตั้ง'}</span></div>
+          <div className="estimate-prototype-line"><FlaskConical size={16} aria-hidden="true" /><span>{english ? 'Prototype: answers stay in this browser session and are not sent to an installer.' : 'เวอร์ชันต้นแบบ: คำตอบอยู่ในเซสชันเบราว์เซอร์นี้และยังไม่ส่งให้ผู้ติดตั้ง'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Start over' : 'เริ่มใหม่'}</button></div>
         </section>
       </div>
     </main>

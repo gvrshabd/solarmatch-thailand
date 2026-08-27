@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
 import { ExternalLink } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
+import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
-export const metadata: Metadata = { title: 'แหล่งข้อมูล' };
+export const metadata = thaiMetadata('แหล่งข้อมูล', '/resources');
 
 const resources = [
   { name: 'PEA · รายละเอียดโครงการรับซื้อไฟส่วนเกิน', note: 'อัตรา 2.20 บาท/kWh, ระยะเวลา 10 ปี, เพดานส่งออก 5 kW AC และเงื่อนไขโครงการ', href: 'https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766' },
@@ -31,7 +31,7 @@ export default function ResourcesPage() {
       </PageHero>
       <section className="site-shell resource-list">
         {resources.map((resource) => (
-          <a key={resource.name} href={resource.href} target="_blank" rel="noreferrer">
+          <a key={resource.name} href={resource.href} target="_blank" rel="noreferrer" aria-label={`${resource.name} (เปิดในแท็บใหม่)`}>
             <div><h2>{resource.name}</h2><p>{resource.note}</p></div>
             <ExternalLink size={20} aria-hidden="true" />
           </a>

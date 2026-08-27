@@ -1,7 +1,7 @@
-import type { Metadata } from 'next';
 import { LegalShell } from '@/components/content/legal-shell';
+import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
-export const metadata: Metadata = { title: 'ร่างนโยบายคุกกี้' };
+export const metadata = thaiMetadata('ร่างนโยบายคุกกี้', '/cookies');
 export default function CookiesPage() {
   return <LegalShell title="คุกกี้และการจัดเก็บในเบราว์เซอร์" summary="เว็บไซต์ต้นแบบไม่มี analytics หรือโฆษณา และจึงไม่แสดงแบนเนอร์ยินยอมที่ไม่จำเป็น"><h2>1. สิ่งที่ใช้ในขณะนี้</h2><p>แบบประเมินใช้ session storage เพื่อจำคำตอบระหว่างหน้าประเมินและหน้าผลลัพธ์ ข้อมูลดังกล่าวอยู่ในเซสชันของเบราว์เซอร์และไม่ใช่ระบบฐานข้อมูลของ SolarMatch</p><h2>2. สิ่งที่ไม่เปิดใช้</h2><p>ไม่มีคุกกี้โฆษณา analytics pixel เครื่องมือทำ heatmap หรือการติดตามข้ามเว็บไซต์ในเวอร์ชันนี้</p><h2>3. เมื่อมีการเปลี่ยนแปลง</h2><p>หากเพิ่มเครื่องมือที่ไม่จำเป็นต่อการทำงาน เว็บไซต์จะต้องอัปเดตรายการวัตถุประสงค์ อายุคุกกี้ ผู้ให้บริการ และกลไกให้ผู้ใช้เลือกก่อนเปิดใช้งาน</p><h2>4. การลบข้อมูลชั่วคราว</h2><p>คุณสามารถปิดแท็บหรือหน้าต่างเบราว์เซอร์เพื่อล้าง session storage ตามพฤติกรรมของเบราว์เซอร์ที่ใช้งาน</p></LegalShell>;
 }

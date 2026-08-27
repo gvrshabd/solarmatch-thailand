@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
 import { PageHero } from '@/components/content/page-hero';
 import { solarAssumptions } from '@/config/solar-assumptions';
+import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
-export const metadata: Metadata = { title: 'วิธีคำนวณและสมมติฐาน' };
+export const metadata = thaiMetadata('วิธีคำนวณและสมมติฐาน', '/methodology');
 
 const lastChecked = '28 สิงหาคม 2569';
 

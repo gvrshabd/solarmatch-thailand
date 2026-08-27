@@ -13,3 +13,9 @@ export const estimateAnswersSchema = z.object({
   timing: z.string().min(1),
   energyInterest: z.string().optional(),
 });
+
+export const estimateDraftSchema = z.object({
+  version: z.literal(1),
+  answers: estimateAnswersSchema.partial(),
+  step: z.number().int().nonnegative(),
+});

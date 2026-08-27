@@ -19,8 +19,10 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - Direct primary-source links and a visible last-checked date on the Thai and English Methodology and Resources pages.
 - Typed, provider-free analytics events with analytics disabled by default.
 - LINE and contact details centralized in `config/site.ts` and left blank.
-- Non-persistent lead endpoint with server-side schema validation and no PII logging.
-- Staging SEO posture: complete metadata/sitemap plus `noindex` and a disallowing robots file.
+- Contact-flow validation runs only in the browser and discards values without a network request. The legacy `/api/leads` route fails closed with `410 Gone` and does not read request bodies.
+- Staging discovery posture: complete metadata/sitemap plus `noindex, follow`; `Claude-User` is explicitly allowed for user-directed retrieval, while `ClaudeBot`, `Claude-SearchBot`, and the wildcard crawler group remain disallowed.
+- A plain-text `/llms.txt` describes canonical routes and prototype limitations without acting as an access-control mechanism.
+- Project-specific AI-generated homepage imagery is served locally in responsive formats and disclosed as illustrative. Complete asset provenance is recorded in `docs/ASSET_PROVENANCE.md`.
 - One Worker with no database, storage binding, payment integration, or shared resource with Milly's.
 
 ## Intentionally deferred
@@ -36,14 +38,14 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - Installer profiles, reviews, testimonials, quote comparison, savings guarantees, and marketplace claims. Future social proof must remain behind a feature flag until it can be substantiated.
 - Automated monitoring of tariffs, Ft, programme quotas, law changes, and third-party package prices. All require re-verification before production use.
 - Final legal identity, PDPA review, production privacy/terms language, recipients, retention periods, and data-subject procedures.
-- Authentic Thai residential-solar photography. The current Pexels photograph is real residential solar but is illustrative and is not confirmed as Thai.
+- Real customer or documentary installation photography. The current image is an AI-generated illustrative scene and is not evidence of a SolarMatch customer or installation.
 
-## Photography provenance
+## Visual-asset provenance
 
-- Asset: `public/images/solar-home-hero.jpg`
-- Source: [Robert So on Pexels](https://www.pexels.com/photo/a-house-with-solar-panel-on-the-roof-12243093/)
-- Licence: [Pexels licence](https://www.pexels.com/license/)
-- Usage boundary: illustration only. Do not describe the property as being in Thailand, as a SolarMatch customer, or as an installation vetted by SolarMatch.
+- Canonical inventory: `docs/ASSET_PROVENANCE.md`.
+- The former Pexels photograph was removed during the 2026-08-28 asset-rights pass.
+- The replacement scene is generated specifically for this project, served locally, and disclosed as AI-generated illustration.
+- No remotely hosted runtime image or third-party stock photograph is used.
 
 ## Swap points
 
@@ -53,5 +55,5 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - Replace the estimator behind `lib/calculator/index.ts` after engineering and market validation.
 - Keep conditional surplus-purchase and tax modules disabled until household inputs, eligibility checks, and current policy are verified.
 - Enable integrations only through `config/feature-flags.ts` after their production configuration is complete.
-- Replace `/api/leads` only after the data controller, recipients, retention period, consent text, and security controls are approved.
-- Replace the illustrative photograph through the shared homepage component after an authentic, licensed Thai asset is secured.
+- Activate or replace `/api/leads` only after the data controller, recipients, retention period, consent text, security controls, and explicit production approval are complete.
+- Replace the AI-generated illustrative scene only with a project-created asset or a source whose provenance and licence can be documented before deployment.

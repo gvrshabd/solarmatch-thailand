@@ -232,6 +232,35 @@ test('a mid-estimate refresh and contextual language switch restore the current 
   await expect(page.getByRole('radio', { name: /^High/ })).toBeChecked();
 });
 
+test('estimator radios support arrow keys and restart clears saved progress', async ({ page }) => {
+  await page.goto('/en/estimate');
+  const bangkok = page.getByRole('radio', { name: 'Bangkok' });
+  await expect(bangkok).toBeEnabled();
+  await bangkok.focus();
+  await bangkok.press('ArrowDown');
+  await expect(page.getByRole('radio', { name: 'Nonthaburi' })).toBeChecked();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect.poll(async () => page.evaluate(() => Boolean(sessionStorage.getItem('solarmatch:estimate-draft')))).toBe(true);
+
+  await page.getByRole('button', { name: 'Start over' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('province');
+  await expect.poll(async () => page.evaluate(() => {
+    const saved = JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft') ?? '{}');
+    return `${saved.version}:${saved.step}:${Object.keys(saved.answers ?? {}).length}`;
+  })).toBe('1:0:0');
+});
+
+test('invalid saved estimator state fails safely and back restores heading focus', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ answers: {}, step: 'broken' })));
+  await page.goto('/estimate');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('จังหวัด');
+  await chooseAndContinue(page, 'กรุงเทพมหานคร', 'ถัดไป');
+  await page.getByRole('spinbutton').fill('4500');
+  await page.getByRole('button', { name: 'ถัดไป', exact: true }).click();
+  await page.getByRole('button', { name: 'ย้อนกลับ' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+});
+
 test('the complete Thai estimate journey reaches a transparent result', async ({ page }) => {
   test.slow();
   await completeEstimate(page, 'th');
@@ -243,6 +272,10 @@ test('the complete English estimate journey reaches a translated result', async 
 });
 
 test('the prototype lead form validates LINE details and discards a valid submission', async ({ page }) => {
+  const leadRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/leads') leadRequests.push(request.url());
+  });
   await page.addInitScript(() => {
     sessionStorage.setItem('solarmatch:estimate', JSON.stringify({
       province: 'bangkok',
@@ -260,7 +293,8 @@ test('the prototype lead form validates LINE details and discards a valid submis
   await expect(page.getByRole('heading', { name: 'Would you like to know when matching is ready to test?' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Test the form' }).click();
-  await expect(page.getByText('Please enter your name.')).toBeVisible();
+  await expect(page.locator('#lead-name-error')).toHaveText('Please enter your name.');
+  await expect(page.getByLabel(/Name/)).toBeFocused();
   await page.getByLabel(/Name/).fill('Test Homeowner');
   await page.getByLabel(/Thai phone number/).fill('081 234 5678');
   await page.getByLabel(/Preferred contact method/).selectOption('line');
@@ -269,7 +303,8 @@ test('the prototype lead form validates LINE details and discards a valid submis
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Test the form' }).click();
   await expect(page.getByText('Prototype form test completed')).toBeVisible();
-  await expect(page.getByText('did not store it or send it to anyone', { exact: false })).toBeVisible();
+  await expect(page.getByText('without sending or storing it', { exact: false })).toBeVisible();
+  expect(leadRequests).toEqual([]);
 });
 
 test('legal and contact routes expose prototype boundaries in both languages', async ({ page }) => {

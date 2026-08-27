@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
 import { ResultsShell } from '@/components/results/results-shell';
+import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
-export const metadata: Metadata = { title: 'ผลประเมิน Solar Rooftop' };
+export const metadata = thaiMetadata('ผลประเมิน Solar Rooftop', '/estimate/results');
 export default function ResultsPage() { return <ResultsShell />; }
