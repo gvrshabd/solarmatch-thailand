@@ -1,0 +1,10 @@
+import type { Metadata } from 'next';
+import { PageHero } from '@/components/content/page-hero';
+import { solarAssumptions } from '@/config/solar-assumptions';
+
+export const metadata: Metadata = { title: 'วิธีคำนวณและสมมติฐาน' };
+export default function MethodologyPage() {
+  return <main><PageHero eyebrow="Methodology · Prototype" title="เราแสดงสมมติฐาน เพราะตัวเลขที่ดีต้องตรวจสอบที่มาได้"><p>เครื่องคำนวณปัจจุบันสร้างช่วงเพื่อทดสอบประสบการณ์ ไม่ใช่แบบวิศวกรรมหรือคำรับรองผลประหยัด</p><p className="updated-date">สมมติฐานเวอร์ชัน {solarAssumptions.version}</p></PageHero>
+    <section className="site-shell methodology-grid"><article className="prose"><h2>ลำดับการประมาณ</h2><ol><li>แปลงค่าไฟเป็นการใช้ไฟโดยใช้อัตราค่าไฟอย่างง่าย {solarAssumptions.simplifiedRetailValueThbPerKwh} บาท/kWh</li><li>ให้น้ำหนักตามสัดส่วนการใช้ไฟช่วงกลางวันที่ผู้ใช้เลือก</li><li>คำนวณกำลังระบบอ้างอิงจากผลผลิต {solarAssumptions.referenceAnnualYieldKwhPerKwp.toLocaleString('th-TH')} kWh/kWp/ปี</li><li>ขยายเป็นช่วง ±18% หรือ ±28% เมื่อข้อมูลหลังคายังไม่ชัด</li><li>จำกัดการประหยัดไม่ให้เกินค่าไฟที่ผู้ใช้ระบุ</li></ol><h2>จงใจไม่รวม</h2><p>ราคาติดตั้ง ระยะคืนทุน ค่าเสื่อม การซ่อมบำรุง เงินกู้ รายได้ขายไฟ ภาษี และการรับประกันผลผลิตยังไม่อยู่ในผลหลัก</p><h2>ข้อจำกัด</h2><p>ค่าไฟจริงมีโครงสร้างอัตราและค่าใช้จ่ายหลายส่วน ข้อมูลแดดแตกต่างตามตำแหน่งและสภาพหน้างาน การคำนวณนี้จึงเหมาะกับการเริ่มตั้งคำถามเท่านั้น</p></article><aside className="assumption-table"><h2>ค่าที่ตั้งไว้</h2><dl><div><dt>ผลผลิตอ้างอิง</dt><dd>{solarAssumptions.referenceAnnualYieldKwhPerKwp.toLocaleString('th-TH')} kWh/kWp/ปี</dd></div><div><dt>มูลค่าไฟอย่างง่าย</dt><dd>{solarAssumptions.simplifiedRetailValueThbPerKwh} บาท/kWh</dd></div><div><dt>FiT ที่เก็บอ้างอิง</dt><dd>{solarAssumptions.fit.rateThbPerKwh} บาท/kWh · ไม่รวมผล</dd></div><div><dt>เพดานภาษีที่เก็บอ้างอิง</dt><dd>฿{solarAssumptions.tax.deductionCapThb.toLocaleString('th-TH')} · ไม่รวมผล</dd></div><div><dt>ตรวจอ้างอิงล่าสุด</dt><dd>{solarAssumptions.fit.lastVerified}</dd></div></dl></aside></section>
+  </main>;
+}
