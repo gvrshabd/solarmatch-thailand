@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/site/internal-link';
 import { usePathname } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { BrandMark } from './brand-mark';
 import { alternateLanguagePath, isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
 
@@ -18,6 +18,27 @@ export function SiteHeader() {
   const pathname = usePathname();
   const locale: Locale = isEnglishPath(pathname) ? 'en' : 'th';
   const english = locale === 'en';
+  const focusMode = pathname === '/estimate' || pathname === '/en/estimate';
+
+  if (focusMode) {
+    return (
+      <header className="site-header focus-header">
+        <div className="site-shell header-inner">
+          <Link className="brand-link" href={localizedPath('/', locale)} aria-label={english ? 'SolarMatch Thailand home' : 'SolarMatch Thailand หน้าหลัก'}>
+            <BrandMark />
+          </Link>
+          <div className="focus-header-actions">
+            <a className="language-switch" href={alternateLanguagePath(pathname)} aria-label={english ? 'View this estimate in Thai' : 'ดูแบบประเมินนี้เป็นภาษาอังกฤษ'}>
+              <span className={!english ? 'active-language' : ''}>TH</span><span aria-hidden="true"> / </span><span className={english ? 'active-language' : ''}>EN</span>
+            </a>
+            <Link className="focus-exit" href={localizedPath('/', locale)}>
+              {english ? 'Exit estimate' : 'ออกจากแบบประเมิน'} <X size={18} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="site-header">

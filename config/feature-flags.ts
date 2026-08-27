@@ -9,7 +9,7 @@ export const featureFlags = {
   FEATURE_MULTIPLE_QUOTES: false,
   FEATURE_FIT_CALCULATION: false,
   FEATURE_TAX_ESTIMATE: false,
-  FEATURE_LONG_TERM_COST_CHART: false,
+  FEATURE_LONG_TERM_COST_CHART: true,
   ASK_BUDGET: false,
   ASK_FINANCING: false,
   ASK_ENERGY_INTEREST: true,

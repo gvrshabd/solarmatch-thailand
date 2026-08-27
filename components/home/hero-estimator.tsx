@@ -1,13 +1,11 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import type { Locale } from '@/config/i18n';
 import { localizedPath } from '@/config/i18n';
 
 export function HeroEstimator({ locale = 'th' }: { locale?: Locale }) {
-  const router = useRouter();
   const english = locale === 'en';
   const [province, setProvince] = useState('bangkok');
   const [bill, setBill] = useState(5000);
@@ -17,11 +15,13 @@ export function HeroEstimator({ locale = 'th' }: { locale?: Locale }) {
 
   function startEstimate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    sessionStorage.removeItem('solarmatch:estimate-draft');
+    sessionStorage.removeItem('solarmatch:estimate');
     sessionStorage.setItem(
       'solarmatch:starter',
       JSON.stringify({ province, monthlyBillThb: bill }),
     );
-    router.push(localizedPath('/estimate', locale));
+    window.location.assign(localizedPath('/estimate', locale));
   }
 
   return (

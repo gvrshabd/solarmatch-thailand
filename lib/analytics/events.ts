@@ -1,5 +1,5 @@
 export type AnalyticsEvents = {
-  estimate_started: { source: 'home' | 'estimate' };
+  estimate_started: { source: 'home' | 'estimate' | 'resume' | 'edit' };
   estimate_step_completed: { stepId: string; stepNumber: number };
   estimate_result_viewed: { confidence: 'low' | 'medium' | 'high' };
   lead_form_started: { contactMethod: 'phone' | 'line' };

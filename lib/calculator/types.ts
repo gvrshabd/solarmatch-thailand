@@ -22,12 +22,29 @@ export type EstimateResult = {
   estimatedBillReductionPct: Range;
   estimatedPaybackYears: null | Range;
   estimatedExportRevenueThb: null | Range;
+  conditionalAnnualExportRevenueThb: Range;
   estimatedTaxBenefitThb: null | Range;
+  estimatedInstalledCostThb: Range;
+  estimatedAnnualSelfConsumedKwh: Range;
+  estimatedAnnualExportedKwh: Range;
+  estimatedAnnualSelfConsumptionValueThb: Range;
+  estimatedAnnualOperationsAndMaintenanceThb: Range;
+  estimatedLifetimeNetBenefitThb: Range;
+  lifetimeCostSeries: LifetimeCostPoint[];
+  tariffVersion: string;
+  estimatedMonthlyConsumptionKwh: number;
   confidence: Confidence;
   assumptionsUsed: string[];
   assumptionVersion: string;
   calculatedAt: string;
   currentMonthlyBillThb: number;
+};
+
+export type LifetimeCostPoint = {
+  year: number;
+  withoutSolarThb: number;
+  withSolarLowThb: number;
+  withSolarHighThb: number;
 };
 
 export interface Estimator {

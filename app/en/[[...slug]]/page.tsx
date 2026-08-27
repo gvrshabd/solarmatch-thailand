@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { HomePage } from '@/components/home/home-page';
 import { EnglishPage } from '@/components/pages/english-pages';
 import { siteConfig } from '@/config/site';
 
@@ -35,5 +36,6 @@ export async function generateMetadata({ params }: EnglishRouteProps): Promise<M
 
 export default async function EnglishRoute({ params }: EnglishRouteProps) {
   const { slug = [] } = await params;
+  if (slug.length === 0) return <HomePage locale="en" />;
   return <EnglishPage slug={slug.join('/')} />;
 }

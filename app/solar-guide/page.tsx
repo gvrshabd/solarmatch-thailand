@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import Link from '@/components/site/internal-link';
 import { ArrowRight } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
 

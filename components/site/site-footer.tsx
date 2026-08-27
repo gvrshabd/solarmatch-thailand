@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/site/internal-link';
 import { usePathname } from 'next/navigation';
 import { BrandMark } from './brand-mark';
 import { isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
@@ -10,6 +10,9 @@ export function SiteFooter() {
   const locale: Locale = isEnglishPath(pathname) ? 'en' : 'th';
   const english = locale === 'en';
   const link = (path: string) => localizedPath(path, locale);
+  const focusMode = pathname === '/estimate' || pathname === '/en/estimate';
+
+  if (focusMode) return null;
 
   return (
     <footer className="site-footer">

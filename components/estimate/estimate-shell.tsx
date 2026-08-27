@@ -1,39 +1,124 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check, CircleHelp } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  BatteryCharging,
+  Building2,
+  CalendarDays,
+  Check,
+  CircleHelp,
+  Clock3,
+  FlaskConical,
+  Home,
+  House,
+  KeyRound,
+  MapPin,
+  MoonStar,
+  Search,
+  SunMedium,
+  Sunrise,
+  Trees,
+  Users,
+  Warehouse,
+  type LucideIcon,
+} from 'lucide-react';
 import { estimateFlow, estimateFlowEn } from '@/config/estimate-flow';
 import { featureFlags } from '@/config/feature-flags';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { track } from '@/lib/analytics/track';
 import { estimateAnswersSchema } from '@/lib/validation/estimate';
 import type { EstimateAnswers } from '@/lib/calculator/types';
-import { PrototypeNotice } from '@/components/site/prototype-notice';
 
 type Draft = Partial<EstimateAnswers>;
-const storageKey = 'solarmatch:estimate';
+type SavedDraft = { answers: Draft; step: number };
+
+const resultStorageKey = 'solarmatch:estimate';
+const draftStorageKey = 'solarmatch:estimate-draft';
+const starterStorageKey = 'solarmatch:starter';
+
+const optionIcons: Record<string, LucideIcon> = {
+  bangkok: Building2,
+  nonthaburi: Home,
+  'pathum-thani': Trees,
+  'samut-prakan': Warehouse,
+  high: SunMedium,
+  medium: Sunrise,
+  low: MoonStar,
+  owner: KeyRound,
+  family: Users,
+  renter: House,
+  detached: Home,
+  'semi-detached': House,
+  townhome: Building2,
+  '0-3': Clock3,
+  '3-6': CalendarDays,
+  '6-12': CalendarDays,
+  '12+': CalendarDays,
+  research: Search,
+  solar: SunMedium,
+  'solar-battery': BatteryCharging,
+  unknown: CircleHelp,
+  other: MapPin,
+};
+
+const roofMaterials = [
+  { value: 'tile', th: 'กระเบื้อง', en: 'Tile', icon: House },
+  { value: 'metal', th: 'เมทัลชีท', en: 'Metal sheet', icon: Warehouse },
+  { value: 'concrete', th: 'ดาดฟ้าคอนกรีต', en: 'Concrete deck', icon: Building2 },
+  { value: 'other', th: 'อื่น ๆ / ไม่แน่ใจ', en: 'Other / not sure', icon: CircleHelp },
+];
+
+const shadeOptions: { value: NonNullable<EstimateAnswers['shade']>; th: string; en: string; icon: LucideIcon }[] = [
+  { value: 'none', th: 'แทบไม่มี', en: 'Almost none', icon: SunMedium },
+  { value: 'partial', th: 'มีบางช่วง', en: 'Some periods', icon: Sunrise },
+  { value: 'high', th: 'มีค่อนข้างมาก', en: 'Significant shade', icon: Trees },
+  { value: 'unknown', th: 'ไม่แน่ใจ', en: 'Not sure', icon: CircleHelp },
+];
+
+function safeParse<T>(value: string | null): T | null {
+  if (!value) return null;
+  try { return JSON.parse(value) as T; } catch { return null; }
+}
 
 export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
-  const router = useRouter();
   const english = locale === 'en';
-  const visibleFlow = useMemo(() => (english ? estimateFlowEn : estimateFlow).filter((question) => question.id !== 'energyInterest' || featureFlags.ASK_ENERGY_INTEREST), [english]);
+  const visibleFlow = useMemo(
+    () => (english ? estimateFlowEn : estimateFlow).filter((question) => question.id !== 'energyInterest' || featureFlags.ASK_ENERGY_INTEREST),
+    [english],
+  );
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft>({});
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const question = visibleFlow[step];
 
   useEffect(() => {
-    const starter = sessionStorage.getItem('solarmatch:starter');
-    if (starter) {
-      // Browser storage is an external system; hydrate it after the server-safe first render.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      try { setDraft((current) => ({ ...current, ...JSON.parse(starter) })); } catch { /* Ignore malformed browser drafts. */ }
-    }
-    track('estimate_started', { source: starter ? 'home' : 'estimate' });
+    const starter = safeParse<Draft>(sessionStorage.getItem(starterStorageKey));
+    const savedDraft = safeParse<SavedDraft>(sessionStorage.getItem(draftStorageKey));
+    const completed = safeParse<Draft>(sessionStorage.getItem(resultStorageKey));
+    const restored = starter ?? savedDraft?.answers ?? completed ?? {};
+
+    // Browser storage hydrates only after the server-safe initial render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDraft(restored);
+    if (!starter && savedDraft) setStep(Math.min(Math.max(savedDraft.step, 0), visibleFlow.length - 1));
+    sessionStorage.removeItem(starterStorageKey);
+    track('estimate_started', { source: starter ? 'home' : savedDraft ? 'resume' : completed ? 'edit' : 'estimate' });
     queueMicrotask(() => setReady(true));
-  }, []);
+  }, [visibleFlow.length]);
+
+  useEffect(() => {
+    if (!ready) return;
+    sessionStorage.setItem(draftStorageKey, JSON.stringify({ answers: draft, step } satisfies SavedDraft));
+  }, [draft, ready, step]);
+
+  useEffect(() => {
+    if (!ready) return;
+    questionHeadingRef.current?.focus({ preventScroll: true });
+  }, [ready, step]);
 
   function setValue<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -48,13 +133,16 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
 
   function next() {
     if (!validCurrent()) {
-      setError(question.type === 'number' ? (english ? 'Please enter an electricity bill of at least ฿500.' : 'กรุณากรอกค่าไฟตั้งแต่ 500 บาทขึ้นไป') : (english ? 'Please choose an answer before continuing.' : 'กรุณาเลือกคำตอบก่อนดำเนินการต่อ'));
+      setError(question.type === 'number'
+        ? (english ? 'Please enter an electricity bill of at least ฿500.' : 'กรุณากรอกค่าไฟตั้งแต่ 500 บาทขึ้นไป')
+        : (english ? 'Please choose an answer before continuing.' : 'กรุณาเลือกคำตอบก่อนดำเนินการต่อ'));
       return;
     }
     track('estimate_step_completed', { stepId: question.id, stepNumber: step + 1 });
     if (step < visibleFlow.length - 1) {
       setStep((current) => current + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
       return;
     }
     const parsed = estimateAnswersSchema.safeParse(draft);
@@ -62,64 +150,74 @@ export function EstimateShell({ locale = 'th' }: { locale?: Locale }) {
       setError(english ? 'Some information is still incomplete. Please check your answers.' : 'ยังมีข้อมูลบางส่วนไม่ครบ กรุณาตรวจสอบอีกครั้ง');
       return;
     }
-    sessionStorage.setItem(storageKey, JSON.stringify(parsed.data));
-    router.push(localizedPath('/estimate/results', locale));
+    sessionStorage.setItem(resultStorageKey, JSON.stringify(parsed.data));
+    sessionStorage.removeItem(draftStorageKey);
+    window.location.assign(localizedPath('/estimate/results', locale));
   }
 
   const selected = (id: string, value: string) => draft[id as keyof Draft] === value;
 
   return (
     <main className="estimate-page">
-      <div className="site-shell estimate-layout">
-        <aside className="estimate-aside">
-          <p className="eyebrow">SolarMatch Estimate</p>
-          <h1>{english ? 'Start with what you know' : 'เริ่มจากข้อมูลที่คุณรู้'}</h1>
-          <p>{english ? 'No bill upload, roof measurements, or phone number required.' : 'ไม่ต้องอัปโหลดบิล ไม่ต้องรู้ขนาดหลังคา และยังไม่ต้องกรอกเบอร์โทร'}</p>
-          <PrototypeNotice compact locale={locale} />
-        </aside>
-        <section className="estimate-card" aria-labelledby="estimate-question">
-          <div className="progress-meta"><span>{english ? `Step ${step + 1} of ${visibleFlow.length}` : `ขั้นตอน ${step + 1} จาก ${visibleFlow.length}`}</span><span>{Math.round(((step + 1) / visibleFlow.length) * 100)}%</span></div>
-          <div className="progress-track" aria-hidden="true"><span style={{ width: `${((step + 1) / visibleFlow.length) * 100}%` }} /></div>
+      <div className="site-shell estimate-focus-layout">
+        <section className="estimate-card focus-card" aria-labelledby="estimate-question">
+          <div
+            className="segment-progress"
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={visibleFlow.length}
+            aria-valuenow={step + 1}
+            aria-label={english ? `Step ${step + 1} of ${visibleFlow.length}` : `ขั้นตอน ${step + 1} จาก ${visibleFlow.length}`}
+          >
+            {visibleFlow.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}
+          </div>
+          <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${visibleFlow.length}` : `ขั้นตอน ${step + 1} จาก ${visibleFlow.length}`}</p>
+
           <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}>
-          <div className="question-heading">
-            <h2 id="estimate-question">{question.title}</h2>
-            <p><CircleHelp size={17} aria-hidden="true" /> {question.reason}</p>
-          </div>
+            <div className="question-stage" key={`${locale}-${question.id}`}>
+              <div className="question-heading">
+                <h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title}</h1>
+                <p><CircleHelp size={17} aria-hidden="true" /> {question.reason}</p>
+              </div>
 
-          {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question">
-            {question.options?.map((option) => {
-              const isSelected = selected(question.id, option.value);
-              return <button key={option.value} type="button" role="radio" aria-checked={isSelected} className={`choice-card ${isSelected ? 'selected' : ''}`} onClick={() => setValue(question.id as keyof EstimateAnswers, option.value)}>
-                <span className="choice-indicator">{isSelected && <Check size={15} />}</span>
-                <span><strong>{option.label}</strong>{option.description && <small>{option.description}</small>}</span>
-              </button>;
-            })}
-          </div>}
+              {question.type === 'choice' && <div className={`choice-grid visual-options visual-options-${question.id}`} role="radiogroup" aria-labelledby="estimate-question">
+                {question.options?.map((option) => {
+                  const isSelected = selected(question.id, option.value);
+                  const Icon = optionIcons[option.value] ?? CircleHelp;
+                  return <button key={option.value} type="button" role="radio" aria-checked={isSelected} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => setValue(question.id as keyof EstimateAnswers, option.value)}>
+                    <Icon className="choice-icon" size={22} aria-hidden="true" />
+                    <span><strong>{option.label}</strong>{option.description && <small>{option.description}</small>}</span>
+                    <span className="choice-indicator" aria-hidden="true">{isSelected && <Check size={15} />}</span>
+                  </button>;
+                })}
+              </div>}
 
-          {question.type === 'number' && <div className="bill-question">
-            <label htmlFor="monthly-bill">{english ? 'Average monthly electricity bill' : 'ค่าไฟเฉลี่ยต่อเดือน'}</label>
-            <div className="large-currency-input"><span>฿</span><input id="monthly-bill" type="number" inputMode="numeric" min="500" max="50000" value={draft.monthlyBillThb ?? ''} placeholder="3,500" onChange={(event) => setValue('monthlyBillThb', Number(event.target.value))} /><small>{english ? '/ month' : '/ เดือน'}</small></div>
-            <input className="bill-slider" aria-label={english ? 'Adjust electricity bill' : 'ปรับค่าไฟ'} type="range" min="500" max="20000" step="100" value={draft.monthlyBillThb ?? 3500} onChange={(event) => setValue('monthlyBillThb', Number(event.target.value))} />
-            <div className="range-labels"><span>฿500</span><span>฿20,000+</span></div>
-          </div>}
+              {question.type === 'number' && <div className="bill-question">
+                <label htmlFor="monthly-bill">{english ? 'Average monthly electricity bill' : 'ค่าไฟเฉลี่ยต่อเดือน'}</label>
+                <div className="large-currency-input"><span>฿</span><input id="monthly-bill" type="number" inputMode="numeric" min="500" max="50000" value={draft.monthlyBillThb ?? ''} placeholder="3,500" onChange={(event) => setValue('monthlyBillThb', Number(event.target.value))} /><small>{english ? '/ month' : '/ เดือน'}</small></div>
+                <input className="bill-slider" aria-label={english ? 'Adjust electricity bill' : 'ปรับค่าไฟ'} type="range" min="500" max="20000" step="100" value={draft.monthlyBillThb ?? 3500} onChange={(event) => setValue('monthlyBillThb', Number(event.target.value))} />
+                <div className="range-labels"><span>฿500</span><span>฿20,000+</span></div>
+              </div>}
 
-          {question.type === 'roof' && <div className="roof-question">
-            <div className="choice-grid two">
-              <button type="button" className={`choice-card ${draft.roofKnown === true ? 'selected' : ''}`} onClick={() => setValue('roofKnown', true)}><span className="choice-indicator">{draft.roofKnown === true && <Check size={15} />}</span><strong>{english ? 'I know some details' : 'พอรู้ข้อมูล'}</strong></button>
-              <button type="button" className={`choice-card ${draft.roofKnown === false ? 'selected' : ''}`} onClick={() => { setValue('roofKnown', false); setValue('shade', 'unknown'); }}><span className="choice-indicator">{draft.roofKnown === false && <Check size={15} />}</span><strong>{english ? 'Not sure / skip details' : 'ไม่แน่ใจ / ข้ามได้'}</strong></button>
+              {question.type === 'roof' && <div className="roof-question">
+                <div className="choice-grid two" role="radiogroup" aria-label={english ? 'Knowledge of roof details' : 'ความรู้เกี่ยวกับหลังคา'}>
+                  <button type="button" role="radio" aria-checked={draft.roofKnown === true} className={`choice-card visual-choice ${draft.roofKnown === true ? 'selected' : ''}`} onClick={() => setValue('roofKnown', true)}><House className="choice-icon" /><strong>{english ? 'I know some details' : 'พอรู้ข้อมูล'}</strong><span className="choice-indicator">{draft.roofKnown === true && <Check size={15} />}</span></button>
+                  <button type="button" role="radio" aria-checked={draft.roofKnown === false} className={`choice-card visual-choice ${draft.roofKnown === false ? 'selected' : ''}`} onClick={() => { setValue('roofKnown', false); setValue('shade', 'unknown'); }}><CircleHelp className="choice-icon" /><strong>{english ? 'Not sure / skip details' : 'ไม่แน่ใจ / ข้ามได้'}</strong><span className="choice-indicator">{draft.roofKnown === false && <Check size={15} />}</span></button>
+                </div>
+                {draft.roofKnown === true && <div className="roof-visual-details">
+                  <div><p>{english ? 'Roof material' : 'วัสดุหลังคา'}</p><div className="compact-choice-grid">{roofMaterials.map((item) => { const Icon = item.icon; const active = draft.roofMaterial === item.value; return <button key={item.value} type="button" aria-pressed={active} className={active ? 'selected' : ''} onClick={() => setValue('roofMaterial', item.value)}><Icon /><span>{english ? item.en : item.th}</span></button>; })}</div></div>
+                  <div><p>{english ? 'Shade' : 'เงาบัง'}</p><div className="compact-choice-grid">{shadeOptions.map((item) => { const Icon = item.icon; const active = draft.shade === item.value; return <button key={item.value} type="button" aria-pressed={active} className={active ? 'selected' : ''} onClick={() => setValue('shade', item.value)}><Icon /><span>{english ? item.en : item.th}</span></button>; })}</div></div>
+                </div>}
+              </div>}
+
+              {error && <p className="form-error" role="alert">{error}</p>}
+              <div className="estimate-actions">
+                <button className="button button-secondary" type="button" disabled={step === 0 || !ready} onClick={() => { setStep((current) => Math.max(0, current - 1)); setError(''); }}><ArrowLeft size={18} /> {english ? 'Back' : 'ย้อนกลับ'}</button>
+                <button className="button" type="button" disabled={!ready} onClick={next}>{step === visibleFlow.length - 1 ? (english ? 'See estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight size={18} /></button>
+              </div>
             </div>
-            {draft.roofKnown === true && <div className="roof-details">
-              <label>{english ? 'Roof material' : 'วัสดุหลังคา'}<select value={draft.roofMaterial ?? ''} onChange={(event) => setValue('roofMaterial', event.target.value)}><option value="">{english ? 'Select if known' : 'เลือกถ้าทราบ'}</option><option value="tile">{english ? 'Tile' : 'กระเบื้อง'}</option><option value="metal">{english ? 'Metal sheet' : 'เมทัลชีท'}</option><option value="concrete">{english ? 'Concrete deck' : 'ดาดฟ้าคอนกรีต'}</option><option value="other">{english ? 'Other / not sure' : 'อื่น ๆ / ไม่แน่ใจ'}</option></select></label>
-              <label>{english ? 'Shade' : 'เงาบัง'}<select value={draft.shade ?? 'unknown'} onChange={(event) => setValue('shade', event.target.value as EstimateAnswers['shade'])}><option value="none">{english ? 'Almost none' : 'แทบไม่มี'}</option><option value="partial">{english ? 'Some periods' : 'มีบางช่วง'}</option><option value="high">{english ? 'Significant shade' : 'มีค่อนข้างมาก'}</option><option value="unknown">{english ? 'Not sure' : 'ไม่แน่ใจ'}</option></select></label>
-            </div>}
-          </div>}
-
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <div className="estimate-actions">
-            <button className="button button-secondary" type="button" disabled={step === 0} onClick={() => { setStep((current) => Math.max(0, current - 1)); setError(''); }}><ArrowLeft size={18} /> {english ? 'Back' : 'ย้อนกลับ'}</button>
-            <button className="button" type="button" disabled={!validCurrent()} onClick={next}>{step === visibleFlow.length - 1 ? (english ? 'See estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight size={18} /></button>
-          </div>
           </fieldset>
+          <div className="estimate-prototype-line"><FlaskConical size={16} aria-hidden="true" /><span>{english ? 'Prototype: answers stay in this browser session and are not sent to an installer.' : 'เวอร์ชันต้นแบบ: คำตอบอยู่ในเซสชันเบราว์เซอร์นี้และยังไม่ส่งให้ผู้ติดตั้ง'}</span></div>
         </section>
       </div>
     </main>

@@ -9,4 +9,4 @@ export function calculateEstimate(answers: EstimateAnswers) {
 
 export { prototypeEstimator } from './prototype-estimator';
 export { productionEstimator } from './production-estimator';
-export type { EstimateAnswers, EstimateResult, Estimator, Range } from './types';
+export type { EstimateAnswers, EstimateResult, Estimator, LifetimeCostPoint, Range } from './types';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/site/internal-link';
 import { ArrowRight, LockKeyhole } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { leadSchema, type LeadInput } from '@/lib/validation/lead';
@@ -41,14 +41,15 @@ export function LeadCapture({ locale = 'th' }: { locale?: Locale }) {
     }
     setState('sending');
     setServerError('');
-    const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(parsed.data satisfies LeadInput) });
-    if (!response.ok) {
+    try {
+      const response = await fetch('/api/leads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(parsed.data satisfies LeadInput) });
+      if (!response.ok) throw new Error('Prototype endpoint rejected the request.');
+      track('lead_form_submitted', { contactMethod: parsed.data.contactMethod, prototype: true });
+      setState('sent');
+    } catch {
       setState('idle');
       setServerError(english ? 'The prototype form could not be submitted. Please try again.' : 'ไม่สามารถส่งแบบฟอร์มต้นแบบได้ กรุณาลองใหม่');
-      return;
     }
-    track('lead_form_submitted', { contactMethod: parsed.data.contactMethod, prototype: true });
-    setState('sent');
   }
 
   if (state === 'sent') return <div className="lead-success" role="status"><strong>{english ? 'Prototype form test completed' : 'ทดสอบแบบฟอร์มสำเร็จ'}</strong><p>{english ? 'The prototype validated the information but did not store it or send it to anyone.' : 'ระบบต้นแบบตรวจข้อมูลแล้ว แต่ไม่ได้บันทึกหรือส่งข้อมูลของคุณให้บุคคลใด'}</p></div>;
