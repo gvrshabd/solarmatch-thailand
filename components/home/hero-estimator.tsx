@@ -3,9 +3,12 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import type { Locale } from '@/config/i18n';
+import { localizedPath } from '@/config/i18n';
 
-export function HeroEstimator() {
+export function HeroEstimator({ locale = 'th' }: { locale?: Locale }) {
   const router = useRouter();
+  const english = locale === 'en';
   const [province, setProvince] = useState('bangkok');
   const [bill, setBill] = useState(5000);
   const [ready, setReady] = useState(false);
@@ -18,7 +21,7 @@ export function HeroEstimator() {
       'solarmatch:starter',
       JSON.stringify({ province, monthlyBillThb: bill }),
     );
-    router.push('/estimate');
+    router.push(localizedPath('/estimate', locale));
   }
 
   return (
@@ -26,17 +29,17 @@ export function HeroEstimator() {
       <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}>
       <div className="field-grid">
         <label>
-          <span>บ้านอยู่จังหวัดไหน?</span>
+          <span>{english ? 'Which province is the home in?' : 'บ้านอยู่จังหวัดไหน?'}</span>
           <select value={province} onChange={(event) => setProvince(event.target.value)}>
-            <option value="bangkok">กรุงเทพมหานคร</option>
-            <option value="nonthaburi">นนทบุรี</option>
-            <option value="pathum-thani">ปทุมธานี</option>
-            <option value="samut-prakan">สมุทรปราการ</option>
-            <option value="other">จังหวัดอื่น</option>
+            <option value="bangkok">{english ? 'Bangkok' : 'กรุงเทพมหานคร'}</option>
+            <option value="nonthaburi">{english ? 'Nonthaburi' : 'นนทบุรี'}</option>
+            <option value="pathum-thani">{english ? 'Pathum Thani' : 'ปทุมธานี'}</option>
+            <option value="samut-prakan">{english ? 'Samut Prakan' : 'สมุทรปราการ'}</option>
+            <option value="other">{english ? 'Another province' : 'จังหวัดอื่น'}</option>
           </select>
         </label>
         <label>
-          <span>ค่าไฟเฉลี่ยต่อเดือน</span>
+          <span>{english ? 'Average monthly electricity bill' : 'ค่าไฟเฉลี่ยต่อเดือน'}</span>
           <div className="currency-input">
             <span>฿</span>
             <input
@@ -49,12 +52,12 @@ export function HeroEstimator() {
               onChange={(event) => setBill(Number(event.target.value))}
               aria-describedby="bill-suffix"
             />
-            <small id="bill-suffix">/ เดือน</small>
+            <small id="bill-suffix">{english ? '/ month' : '/ เดือน'}</small>
           </div>
         </label>
       </div>
       <input
-        aria-label="ปรับค่าไฟต่อเดือน"
+        aria-label={english ? 'Adjust monthly electricity bill' : 'ปรับค่าไฟต่อเดือน'}
         className="bill-slider"
         min="500"
         max="20000"
@@ -64,7 +67,7 @@ export function HeroEstimator() {
         onChange={(event) => setBill(Number(event.target.value))}
       />
       <button className="button estimator-button" type="submit">
-        ดูผลประเมินเบื้องต้น <ArrowRight size={19} aria-hidden="true" />
+        {english ? 'See your initial estimate' : 'ดูผลประเมินเบื้องต้น'} <ArrowRight size={19} aria-hidden="true" />
       </button>
       </fieldset>
     </form>

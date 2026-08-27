@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Anuphan, Manrope, Noto_Sans_Thai } from 'next/font/google';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
+import { LanguageDocumentSync } from '@/components/site/language-document-sync';
 import { siteConfig } from '@/config/site';
 import './globals.css';
 
@@ -46,11 +47,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th">
+    <html lang="th" suppressHydrationWarning>
       <body
         className={`${anuphan.variable} ${notoSansThai.variable} ${manrope.variable} antialiased`}
       >
-        <a className="skip-link" href="#main-content">ข้ามไปยังเนื้อหาหลัก</a>
+        <LanguageDocumentSync />
         <SiteHeader />
         <div id="main-content">{children}</div>
         <SiteFooter />

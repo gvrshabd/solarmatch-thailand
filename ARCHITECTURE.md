@@ -3,7 +3,7 @@
 ## Fixed now
 
 - Next-compatible App Router application built by vinext for Cloudflare Workers.
-- Thai-first responsive shell, design tokens, navigation, footer and content-page patterns.
+- Thai-first bilingual responsive shell with complete `/en` route parity, localized navigation, footer, estimator, results, legal drafts and content-page patterns.
 - Routes for the homepage, estimator, results, education, methodology, project information, contact placeholder and draft legal notices.
 - Config-driven estimator questions and a replaceable `Estimator` interface.
 - Prototype calculations isolated in `lib/calculator/prototype-estimator.ts`.
