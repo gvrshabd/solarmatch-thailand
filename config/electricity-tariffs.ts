@@ -6,6 +6,8 @@ export type TariffTier = {
 export type ResidentialTariff = {
   id: string;
   label: string;
+  labelTh: string;
+  labelEn: string;
   effectiveFrom: string;
   effectiveTo: string;
   serviceChargeThb: number;
@@ -20,6 +22,8 @@ export type ResidentialTariff = {
 export const activeResidentialTariff: ResidentialTariff = {
   id: 'pea-mea-residential-over-150-may-2023-ft-may-aug-2026',
   label: 'อัตราบ้านอยู่อาศัย >150 หน่วย · รอบบิลถึง ส.ค. 2569',
+  labelTh: 'อัตราบ้านอยู่อาศัย >150 หน่วย · รอบบิลถึง ส.ค. 2569',
+  labelEn: 'Residential tariff above 150 kWh · bills through August 2026',
   effectiveFrom: '2026-05-01',
   effectiveTo: '2026-08-31',
   serviceChargeThb: 24.62,
@@ -36,6 +40,8 @@ export const activeResidentialTariff: ResidentialTariff = {
 export const september2026ResidentialTariff: ResidentialTariff = {
   id: 'pea-mea-residential-september-2026-ft-sep-dec-2026',
   label: 'อัตราบ้านอยู่อาศัย · รอบบิลตั้งแต่ ก.ย. 2569',
+  labelTh: 'อัตราบ้านอยู่อาศัย · รอบบิลตั้งแต่ ก.ย. 2569',
+  labelEn: 'Residential tariff · bills from September 2026',
   effectiveFrom: '2026-09-01',
   effectiveTo: '2026-12-31',
   serviceChargeThb: 24.62,
@@ -50,6 +56,25 @@ export const september2026ResidentialTariff: ResidentialTariff = {
 };
 
 export const residentialTariffs = [activeResidentialTariff, september2026ResidentialTariff] as const;
+
+// PEA small general service, lower than 22 kV. This bill-only fallback is used
+// for business property types because it does not require a demand-charge input.
+export const smallGeneralServiceTariff: ResidentialTariff = {
+  id: 'pea-small-general-service-lt-22kv-may-2023-ft-2026',
+  label: 'อัตรากิจการขนาดเล็ก แรงดันต่ำกว่า 22 kV',
+  labelTh: 'อัตรากิจการขนาดเล็ก แรงดันต่ำกว่า 22 kV',
+  labelEn: 'Small general service tariff below 22 kV',
+  effectiveFrom: '2023-05-01',
+  effectiveTo: '2026-12-31',
+  serviceChargeThb: 33.29,
+  ftThbPerKwh: 0.1623,
+  vatRate: 0.07,
+  tiers: [
+    { upToKwh: 150, rateThbPerKwh: 3.2484 },
+    { upToKwh: null, rateThbPerKwh: 4.2218 },
+  ],
+  source: 'https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf',
+};
 
 export function selectResidentialTariff(billingDate = new Date()) {
   const isoDate = billingDate.toISOString().slice(0, 10);
@@ -75,12 +100,19 @@ export function calculateResidentialBill(kwh: number, tariff = activeResidential
 
 export function estimateKwhFromBill(billThb: number, tariff = activeResidentialTariff) {
   const target = Math.max(0, billThb);
-  let low = 0;
-  let high = 20000;
-  for (let index = 0; index < 60; index += 1) {
-    const middle = (low + high) / 2;
-    if (calculateResidentialBill(middle, tariff) < target) low = middle;
-    else high = middle;
+  let remainingPreVatCharge = target / (1 + tariff.vatRate) - tariff.serviceChargeThb;
+  if (remainingPreVatCharge <= 0) return 0;
+  let previousLimit = 0;
+
+  for (const tier of tariff.tiers) {
+    const combinedRate = tier.rateThbPerKwh + tariff.ftThbPerKwh;
+    if (tier.upToKwh === null) return previousLimit + remainingPreVatCharge / combinedRate;
+    const tierWidth = tier.upToKwh - previousLimit;
+    const tierCharge = tierWidth * combinedRate;
+    if (remainingPreVatCharge <= tierCharge) return previousLimit + remainingPreVatCharge / combinedRate;
+    remainingPreVatCharge -= tierCharge;
+    previousLimit = tier.upToKwh;
   }
-  return (low + high) / 2;
+
+  return previousLimit;
 }

@@ -9,27 +9,26 @@ import {
 } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
 import Link from '@/components/site/internal-link';
-import { PrototypeNotice } from '@/components/site/prototype-notice';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { initialLaunchProvinces } from '@/config/provinces';
 
 const copy = {
   th: {
     eyebrow: 'เกี่ยวกับโครงการ',
-    title: 'ช่วยให้เจ้าของบ้านเข้าใจโซลาร์ ก่อนถูกขอให้ตัดสินใจ',
-    intro: 'SolarMatch Thailand เป็นเว็บไซต์ต้นแบบอิสระสำหรับช่วยเจ้าของบ้านทำความเข้าใจเศรษฐศาสตร์และข้อสมมติของ Solar Rooftop ก่อนคุยกับผู้ติดตั้ง',
+    title: 'ช่วยลูกค้าเข้าใจโซลาร์ แล้วเชื่อมกับผู้ติดตั้งที่เหมาะสม',
+    intro: 'SolarMatch Thailand เป็นธุรกิจสร้างและคัดกรองลูกค้าเป้าหมายสำหรับ Solar Rooftop โดยใช้ค่าประเมินที่เข้าใจง่ายเป็นประโยชน์แรก ก่อนการเปรียบเทียบผู้ติดตั้ง',
     principles: [
       ['เริ่มจากความชัดเจน', 'บอกให้เห็นว่าส่วนใดเป็นข้อมูล ส่วนใดเป็นสมมติฐาน และส่วนใดยังต้องตรวจหน้างาน'],
-      ['ไม่สรุปเกินหลักฐาน', 'แสดงค่ากลางเพื่อวางแผนพร้อมระดับความมั่นใจ และไม่อ้างว่าระบบใดดีที่สุดโดยไม่มีข้อมูลบ้านจริง'],
-      ['ความยินยอมมาก่อน', 'ผู้ใช้เห็นผลก่อนเสมอ และต้นแบบนี้ยังไม่ส่งข้อมูลให้ผู้ติดตั้ง'],
+      ['ไม่สรุปเกินหลักฐาน', 'แสดงค่าประเมินที่มีที่มา และไม่อ้างว่าระบบใดดีที่สุดโดยไม่มีข้อมูลสถานที่จริง'],
+      ['ความยินยอมมาก่อน', 'ผู้ใช้เห็นผลก่อนเสมอ และข้อมูลจะส่งต่อได้เฉพาะเมื่อระบบจริงพร้อมและผู้ใช้ยินยอม'],
     ],
     todayEyebrow: 'สิ่งที่ทำได้วันนี้',
-    todayTitle: 'เครื่องมือให้ความรู้ ไม่ใช่บริการขายหรือติดตั้ง',
-    todayBody: 'ต้นแบบประเมินขนาดระบบ ผลผลิต มูลค่าจากการใช้ไฟเอง และระยะคืนทุนเป็นค่ากลางเพื่อวางแผน พร้อมแสดงสมมติฐาน ระดับความมั่นใจ แหล่งอ้างอิง และข้อจำกัดใกล้กับผล',
+    todayTitle: 'ธุรกิจลูกค้าเป้าหมายที่เริ่มจากประโยชน์ต่อผู้ใช้',
+    todayBody: 'ค่าประเมินช่วยให้ลูกค้าเห็นขนาดระบบ ผลผลิต ราคา เงินประหยัด และระยะคืนทุนก่อนกรอกเบอร์ จากนั้นคำตอบจะช่วยเตรียมข้อมูลสำหรับการจับคู่ผู้ติดตั้งเมื่อเปิดบริการจริง',
     notYetTitle: 'สิ่งที่ยังไม่เปิดใช้งาน',
     notYetItems: ['ยังไม่จับคู่หรือจัดอันดับผู้ติดตั้ง', 'ยังไม่ส่งหรือบันทึกข้อมูลลีด', 'ยังไม่ออกแบบระบบ รับชำระเงิน หรือรับรองผลประหยัด'],
     evidenceTitle: 'สิ่งที่ใช้สร้างความน่าเชื่อถือ',
-    evidenceItems: ['วิธีคำนวณที่ตรวจสอบย้อนกลับได้', 'แหล่งข้อมูลจากหน่วยงานและวันที่ตรวจล่าสุด', 'การแยกสิ่งที่ยืนยันแล้วออกจากสิ่งที่ยังเป็นต้นแบบ'],
+    evidenceItems: ['วิธีคำนวณที่ตรวจสอบย้อนกลับได้', 'แหล่งข้อมูลจากหน่วยงานและวันที่ตรวจล่าสุด', 'ไม่สร้างรีวิว พันธมิตร หรือผลลัพธ์ที่ยังไม่มีหลักฐาน'],
     scopeEyebrow: 'ขอบเขตระยะแรก',
     scopeTitle: 'เริ่มตรวจสอบตลาดในกรุงเทพฯ และปริมณฑลอย่างตั้งใจ',
     scopeBody: 'ระยะแรกจำกัดพื้นที่เพื่อให้ตรวจสมมติฐาน ความครอบคลุมของผู้ซื้อ และกระบวนการได้อย่างรับผิดชอบ ตัวเลือก “จังหวัดอื่น” ยังคงอยู่เพื่อรับรู้ความสนใจ แต่ไม่ได้หมายความว่ามีผู้ติดตั้งครอบคลุมแล้ว',
@@ -42,20 +41,20 @@ const copy = {
   },
   en: {
     eyebrow: 'About the project',
-    title: 'Helping homeowners understand solar before being asked to decide',
-    intro: 'SolarMatch Thailand is an independent early-stage prototype that helps homeowners understand the economics and assumptions behind rooftop solar before speaking with an installer.',
+    title: 'Helping customers understand solar, then connect with suitable installers',
+    intro: 'SolarMatch Thailand is a rooftop-solar lead-generation and qualification business. A clear estimate gives customers value first, before they decide whether to compare installers.',
     principles: [
       ['Clarity first', 'Show what is known, what is assumed, and what still requires a site survey.'],
-      ['No conclusion beyond the evidence', 'Show a planning figure with evidence confidence, and never claim a system is best without information about the actual home.'],
-      ['Consent before any referral', 'People see their result first, and this prototype does not send information to installers.'],
+      ['No conclusion beyond the evidence', 'Show a traceable planning figure and never claim a system is best without information about the actual property.'],
+      ['Consent before any referral', 'People see their result first, and data can only be shared after live matching and consent are ready.'],
     ],
     todayEyebrow: 'What works today',
-    todayTitle: 'An educational tool—not an installer or sales service',
-    todayBody: 'The prototype estimates a planning system size, production, direct-use value, and payback from initial information, while keeping evidence confidence, assumptions, sources, and limitations close to the result.',
+    todayTitle: 'A lead-generation business that starts with customer value',
+    todayBody: 'The estimate gives customers a system size, production, price, savings, and payback before asking for a phone number. Their answers can later prepare a useful installer-matching request once live matching opens.',
     notYetTitle: 'What is not active',
     notYetItems: ['No installer matching or ranking', 'No lead storage or transmission', 'No system design, payment, or savings guarantee'],
     evidenceTitle: 'How credibility is earned',
-    evidenceItems: ['Traceable methodology', 'Primary sources with visible review dates', 'A clear boundary between validated facts and prototype assumptions'],
+    evidenceItems: ['Traceable methodology', 'Primary sources with visible review dates', 'No invented reviews, partners, or outcomes'],
     scopeEyebrow: 'Initial scope',
     scopeTitle: 'A deliberate Bangkok Metropolitan Region validation area',
     scopeBody: 'The first phase is geographically narrow so assumptions, buyer coverage, and operations can be tested responsibly. “Another province” remains available to understand wider interest, but it does not imply confirmed installer coverage.',
@@ -78,7 +77,6 @@ export function AboutContent({ locale = 'th' }: { locale?: Locale }) {
     <main>
       <PageHero eyebrow={text.eyebrow} title={text.title}>
         <p>{text.intro}</p>
-        <PrototypeNotice locale={locale} />
       </PageHero>
 
       <section className="site-shell about-grid about-principles">

@@ -7,8 +7,8 @@ export function PrototypeNotice({ compact = false, locale = 'th' }: { compact?: 
     <div className={compact ? 'prototype-notice compact' : 'prototype-notice'} role="note">
       <FlaskConical size={18} aria-hidden="true" />
       <div>
-        <strong>{english ? 'Prototype for experience testing' : 'ต้นแบบเพื่อทดสอบประสบการณ์ใช้งาน'}</strong>
-        {!compact && <span>{english ? 'Assumptions are still being validated, and this system does not send data to installers.' : 'สมมติฐานยังอยู่ระหว่างตรวจสอบ และระบบนี้ยังไม่ส่งข้อมูลให้ผู้ติดตั้ง'}</span>}
+        <strong>{english ? 'Installer matching is in pre-launch testing' : 'ระบบจับคู่ผู้ติดตั้งอยู่ระหว่างทดสอบก่อนเปิดใช้'}</strong>
+        {!compact && <span>{english ? 'No contact details are currently stored or sent.' : 'ขณะนี้ยังไม่มีการบันทึกหรือส่งข้อมูลติดต่อ'}</span>}
       </div>
     </div>
   );

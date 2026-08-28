@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: 'SolarMatch',
   mode: 'prototype' as const,
   description:
-    'เครื่องมือประเมิน Solar Rooftop เบื้องต้นสำหรับเจ้าของบ้านในไทย',
+    'ประเมิน Solar Rooftop เบื้องต้นและเตรียมเปรียบเทียบผู้ติดตั้งที่เหมาะสมในไทย',
   url: 'https://solarmatch-thailand.deluxejahseh.workers.dev',
   contact: {
     lineUrl: '',
@@ -18,7 +18,7 @@ export const siteConfig = {
     'ปทุมธานี',
     'สมุทรปราการ',
   ],
-  assumptionVersion: 'prototype-2026-08-27',
+  assumptionVersion: 'thailand-ballpark-2026-08-28-v5',
 } as const;
 
 export type SiteConfig = typeof siteConfig;

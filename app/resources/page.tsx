@@ -29,7 +29,7 @@ export default function ResourcesPage() {
   return (
     <main>
       <PageHero eyebrow="Resources · checked 2026-08-28" title="ตรวจสอบตัวเลขจากเอกสารต้นทาง">
-        <p>นโยบาย อัตราค่าไฟ ราคา และเงื่อนไขเปลี่ยนได้ ลิงก์เหล่านี้คือแหล่งที่ใช้กับสมมติฐานต้นแบบ และควรตรวจซ้ำก่อนตัดสินใจจริง</p>
+        <p>นโยบาย อัตราค่าไฟ ราคา และเงื่อนไขเปลี่ยนได้ ลิงก์เหล่านี้คือแหล่งที่ใช้กับแบบจำลองปัจจุบัน และควรตรวจซ้ำก่อนตัดสินใจจริง</p>
       </PageHero>
       <section className="site-shell resource-list">
         {resources.map((resource) => (

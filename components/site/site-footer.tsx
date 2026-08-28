@@ -19,8 +19,8 @@ export function SiteFooter() {
       <div className="site-shell footer-grid">
         <div className="footer-brand">
           <BrandMark />
-          <p>{english ? 'Helping homeowners understand rooftop solar before speaking with an installer.' : 'ช่วยเจ้าของบ้านเริ่มทำความเข้าใจ Solar Rooftop ก่อนคุยกับผู้ติดตั้ง'}</p>
-          <span className="prototype-chip">{english ? 'Prototype website · no live data transfer' : 'เว็บไซต์ต้นแบบ · ยังไม่รับส่งข้อมูลจริง'}</span>
+          <p>{english ? 'Understand rooftop solar, then prepare to compare suitable installers.' : 'เข้าใจ Solar Rooftop แล้วเตรียมเปรียบเทียบผู้ติดตั้งที่เหมาะสม'}</p>
+          <span className="prototype-chip">{english ? 'Installer matching is not accepting submissions yet' : 'ระบบจับคู่ผู้ติดตั้งยังไม่เปิดรับคำขอจริง'}</span>
         </div>
         <div>
           <h2>{english ? 'Get started' : 'เริ่มต้น'}</h2>
@@ -43,7 +43,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="site-shell footer-bottom">
-        <span>{english ? 'All figures are prototype estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นการประมาณการต้นแบบ ไม่ใช่ใบเสนอราคา'}</span>
+        <span>{english ? 'All figures are preliminary estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา'}</span>
       </div>
     </footer>
   );

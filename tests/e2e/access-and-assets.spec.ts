@@ -9,11 +9,9 @@ const contentRoutes = [
 ];
 
 const savedEstimate = {
-  province: 'bangkok',
-  location: { address: '99 Test Road, Bangkok', latitude: 13.7563, longitude: 100.5018, province: 'bangkok', source: 'manual-map', confirmed: true },
-  electricityInputKind: 'kwh', monthlyKwh: 900, consumptionPeriod: 'average-12', tariffType: 'standard',
-  daytimePattern: 'work-or-ac', daytimeLoads: ['air-conditioning', 'home-office'], acDaytimeHours: '2-4',
-  roofMaterial: 'concrete-tile', shade: 'none', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
+  province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', roofArea: '60-100',
+  daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'office-equipment'],
+  roofMaterial: 'concrete-tile', shade: 'almost-none', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
 function desktopOnly(testInfo: TestInfo) {
@@ -66,7 +64,7 @@ test('SSR metadata, language boundaries, images, and the disabled lead endpoint 
   const english = await (await request.get('/en/methodology')).text();
   expect(english).toContain('lang="en" data-locale="en"');
   expect(english).toMatch(/hrefLang="th-TH"/i);
-  expect(english).toContain('One planning estimate, with the method kept open');
+  expect(english).toContain('A useful ballpark without pretending it is a quote');
 
   const home = await (await request.get('/')).text();
   expect(home).toContain('/images/solar-home-real-768.webp 768w');
@@ -97,6 +95,9 @@ test('all Thai and English content routes have no serious or critical axe findin
 
   for (const route of contentRoutes) {
     await page.goto(route, { waitUntil: 'load' });
+    await expect.poll(() => new URL(page.url()).pathname).toBe(route);
+    await expect.poll(() => documentLanguage(page)).toBe(route.startsWith('/en') ? 'en' : 'th');
+    await expect.poll(() => page.title()).not.toBe('');
     await page.evaluate(() => document.fonts.ready);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -107,3 +108,7 @@ test('all Thai and English content routes have no serious or critical axe findin
 
   expect(failures, failures.join('\n')).toEqual([]);
 });
+
+async function documentLanguage(page: import('@playwright/test').Page) {
+  return page.evaluate(() => document.documentElement.lang);
+}

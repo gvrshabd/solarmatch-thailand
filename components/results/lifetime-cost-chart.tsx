@@ -9,8 +9,7 @@ export function LifetimeCostChart({ data, locale = 'th' }: { data: LifetimeCostP
   const english = locale === 'en';
   const labels = {
     without: english ? 'Without solar' : 'ไม่ติดโซลาร์',
-    low: english ? 'With solar · planning path' : 'ติดโซลาร์ · ตัวเลขวางแผน',
-    high: english ? 'With solar · higher-cost sensitivity' : 'ติดโซลาร์ · กรณีต้นทุนสูง',
+    withSolar: english ? 'With solar · planning path' : 'ติดโซลาร์ · ตัวเลขวางแผน',
   };
   return (
     <div className="lifetime-chart" aria-hidden="true">
@@ -25,8 +24,7 @@ export function LifetimeCostChart({ data, locale = 'th' }: { data: LifetimeCostP
           />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
           <Line name={labels.without} type="monotone" dataKey="withoutSolarThb" stroke="#7f8d85" strokeWidth={2.5} dot={false} isAnimationActive={false} />
-          <Line name={labels.low} type="monotone" dataKey="withSolarLowThb" stroke="#137a50" strokeWidth={2.5} dot={false} isAnimationActive={false} />
-          <Line name={labels.high} type="monotone" dataKey="withSolarHighThb" stroke="#e2a62b" strokeWidth={2} strokeDasharray="7 5" dot={false} isAnimationActive={false} />
+          <Line name={labels.withSolar} type="monotone" dataKey="withSolarThb" stroke="#137a50" strokeWidth={2.5} dot={false} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

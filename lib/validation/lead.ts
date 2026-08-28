@@ -7,6 +7,8 @@ export const leadSchema = z.object({
   phone: z.string().transform((value) => value.replace(/[-\s]/g, '')).refine((value) => thaiPhonePattern.test(value), 'กรุณากรอกเบอร์โทรไทยให้ถูกต้อง'),
   contactMethod: z.enum(['phone', 'line']),
   lineId: z.string().trim().max(80).optional(),
+  propertyOwnership: z.enum(['owner', 'decision-maker', 'tenant', 'other']),
+  timeframe: z.enum(['asap', 'one-three-months', 'three-six-months', 'researching']),
   convenientTime: z.enum(['morning', 'afternoon', 'evening', 'anytime']),
   consent: z.literal(true, { error: 'กรุณายืนยันความยินยอม' }),
 }).superRefine((value, context) => {

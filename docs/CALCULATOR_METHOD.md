@@ -1,110 +1,112 @@
 # Calculator method
 
-Model version: `prototype-2026-08-28-th-planning-v3`
-
+Model version: `thailand-ballpark-2026-08-28-v5`
 Last reviewed: 2026-08-28
 
-This document describes the current planning model exactly. It is an educational pre-quotation screen, not a site design, engineering assessment, quotation, financing offer, or savings guarantee.
+The model is a bill-led lead-qualification ballpark. It must produce a complete consumer result after the required flow, but it must not imitate an engineering design or quotation.
 
-## Inputs and sequence
+## Required inputs
 
-The quick path asks one main question at a time:
+The eight required answers are:
 
-1. Typed home address and user-confirmed map position.
-2. Monthly electricity use in kWh, or bill amount when kWh is unavailable.
-3. Whether the number is a 12-month average, 3-month average, latest month, typical month, or unknown.
-4. Standard residential, TOU, privately billed, or unknown tariff.
-5. Observable weekday daytime-use pattern.
-6. Regular daytime loads, with conditional air-conditioning and EV follow-ups.
-7. Roof material, including a final “I do not know” option.
-8. Observable shade from roughly 10:00–15:00.
+1. Province.
+2. Typical monthly electricity bill in baht.
+3. Property type.
+4. Approximate usable roof-area band.
+5. General daytime electricity intensity.
+6. Regular daytime loads.
+7. Roof material.
+8. Observable shade.
 
-The results page can then accept roof direction, slope, usable area, electricity phase, expected future loads, and a comparable solar-only cash quotation. Future loads are disclosed separately and do not inflate present savings.
+The homepage and estimator use the same bill field and session state. When province and bill come from the homepage, the estimator begins at the first unanswered question. There is no kWh, multi-month, period, TOU, or weather question in the consumer flow.
 
-## Electricity consumption
+## No-invented-number rule
 
-When kWh is supplied, it is used directly. When only a bill total is supplied, the calculator solves for the kWh that reproduces that bill under the versioned progressive tariff:
+Each displayed metric must be traceable to one of:
+
+- a direct user answer;
+- a current official tariff or policy source;
+- current observed Thai package-price evidence; or
+- a documented conservative research fallback.
+
+If a metric cannot be supported, the remedy is an easier input or a clearly documented fallback—not a fake default. The result includes a programmatic `trace` list so its bill, tariff, derived usage, system size, production, price, and lifetime reserve can be audited.
+
+## Bill-to-consumption conversion
+
+Residential property types use the current effective PEA/MEA residential schedule. Shophouses, warehouses, and apartment buildings use the published PEA small-general-service schedule as the bill-only commercial fallback because it can be inverted without inventing a demand-charge input.
 
 `bill(kWh) = (service charge + tiered energy charge + kWh × Ft) × (1 + VAT)`
 
-The inverse is found by bounded binary search. This is more faithful than dividing the bill by one flat rate. TOU and privately billed customers do not receive financial results until those models are validated.
+The inverse is solved exactly through the same piecewise tariff tiers, Ft, service charge, and VAT. There is no ฿50,000 or kWh business-rule cap. The slider expands to the entered amount, while direct keyboard entry remains available.
 
-If extra months are supplied, valid positive figures are averaged. The current prototype uses that average across the year, while preserving supplied monthly figures as the most recent months. It does not invent weather-normalised interval data.
+## Starting system size
 
-## System sizing
+Thai load-profile research supports roughly 30% annual-load matching for residential/small-general-service loads and 40–50% for more daytime-led commercial loads. The general daytime-use answer selects a point within that evidence envelope:
 
-The daytime answers create a low, medium, high, or unknown load profile. The target annual-load shares are currently 34%, 52%, 68%, and 44% respectively.
+| Daytime intensity | Annual-load share |
+| --- | ---: |
+| Very low | 24% |
+| Low | 28% |
+| Moderate | 32% |
+| High | 40% |
+| Very high | 48% |
 
-`starting kWp = round to 0.5 kWp((annual household kWh × target share) / province yield)`
+Commercial property types apply a research-bounded floor. A stated future high-use load moves the target by four percentage points, still capped inside the documented 24–52% planning envelope.
 
-The result is constrained to 1.5–10 kWp unless the user enters a real quotation size. Direction and shade reduce expected production; they never silently increase the recommended system to compensate. This prevents the model from turning a poor roof into a larger sale.
+`bill-led kWp = annual estimated kWh × target share ÷ province yield`
 
-## Production
+The result rounds to 0.5 kWp and uses a 1.5 kWp minimum where no comparable quotation is supplied. Because the current public package evidence starts at 3 kWp, systems below 3 kWp use the 3 kWp package-price floor instead of inventing a cheaper small-system price. Shade and orientation reduce expected production; they do not inflate the recommended sale.
 
-Province reference yields are annual kWh per installed kWp: Bangkok 1,380; Nonthaburi 1,376; Pathum Thani 1,357; Samut Prakan 1,398; fallback 1,375. They are transitional PVGIS-derived planning anchors, not a roof-specific PVGIS simulation.
+## Roof constraint
 
-`first-year production = kWp × province yield × orientation/slope factor × shade factor`
+Current 550 W module datasheets imply approximately 4.0–4.75 m²/kWp before access and layout spacing. The planning model uses a conservative 5.5 m²/kWp. Closed roof-area bands use a representative area divided by 5.5. “More than 200 m²” is intentionally open-ended and therefore does not invent an upper capacity cap. “Unsure” leaves the result bill-led and marks roof feasibility unconfirmed.
 
-Orientation/slope factors range from 1.00 for the south group to 0.86 for a steep north-facing roof. Shade factors are 1.00 for little/no shade, 0.96 for short shade, 0.85 for several hours, 0.75 for heavy shade, and 0.95 when unknown. Heavy or unknown shade suppresses any “up to” statement.
+An optional exact roof area replaces the band and constrains system size directly.
 
-Production is distributed over 12 versioned monthly shares. Self-consumption starts from the daytime-load archetype and is adjusted down when PV is large relative to household demand. Monthly direct use cannot exceed that month’s household consumption or modeled solar production.
+## Production and self-use
 
-## Savings and tariff treatment
+`first-year production = kWp × province yield × direction/slope factor × shade factor`
 
-Directly used solar is valued using the exact difference between the progressive residential bill before and after monthly self-consumption:
+Province yields are stored PVGIS-derived long-run planning anchors. The model uses monthly production shares and never assumes permanently clear weather. Self-consumption begins with the user-selected daytime intensity, receives a small bounded adjustment for directly reported high-use equipment, and is reduced when production grows large relative to load.
 
-`avoided bill = Σ[bill(monthly load) − bill(monthly load − direct solar use)]`
+Monthly self-use can never exceed monthly consumption or modeled production.
 
-The main planning figure excludes export revenue, tax treatment, financing, and electricity-price escalation. The tariff-escalation assumption is 0%.
+## Savings
 
-Surplus is displayed separately. The prototype mentions the conditional ฿2.20/kWh programme, 10-year term, 5 kW AC export limit, quota, eligibility, and utility approval, but it does not add that revenue to headline savings or payback.
+`annual avoided bill = Σ[bill(monthly load) − bill(monthly load − monthly self-use)]`
 
-## Price, upkeep, and payback
+The headline result excludes export income, tax relief, finance, and electricity-price escalation. The displayed monthly reduction is rounded down to ฿50; annual savings are rounded down to ฿100.
 
-Cash-price anchors are interpolated and rounded to ฿5,000:
+## Price and payback
+
+Planning-price anchors triangulate current GRoof and PEA Shopping packages:
 
 | Size | Single phase | Three phase |
 | --- | ---: | ---: |
-| 1.5 kWp | ฿99,000 | ฿109,000 |
-| 3 kWp | ฿115,000 | ฿130,000 |
-| 5 kWp | ฿155,000 | ฿175,000 |
-| 10 kWp | ฿250,000 | ฿260,000 |
+| 3 kWp | ฿130,000 | ฿145,000 |
+| 5 kWp | ฿175,000 | ฿195,000 |
+| 10 kWp | ฿290,000 | ฿300,000 |
+| 15 kWp | ฿454,900 | ฿454,900 |
+| 20 kWp | ฿550,000 | ฿550,000 |
 
-Unknown phase uses the single-phase planning anchor but lowers evidence confidence. A complete solar-only cash quotation can replace the market anchor. A quote marked as battery-inclusive is never treated as comparable.
+Values between anchors are interpolated. Larger systems extend the evidenced 15–20 kWp marginal price rather than freezing at the 20 kWp price. A user-supplied comparable battery-free cash quote may replace the market price.
 
-Routine upkeep is ฿3,000/year up to 3 kWp, ฿4,000/year up to 5 kWp, and ฿5,000/year above 5 kWp. The long-term view applies 0.5% annual panel degradation and one year-13 inverter reserve equal to 23% of planning cost, rounded to ฿1,000 and constrained to ฿25,000–฿60,000.
+NREL's 2024 residential PV benchmark models fixed O&M at 1.02% of CAPEX and includes cleaning, component failure, and inverter-related work. SolarMatch uses that percentage once as an annual maintenance/component reserve; it does not double-count a separate invented inverter event.
 
-`simple cash payback = planning cash price / (first-year avoided bill − annual routine upkeep)`
+`simple payback = planning price ÷ (first-year avoided bill − annual reserve)`
 
-Payback is withheld when the financial model is unavailable, annual net value is non-positive, or evidence confidence is low.
+The required eight answers always produce an explicit payback outcome. When first-year avoided-bill value is greater than the annual reserve, the model displays the calculated simple payback. When it is not, the truthful result is “Not reached” / “ยังไม่คืนทุน”—never a manufactured denominator and never “Needs more information.”
 
-## One planning figure and restrained “up to” language
+## 25-year net value
 
-The interface does not present a broad low-to-high range as its main answer. It shows one rounded planning system, price, production, monthly saving, and—when supported—payback. The legacy range fields remain internally for compatibility and sensitivity tests, not as dominant public claims.
+For each year, avoided-bill value is reduced by 0.5% annual module degradation. Electricity-price escalation remains 0%.
 
-An “up to” monthly saving is permitted only when:
+`25-year net value = cumulative avoided bills − installation price − cumulative annual reserve`
 
-- the tariff is identified as standard residential;
-- confidence is medium or high;
-- shade is neither heavy nor unknown; and
-- roof material is known.
+The public “Save up to” value is the rounded-down conservative net value itself; it is not an inflated confidence multiplier. When net value is non-positive, the UI leads with monthly bill reduction instead of claiming savings that the model does not support.
 
-The ceiling uses the same home, same system, and same exclusions as the planning figure. It is 8% above planning at high confidence or 15% at medium confidence, rounded down to ฿50 and hard-capped at 20% above planning.
+## Optional precision inputs
 
-## Evidence confidence
+Exact address/map, exact roof area, direction, slope, phase, future loads, and a comparable cash quotation are optional. Each applicable input immediately recalculates the same result and updates a visible status message. Address and coordinates remain in browser session storage and are not submitted.
 
-Confidence rewards actual kWh, multi-month averages, identified tariff, observable daytime use and shade, known direction/slope and phase, and a comparable quotation. It penalises bill-derived load, unknowns, heavy shade, TOU/private billing, extreme inputs, and very small systems without a quotation.
-
-High confidence additionally requires actual kWh from a 3- or 12-month average, standard tariff, known shade, and known direction and slope. Confidence affects claim eligibility and which follow-up checks are recommended; it never exists merely because the user completed more screens.
-
-## Rounding and boundaries
-
-- System sizing: nearest 0.5 kWp; quotation size nearest 0.1 kWp.
-- Planning cash price: nearest ฿5,000.
-- Monthly savings: nearest ฿50.
-- Annual savings: nearest ฿100.
-- Production and energy flows: nearest 100 kWh in the public result.
-- Payback: nearest 0.1 year.
-- 10- and 25-year difference: nearest ฿1,000.
-
-All configuration lives in `config/solar-assumptions.ts` and `config/electricity-tariffs.ts`; calculation code lives in `lib/calculator/prototype-estimator.ts`. Any change to a material constant requires a source review, model-version change, and regression tests.
+Material constants live in `config/solar-assumptions.ts` and `config/electricity-tariffs.ts`. Calculation code lives in `lib/calculator/prototype-estimator.ts`. Material changes require a source review, model-version update, and regression test.

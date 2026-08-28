@@ -2,59 +2,37 @@
 
 Last checked: **2026-08-28**
 
-This register separates primary evidence from transitional assumptions. A link is not an endorsement of SolarMatch or any supplier.
+This register distinguishes authoritative inputs, observed market evidence, and conservative research fallbacks. Supplier links are evidence, not endorsements.
 
-## Primary policy and utility sources
-
-| Subject | Source | Use in the model |
+| Subject | Source | Model use |
 | --- | --- | --- |
-| Residential tariffs | [PEA electricity-tariff register](https://www.pea.co.th/our-services/tariff) | Version control for residential tier schedules, service charge, and effective dates |
-| Fuel adjustment charge | [PEA Ft register](https://www.pea.co.th/our-services/tariff/ft) and [ERC automatic Ft](https://www.erc.or.th/th/automatic) | Ft period and amount; current model uses ฿0.1623/kWh for the documented 2026 periods |
-| May 2023 tariff schedule | [PEA tariff PDF](https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf) | Progressive residential tiers used through August 2026 |
-| September 2026 tariff schedule | [PEA tariff PDF](https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf) | Progressive residential tiers selected automatically from 1 September 2026 |
-| PEA surplus purchase | [PEA PPIM programme](https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766) | Conditional ฿2.20/kWh, term, eligibility and PEA process; excluded from the base result |
-| MEA surplus purchase | [MEA My Energy programme](https://myenergy.mea.or.th/project/6a38ac8d329d02001dd7024e) | MEA-area application and export-control conditions; excluded from the base result |
-| Regulatory notice | [Energy Regulatory Commission notice (PDF)](https://erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202606/m_news/9090/3441/file_download/ae5c0f3369d23b692064262036b1725f.pdf) | Programme framework, quota, 5 kW AC export limit, and approval conditions |
-| Tax measure | [Revenue Department Royal Decree No. 805 (PDF)](https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dc805.pdf) | Qualifying-expenditure cap and conditions; excluded from calculations and never presented as a cash refund |
+| Tariff register | [PEA](https://www.pea.co.th/our-services/tariff) | Effective residential and small-general-service schedules |
+| Sep–Dec 2026 Ft | [Energy Regulatory Commission](https://erc.or.th/th/news-release/3458) | ฿0.1623/kWh Ft and published period |
+| May 2023 tariff PDF | [PEA](https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf) | Residential schedule through Aug 2026 and bill-only small-general-service fallback |
+| Sep 2026 tariff PDF | [PEA](https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf) | Residential tiers from Sep 2026 |
+| Solar resource | [European Commission JRC PVGIS](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en) | Stored province-level long-run yield anchors |
+| Thai self-consumption/load profiles | [Energies 14(11), 3329](https://www.mdpi.com/1996-1073/14/11/3329) | Residential and commercial annual-load matching and self-consumption envelope |
+| Thai customer load-profile study | [Renewable Energy 131, 1149–1162](https://www.sciencedirect.com/science/article/pii/S0960148118308541) | Evidence that Thai customer classes have distinct load shapes |
+| Thai residential economics | [Renewable Energy 138, 395–408](https://www.sciencedirect.com/science/article/pii/S0960148119301004) | 3 kW/4,097 kWh-year and PV/load-ratio context |
+| 5 kW current package | [PEA Shopping](https://peashopping.com/product/pea-solar-5kw-1-phase-standard-package/) | Current public package-price anchor |
+| 10 kW current package | [PEA Shopping](https://peashopping.com/product/pea-solar-10kw-3-phase-standard-package/) | Current public package-price anchor |
+| May 2026 market packages | [GRoof brochure](https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf) | Current Thai package-price triangulation |
+| Module area | [Trina 550 W datasheet](https://static.trinasolar.com/sites/default/files/MA_Datasheet_Vertex_DEG19C.20_202011.pdf) and [JA Solar 550 W datasheet](https://www.jasolar.com/uploadfile/fujian/2025/0924/91284c078dbf.pdf) | 5.5 m²/kWp conservative roof-layout conversion |
+| O&M/component reserve | [NREL 2024 residential PV ATB](https://atb.nrel.gov/electricity/2024b/residential_pv) | 1.02% of CAPEX/year; scope includes component and inverter-related work |
+| Degradation | [IRENA rooftop PV cost indicators](https://www.irena.org/-/media/Files/IRENA/Agency/Publication/2017/Dec/IRENA_Cost_Indicators_PV_2017.pdf) | 0.5% annual production decline |
+| Surplus payments | [PEA announcement](https://www.pea.co.th/news/corporate-news/2133) and [PEA conditions](https://www.pea.co.th/news/corporate-news/2114) | Conditional ฿2.20/kWh, 10 years, 5 kW AC export limit; excluded from headline results |
+| Tax relief | [PEA summary](https://www.pea.co.th/news/corporate-news/2268) and [Revenue Department decree register](https://www.rd.go.th/1603.html) | Qualifying-spend deduction cap and end date; excluded from headline results |
 
-## Solar-resource source
+## Conservative fallbacks
 
-[European Commission Joint Research Centre PVGIS](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en) and its [non-interactive API documentation](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/using-pvgis-5/api-non-interactive-service_en) are the primary basis for the province-level yield anchors. The current model stores reviewed annual planning values rather than calling PVGIS from the visitor’s browser. This avoids transmitting the typed address and keeps the result reproducible.
+- Province “other” uses 1,375 kWh/kWp-year, within the reviewed launch-province range.
+- Unknown direction/slope uses a documented 0.95 production factor.
+- “Unsure” shade uses 0.90, more conservative than the former 0.95 fallback.
+- “More than 200 m²” has no invented upper capacity cap.
+- Commercial property types use small-general-service billing as a bill-only screen. A real medium/large general-service bill with demand charges requires installer review; the public result remains a lead-qualification ballpark.
+- Public installed-price evidence begins at 3 kWp. A calculated 1.5–2.5 kWp starting size therefore uses the evidenced 3 kWp package-price floor rather than an invented small-system discount.
+- The base assumes 0% tariff escalation and excludes export, tax, and finance.
 
-The province anchors are not roof simulations. Direction, slope, and observable shade are applied as explicit model factors, while a real site survey remains necessary.
+## Review gate before live acquisition
 
-## Market-price evidence
-
-Planning price anchors were triangulated from publicly listed cash package material available during May–August 2026, including:
-
-- [GRoof May 2026 package brochure (PDF)](https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf)
-- [PEA Shopping 5 kW Standard](https://peashopping.com/product/pea-solar-5kw-1-phase-standard-package/)
-- [PEA Shopping 5 kW Premium](https://peashopping.com/product/pea-solar-5kw-1-phase-premium-package/)
-- [PEA Shopping 10 kW Standard](https://peashopping.com/product/pea-solar-10kw-3-phase-standard-package/)
-- [PEA Shopping 10 kW Premium](https://peashopping.com/product/pea-solar-10kw-3-phase-premium-package/)
-
-These are observations, not endorsements and not a claim that every package contains identical equipment, structural scope, utility work, warranties, or VAT treatment. The UI therefore calls the interpolated result a planning cash price, not a quotation. A user-supplied comparable quote can replace it.
-
-## Transitional assumptions requiring further validation
-
-The following are explicit product assumptions, not official Thai household interval datasets:
-
-- load-profile target shares;
-- self-consumption ratios;
-- direction/slope and observable-shade factors;
-- monthly production distribution;
-- routine upkeep allowances;
-- inverter replacement timing and reserve;
-- roof-area capacity categories.
-
-Buyer interviews, installer quotations, household interval data, and site-survey feedback should refine these values. Until then, confidence gating and disclosures prevent them from being presented as certainty.
-
-## Review policy
-
-Before a public advertising campaign or real lead collection:
-
-1. Recheck every tariff, Ft, surplus-purchase, tax, and price source.
-2. Replace expired schedules rather than silently extending them.
-3. Review the model version and regression fixtures.
-4. Revalidate Thai wording with a native legal/product reviewer.
-5. Record the date, source, and reason for every material change.
+Before advertising or transmitting leads, recheck tariffs, Ft, price packages, surplus rules, tax terms, legal wording, and regression fixtures. Buyer interviews still determine lead qualification, pricing, exclusivity, routing, replacement policy, and service levels.

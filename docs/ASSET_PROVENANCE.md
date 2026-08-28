@@ -10,15 +10,15 @@ The homepage photograph is **“Solar Panel on Roof of House in California, USA�
 
 - Source page: <https://www.pexels.com/photo/solar-panel-on-roof-of-house-in-california-usa-9875438/>
 - Licence: Pexels Licence, checked 2026-08-28: <https://www.pexels.com/license/>
-- Rights basis: Pexels permits free use and modification, including use on websites. Attribution is not required. The licence prohibits presenting identifiable people or brands in a bad light, implying endorsement, and redistributing an unaltered copy as stock. This project does none of those things.
+- Rights basis: Pexels permits free use and modification, including use on websites. Attribution is not required by the licence, but the homepage now provides a visible linked credit to Kindel Media and the source page. The licence prohibits presenting identifiable people or brands in a bad light, implying endorsement, and redistributing an unaltered copy as stock. This project does none of those things.
 - Download and processing: the original 4385×3289 JPEG was downloaded from Pexels on 2026-08-28. Only cropping, resizing, colour-preserving WebP encoding, and PNG palette optimisation were applied. The downloaded source file is not shipped or committed.
 - Presentation boundary: the photograph is used as an illustrative residential-solar scene. It is not described as Thailand, a SolarMatch customer, a SolarMatch installation, or evidence of a household-specific engineering result.
 - Delivery: all derivatives are served locally. The public site does not hotlink Pexels.
 
 | Path | Purpose and transformation | SHA-256 | Attribution | Limitation |
 | --- | --- | --- | --- | --- |
-| `public/images/solar-home-real-1440.webp` | 1440×960 responsive homepage crop, WebP quality 84 | `63D1CFA09E02C5811E597002ADCCE8E43787797635CE8BFA704AF3A5F70FEBBF` | Not required; creator and source are documented above | Illustrative only; not a SolarMatch customer or verified Thai installation |
-| `public/images/solar-home-real-768.webp` | 768×512 responsive homepage crop, WebP quality 82 | `4F4EBAD867F50712C1A86A9108A495B20AB9D9E51594D07284A2535F64024055` | Not required; creator and source are documented above | Same presentation boundary as the large derivative |
+| `public/images/solar-home-real-1440.webp` | 1440×960 responsive homepage crop, WebP quality 84 | `63D1CFA09E02C5811E597002ADCCE8E43787797635CE8BFA704AF3A5F70FEBBF` | Visible linked homepage credit: Kindel Media via Pexels | Illustrative only; not a SolarMatch customer or verified Thai installation |
+| `public/images/solar-home-real-768.webp` | 768×512 responsive homepage crop, WebP quality 82 | `4F4EBAD867F50712C1A86A9108A495B20AB9D9E51594D07284A2535F64024055` | Visible linked homepage credit: Kindel Media via Pexels | Same presentation boundary as the large derivative |
 | `public/og.png` | 1200×630 social-preview crop with 256-colour PNG optimisation | `57721998CAEDEFE703AF68794D86669E0B7C442AC8474329DBA8BEA1907B37EA` | Not required; creator and source are documented above | Social preview only; it does not imply endorsement |
 
 ## Project branding and code-native visuals

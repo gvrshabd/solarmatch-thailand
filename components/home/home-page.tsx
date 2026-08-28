@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { HeroEstimator } from '@/components/home/hero-estimator';
 import Link from '@/components/site/internal-link';
-import { PrototypeNotice } from '@/components/site/prototype-notice';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { localizedPath, type Locale } from '@/config/i18n';
 
@@ -56,9 +55,9 @@ const copy: Record<Locale, HomeCopy> = {
     eyebrow: 'ประเมิน Solar Rooftop สำหรับบ้านในไทย',
     titleLead: 'ค่าไฟบ้านคุณ',
     titleEmphasis: 'เหมาะกับโซลาร์แค่ไหน?',
-    lede: 'ดูขนาดระบบและตัวเลขประหยัดเบื้องต้นเพื่อวางแผน ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
+    lede: 'ดูตัวเลขเบื้องต้นที่เข้าใจง่าย แล้วเตรียมเปรียบเทียบผู้ติดตั้งที่เหมาะกับบ้านและงบของคุณ',
     photoAlt: 'แผงโซลาร์บนหลังคากระเบื้องของบ้านพักอาศัย โดยมีต้นปาล์มอยู่ด้านหลัง',
-    photoCaption: 'ภาพประกอบจากการติดตั้งที่อยู่อาศัยจริง · หลังคาของคุณยังต้องสำรวจหน้างาน',
+    photoCaption: 'ภาพโดย Kindel Media ผ่าน Pexels · ใช้ภายใต้สัญญาอนุญาต Pexels',
     example: 'ตัวอย่างผลเพื่อวางแผน',
     exampleNote: 'ไม่ใช่คำสัญญาหรือใบเสนอราคา',
     trust: ['ดูผลก่อนกรอกเบอร์', 'ไม่ต้องอัปโหลดบิล', 'ไม่มีค่าใช้จ่ายสำหรับเจ้าของบ้าน'],
@@ -71,8 +70,8 @@ const copy: Record<Locale, HomeCopy> = {
     processBody: 'เครื่องมือนี้ช่วยจัดข้อมูลเบื้องต้น ไม่ได้แทนการสำรวจหน้างานหรือคำแนะนำจากวิศวกร',
     steps: [
       { title: 'ตอบจากสิ่งที่รู้', body: 'จังหวัด ค่าไฟ และรูปแบบการใช้ไฟช่วงกลางวัน โดยไม่ต้องอัปโหลดเอกสาร' },
-      { title: 'เห็นตัวเลขที่ใช้วางแผนได้', body: 'ดูขนาดระบบ ผลผลิต และเงินประหยัดเป็นค่ากลางที่อธิบายที่มา พร้อมระดับความมั่นใจ' },
-      { title: 'ค่อยเลือกว่าจะคุยต่อไหม', body: 'คุณเห็นผลก่อนเสมอ การขอให้ติดต่อเป็นอีกขั้นตอนหนึ่งและยังไม่ส่งข้อมูลจริง' },
+      { title: 'เห็นตัวเลขที่ใช้วางแผนได้', body: 'ดูขนาดระบบ ผลผลิต ราคา และเงินประหยัดเป็นค่ากลางที่อธิบายที่มา' },
+      { title: 'เตรียมเปรียบเทียบผู้ติดตั้ง', body: 'เห็นผลก่อนกรอกเบอร์ แล้วค่อยตัดสินใจว่าต้องการให้ SolarMatch ช่วยจับคู่หรือไม่' },
     ],
     previewEyebrow: 'ตัวอย่างการแสดงผล',
     previewTitle: 'เห็นความต่าง—พร้อมเห็นสมมติฐาน',
@@ -83,20 +82,20 @@ const copy: Record<Locale, HomeCopy> = {
     previewCta: 'ประเมินจากค่าไฟของฉัน',
     evidenceEyebrow: 'สิ่งที่ตรวจสอบได้ตอนนี้',
     evidenceTitle: 'เชื่อมั่นในวิธีทำงาน ไม่ใช่คำอ้างความนิยม',
-    evidenceBody: 'SolarMatch ยังอยู่ในระยะต้นแบบ จึงไม่แสดงรีวิว จำนวนลูกค้า หรือพันธมิตรที่ยังไม่มีหลักฐาน',
+    evidenceBody: 'SolarMatch กำลังตรวจสอบเครือข่ายผู้ติดตั้ง จึงไม่แสดงรีวิว จำนวนลูกค้า หรือพันธมิตรที่ยังไม่มีหลักฐาน',
     evidence: [
       { title: 'ผลมาก่อนข้อมูลติดต่อ', body: 'เห็นข้อมูลประมาณการก่อนตัดสินใจว่าจะกรอกเบอร์หรือไม่' },
       { title: 'สมมติฐานเปิดเผย', body: 'อัตรา ค่าใช้จ่าย และข้อจำกัดอยู่ใกล้กับผล ไม่ซ่อนในข้อความเล็ก' },
-      { title: 'ยังไม่มีการส่งข้อมูลจริง', body: 'แบบฟอร์มต้นแบบตรวจรูปแบบแล้วทิ้งข้อมูล ไม่มีการส่งให้ผู้ติดตั้ง' },
+      { title: 'ยังไม่มีการส่งข้อมูลจริง', body: 'ระหว่างตรวจสอบระบบจับคู่ แบบฟอร์มจะตรวจรูปแบบแล้วทิ้งข้อมูล ไม่มีการส่งให้ผู้ติดตั้ง' },
       { title: 'ไม่มีความเร่งด่วนปลอม', body: 'ไม่มีนาฬิกานับถอยหลัง โควตาปลอม หรือข้อความกดดัน' },
     ],
     faqEyebrow: 'คำถามที่พบบ่อย',
     faqTitle: 'เริ่มต้นได้โดยไม่ต้องรู้เรื่องโซลาร์มาก่อน',
     faq: [
       { question: 'ผลประเมินนี้แม่นแค่ไหน?', answer: 'เป็นการคัดกรองเบื้องต้นจากค่าไฟและพฤติกรรมการใช้ไฟ ความแม่นยำจะเพิ่มขึ้นเมื่อมีข้อมูลหลังคา โหลดไฟ และการสำรวจหน้างานจริง' },
-      { question: 'ต้องกรอกเบอร์ก่อนดูผลไหม?', answer: 'ไม่ต้อง คุณจะเห็นผลประมาณการก่อน แบบฟอร์มติดต่ออยู่หลังผลและยังไม่บันทึกหรือส่งข้อมูลในต้นแบบนี้' },
-      { question: 'SolarMatch เป็นผู้ติดตั้งหรือไม่?', answer: 'ไม่ใช่ผู้ติดตั้ง เรากำลังทดสอบเครื่องมือที่ช่วยให้เจ้าของบ้านเข้าใจข้อมูลก่อนพูดคุยกับผู้ให้บริการ' },
-      { question: 'ตัวเลขระยะคืนทุนมาจากไหน?', answer: 'แบบจำลองต้นแบบแยกการใช้ไฟเอง รายได้ขายไฟที่เข้าเงื่อนไข ราคาติดตั้ง และค่าดูแล โดยแสดงสมมติฐานพร้อมผล ตัวเลขจริงยังต้องยืนยันจากผู้ติดตั้งและข้อมูลบ้าน' },
+      { question: 'ต้องกรอกเบอร์ก่อนดูผลไหม?', answer: 'ไม่ต้อง คุณจะเห็นผลประมาณการก่อน แบบฟอร์มติดต่ออยู่หลังผล และขณะนี้ยังไม่บันทึกหรือส่งข้อมูล' },
+      { question: 'SolarMatch เป็นผู้ติดตั้งหรือไม่?', answer: 'ไม่ใช่ SolarMatch เป็นธุรกิจสร้างและคัดกรองลูกค้าเป้าหมายที่ช่วยให้เจ้าของบ้านเข้าใจข้อมูล แล้วเชื่อมกับผู้ติดตั้งที่เหมาะสมเมื่อระบบจับคู่เปิดใช้งาน' },
+      { question: 'ตัวเลขระยะคืนทุนมาจากไหน?', answer: 'แบบจำลองใช้ไฟที่ผลิตและใช้เอง ราคาติดตั้งปัจจุบัน ค่าเสื่อมประสิทธิภาพ และเงินสำรองค่าดูแล โดยไม่นับรายได้ขายไฟ สิทธิภาษี เงินกู้ หรือค่าไฟที่เพิ่มขึ้น ตัวเลขจริงยังต้องยืนยันจากผู้ติดตั้งและข้อมูลบ้าน' },
     ],
     finalTitle: 'เริ่มเข้าใจว่าบ้านคุณอาจต้องการระบบแบบไหน',
     finalBody: 'ดูผลก่อนกรอกข้อมูลติดต่อ',
@@ -106,9 +105,9 @@ const copy: Record<Locale, HomeCopy> = {
     eyebrow: 'Rooftop solar estimates for homes in Thailand',
     titleLead: 'Is rooftop solar',
     titleEmphasis: 'a good fit for your home?',
-    lede: 'See a practical starting system and planning figure before deciding whether to speak with an installer.',
+    lede: 'See a clear starting estimate, then prepare to compare installers suited to your property and budget.',
     photoAlt: 'Solar panels on a tiled residential roof with palm trees in the background',
-    photoCaption: 'Illustrative residential solar installation · your roof still requires a site survey',
+    photoCaption: 'Photo by Kindel Media via Pexels · used under the Pexels licence',
     example: 'Example planning result',
     exampleNote: 'Not a promise or quotation',
     trust: ['See results before entering a phone number', 'No bill upload required', 'Free for homeowners'],
@@ -121,8 +120,8 @@ const copy: Record<Locale, HomeCopy> = {
     processBody: 'This tool organizes initial information. It does not replace a site survey or engineering advice.',
     steps: [
       { title: 'Answer from what you know', body: 'Province, electricity bill, and daytime use—without uploading documents.' },
-      { title: 'See one planning figure', body: 'View a starting system, production, and savings figure with its evidence confidence clearly explained.' },
-      { title: 'Choose whether to continue', body: 'You always see the result first. Requesting contact is separate and sends nothing in this prototype.' },
+      { title: 'See one planning figure', body: 'View a starting system, production, price, and savings figure with a traceable basis.' },
+      { title: 'Prepare to compare installers', body: 'See the result before entering a phone number, then decide whether you want SolarMatch to help match you.' },
     ],
     previewEyebrow: 'Example result',
     previewTitle: 'See the difference—and the assumptions behind it',
@@ -133,20 +132,20 @@ const copy: Record<Locale, HomeCopy> = {
     previewCta: 'Estimate from my bill',
     evidenceEyebrow: 'What you can verify today',
     evidenceTitle: 'Trust the process, not popularity claims',
-    evidenceBody: 'SolarMatch is still a prototype, so it does not display testimonials, customer counts, or installer partners that have not been validated.',
+    evidenceBody: 'SolarMatch is still validating its installer network, so it does not display testimonials, customer counts, or partners that have not been verified.',
     evidence: [
       { title: 'Results before contact details', body: 'Review useful preliminary information before deciding whether to enter a phone number.' },
       { title: 'Assumptions are visible', body: 'Rates, costs, and limitations sit close to the result instead of hiding in fine print.' },
-      { title: 'No live data transfer', body: 'The prototype form validates then discards information; nothing is sent to an installer.' },
+      { title: 'No live data transfer yet', body: 'While matching is being validated, the form checks then discards information; nothing is sent to an installer.' },
       { title: 'No manufactured urgency', body: 'No countdown timers, invented availability, or pressure messages.' },
     ],
     faqEyebrow: 'Frequently asked questions',
     faqTitle: 'Start without already knowing solar',
     faq: [
       { question: 'How accurate is this estimate?', answer: 'It is an initial screen based on electricity cost and usage patterns. Accuracy improves with roof, load, and site-survey information.' },
-      { question: 'Do I need to enter a phone number first?', answer: 'No. You see the estimate first. The contact form appears afterwards and does not store or send information in this prototype.' },
-      { question: 'Is SolarMatch an installer?', answer: 'No. We are testing a tool that helps homeowners understand the basics before speaking with service providers.' },
-      { question: 'Where does the payback figure come from?', answer: 'The prototype values direct self-use against the progressive residential bill, then includes installation-cost references, routine upkeep, degradation, and an inverter reserve. Export, tax, finance, and tariff escalation stay outside the planning figure.' },
+      { question: 'Do I need to enter a phone number first?', answer: 'No. You see the estimate first. The contact form appears afterwards and currently does not store or send information.' },
+      { question: 'Is SolarMatch an installer?', answer: 'No. SolarMatch is a lead-generation and qualification business designed to help customers understand the basics and connect with suitable installers when matching opens.' },
+      { question: 'Where does the payback figure come from?', answer: 'The model values electricity produced and used on site, then includes current installation-price references, degradation, and a maintenance/component reserve. Export income, tax relief, finance, and tariff escalation stay outside the planning figure.' },
     ],
     finalTitle: 'Start understanding what kind of system your home may need',
     finalBody: 'See results before entering contact information.',
@@ -168,7 +167,6 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
             <p className="eyebrow"><SunMedium size={16} aria-hidden="true" /> {text.eyebrow}</p>
             <h1>{text.titleLead}<br /><em>{text.titleEmphasis}</em></h1>
             <p className="hero-lede">{text.lede}</p>
-            <PrototypeNotice compact locale={locale} />
           </div>
           <figure className="hero-photo">
             <div className="hero-photo-frame">
@@ -190,9 +188,9 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
                 />
               </picture>
               <div className="sunline" aria-hidden="true" />
-              <div className="result-peek result-peek-v2"><span>{text.example}</span><strong>{locale === 'en' ? 'About ' : 'ประมาณ '}5 <small>kWp</small></strong><p>{text.exampleNote}</p></div>
+              <div className="result-peek result-peek-v2 result-peek-message"><strong>{locale === 'en' ? 'Save money while saving the world' : 'ประหยัดค่าไฟ พร้อมช่วยโลกไปด้วยกัน'}</strong></div>
             </div>
-            <figcaption>{text.photoCaption}</figcaption>
+            <figcaption><a href="https://www.pexels.com/photo/solar-panel-on-roof-of-house-in-california-usa-9875438/" target="_blank" rel="noreferrer">{text.photoCaption}</a></figcaption>
           </figure>
           <div className="hero-estimator-panel">
             <HeroEstimator locale={locale} />

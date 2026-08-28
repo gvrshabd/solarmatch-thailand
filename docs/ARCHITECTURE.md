@@ -1,25 +1,24 @@
 # Architecture note
 
-The canonical architecture and decision boundary is maintained at [`../ARCHITECTURE.md`](../ARCHITECTURE.md).
+## Fixed and durable now
 
-## Fixed in this calculator release
-
-- Thai-first and English-parity question flow.
-- Browser-session-only address and estimator state.
-- Manual Leaflet/OpenStreetMap location confirmation with no geocoder.
-- Versioned progressive residential tariffs and province solar-yield anchors.
-- Self-consumption-first sizing that does not enlarge a system to compensate for shade.
-- One public planning value, evidence confidence, and tightly gated “up to” wording.
-- Cash planning prices, routine upkeep, degradation, and a year-13 inverter reserve.
-- Conditional export and tax information excluded from headline economics.
-- No lead, database, routing, OTP, payments, ads, analytics provider, or automation integration.
+- One Thai-first, English-parity brand and component shell.
+- Lead-generation positioning: useful estimate first, installer-matching request second.
+- Homepage and estimator share one reusable province-and-bill state model.
+- Eight required, consumer-friendly questions with complete final metrics.
+- Versioned tariff inversion, province solar yields, research-bounded self-use sizing, roof constraints, current package prices, payback, and 25-year net value.
+- Optional address/map and precision details that recalculate results without being required.
+- Browser-session persistence across refresh and language switching.
+- Central `siteConfig.mode` boundary and local validation-and-discard lead form.
+- SEO-friendly localized routes, server-rendered page content, noindex/follow posture, automated-review files, and analytics-event placeholders.
+- Licensed local photography with visible creator credit and documented provenance.
 
 ## Intentionally deferred
 
-- Exact-address geocoding, autocomplete, satellite imagery, roof polygons, LiDAR, and site-specific irradiance.
-- Engineering design, structural assessment, quote guarantee, and installer-specific equipment.
-- Validated TOU and privately billed financial models.
-- Buyer qualification, pricing, exclusivity, routing, live forms, LINE, CRM, and analytics.
-- Automated source updates and production legal/PDPA approval.
+- Final buyer qualification rules, lead price, exclusivity, replacement rules, routing, and response-time obligations.
+- Real form submission, lead storage, database, CRM, LINE, email, OTP, payments, ads, analytics provider, or automation.
+- Installer vetting, ranking, quote comparison, or performance claims.
+- Engineering design, structural assessment, roof polygon/satellite analysis, tariff-class document parsing, or quote guarantee.
+- Final PDPA/legal review and production consent language.
 
-See `CALCULATOR_METHOD.md`, `CALCULATOR_SOURCES.md`, `ADDRESS_MAP_PRIVACY.md`, and `UX_RESEARCH.md` for the current model boundary.
+The implementation boundary is deliberate: calculator and content assumptions can change quickly without changing the route shell, design system, lead form, or deployment pipeline. See `CALCULATOR_METHOD.md`, `CALCULATOR_SOURCES.md`, `ADDRESS_MAP_PRIVACY.md`, and `ASSET_PROVENANCE.md`.

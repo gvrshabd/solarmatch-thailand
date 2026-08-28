@@ -1,13 +1,11 @@
-import { calculateResidentialBill, estimateKwhFromBill, selectResidentialTariff } from '@/config/electricity-tariffs';
+import {
+  calculateResidentialBill,
+  estimateKwhFromBill,
+  selectResidentialTariff,
+  smallGeneralServiceTariff,
+} from '@/config/electricity-tariffs';
 import { solarAssumptions } from '@/config/solar-assumptions';
-import type {
-  Confidence,
-  EstimateAnswers,
-  EstimateResult,
-  Estimator,
-  LifetimeCostPoint,
-  Range,
-} from './types';
+import type { EstimateAnswers, EstimateResult, Estimator, LifetimeCostPoint, Range } from './types';
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -21,11 +19,12 @@ function roundDown(value: number, step = 1) {
   return Math.floor(value / step) * step;
 }
 
-function rangeAround(value: number, uncertainty: number, step = 1): Range {
-  return {
-    min: round(Math.max(0, value * (1 - uncertainty)), step),
-    max: round(Math.max(0, value * (1 + uncertainty)), step),
-  };
+function point(value: number): Range {
+  return { min: value, max: value };
+}
+
+function isBusinessProperty(propertyType: EstimateAnswers['propertyType']) {
+  return ['shophouse', 'warehouse', 'apartment-building'].includes(propertyType);
 }
 
 function planningPrice(sizeKwp: number, phase: EstimateAnswers['electricityPhase']) {
@@ -40,272 +39,166 @@ function planningPrice(sizeKwp: number, phase: EstimateAnswers['electricityPhase
       return round(left[priceKey] + (right[priceKey] - left[priceKey]) * ratio, 5000);
     }
   }
-  return anchors[anchors.length - 1][priceKey];
+  const left = anchors[anchors.length - 2];
+  const right = anchors[anchors.length - 1];
+  const evidencedMarginalPrice = (right[priceKey] - left[priceKey]) / (right.kwp - left.kwp);
+  return round(right[priceKey] + (sizeKwp - right.kwp) * evidencedMarginalPrice, 5000);
 }
 
 function classifyLoad(answers: EstimateAnswers): EstimateResult['loadProfile'] {
-  if (answers.daytimePattern === 'unknown' && answers.daytimeLoads.includes('unknown')) return 'unknown';
-  let score = answers.daytimePattern === 'mostly-empty'
-    ? -2
-    : answers.daytimePattern === 'light-use'
-      ? 0
-      : answers.daytimePattern === 'work-or-ac'
-        ? 2
-        : answers.daytimePattern === 'regular-loads'
-          ? 4
-          : 0;
-  if (answers.daytimeLoads.includes('pump')) score += 1;
-  if (answers.daytimeLoads.includes('home-office')) score += 1;
-  if (answers.daytimeLoads.includes('home-business')) score += 2;
-  if (answers.daytimeLoads.includes('ev') && answers.evChargesInDaytime === 'yes') score += 2;
-  if (answers.daytimeLoads.includes('air-conditioning')) {
-    if (answers.acDaytimeHours === '2-4') score += 1;
-    if (answers.acDaytimeHours === 'over-4') score += 2;
-  }
-  if (score <= 0) return 'low';
+  const index = ['very-low', 'low', 'moderate', 'high', 'very-high'].indexOf(answers.daytimePattern);
+  let score = index;
+  if (answers.daytimeLoads.some((load) => ['business-equipment', 'other-high-use'].includes(load))) score += 1;
+  if (isBusinessProperty(answers.propertyType)) score += 1;
+  if (score <= 1) return 'low';
   if (score >= 4) return 'high';
   return 'medium';
 }
 
-function monthlyValues(answers: EstimateAnswers, tariff: ReturnType<typeof selectResidentialTariff>) {
-  const supplied = answers.electricityInputKind === 'kwh'
-    ? [answers.monthlyKwh ?? 0, ...(answers.additionalMonthlyValues ?? [])]
-    : [answers.monthlyBillThb ?? 0, ...(answers.additionalMonthlyValues ?? [])].map((bill) => estimateKwhFromBill(bill, tariff));
-  const usable = supplied.filter((value) => Number.isFinite(value) && value > 0);
-  const average = usable.reduce((sum, value) => sum + value, 0) / Math.max(1, usable.length);
-  const months = Array.from({ length: 12 }, () => average);
-  usable.slice(0, 12).forEach((value, index) => { months[11 - index] = value; });
-  return { months, average };
-}
-
-function confidenceFor(answers: EstimateAnswers, systemKw: number) {
-  let score = 0;
-  const reasons: string[] = [];
-  const missing: string[] = [];
-
-  if (answers.electricityInputKind === 'kwh') {
-    score += answers.consumptionPeriod === 'average-12' ? 4 : answers.consumptionPeriod === 'average-3' ? 3 : 2;
-    reasons.push('actual-kwh');
-  } else {
-    score += 1;
-    reasons.push('bill-derived-load');
-    missing.push('more-bills');
-  }
-
-  if (answers.tariffType === 'standard') { score += 2; reasons.push('tariff-identified'); }
-  else if (answers.tariffType === 'tou') { score -= 4; missing.push('tou-model'); }
-  else if (answers.tariffType === 'private') { score -= 4; missing.push('private-rate'); }
-  else missing.push('tariff-check');
-
-  if (answers.daytimePattern !== 'unknown') { score += 2; reasons.push('daytime-pattern'); }
-  else missing.push('daytime-pattern');
-
-  if (answers.shade !== 'unknown') { score += 2; reasons.push('shade-observed'); }
-  else { score -= 2; missing.push('shade-check'); }
-  if (answers.shade === 'heavy') { score -= 3; missing.push('site-survey'); }
-
-  const directionKnown = Boolean(answers.roofDirection && answers.roofDirection !== 'unknown');
-  const slopeKnown = Boolean(answers.roofSlope && answers.roofSlope !== 'unknown');
-  if (directionKnown && slopeKnown) { score += 2; reasons.push('roof-direction-slope'); }
-  else missing.push('roof-direction');
-
-  if (answers.electricityPhase && answers.electricityPhase !== 'unknown') { score += 1; reasons.push('phase-known'); }
-  else missing.push('electricity-phase');
-
-  if (answers.quoteCashPriceThb && answers.quoteSystemKw && !answers.quoteBatteryIncluded) { score += 3; reasons.push('comparable-quote'); }
-
-  const inputValue = answers.monthlyKwh ?? answers.monthlyBillThb ?? 0;
-  if ((answers.monthlyKwh && inputValue > 5000) || (answers.monthlyBillThb && inputValue > 25000)) {
-    score -= 2;
-    missing.push('outlier-review');
-  }
-  if (systemKw < 3 && !answers.quoteCashPriceThb) score -= 2;
-
-  const blocking = answers.tariffType === 'tou' || answers.tariffType === 'private' || answers.shade === 'heavy';
-  const highGate = score >= 11
-    && answers.electricityInputKind === 'kwh'
-    && ['average-12', 'average-3'].includes(answers.consumptionPeriod)
-    && answers.tariffType === 'standard'
-    && answers.shade !== 'unknown'
-    && directionKnown
-    && slopeKnown;
-  const mediumGate = score >= 6 && !blocking && answers.daytimePattern !== 'unknown';
-  const confidence: Confidence = highGate ? 'high' : mediumGate ? 'medium' : 'low';
-  return { score, confidence, reasons, missing: [...new Set(missing)] };
-}
-
-function improvementActions(missing: string[]) {
-  const ordered = ['tou-model', 'private-rate', 'site-survey', 'more-bills', 'tariff-check', 'roof-direction', 'shade-check', 'electricity-phase', 'daytime-pattern', 'outlier-review'];
-  return ordered.filter((item) => missing.includes(item)).slice(0, 2);
+function roofCapacity(answers: EstimateAnswers) {
+  if (answers.exactRoofAreaSqm) return Math.max(1, Math.floor((answers.exactRoofAreaSqm / solarAssumptions.squareMetresPerKwp) * 2) / 2);
+  return solarAssumptions.roofAreaCapacityKwp[answers.roofArea];
 }
 
 export const prototypeEstimator: Estimator = {
   calculate(answers: EstimateAnswers): EstimateResult {
-    const tariff = selectResidentialTariff();
-    const consumption = monthlyValues(answers, tariff);
-    const annualLoadKwh = consumption.months.reduce((sum, value) => sum + value, 0);
+    const tariff = isBusinessProperty(answers.propertyType) ? smallGeneralServiceTariff : selectResidentialTariff();
+    const monthlyConsumptionKwh = estimateKwhFromBill(answers.monthlyBillThb, tariff);
+    const annualLoadKwh = monthlyConsumptionKwh * 12;
     const loadProfile = classifyLoad(answers);
     const provinceYield = solarAssumptions.provinceYieldKwhPerKwp[answers.province as keyof typeof solarAssumptions.provinceYieldKwhPerKwp]
       ?? solarAssumptions.provinceYieldKwhPerKwp.other;
-    const direction = answers.roofDirection ?? 'unknown';
-    const slope = answers.roofSlope ?? 'unknown';
+    const direction = answers.roofDirection ?? 'unsure';
+    const slope = answers.roofSlope ?? 'unsure';
     const orientationFactor = solarAssumptions.slopeFactor[direction][slope];
-    const targetShare = solarAssumptions.sizingTargetAnnualLoadShare[loadProfile];
-    // Size from the household load first. Roof direction and shade change the
-    // expected production; they do not quietly justify a larger sale.
-    const calculatedSystemKw = clamp(round((annualLoadKwh * targetShare) / provinceYield, 0.5), 1.5, solarAssumptions.installedCapacityLimitKwp);
-    const systemKw = answers.quoteSystemKw ? clamp(round(answers.quoteSystemKw, 0.1), 1, 30) : calculatedSystemKw;
     const shadeFactor = solarAssumptions.shadeFactor[answers.shade];
-    const annualProduction = systemKw * provinceYield * orientationFactor * shadeFactor;
-    const pvLoadRatio = annualProduction / Math.max(1, annualLoadKwh);
-    const baseSelfConsumption = solarAssumptions.selfConsumptionAtBalancedSize[loadProfile];
-    const selfConsumptionRatio = clamp(baseSelfConsumption - Math.max(0, pvLoadRatio - 0.45) * 0.22 + Math.max(0, 0.45 - pvLoadRatio) * 0.1, 0.25, 0.9);
-
-    const monthlyProduction = solarAssumptions.monthlyProductionShare.map((share) => annualProduction * share);
-    const monthlySelfConsumed = monthlyProduction.map((production, index) => Math.min(consumption.months[index], production * selfConsumptionRatio));
-    const annualSelfConsumed = monthlySelfConsumed.reduce((sum, value) => sum + value, 0);
-    const annualExported = Math.max(0, annualProduction - annualSelfConsumed);
-
-    const financialResultAvailable = answers.tariffType === 'standard' || answers.tariffType === 'unknown';
-    const annualAvoidedBill = financialResultAvailable
-      ? consumption.months.reduce((sum, monthKwh, index) => sum + calculateResidentialBill(monthKwh, tariff) - calculateResidentialBill(Math.max(0, monthKwh - monthlySelfConsumed[index]), tariff), 0)
-      : 0;
-    const modeledAnnualBill = consumption.months.reduce((sum, monthKwh) => sum + calculateResidentialBill(monthKwh, tariff), 0);
-    const currentMonthlyBill = answers.electricityInputKind === 'kwh'
-      ? modeledAnnualBill / 12
-      : [answers.monthlyBillThb ?? 0, ...(answers.additionalMonthlyValues ?? [])].reduce((sum, value) => sum + value, 0) / (1 + (answers.additionalMonthlyValues?.length ?? 0));
-
-    const marketPlanningCost = planningPrice(systemKw, answers.electricityPhase);
-    const comparableQuote = Boolean(answers.quoteCashPriceThb && answers.quoteSystemKw && !answers.quoteBatteryIncluded);
-    const planningCost = round(comparableQuote ? answers.quoteCashPriceThb! : marketPlanningCost, 5000);
-    const maintenance = systemKw <= 3
-      ? solarAssumptions.routineMaintenanceThb.small
-      : systemKw <= 5
-        ? solarAssumptions.routineMaintenanceThb.medium
-        : solarAssumptions.routineMaintenanceThb.large;
-    const inverterReplacement = clamp(
-      round(planningCost * solarAssumptions.inverterReplacement.costShare, 1000),
-      solarAssumptions.inverterReplacement.minimumThb,
-      solarAssumptions.inverterReplacement.maximumThb,
+    const propertyFloor = solarAssumptions.propertySizingFloor[answers.propertyType];
+    const futureLoadAdjustment = answers.futureLoads?.some((load) => !['none', 'unsure'].includes(load)) ? 0.04 : 0;
+    const targetShare = clamp(
+      Math.max(solarAssumptions.sizingTargetAnnualLoadShare[answers.daytimePattern], propertyFloor) + futureLoadAdjustment,
+      0.24,
+      0.52,
     );
 
-    const confidenceResult = confidenceFor(answers, systemKw);
-    const planningMonthlySavings = financialResultAvailable ? round(annualAvoidedBill / 12, 50) : null;
-    const planningAnnualSavings = financialResultAvailable ? round(annualAvoidedBill, 100) : null;
-    const netAnnualValue = annualAvoidedBill - maintenance;
-    const rawPayback = financialResultAvailable && netAnnualValue > 0 ? planningCost / netAnnualValue : null;
-    const planningPayback = rawPayback !== null && confidenceResult.confidence !== 'low' ? round(rawPayback, 0.1) : null;
-    const upToAllowed = financialResultAvailable
-      && answers.tariffType === 'standard'
-      && confidenceResult.confidence !== 'low'
-      && !['heavy', 'unknown'].includes(answers.shade)
-      && answers.roofMaterial !== 'unknown';
-    const upToFactor = confidenceResult.confidence === 'high' ? 1.08 : 1.15;
-    const upToMonthlySavings = upToAllowed && planningMonthlySavings
-      ? Math.min(roundDown(planningMonthlySavings * upToFactor, 50), roundDown(planningMonthlySavings * 1.2, 50))
-      : null;
+    const billLedSystemKw = Math.max(1.5, round((annualLoadKwh * targetShare) / provinceYield, 0.5));
+    const capacity = roofCapacity(answers);
+    const roofLimitedSystemKw = capacity === null ? billLedSystemKw : Math.min(billLedSystemKw, capacity);
+    const systemKw = answers.quoteSystemKw
+      ? round(answers.quoteSystemKw, 0.1)
+      : Math.max(1, round(roofLimitedSystemKw, 0.5));
 
-    const roofCapacity = answers.roofArea ? solarAssumptions.roofAreaCapacityKwp[answers.roofArea] : null;
-    const roofFeasibility = !answers.roofArea || answers.roofArea === 'unknown'
-      ? 'unknown'
-      : roofCapacity !== null && systemKw > roofCapacity
-        ? 'check'
-        : 'likely';
+    const annualProduction = systemKw * provinceYield * orientationFactor * shadeFactor;
+    const pvLoadRatio = annualProduction / Math.max(1, annualLoadKwh);
+    const selfConsumptionBase = solarAssumptions.selfConsumptionAtBalancedSize[answers.daytimePattern];
+    const loadBonus = answers.daytimeLoads.some((load) => ['business-equipment', 'other-high-use', 'ev'].includes(load)) ? 0.03 : 0;
+    const selfConsumptionRatio = clamp(
+      selfConsumptionBase + loadBonus - Math.max(0, pvLoadRatio - targetShare) * 0.25,
+      0.35,
+      0.9,
+    );
 
-    const lifetimeCostSeries: LifetimeCostPoint[] = [];
+    const monthlyProduction = solarAssumptions.monthlyProductionShare.map((share) => annualProduction * share);
+    const monthlySelfConsumed = monthlyProduction.map((production) => Math.min(monthlyConsumptionKwh, production * selfConsumptionRatio));
+    const annualSelfConsumed = monthlySelfConsumed.reduce((sum, value) => sum + value, 0);
+    const annualExported = Math.max(0, annualProduction - annualSelfConsumed);
+    const annualAvoidedBill = monthlySelfConsumed.reduce((sum, selfConsumedKwh) => {
+      const before = calculateResidentialBill(monthlyConsumptionKwh, tariff);
+      const after = calculateResidentialBill(Math.max(0, monthlyConsumptionKwh - selfConsumedKwh), tariff);
+      return sum + before - after;
+    }, 0);
+    const modeledAnnualBill = calculateResidentialBill(monthlyConsumptionKwh, tariff) * 12;
+
+    const assumedPhase = answers.electricityPhase === 'single' || answers.electricityPhase === 'three'
+      ? answers.electricityPhase
+      : isBusinessProperty(answers.propertyType) ? 'three' : 'single';
+    const marketPlanningCost = planningPrice(systemKw, assumedPhase);
+    const comparableQuote = Boolean(answers.quoteCashPriceThb && answers.quoteSystemKw && !answers.quoteBatteryIncluded);
+    const planningCost = round(comparableQuote ? answers.quoteCashPriceThb! : marketPlanningCost, 5000);
+    const annualReserve = round(planningCost * solarAssumptions.annualMaintenanceAndComponentReserveRate, 100);
+    const firstYearNetValue = annualAvoidedBill - annualReserve;
+    const payback = firstYearNetValue > 0 ? planningCost / firstYearNetValue : null;
+
+    const lifetimeCostSeries: LifetimeCostPoint[] = [{ year: 0, withoutSolarThb: 0, withSolarThb: planningCost }];
     let withoutSolar = 0;
-    let withSolarPlanning = planningCost;
-    const costUncertainty = comparableQuote ? 0 : confidenceResult.confidence === 'low' ? 0.15 : 0.08;
-    lifetimeCostSeries.push({
-      year: 0,
-      withoutSolarThb: 0,
-      withSolarLowThb: round(planningCost * (1 - costUncertainty), 100),
-      withSolarHighThb: round(planningCost * (1 + costUncertainty), 100),
-    });
-    let tenYearNetBenefit: number | null = null;
+    let withSolar = planningCost;
     for (let year = 1; year <= solarAssumptions.analysisYears; year += 1) {
       const degradation = (1 - solarAssumptions.annualPanelDegradationRate) ** (year - 1);
-      const avoided = financialResultAvailable ? annualAvoidedBill * degradation : 0;
+      const avoided = annualAvoidedBill * degradation;
       withoutSolar += modeledAnnualBill;
-      withSolarPlanning += Math.max(0, modeledAnnualBill - avoided) + maintenance;
-      if (year === solarAssumptions.inverterReplacement.year) withSolarPlanning += inverterReplacement;
-      const spread = comparableQuote ? 0.03 : confidenceResult.confidence === 'low' ? 0.12 : 0.07;
+      withSolar += Math.max(0, modeledAnnualBill - avoided) + annualReserve;
       lifetimeCostSeries.push({
         year,
         withoutSolarThb: round(withoutSolar, 100),
-        withSolarLowThb: round(withSolarPlanning * (1 - spread), 100),
-        withSolarHighThb: round(withSolarPlanning * (1 + spread), 100),
+        withSolarThb: round(withSolar, 100),
       });
-      if (year === 10 && financialResultAvailable) tenYearNetBenefit = round(withoutSolar - withSolarPlanning, 1000);
     }
-    const finalPoint = lifetimeCostSeries[lifetimeCostSeries.length - 1];
-    const twentyFiveYearNetBenefit = financialResultAvailable ? round(finalPoint.withoutSolarThb - withSolarPlanning, 1000) : null;
-    const uncertainty = confidenceResult.confidence === 'high' ? 0.08 : confidenceResult.confidence === 'medium' ? 0.14 : 0.22;
-    const productionRange = rangeAround(annualProduction, uncertainty, 100);
-    const selfConsumedRange = rangeAround(annualSelfConsumed, uncertainty, 100);
-    const exportedRange = rangeAround(annualExported, uncertainty, 100);
-    const savingsRange = financialResultAvailable ? rangeAround(annualAvoidedBill / 12, uncertainty, 50) : { min: 0, max: 0 };
-    const installedCostRange = comparableQuote ? { min: planningCost, max: planningCost } : rangeAround(planningCost, costUncertainty, 5000);
-    const paybackRange = rawPayback === null ? null : rangeAround(rawPayback, confidenceResult.confidence === 'low' ? 0.25 : 0.12, 0.1);
-    const lifetimeBenefitRange = financialResultAvailable ? rangeAround(twentyFiveYearNetBenefit ?? 0, uncertainty, 1000) : { min: 0, max: 0 };
-    const weakEconomics = !financialResultAvailable || netAnnualValue <= 0 || (rawPayback ?? 99) > 15;
+
+    const lifetimeNet = roundDown(withoutSolar - withSolar, 1000);
+    const monthlySavings = roundDown(annualAvoidedBill / 12, 50);
+    const annualSavings = roundDown(annualAvoidedBill, 100);
+    const billReductionPct = round((annualAvoidedBill / Math.max(1, modeledAnnualBill)) * 100, 1);
+    const selectedRoofLimited = capacity !== null && capacity + 0.01 < billLedSystemKw;
+    const roofFeasibility = capacity === null ? 'unconfirmed' : selectedRoofLimited ? 'limited' : 'likely';
+    const recommendation = answers.shade === 'a-lot' || (selectedRoofLimited && systemKw < billLedSystemKw * 0.6)
+      ? 'site-check-first'
+      : lifetimeNet > 0 && payback !== null && payback <= 15
+        ? 'strong-fit'
+        : 'worth-comparing';
+
+    const roundedSystem = round(systemKw, 0.1);
+    const roundedProduction = roundDown(annualProduction, 100);
+    const roundedSelfConsumed = roundDown(annualSelfConsumed, 100);
+    const roundedExported = roundDown(annualExported, 100);
+    const roundedCost = round(planningCost, 1000);
+    const roundedPayback = payback === null ? null : round(payback, 0.1);
 
     return {
-      recommendedSystemKw: rangeAround(systemKw, 0.1, 0.5),
-      estimatedAnnualProductionKwh: productionRange,
-      estimatedMonthlySavingsThb: savingsRange,
-      estimatedBillReductionPct: financialResultAvailable ? rangeAround((annualAvoidedBill / Math.max(1, modeledAnnualBill)) * 100, uncertainty, 1) : { min: 0, max: 0 },
-      estimatedPaybackYears: paybackRange,
-      estimatedExportRevenueThb: null,
-      conditionalAnnualExportRevenueThb: rangeAround(annualExported * solarAssumptions.fit.rateThbPerKwh, uncertainty, 100),
-      estimatedTaxBenefitThb: null,
-      estimatedInstalledCostThb: installedCostRange,
-      estimatedAnnualSelfConsumedKwh: selfConsumedRange,
-      estimatedAnnualExportedKwh: exportedRange,
-      estimatedAnnualSelfConsumptionValueThb: financialResultAvailable ? rangeAround(annualAvoidedBill, uncertainty, 100) : { min: 0, max: 0 },
-      estimatedAnnualOperationsAndMaintenanceThb: { min: maintenance, max: maintenance },
-      estimatedLifetimeNetBenefitThb: lifetimeBenefitRange,
-      lifetimeCostSeries,
+      currentMonthlyBillThb: answers.monthlyBillThb,
+      estimatedMonthlyConsumptionKwh: round(monthlyConsumptionKwh),
+      planningSystemKw: roundedSystem,
+      planningAnnualProductionKwh: roundedProduction,
+      planningMonthlySavingsThb: monthlySavings,
+      planningAnnualSavingsThb: annualSavings,
+      planningInstalledCostThb: roundedCost,
+      planningPaybackYears: roundedPayback,
+      planningAnnualSelfConsumedKwh: roundedSelfConsumed,
+      planningAnnualExportedKwh: roundedExported,
+      planningTwentyFiveYearNetBenefitThb: lifetimeNet,
+      planningBillReductionPct: billReductionPct,
+      roofFeasibility,
+      recommendation,
+      loadProfile,
       tariffVersion: tariff.id,
-      estimatedMonthlyConsumptionKwh: round(consumption.average),
-      confidence: confidenceResult.confidence,
-      assumptionsUsed: [
-        'ใช้ค่าผลผลิตตามจังหวัดและปรับด้วยทิศ ความลาด และเงาบังที่ผู้ใช้ระบุ',
-        'คำนวณมูลค่าจากส่วนต่างของบิลอัตราก้าวหน้าก่อนและหลังใช้ไฟโซลาร์เองในแต่ละเดือน',
-        'ขนาดเริ่มต้นเน้นการใช้ไฟเอง และไม่เพิ่มขนาดระบบเพื่อชดเชยเงาบัง',
-        'ราคาเป็นค่ากลางเพื่อวางแผนและยังไม่ใช่ใบเสนอราคา',
-        'ผลหลักไม่รวมรายได้ขายไฟ สิทธิภาษี ดอกเบี้ย หรือการเพิ่มขึ้นของค่าไฟ',
-        `มุมมองระยะยาวเผื่อค่าดูแลรายปี การเสื่อมของแผง 0.5% ต่อปี และเงินสำรองเปลี่ยนอินเวอร์เตอร์ปีที่ ${solarAssumptions.inverterReplacement.year}`,
-      ],
+      tariffLabelEn: tariff.labelEn,
+      tariffLabelTh: tariff.labelTh,
       assumptionVersion: solarAssumptions.version,
       calculatedAt: new Date().toISOString(),
-      currentMonthlyBillThb: round(currentMonthlyBill, 1),
-      planningSystemKw: systemKw,
-      planningAnnualProductionKwh: round(annualProduction, 100),
-      planningMonthlySavingsThb: planningMonthlySavings,
-      upToMonthlySavingsThb: upToMonthlySavings,
-      planningAnnualSavingsThb: planningAnnualSavings,
-      planningInstalledCostThb: planningCost,
-      planningPaybackYears: planningPayback,
-      planningAnnualSelfConsumedKwh: round(annualSelfConsumed, 100),
-      planningAnnualExportedKwh: round(annualExported, 100),
-      planningTenYearNetBenefitThb: tenYearNetBenefit,
-      planningTwentyFiveYearNetBenefitThb: twentyFiveYearNetBenefit,
-      financialResultAvailable,
-      weakEconomics,
-      confidenceScore: confidenceResult.score,
-      confidenceReasons: confidenceResult.reasons,
-      missingEvidence: confidenceResult.missing,
-      improvementActions: improvementActions(confidenceResult.missing),
-      roofFeasibility,
-      tariffAssumption: answers.tariffType === 'standard'
-        ? 'identified-standard'
-        : answers.tariffType === 'unknown'
-          ? 'assumed-standard'
-          : answers.tariffType === 'tou'
-            ? 'tou-withheld'
-            : 'private-withheld',
-      loadProfile,
+      assumptionsUsed: [
+        'Monthly consumption is reverse-calculated from the entered bill using the selected current PEA/MEA tariff schedule.',
+        'System sizing is led by the bill and the stated daytime-use band, then constrained by the stated usable roof area when known.',
+        'Production uses province-level solar yield and the stated shade, direction and slope information; no clear-sky assumption is used.',
+        'The base result values self-consumed electricity only and excludes export payments, tax relief, finance and tariff escalation.',
+        'The 25-year figure subtracts installation cost and a 1.02% annual maintenance/component reserve, including inverter-related risk, and applies 0.5% annual module degradation.',
+      ],
+      trace: [
+        { labelEn: 'Monthly bill', labelTh: 'ค่าไฟต่อเดือน', value: `฿${round(answers.monthlyBillThb).toLocaleString('en-US')}`, basisEn: 'Your answer', basisTh: 'คำตอบของคุณ' },
+        { labelEn: 'Tariff', labelTh: 'อัตราค่าไฟ', value: tariff.labelEn, valueTh: tariff.labelTh, basisEn: tariff.source, basisTh: tariff.source },
+        { labelEn: 'Estimated monthly use', labelTh: 'การใช้ไฟต่อเดือนโดยประมาณ', value: `${round(monthlyConsumptionKwh).toLocaleString('en-US')} kWh`, basisEn: 'Reverse-calculated from the current tariff', basisTh: 'คำนวณย้อนกลับจากอัตราค่าไฟปัจจุบัน' },
+        { labelEn: 'Starting size', labelTh: 'ขนาดระบบเริ่มต้น', value: `${roundedSystem} kWp`, basisEn: 'Bill, daytime use, property type and available roof area', basisTh: 'ค่าไฟ การใช้ไฟกลางวัน ประเภทสถานที่ และพื้นที่หลังคา' },
+        { labelEn: 'Annual production', labelTh: 'ผลผลิตต่อปี', value: `${roundedProduction.toLocaleString('en-US')} kWh`, basisEn: 'Province yield, shade and optional roof details', basisTh: 'ผลผลิตอ้างอิงรายจังหวัด เงาบัง และข้อมูลหลังคาเสริม' },
+        { labelEn: 'Planning price', labelTh: 'ราคาเพื่อวางแผน', value: `฿${roundedCost.toLocaleString('en-US')}`, basisEn: comparableQuote ? 'Your comparable cash quote' : 'Current PEA and Thai market package evidence', basisTh: comparableQuote ? 'ใบเสนอราคาเงินสดที่เปรียบเทียบได้ของคุณ' : 'ข้อมูลแพ็กเกจปัจจุบันของ PEA และตลาดไทย' },
+        { labelEn: 'Lifetime reserve', labelTh: 'เงินสำรองค่าดูแล', value: `฿${annualReserve.toLocaleString('en-US')}/year`, basisEn: 'NREL 1.02% of CAPEX fixed O&M benchmark', basisTh: 'ค่าอ้างอิง NREL สำหรับการดูแลคงที่ 1.02% ของเงินลงทุน' },
+      ],
+      lifetimeCostSeries,
+      recommendedSystemKw: point(roundedSystem),
+      estimatedAnnualProductionKwh: point(roundedProduction),
+      estimatedMonthlySavingsThb: point(monthlySavings),
+      estimatedBillReductionPct: point(billReductionPct),
+      estimatedPaybackYears: roundedPayback === null ? null : point(roundedPayback),
+      estimatedInstalledCostThb: point(roundedCost),
+      estimatedAnnualSelfConsumedKwh: point(roundedSelfConsumed),
+      estimatedAnnualExportedKwh: point(roundedExported),
+      estimatedLifetimeNetBenefitThb: point(lifetimeNet),
     };
   },
 };

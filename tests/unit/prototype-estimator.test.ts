@@ -4,97 +4,92 @@ import type { EstimateAnswers } from '@/lib/calculator/types';
 
 const base: EstimateAnswers = {
   province: 'bangkok',
-  location: { address: '99 ถนนสุขุมวิท กรุงเทพมหานคร', latitude: 13.735, longitude: 100.58, province: 'bangkok', source: 'manual-map', confirmed: true },
-  electricityInputKind: 'kwh',
-  monthlyKwh: 1000,
-  consumptionPeriod: 'average-12',
-  tariffType: 'standard',
-  daytimePattern: 'regular-loads',
-  daytimeLoads: ['air-conditioning', 'pump', 'home-office'],
-  acDaytimeHours: 'over-4',
+  monthlyBillThb: 6000,
+  propertyType: 'detached-home',
+  roofArea: '60-100',
+  daytimePattern: 'high',
+  daytimeLoads: ['air-conditioning', 'pump', 'office-equipment'],
   roofMaterial: 'concrete-tile',
-  shade: 'none',
-  roofDirection: 'south-group',
-  roofSlope: 'gentle',
-  roofArea: 'large',
-  electricityPhase: 'single',
+  shade: 'almost-none',
 };
 
-describe('Thailand planning estimator', () => {
-  it('returns one planning value and a restrained up-to ceiling for strong evidence', () => {
+describe('Thailand bill-led planning estimator', () => {
+  it('always returns every headline metric after the required eight answers', () => {
     const result = prototypeEstimator.calculate(base);
-    expect(result.confidence).toBe('high');
-    expect(result.planningMonthlySavingsThb).toBeGreaterThan(0);
-    expect(result.upToMonthlySavingsThb).toBeGreaterThan(result.planningMonthlySavingsThb ?? 0);
-    expect(result.upToMonthlySavingsThb).toBeLessThanOrEqual((result.planningMonthlySavingsThb ?? 0) * 1.2);
-    expect(result.estimatedExportRevenueThb).toBeNull();
-    expect(result.estimatedTaxBenefitThb).toBeNull();
+    for (const value of [
+      result.planningSystemKw,
+      result.planningAnnualProductionKwh,
+      result.planningMonthlySavingsThb,
+      result.planningInstalledCostThb,
+      result.planningPaybackYears,
+      result.planningTwentyFiveYearNetBenefitThb,
+    ]) {
+      expect(typeof value).toBe('number');
+      if (typeof value === 'number') expect(Number.isFinite(value)).toBe(true);
+    }
+    expect(result.trace.length).toBeGreaterThanOrEqual(6);
   });
 
-  it('uses actual kWh and the progressive bill difference rather than a flat value per generated unit', () => {
-    const lower = prototypeEstimator.calculate({ ...base, monthlyKwh: 500 });
-    const higher = prototypeEstimator.calculate({ ...base, monthlyKwh: 1500 });
-    expect(higher.currentMonthlyBillThb).toBeGreaterThan(lower.currentMonthlyBillThb);
-    expect(higher.planningAnnualSavingsThb).toBeGreaterThan(lower.planningAnnualSavingsThb ?? 0);
+  it('supports large bills without a ฿50,000 calculation cap', () => {
+    const medium = prototypeEstimator.calculate({ ...base, monthlyBillThb: 85000, propertyType: 'warehouse', roofArea: 'over-200', daytimePattern: 'very-high' });
+    const large = prototypeEstimator.calculate({ ...base, monthlyBillThb: 250000, propertyType: 'warehouse', roofArea: 'over-200', daytimePattern: 'very-high' });
+    expect(medium.estimatedMonthlyConsumptionKwh).toBeGreaterThan(10000);
+    expect(large.estimatedMonthlyConsumptionKwh).toBeGreaterThan(medium.estimatedMonthlyConsumptionKwh);
+    expect(large.planningSystemKw).toBeGreaterThanOrEqual(medium.planningSystemKw);
   });
 
-  it('does not enlarge the recommended system to compensate for shade', () => {
-    const clear = prototypeEstimator.calculate({ ...base, shade: 'none' });
-    const shaded = prototypeEstimator.calculate({ ...base, shade: 'heavy' });
+  it('does not enlarge the starting system to compensate for shade', () => {
+    const clear = prototypeEstimator.calculate(base);
+    const shaded = prototypeEstimator.calculate({ ...base, shade: 'a-lot' });
     expect(shaded.planningSystemKw).toBe(clear.planningSystemKw);
     expect(shaded.planningAnnualProductionKwh).toBeLessThan(clear.planningAnnualProductionKwh);
+    expect(shaded.recommendation).toBe('site-check-first');
   });
 
-  it('suppresses up-to and narrow payback claims for heavy shade', () => {
-    const result = prototypeEstimator.calculate({ ...base, shade: 'heavy' });
-    expect(result.confidence).toBe('low');
-    expect(result.upToMonthlySavingsThb).toBeNull();
-    expect(result.planningPaybackYears).toBeNull();
-    expect(result.improvementActions).toContain('site-survey');
-  });
-
-  it('withholds standard-tariff savings and payback for TOU or private billing', () => {
-    for (const tariffType of ['tou', 'private'] as const) {
-      const result = prototypeEstimator.calculate({ ...base, tariffType });
-      expect(result.financialResultAvailable).toBe(false);
-      expect(result.planningMonthlySavingsThb).toBeNull();
-      expect(result.upToMonthlySavingsThb).toBeNull();
-      expect(result.planningPaybackYears).toBeNull();
-    }
-  });
-
-  it('applies orientation and slope without presenting degree-level precision', () => {
+  it('uses optional roof details to recalculate production', () => {
     const south = prototypeEstimator.calculate({ ...base, roofDirection: 'south-group', roofSlope: 'gentle' });
     const northSteep = prototypeEstimator.calculate({ ...base, roofDirection: 'north', roofSlope: 'steep' });
     expect(northSteep.planningAnnualProductionKwh).toBeLessThan(south.planningAnnualProductionKwh);
   });
 
-  it('flags a roof-space mismatch without silently reducing the electricity-based target', () => {
-    const unknownArea = prototypeEstimator.calculate({ ...base, roofArea: 'unknown' });
-    const smallArea = prototypeEstimator.calculate({ ...base, roofArea: 'small' });
-    expect(smallArea.planningSystemKw).toBe(unknownArea.planningSystemKw);
-    expect(smallArea.roofFeasibility).toBe('check');
+  it('uses stated roof area as a real constraint', () => {
+    const unsure = prototypeEstimator.calculate({ ...base, monthlyBillThb: 15000, roofArea: 'unsure' });
+    const small = prototypeEstimator.calculate({ ...base, monthlyBillThb: 15000, roofArea: 'under-30' });
+    expect(small.planningSystemKw).toBeLessThan(unsure.planningSystemKw);
+    expect(small.roofFeasibility).toBe('limited');
   });
 
-  it('uses a comparable cash quote but excludes battery-inclusive prices from the solar-only comparison', () => {
+  it('lets exact roof area and future loads update the result', () => {
+    const limited = prototypeEstimator.calculate({ ...base, monthlyBillThb: 15000, exactRoofAreaSqm: 22 });
+    const future = prototypeEstimator.calculate({ ...base, monthlyBillThb: 15000, roofArea: 'over-200', futureLoads: ['ev'] });
+    const present = prototypeEstimator.calculate({ ...base, monthlyBillThb: 15000, roofArea: 'over-200', futureLoads: ['none'] });
+    expect(limited.planningSystemKw).toBeLessThan(present.planningSystemKw);
+    expect(future.planningSystemKw).toBeGreaterThanOrEqual(present.planningSystemKw);
+  });
+
+  it('uses a comparable battery-free quote but rejects battery-inclusive price as a solar-only anchor', () => {
     const comparable = prototypeEstimator.calculate({ ...base, quoteSystemKw: 6, quoteCashPriceThb: 222000, quoteBatteryIncluded: false });
     const battery = prototypeEstimator.calculate({ ...base, quoteSystemKw: 6, quoteCashPriceThb: 600000, quoteBatteryIncluded: true });
     expect(comparable.planningInstalledCostThb).toBe(220000);
     expect(battery.planningInstalledCostThb).not.toBe(600000);
   });
 
-  it('uses phase-specific planning prices', () => {
-    const single = prototypeEstimator.calculate({ ...base, electricityPhase: 'single' });
-    const three = prototypeEstimator.calculate({ ...base, electricityPhase: 'three' });
-    expect(three.planningInstalledCostThb).toBeGreaterThan(single.planningInstalledCostThb);
-  });
-
-  it('includes routine maintenance, degradation and a year-13 inverter reserve in long-term cash flow', () => {
+  it('includes the annual maintenance and component reserve in the 25-year cash path', () => {
     const result = prototypeEstimator.calculate(base);
     expect(result.lifetimeCostSeries).toHaveLength(26);
-    const year11 = result.lifetimeCostSeries[11];
-    const year12 = result.lifetimeCostSeries[12];
-    const year13 = result.lifetimeCostSeries[13];
-    expect(year13.withSolarHighThb - year12.withSolarHighThb).toBeGreaterThan(year12.withSolarHighThb - year11.withSolarHighThb);
+    expect(result.lifetimeCostSeries[25].withSolarThb).toBeGreaterThan(result.planningInstalledCostThb);
+  });
+
+  it('does not manufacture a payback denominator when annual value is below the reserve', () => {
+    const result = prototypeEstimator.calculate({ ...base, monthlyBillThb: 100, daytimePattern: 'very-low', daytimeLoads: ['none'] });
+    expect(result.planningPaybackYears).toBeNull();
+    expect(result.estimatedPaybackYears).toBeNull();
+  });
+
+  it('treats an unsure business phase as three-phase instead of silently pricing single-phase', () => {
+    const business = { ...base, propertyType: 'warehouse' as const, electricityPhase: 'unsure' as const };
+    const unsure = prototypeEstimator.calculate(business);
+    const three = prototypeEstimator.calculate({ ...business, electricityPhase: 'three' });
+    expect(unsure.planningInstalledCostThb).toBe(three.planningInstalledCostThb);
   });
 });
