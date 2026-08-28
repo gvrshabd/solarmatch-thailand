@@ -9,8 +9,8 @@ export function LifetimeCostChart({ data, locale = 'th' }: { data: LifetimeCostP
   const english = locale === 'en';
   const labels = {
     without: english ? 'Without solar' : 'ไม่ติดโซลาร์',
-    low: english ? 'With solar · lower-cost path' : 'ติดโซลาร์ · ต้นทุนรวมช่วงต่ำ',
-    high: english ? 'With solar · higher-cost path' : 'ติดโซลาร์ · ต้นทุนรวมช่วงสูง',
+    low: english ? 'With solar · planning path' : 'ติดโซลาร์ · ตัวเลขวางแผน',
+    high: english ? 'With solar · higher-cost sensitivity' : 'ติดโซลาร์ · กรณีต้นทุนสูง',
   };
   return (
     <div className="lifetime-chart" aria-hidden="true">

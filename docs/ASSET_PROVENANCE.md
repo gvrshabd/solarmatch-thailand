@@ -37,6 +37,7 @@ The homepage photograph is **“Solar Panel on Roof of House in California, USA�
 | --- | --- | --- | --- | --- |
 | `lucide-react` 1.34.0 | Interface icons rendered as inline SVG | ISC licence, with Feather-derived material under MIT. Licence text is distributed in `node_modules/lucide-react/LICENSE`; source: <https://github.com/lucide-icons/lucide>. | Generated locally at build/runtime | No in-product attribution required by the applicable licences |
 | `recharts` 3.10.1 | Savings and lifetime-cost charts rendered as SVG | MIT licence in `node_modules/recharts/LICENSE`; source: <https://github.com/recharts/recharts>. | Generated locally at build/runtime | No in-product attribution required; retain licence notices with redistributed package material |
+| `leaflet` 1.9.4 | Interactive address-confirmation map and controls | BSD-2-Clause licence in `node_modules/leaflet/LICENSE`; source: <https://github.com/Leaflet/Leaflet/blob/main/LICENSE>. | Local application package | Retain package licence notice |
 | Anuphan | Thai/Latin interface font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/anuphan/OFL.txt> | Downloaded by the build and served locally | No visible attribution required; OFL terms apply |
 | Noto Sans Thai | Thai/Latin body font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/notosansthai/OFL.txt> | Downloaded by the build and served locally | No visible attribution required; OFL terms apply |
 | Manrope | Latin/numeric display font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/manrope/OFL.txt> | Downloaded by the build and served locally | No visible attribution required; OFL terms apply |
@@ -49,8 +50,10 @@ Build-generated font files appear under `.vinext/fonts/` and the deployment outp
 - `public/images/solar-home-hero.jpg` was an earlier Pexels photograph credited to Robert So. It remains removed and must not be restored without a fresh provenance and product-fit review.
 - The former AI-generated `public/og.png` was replaced by the documented Kindel Media licensed crop.
 
-## Remote visual-asset check
+## Remote map tiles
 
-The 2026-08-28 audit found no runtime-hotlinked image, remote CSS background, remote SVG, video, iframe, canvas image source, base64 visual, CDN image, stock-photo URL, manifest image, or remotely served logo. External URLs in Methodology, Resources, and this register are documentary source links, not visual assets loaded into SolarMatch pages.
+The address-confirmation step loads standard map tiles from `https://tile.openstreetmap.org/{z}/{x}/{y}.png` only after the user opens the map. Map data is © OpenStreetMap contributors and available under the Open Data Commons Open Database Licence; visible attribution links to <https://www.openstreetmap.org/copyright>. Tile use follows the [OpenStreetMap tile policy](https://operations.osmfoundation.org/policies/tiles/). The site does not copy a proprietary basemap, scrape tiles, prefetch tiles, or claim ownership.
+
+The 2026-08-28 audit otherwise found no runtime-hotlinked stock photograph, CSS background, remote SVG, video, iframe, base64 visual, CDN image, manifest image, or remotely served logo. External URLs in Methodology, Resources, and this register are documentary source links, not visual assets loaded into SolarMatch pages.
 
 Generated copies under deployment output are not separate source assets. Re-run this audit whenever a public image, icon package, font, social card, manifest, or remote media reference changes.

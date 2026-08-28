@@ -15,12 +15,14 @@ const resources = [
   { name: 'PEA · อัตราค่าไฟฟ้า พฤษภาคม 2566 (PDF)', note: 'อัตราฐานบ้านอยู่อาศัยที่ใช้อ้างอิง ณ สิงหาคม 2569', href: 'https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf' },
   { name: 'PEA · อัตราค่าไฟฟ้า กันยายน 2569 (PDF)', note: 'โครงสร้างอัตราบ้านอยู่อาศัยที่ประกาศให้มีผลตั้งแต่กันยายน 2569', href: 'https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf' },
   { name: 'สำนักงาน กกพ. · ค่า Ft อัตโนมัติ', note: 'แหล่งตรวจค่า Ft ปัจจุบันและรอบประกาศที่เกี่ยวข้อง', href: 'https://www.erc.or.th/th/automatic' },
+  { name: 'คณะกรรมาธิการยุโรป JRC · PVGIS', note: 'ข้อมูลพลังงานแสงอาทิตย์ที่ใช้สร้างค่าผลผลิตอ้างอิงระดับจังหวัด', href: 'https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en' },
+  { name: 'OpenStreetMap · นโยบายการใช้แผนที่', note: 'เงื่อนไขของแผนที่ที่ใช้ยืนยันตำแหน่ง โดยไม่ส่งข้อความที่อยู่ไปค้นหา', href: 'https://operations.osmfoundation.org/policies/tiles/' },
   { name: 'Greener Bangkok · คู่มือติดตั้งโซลาร์สำหรับบ้าน', note: 'ข้อมูลประกอบเรื่องผลผลิต การประเมินหลังคา และขั้นตอนติดตั้ง', href: 'https://greener.bangkok.go.th/en/solarcity/solar-installation-guide-for-homes/' },
-  { name: 'GRoof · โบรชัวร์แพ็กเกจ พฤษภาคม 2569 (PDF)', note: 'แหล่งราคาแพ็กเกจที่ใช้สร้างช่วงอ้างอิง ไม่ใช่การรับรองผู้ให้บริการ', href: 'https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf' },
+  { name: 'GRoof · โบรชัวร์แพ็กเกจ พฤษภาคม 2569 (PDF)', note: 'แหล่งราคาแพ็กเกจที่ใช้สร้างราคากลางเพื่อวางแผน ไม่ใช่การรับรองผู้ให้บริการ', href: 'https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf' },
   { name: 'PEA Shopping · แพ็กเกจ 5 kW Standard', note: 'หนึ่งในจุดอ้างอิงราคาตลาดสำหรับระบบขนาด 5 kW', href: 'https://peashopping.com/product/pea-solar-5kw-1-phase-standard-package/' },
-  { name: 'PEA Shopping · แพ็กเกจ 5 kW Premium', note: 'จุดอ้างอิงช่วงราคาด้านบนสำหรับระบบขนาด 5 kW', href: 'https://peashopping.com/product/pea-solar-5kw-1-phase-premium-package/' },
+  { name: 'PEA Shopping · แพ็กเกจ 5 kW Premium', note: 'อีกหนึ่งจุดอ้างอิงราคาตลาดสำหรับระบบขนาด 5 kW', href: 'https://peashopping.com/product/pea-solar-5kw-1-phase-premium-package/' },
   { name: 'PEA Shopping · แพ็กเกจ 10 kW Standard', note: 'หนึ่งในจุดอ้างอิงราคาตลาดสำหรับระบบขนาด 10 kW', href: 'https://peashopping.com/product/pea-solar-10kw-3-phase-standard-package/' },
-  { name: 'PEA Shopping · แพ็กเกจ 10 kW Premium', note: 'จุดอ้างอิงช่วงราคาด้านบนสำหรับระบบขนาด 10 kW', href: 'https://peashopping.com/product/pea-solar-10kw-3-phase-premium-package/' },
+  { name: 'PEA Shopping · แพ็กเกจ 10 kW Premium', note: 'อีกหนึ่งจุดอ้างอิงราคาตลาดสำหรับระบบขนาด 10 kW', href: 'https://peashopping.com/product/pea-solar-10kw-3-phase-premium-package/' },
 ];
 
 export default function ResourcesPage() {

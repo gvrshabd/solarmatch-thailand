@@ -1,217 +1,60 @@
-import { localizedProvinceOptions } from './provinces';
+export type EstimateQuestionType = 'address' | 'energy' | 'period' | 'tariff' | 'choice' | 'multichoice';
 
-export type EstimateQuestionType = 'choice' | 'number' | 'roof';
-
-export type EstimateOption = {
-  value: string;
-  label: string;
-  description?: string;
-};
+export type EstimateOption = { value: string; label: string; description?: string };
 
 export type EstimateQuestion = {
-  id: string;
+  id: 'location' | 'electricity' | 'consumptionPeriod' | 'tariffType' | 'daytimePattern' | 'daytimeLoads' | 'roofMaterial' | 'shade';
   title: string;
   reason: string;
   type: EstimateQuestionType;
-  required: boolean;
-  analyticsEvent: 'estimate_step_completed';
   options?: EstimateOption[];
 };
 
-export const estimateFlow: EstimateQuestion[] = [
-  {
-    id: 'province',
-    title: 'บ้านที่กำลังคิดจะติดโซลาร์อยู่จังหวัดไหน?',
-    reason: 'ใช้เพื่อปรับสมมติฐานและดูว่ามีผู้ติดตั้งครอบคลุมพื้นที่หรือไม่',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: localizedProvinceOptions('th'),
-  },
-  {
-    id: 'monthlyBillThb',
-    title: 'ปกติค่าไฟบ้านประมาณเท่าไรต่อเดือน?',
-    reason: 'ช่วยให้เราประเมินการใช้ไฟและช่วงขนาดระบบเบื้องต้น',
-    type: 'number',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-  },
-  {
-    id: 'daytimeUsage',
-    title: 'บ้านคุณใช้ไฟช่วงกลางวันมากแค่ไหน?',
-    reason: 'โซลาร์ผลิตไฟตอนกลางวัน ข้อนี้จึงมีผลต่อไฟที่คุณใช้จากระบบได้เอง',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'high', label: 'มาก', description: 'มีคนอยู่บ้าน ใช้แอร์ ปั๊ม หรือทำงานที่บ้านช่วงกลางวัน' },
-      { value: 'medium', label: 'ปานกลาง', description: 'ใช้ไฟทั้งกลางวันและช่วงเย็นพอ ๆ กัน' },
-      { value: 'low', label: 'น้อย', description: 'กลางวันบ้านค่อนข้างว่าง โหลดหลักอยู่ช่วงเย็นหรือกลางคืน' },
-      { value: 'unknown', label: 'ไม่แน่ใจ' },
-    ],
-  },
-  {
-    id: 'authority',
-    title: 'บ้านนี้เป็นบ้านของคุณหรือครอบครัวใช่ไหม?',
-    reason: 'การติดตั้งจริงต้องมีผู้มีสิทธิ์ในทรัพย์สินร่วมตัดสินใจ',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'owner', label: 'เป็นเจ้าของบ้าน' },
-      { value: 'family', label: 'เป็นผู้ตัดสินใจร่วมกับครอบครัว' },
-      { value: 'renter', label: 'เช่าอยู่' },
-      { value: 'other', label: 'อื่น ๆ' },
-    ],
-  },
-  {
-    id: 'propertyType',
-    title: 'บ้านแบบไหนใกล้เคียงที่สุด?',
-    reason: 'รูปแบบอาคารช่วยให้เราอธิบายข้อจำกัดของพื้นที่หลังคาได้เหมาะขึ้น',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'detached', label: 'บ้านเดี่ยว' },
-      { value: 'semi-detached', label: 'บ้านแฝด' },
-      { value: 'townhome', label: 'ทาวน์โฮม / ทาวน์เฮาส์' },
-      { value: 'other', label: 'อาคารพักอาศัยอื่น ๆ' },
-      { value: 'unknown', label: 'ไม่แน่ใจ' },
-    ],
-  },
-  {
-    id: 'roof',
-    title: 'รู้ข้อมูลหลังคาคร่าว ๆ ไหม?',
-    reason: 'ข้อมูลวัสดุและเงาบังช่วยให้ช่วงประมาณการแคบลง แต่ไม่จำเป็นต้องเดา',
-    type: 'roof',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-  },
-  {
-    id: 'timing',
-    title: 'ถ้าเหมาะกับบ้าน คุณคิดว่าจะติดประมาณเมื่อไร?',
-    reason: 'ช่วยให้ขั้นตอนต่อไปเหมาะกับจังหวะการตัดสินใจของคุณ',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: '0-3', label: 'ภายใน 3 เดือน' },
-      { value: '3-6', label: '3–6 เดือน' },
-      { value: '6-12', label: '6–12 เดือน' },
-      { value: '12+', label: 'เกิน 1 ปี' },
-      { value: 'research', label: 'ตอนนี้แค่ศึกษาข้อมูล' },
-    ],
-  },
-  {
-    id: 'energyInterest',
-    title: 'สนใจอะไรเป็นพิเศษ?',
-    reason: 'ช่วยแยกคำถามเรื่องระบบโซลาร์กับแบตเตอรี่โดยไม่บังคับให้ตัดสินใจตอนนี้',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'solar', label: 'Solar Rooftop' },
-      { value: 'solar-battery', label: 'Solar + Battery' },
-      { value: 'unknown', label: 'ยังไม่แน่ใจ' },
-    ],
-  },
+const th: EstimateQuestion[] = [
+  { id: 'location', title: 'บ้านที่จะติดโซลาร์อยู่ที่ไหน?', reason: 'ที่อยู่ช่วยระบุตำแหน่งและจังหวัดเพื่อปรับค่าพลังงานแสงอาทิตย์ โดย SolarMatch ไม่บันทึกหรือส่งที่อยู่ให้ผู้ติดตั้ง', type: 'address' },
+  { id: 'electricity', title: 'คุณมีข้อมูลแบบไหนจากบิลค่าไฟ?', reason: 'จำนวนหน่วย kWh ให้ค่าประมาณที่ตรงกว่ายอดเงิน แต่ใช้ยอดเงินได้หากหา kWh ไม่เจอ', type: 'energy' },
+  { id: 'consumptionPeriod', title: 'ตัวเลขนี้มาจากช่วงไหน?', reason: 'ค่าเฉลี่ยหลายเดือนช่วยลดความคลาดเคลื่อนจากฤดูกาล', type: 'period', options: [
+    { value: 'average-12', label: 'ค่าเฉลี่ย 12 เดือน' }, { value: 'average-3', label: 'ค่าเฉลี่ย 3 เดือน' }, { value: 'latest', label: 'เดือนล่าสุด' }, { value: 'typical', label: 'เดือนที่ค่าไฟค่อนข้างปกติ' }, { value: 'unknown', label: 'ไม่แน่ใจ' },
+  ] },
+  { id: 'tariffType', title: 'ในบิลมีคำว่า TOU, On Peak หรือ Off Peak ไหม?', reason: 'อัตรา TOU และค่าไฟที่จ่ายผ่านโครงการต้องคำนวณต่างจากอัตราบ้านอยู่อาศัยมาตรฐาน', type: 'tariff', options: [
+    { value: 'standard', label: 'ไม่มี', description: 'อัตราบ้านอยู่อาศัยมาตรฐาน' }, { value: 'tou', label: 'มี', description: 'บิลแยก On Peak และ Off Peak' }, { value: 'private', label: 'จ่ายผ่านเจ้าของโครงการหรือผู้ให้เช่า' }, { value: 'unknown', label: 'ไม่แน่ใจ' },
+  ] },
+  { id: 'daytimePattern', title: 'วันธรรมดาช่วงประมาณ 9 โมงเช้าถึง 4 โมงเย็น บ้านเป็นแบบไหนบ่อยที่สุด?', reason: 'โซลาร์มีมูลค่ามากที่สุดเมื่อบ้านใช้ไฟระหว่างที่ระบบกำลังผลิต', type: 'choice', options: [
+    { value: 'mostly-empty', label: 'ส่วนใหญ่ไม่มีคนอยู่บ้าน' }, { value: 'light-use', label: 'มีคนอยู่ แต่ใช้ไฟไม่มาก' }, { value: 'work-or-ac', label: 'มีคนทำงานที่บ้านหรือเปิดแอร์บางช่วง' }, { value: 'regular-loads', label: 'ใช้แอร์ ปั๊ม หรืออุปกรณ์หลายอย่างเป็นประจำ' }, { value: 'unknown', label: 'ไม่แน่ใจ' },
+  ] },
+  { id: 'daytimeLoads', title: 'อุปกรณ์อะไรทำงานเป็นประจำช่วงกลางวัน?', reason: 'เลือกได้หลายข้อ เราใช้เพื่อจัดกลุ่มรูปแบบการใช้ไฟ ไม่ได้เดาหน่วยไฟของอุปกรณ์แบบตายตัว', type: 'multichoice', options: [
+    { value: 'air-conditioning', label: 'เครื่องปรับอากาศ' }, { value: 'pump', label: 'ปั๊มสระว่ายน้ำหรือปั๊มน้ำ' }, { value: 'ev', label: 'ชาร์จรถไฟฟ้าที่บ้าน' }, { value: 'home-office', label: 'อุปกรณ์สำนักงานที่บ้าน' }, { value: 'home-business', label: 'อุปกรณ์กิจการที่บ้าน' }, { value: 'laundry-cooking', label: 'ซักผ้า อบผ้า หรือทำอาหาร' }, { value: 'none', label: 'ไม่มีรายการเหล่านี้เป็นประจำ' }, { value: 'unknown', label: 'ไม่แน่ใจ' },
+  ] },
+  { id: 'roofMaterial', title: 'หลังคาส่วนที่จะติดแผงเป็นวัสดุอะไร?', reason: 'วัสดุช่วยเตรียมคำถามสำหรับผู้ติดตั้ง แต่ยังไม่ถูกใช้เพิ่มราคาโดยอัตโนมัติ', type: 'choice', options: [
+    { value: 'concrete-tile', label: 'กระเบื้องคอนกรีต' }, { value: 'clay-tile', label: 'กระเบื้องดินเผา' }, { value: 'fibre-cement', label: 'กระเบื้องไฟเบอร์ซีเมนต์' }, { value: 'metal-sheet', label: 'เมทัลชีท' }, { value: 'flat-concrete', label: 'คอนกรีตแบนหรือดาดฟ้า' }, { value: 'other', label: 'วัสดุอื่น' }, { value: 'unknown', label: 'ไม่ทราบ' },
+  ] },
+  { id: 'shade', title: 'ช่วงประมาณ 10 โมงเช้าถึง 3 โมงเย็น หลังคามีเงาจากต้นไม้ อาคาร หรือสิ่งกีดขวางไหม?', reason: 'ตอบจากสิ่งที่เห็นได้ ไม่ต้องคำนวณเป็นเปอร์เซ็นต์', type: 'choice', options: [
+    { value: 'none', label: 'แทบไม่มีเงา' }, { value: 'short', label: 'มีเงาเฉพาะช่วงสั้น ๆ' }, { value: 'several-hours', label: 'มีเงาหลายชั่วโมง' }, { value: 'heavy', label: 'มีเงามากเกือบทั้งช่วงกลางวัน' }, { value: 'unknown', label: 'ไม่แน่ใจ' },
+  ] },
 ];
 
-export const estimateFlowEn: EstimateQuestion[] = [
-  {
-    id: 'province',
-    title: 'Which province is the home you are considering for solar in?',
-    reason: 'This helps us adjust assumptions and understand future installer coverage.',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: localizedProvinceOptions('en'),
-  },
-  {
-    id: 'monthlyBillThb',
-    title: 'About how much is the home’s usual monthly electricity bill?',
-    reason: 'This helps us estimate electricity use and an initial system-size range.',
-    type: 'number',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-  },
-  {
-    id: 'daytimeUsage',
-    title: 'How much electricity does the home use during the day?',
-    reason: 'Solar generates during daylight hours, so this affects how much solar energy the home may use directly.',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'high', label: 'High', description: 'People are home, with air conditioning, pumps, or home-working loads during the day.' },
-      { value: 'medium', label: 'Moderate', description: 'Electricity use is spread fairly evenly across daytime and evening.' },
-      { value: 'low', label: 'Low', description: 'The home is mostly empty during the day and the main loads occur in the evening or at night.' },
-      { value: 'unknown', label: 'Not sure' },
-    ],
-  },
-  {
-    id: 'authority',
-    title: 'Is this your home or a family home?',
-    reason: 'A real installation requires someone with authority over the property to be involved in the decision.',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'owner', label: 'I own the home' },
-      { value: 'family', label: 'I decide together with my family' },
-      { value: 'renter', label: 'I rent the home' },
-      { value: 'other', label: 'Other' },
-    ],
-  },
-  {
-    id: 'propertyType',
-    title: 'Which property type is the closest match?',
-    reason: 'The building type helps us explain likely roof-space constraints more clearly.',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'detached', label: 'Detached house' },
-      { value: 'semi-detached', label: 'Semi-detached house' },
-      { value: 'townhome', label: 'Townhome / townhouse' },
-      { value: 'other', label: 'Another residential building' },
-      { value: 'unknown', label: 'Not sure' },
-    ],
-  },
-  {
-    id: 'roof',
-    title: 'Do you know any basic details about the roof?',
-    reason: 'Roof material and shade can narrow the estimate, but there is no need to guess.',
-    type: 'roof',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-  },
-  {
-    id: 'timing',
-    title: 'If solar suits the home, when might you install it?',
-    reason: 'This helps any future next step fit your decision timeline.',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: '0-3', label: 'Within 3 months' },
-      { value: '3-6', label: '3–6 months' },
-      { value: '6-12', label: '6–12 months' },
-      { value: '12+', label: 'More than 1 year' },
-      { value: 'research', label: 'I am only researching for now' },
-    ],
-  },
-  {
-    id: 'energyInterest',
-    title: 'What are you most interested in?',
-    reason: 'This separates solar-only and battery questions without forcing a decision now.',
-    type: 'choice',
-    required: true,
-    analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'solar', label: 'Rooftop solar' },
-      { value: 'solar-battery', label: 'Solar + battery' },
-      { value: 'unknown', label: 'Not sure yet' },
-    ],
-  },
+const en: EstimateQuestion[] = [
+  { id: 'location', title: 'Where is the home you are considering for solar?', reason: 'The address helps identify the location and province for the solar-resource estimate. SolarMatch does not save it or send it to installers.', type: 'address' },
+  { id: 'electricity', title: 'Which electricity figure can you provide?', reason: 'Electricity use in kWh is more precise, but the bill total works if you cannot find it.', type: 'energy' },
+  { id: 'consumptionPeriod', title: 'What period does this figure represent?', reason: 'An average from several months reduces seasonal uncertainty.', type: 'period', options: [
+    { value: 'average-12', label: 'A 12-month average' }, { value: 'average-3', label: 'A 3-month average' }, { value: 'latest', label: 'The latest month' }, { value: 'typical', label: 'A fairly typical month' }, { value: 'unknown', label: 'Not sure' },
+  ] },
+  { id: 'tariffType', title: 'Does the bill show TOU, On Peak or Off Peak usage?', reason: 'TOU and privately billed electricity cannot be calculated as a standard residential tariff.', type: 'tariff', options: [
+    { value: 'standard', label: 'No', description: 'Standard residential tariff' }, { value: 'tou', label: 'Yes', description: 'The bill separates On Peak and Off Peak' }, { value: 'private', label: 'I pay a landlord or development' }, { value: 'unknown', label: 'Not sure' },
+  ] },
+  { id: 'daytimePattern', title: 'On a typical weekday between about 9am and 4pm, which best describes the home?', reason: 'Solar is most valuable when the home uses electricity while the system is producing.', type: 'choice', options: [
+    { value: 'mostly-empty', label: 'The home is mostly empty' }, { value: 'light-use', label: 'Someone is home, but electricity use is light' }, { value: 'work-or-ac', label: 'Someone works from home or uses air conditioning for part of the day' }, { value: 'regular-loads', label: 'Air conditioning, pumps or several appliances run regularly' }, { value: 'unknown', label: 'Not sure' },
+  ] },
+  { id: 'daytimeLoads', title: 'Which of these regularly operate during the day?', reason: 'Select all that apply. We use this to classify the load pattern, not to invent exact appliance consumption.', type: 'multichoice', options: [
+    { value: 'air-conditioning', label: 'Air conditioning' }, { value: 'pump', label: 'Pool or water pump' }, { value: 'ev', label: 'EV charging' }, { value: 'home-office', label: 'Home-office equipment' }, { value: 'home-business', label: 'Home-business equipment' }, { value: 'laundry-cooking', label: 'Laundry or cooking appliances' }, { value: 'none', label: 'None regularly' }, { value: 'unknown', label: 'Not sure' },
+  ] },
+  { id: 'roofMaterial', title: 'What is the main roof surface made from?', reason: 'The material helps prepare installer questions, but it does not automatically change the planning price yet.', type: 'choice', options: [
+    { value: 'concrete-tile', label: 'Concrete roof tiles' }, { value: 'clay-tile', label: 'Clay tiles' }, { value: 'fibre-cement', label: 'Fibre-cement tiles' }, { value: 'metal-sheet', label: 'Metal sheet' }, { value: 'flat-concrete', label: 'Flat concrete roof or rooftop' }, { value: 'other', label: 'Another material' }, { value: 'unknown', label: 'I do not know' },
+  ] },
+  { id: 'shade', title: 'Between about 10am and 3pm, is the roof shaded by trees, buildings or other obstructions?', reason: 'Answer from what you can observe; there is no need to estimate a percentage.', type: 'choice', options: [
+    { value: 'none', label: 'Little or no shade' }, { value: 'short', label: 'Shade for a short part of the day' }, { value: 'several-hours', label: 'Shade for several hours' }, { value: 'heavy', label: 'Heavily shaded for most of the day' }, { value: 'unknown', label: 'Not sure' },
+  ] },
 ];
+
+export const estimateFlow = th;
+export const estimateFlowEn = en;

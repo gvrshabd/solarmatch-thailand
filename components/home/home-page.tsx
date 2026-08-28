@@ -56,10 +56,10 @@ const copy: Record<Locale, HomeCopy> = {
     eyebrow: 'ประเมิน Solar Rooftop สำหรับบ้านในไทย',
     titleLead: 'ค่าไฟบ้านคุณ',
     titleEmphasis: 'เหมาะกับโซลาร์แค่ไหน?',
-    lede: 'ประเมินขนาดระบบและช่วงเงินที่อาจประหยัดได้เบื้องต้น ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
+    lede: 'ดูขนาดระบบและตัวเลขประหยัดเบื้องต้นเพื่อวางแผน ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
     photoAlt: 'แผงโซลาร์บนหลังคากระเบื้องของบ้านพักอาศัย โดยมีต้นปาล์มอยู่ด้านหลัง',
     photoCaption: 'ภาพประกอบจากการติดตั้งที่อยู่อาศัยจริง · หลังคาของคุณยังต้องสำรวจหน้างาน',
-    example: 'ตัวอย่างช่วงผลประเมิน',
+    example: 'ตัวอย่างผลเพื่อวางแผน',
     exampleNote: 'ไม่ใช่คำสัญญาหรือใบเสนอราคา',
     trust: ['ดูผลก่อนกรอกเบอร์', 'ไม่ต้องอัปโหลดบิล', 'ไม่มีค่าใช้จ่ายสำหรับเจ้าของบ้าน'],
     introEyebrow: 'ก่อนขอราคา',
@@ -71,7 +71,7 @@ const copy: Record<Locale, HomeCopy> = {
     processBody: 'เครื่องมือนี้ช่วยจัดข้อมูลเบื้องต้น ไม่ได้แทนการสำรวจหน้างานหรือคำแนะนำจากวิศวกร',
     steps: [
       { title: 'ตอบจากสิ่งที่รู้', body: 'จังหวัด ค่าไฟ และรูปแบบการใช้ไฟช่วงกลางวัน โดยไม่ต้องอัปโหลดเอกสาร' },
-      { title: 'เห็นผลเป็นช่วง', body: 'ดูขนาดระบบ ผลผลิต และการประหยัดเป็นช่วง เพื่อสะท้อนความไม่แน่นอน' },
+      { title: 'เห็นตัวเลขที่ใช้วางแผนได้', body: 'ดูขนาดระบบ ผลผลิต และเงินประหยัดเป็นค่ากลางที่อธิบายที่มา พร้อมระดับความมั่นใจ' },
       { title: 'ค่อยเลือกว่าจะคุยต่อไหม', body: 'คุณเห็นผลก่อนเสมอ การขอให้ติดต่อเป็นอีกขั้นตอนหนึ่งและยังไม่ส่งข้อมูลจริง' },
     ],
     previewEyebrow: 'ตัวอย่างการแสดงผล',
@@ -106,10 +106,10 @@ const copy: Record<Locale, HomeCopy> = {
     eyebrow: 'Rooftop solar estimates for homes in Thailand',
     titleLead: 'Is rooftop solar',
     titleEmphasis: 'a good fit for your home?',
-    lede: 'See an initial system-size and possible savings range before deciding whether to speak with an installer.',
+    lede: 'See a practical starting system and planning figure before deciding whether to speak with an installer.',
     photoAlt: 'Solar panels on a tiled residential roof with palm trees in the background',
     photoCaption: 'Illustrative residential solar installation · your roof still requires a site survey',
-    example: 'Example estimate range',
+    example: 'Example planning result',
     exampleNote: 'Not a promise or quotation',
     trust: ['See results before entering a phone number', 'No bill upload required', 'Free for homeowners'],
     introEyebrow: 'Before requesting a quote',
@@ -121,7 +121,7 @@ const copy: Record<Locale, HomeCopy> = {
     processBody: 'This tool organizes initial information. It does not replace a site survey or engineering advice.',
     steps: [
       { title: 'Answer from what you know', body: 'Province, electricity bill, and daytime use—without uploading documents.' },
-      { title: 'See an honest range', body: 'View system size, production, and possible savings as ranges that reflect uncertainty.' },
+      { title: 'See one planning figure', body: 'View a starting system, production, and savings figure with its evidence confidence clearly explained.' },
       { title: 'Choose whether to continue', body: 'You always see the result first. Requesting contact is separate and sends nothing in this prototype.' },
     ],
     previewEyebrow: 'Example result',
@@ -146,7 +146,7 @@ const copy: Record<Locale, HomeCopy> = {
       { question: 'How accurate is this estimate?', answer: 'It is an initial screen based on electricity cost and usage patterns. Accuracy improves with roof, load, and site-survey information.' },
       { question: 'Do I need to enter a phone number first?', answer: 'No. You see the estimate first. The contact form appears afterwards and does not store or send information in this prototype.' },
       { question: 'Is SolarMatch an installer?', answer: 'No. We are testing a tool that helps homeowners understand the basics before speaking with service providers.' },
-      { question: 'Where does the payback range come from?', answer: 'The prototype separates self-consumption, conditional export income, installation-cost references, and upkeep. The assumptions are shown with the result and still require validation for your home.' },
+      { question: 'Where does the payback figure come from?', answer: 'The prototype values direct self-use against the progressive residential bill, then includes installation-cost references, routine upkeep, degradation, and an inverter reserve. Export, tax, finance, and tariff escalation stay outside the planning figure.' },
     ],
     finalTitle: 'Start understanding what kind of system your home may need',
     finalBody: 'See results before entering contact information.',
@@ -190,7 +190,7 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
                 />
               </picture>
               <div className="sunline" aria-hidden="true" />
-              <div className="result-peek result-peek-v2"><span>{text.example}</span><strong>3–5 <small>kW</small></strong><p>{text.exampleNote}</p></div>
+              <div className="result-peek result-peek-v2"><span>{text.example}</span><strong>{locale === 'en' ? 'About ' : 'ประมาณ '}5 <small>kWp</small></strong><p>{text.exampleNote}</p></div>
             </div>
             <figcaption>{text.photoCaption}</figcaption>
           </figure>

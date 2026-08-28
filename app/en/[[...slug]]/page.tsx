@@ -28,9 +28,9 @@ export async function generateMetadata({ params }: EnglishRouteProps): Promise<M
   const thaiUrl = `${siteConfig.url}${path}`;
   return {
     title: titles[key] ?? 'SolarMatch Thailand',
-    description: 'Understand a possible rooftop solar system size and savings range for a home in Thailand before speaking with an installer.',
+    description: 'Understand a practical rooftop solar starting size and planning savings figure for a home in Thailand before speaking with an installer.',
     alternates: { canonical: englishUrl, languages: { 'en-US': englishUrl, 'th-TH': thaiUrl } },
-    openGraph: { type: 'website', locale: 'en_US', url: englishUrl, title: titles[key] ?? 'SolarMatch Thailand', description: 'Start with your electricity bill and daytime usage to understand a possible rooftop solar range.', images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Solar panels on a tiled residential roof with palm trees in the background' }] },
+    openGraph: { type: 'website', locale: 'en_US', url: englishUrl, title: titles[key] ?? 'SolarMatch Thailand', description: 'Start with your electricity bill, address, and daytime usage to understand a practical rooftop solar planning figure.', images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Solar panels on a tiled residential roof with palm trees in the background' }] },
   };
 }
 

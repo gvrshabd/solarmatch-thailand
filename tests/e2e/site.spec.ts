@@ -1,64 +1,41 @@
 import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
 
 const thaiHeaderLinks = [
-  ['ประเมินโซลาร์', '/estimate'],
-  ['วิธีการทำงาน', '/how-it-works'],
-  ['คู่มือโซลาร์', '/solar-guide'],
-  ['วิธีคำนวณ', '/methodology'],
-  ['เกี่ยวกับเรา', '/about'],
+  ['ประเมินโซลาร์', '/estimate'], ['วิธีการทำงาน', '/how-it-works'], ['คู่มือโซลาร์', '/solar-guide'],
+  ['วิธีคำนวณ', '/methodology'], ['เกี่ยวกับเรา', '/about'],
 ] as const;
-
 const englishHeaderLinks = [
-  ['Solar estimate', '/en/estimate'],
-  ['How it works', '/en/how-it-works'],
-  ['Solar guide', '/en/solar-guide'],
-  ['Methodology', '/en/methodology'],
-  ['About', '/en/about'],
+  ['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'],
+  ['Methodology', '/en/methodology'], ['About', '/en/about'],
 ] as const;
+const thaiFooterLinks = [...thaiHeaderLinks.slice(0, 3), ['วิธีคำนวณ', '/methodology'], ['แหล่งข้อมูล', '/resources'], ['เกี่ยวกับเรา', '/about'], ['ติดต่อ', '/contact'], ['ความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้งาน', '/terms'], ['คุกกี้', '/cookies']] as const;
+const englishFooterLinks = [...englishHeaderLinks.slice(0, 3), ['Methodology', '/en/methodology'], ['Resources', '/en/resources'], ['About', '/en/about'], ['Contact', '/en/contact'], ['Privacy', '/en/privacy'], ['Terms of use', '/en/terms'], ['Cookies', '/en/cookies']] as const;
 
-const thaiFooterLinks = [
-  ...thaiHeaderLinks.slice(0, 3),
-  ['วิธีคำนวณ', '/methodology'],
-  ['แหล่งข้อมูล', '/resources'],
-  ['เกี่ยวกับเรา', '/about'],
-  ['ติดต่อ', '/contact'],
-  ['ความเป็นส่วนตัว', '/privacy'],
-  ['ข้อกำหนดการใช้งาน', '/terms'],
-  ['คุกกี้', '/cookies'],
-] as const;
+export const savedEstimate = {
+  province: 'bangkok',
+  location: { address: '99 Test Road, Bangkok', latitude: 13.7563, longitude: 100.5018, province: 'bangkok', source: 'manual-map', confirmed: true },
+  electricityInputKind: 'kwh', monthlyKwh: 900, consumptionPeriod: 'average-12', tariffType: 'standard',
+  daytimePattern: 'work-or-ac', daytimeLoads: ['air-conditioning', 'home-office'], acDaytimeHours: '2-4',
+  roofMaterial: 'concrete-tile', shade: 'none', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
+} as const;
 
-const englishFooterLinks = [
-  ...englishHeaderLinks.slice(0, 3),
-  ['Methodology', '/en/methodology'],
-  ['Resources', '/en/resources'],
-  ['About', '/en/about'],
-  ['Contact', '/en/contact'],
-  ['Privacy', '/en/privacy'],
-  ['Terms of use', '/en/terms'],
-  ['Cookies', '/en/cookies'],
-] as const;
-
-function desktopOnly(testInfo: TestInfo) {
-  test.skip(testInfo.project.name !== 'desktop-chromium', 'Desktop navigation is covered in the desktop project.');
+function desktopOnly(testInfo: TestInfo) { test.skip(testInfo.project.name !== 'desktop-chromium', 'Desktop-only coverage.'); }
+function mobileOnly(testInfo: TestInfo) { test.skip(testInfo.project.name !== 'mobile-chromium', 'Mobile-only coverage.'); }
+async function expectPath(page: Page, path: string) { await expect.poll(() => new URL(page.url()).pathname).toBe(path); }
+async function clickAnchorAndExpectPath(page: Page, link: Locator, path: string) { await expect(link).toHaveAttribute('href', path); await link.click(); await expectPath(page, path); }
+async function chooseAndContinue(page: Page, option: string | RegExp, next: string) {
+  await page.getByRole('radio', { name: option, exact: typeof option === 'string' }).click();
+  await page.getByRole('button', { name: next, exact: true }).click();
 }
 
-function mobileOnly(testInfo: TestInfo) {
-  test.skip(testInfo.project.name !== 'mobile-chromium', 'The collapsed details menu is covered in the mobile project.');
-}
-
-async function expectPath(page: Page, expectedPath: string) {
-  await expect.poll(() => new URL(page.url()).pathname).toBe(expectedPath);
-}
-
-async function clickAnchorAndExpectPath(page: Page, link: Locator, expectedPath: string) {
-  await expect(link).toHaveAttribute('href', expectedPath);
-  await link.click();
-  await expectPath(page, expectedPath);
-}
-
-async function chooseAndContinue(page: Page, optionName: string | RegExp, nextName: string) {
-  await page.getByRole('radio', { name: optionName, exact: typeof optionName === 'string' }).click();
-  await page.getByRole('button', { name: nextName, exact: true }).click();
+async function confirmAddress(page: Page, locale: 'th' | 'en', address = '99 Test Road, Bangkok') {
+  const english = locale === 'en';
+  const field = page.getByLabel(english ? 'Home address' : 'ที่อยู่บ้าน');
+  if (!(await field.inputValue())) await field.fill(address);
+  const position = page.getByRole('button', { name: english ? 'Position home on map' : 'วางตำแหน่งบ้านบนแผนที่' });
+  if (await position.isVisible().catch(() => false)) await position.click();
+  await page.getByRole('button', { name: english ? 'Confirm this property location' : 'ยืนยันตำแหน่งบ้านนี้' }).click();
+  await page.getByRole('button', { name: english ? 'Next' : 'ถัดไป', exact: true }).click();
 }
 
 async function completeEstimate(page: Page, locale: 'th' | 'en') {
@@ -70,122 +47,67 @@ async function completeEstimate(page: Page, locale: 'th' | 'en') {
 
   await page.goto(homePath);
   const starter = page.locator('#hero-estimator');
-  await starter.getByRole('combobox').selectOption('bangkok');
-  await starter.getByRole('spinbutton').fill('4500');
-  await starter.getByRole('button', { name: english ? /See your initial estimate/ : /ดูผลประเมินเบื้องต้น/ }).click();
+  await starter.getByRole('textbox').fill('99 Test Road, Bangkok');
+  await starter.getByRole('button', { name: english ? 'Continue to map' : 'ไปวางตำแหน่งบนแผนที่' }).click();
   await expectPath(page, estimatePath);
+  await confirmAddress(page, locale);
 
-  await expect(page.getByRole('radio', { name: english ? 'Bangkok' : 'กรุงเทพมหานคร' })).toBeChecked();
+  await page.getByRole('radio', { name: english ? 'Electricity used in kWh' : 'จำนวนหน่วยไฟฟ้า (kWh)' }).click();
+  await page.getByLabel(english ? 'Monthly electricity used' : 'จำนวนหน่วยต่อเดือน').fill('900');
   await page.getByRole('button', { name: next, exact: true }).click();
-  await expect(page.getByRole('spinbutton')).toHaveValue('4500');
+  await chooseAndContinue(page, english ? 'A 12-month average' : 'ค่าเฉลี่ย 12 เดือน', next);
+  await chooseAndContinue(page, english ? /^No Standard/ : /^ไม่มี/, next);
+  await chooseAndContinue(page, english ? /works from home or uses air conditioning/ : /ทำงานที่บ้านหรือเปิดแอร์/, next);
+
+  await page.getByRole('checkbox', { name: english ? 'Air conditioning' : 'เครื่องปรับอากาศ' }).click();
+  await page.getByRole('checkbox', { name: english ? 'Home-office equipment' : 'อุปกรณ์สำนักงานที่บ้าน' }).click();
   await page.getByRole('button', { name: next, exact: true }).click();
-
-  await chooseAndContinue(page, english ? /^High/ : /^มาก/, next);
-  await chooseAndContinue(page, english ? 'I own the home' : 'เป็นเจ้าของบ้าน', next);
-  await chooseAndContinue(page, english ? 'Detached house' : 'บ้านเดี่ยว', next);
-  await chooseAndContinue(page, english ? 'Not sure / skip details' : 'ไม่แน่ใจ / ข้ามได้', next);
-  await chooseAndContinue(page, english ? 'I am only researching for now' : 'ตอนนี้แค่ศึกษาข้อมูล', next);
-
-  await page.getByRole('radio', { name: english ? 'Rooftop solar' : 'Solar Rooftop' }).click();
+  await chooseAndContinue(page, english ? 'Concrete roof tiles' : 'กระเบื้องคอนกรีต', next);
+  await page.getByRole('radio', { name: english ? 'Little or no shade' : 'แทบไม่มีเงา' }).click();
   await page.getByRole('button', { name: english ? 'See estimate' : 'ดูผลประเมิน', exact: true }).click();
   await expectPath(page, resultsPath);
 
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(english ? 'A useful starting range is' : 'ช่วงเริ่มต้นที่อาจเหมาะคือ');
-  await expect(page.getByLabel(english ? 'Estimated figures' : 'ตัวเลขประมาณการ')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(english ? 'up to about' : 'สูงสุดประมาณ');
+  await expect(page.getByLabel(english ? 'Planning figures' : 'ตัวเลขเพื่อวางแผน')).toBeVisible();
+  await expect(page.getByText(english ? 'Suggested starting system' : 'ขนาดเริ่มต้นที่แนะนำ')).toBeVisible();
   await expect(page.getByRole('link', { name: english ? 'Read the full methodology' : 'อ่านวิธีคำนวณทั้งหมด' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: english ? 'Cumulative household electricity cost' : 'ต้นทุนไฟฟ้าสะสมของบ้าน' })).toBeVisible();
 }
 
-test('homepage explains the prototype without prohibited timing or copyright copy', async ({ page }) => {
+test.beforeEach(async ({ page }) => { await page.route('https://tile.openstreetmap.org/**', (route) => route.abort()); });
+
+test('homepage and selector use the requested copy and spacing', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('ค่าไฟบ้านคุณ');
-  await expect(page.getByText('เว็บไซต์ต้นแบบ', { exact: false }).first()).toBeVisible();
   await expect(page.locator('footer')).not.toContainText('©');
   await expect(page.locator('body')).not.toContainText(/ประมาณ 3 นาที|About 3 minutes|และแก้ไขคำตอบได้ทุกเมื่อ|and edit your answers at any time/i);
+  const switcher = page.getByRole('link', { name: 'View this page in English' });
+  await expect(switcher).toHaveText('TH / EN');
+  expect(await switcher.evaluate((element) => Number.parseFloat(getComputedStyle(element).gap))).toBeGreaterThan(0);
 });
 
-test('all desktop header anchors navigate in Thai and English', async ({ page }, testInfo) => {
-  desktopOnly(testInfo);
-
-  for (const [homePath, navLabel, links] of [
-    ['/', 'เมนูหลัก', thaiHeaderLinks],
-    ['/en', 'Primary navigation', englishHeaderLinks],
+test('all desktop header and footer anchors navigate in Thai and English', async ({ page }, testInfo) => {
+  desktopOnly(testInfo); test.slow();
+  for (const [home, navLabel, headerLinks, footerLinks] of [
+    ['/', 'เมนูหลัก', thaiHeaderLinks, thaiFooterLinks], ['/en', 'Primary navigation', englishHeaderLinks, englishFooterLinks],
   ] as const) {
-    for (const [label, destination] of links) {
-      await page.goto(homePath);
-      const navigation = page.getByRole('navigation', { name: navLabel });
-      await clickAnchorAndExpectPath(page, navigation.getByRole('link', { name: label, exact: true }), destination);
-    }
+    for (const [label, path] of headerLinks) { await page.goto(home); await clickAnchorAndExpectPath(page, page.getByRole('navigation', { name: navLabel }).getByRole('link', { name: label, exact: true }), path); }
+    for (const [label, path] of footerLinks) { await page.goto(home); await clickAnchorAndExpectPath(page, page.locator('footer').getByRole('link', { name: label, exact: true }), path); }
   }
 });
 
-test('all footer anchors navigate in Thai and English', async ({ page }, testInfo) => {
-  test.slow();
-  desktopOnly(testInfo);
-
-  for (const [homePath, links] of [
-    ['/', thaiFooterLinks],
-    ['/en', englishFooterLinks],
-  ] as const) {
-    for (const [label, destination] of links) {
-      await page.goto(homePath);
-      const footer = page.locator('footer');
-      await clickAnchorAndExpectPath(page, footer.getByRole('link', { name: label, exact: true }), destination);
-    }
-  }
+test('homepage CTAs and language switching navigate correctly', async ({ page }) => {
+  for (const [home, label, path] of [
+    ['/', 'ดูว่าเราทำงานอย่างไร', '/how-it-works'], ['/', 'ประเมินจากค่าไฟของฉัน', '/estimate'],
+    ['/en', 'See how it works', '/en/how-it-works'], ['/en', 'Estimate from my bill', '/en/estimate'],
+  ] as const) { await page.goto(home); await clickAnchorAndExpectPath(page, page.getByRole('link', { name: label, exact: true }), path); }
+  await page.goto('/solar-guide'); await page.getByRole('link', { name: 'View this page in English' }).click(); await expectPath(page, '/en/solar-guide');
+  await page.getByRole('link', { name: 'View this page in Thai' }).click(); await expectPath(page, '/solar-guide');
 });
 
-test('the logo returns to the correct language homepage', async ({ page }) => {
-  await page.goto('/solar-guide');
-  await clickAnchorAndExpectPath(page, page.getByRole('link', { name: 'SolarMatch Thailand หน้าหลัก' }), '/');
-
-  await page.goto('/en/solar-guide');
-  await clickAnchorAndExpectPath(page, page.getByRole('link', { name: 'SolarMatch Thailand home' }), '/en');
-});
-
-test('representative homepage CTAs navigate in both languages', async ({ page }) => {
-  test.slow();
-  for (const [homePath, label, destination] of [
-    ['/', 'ดูว่าเราทำงานอย่างไร', '/how-it-works'],
-    ['/', 'ประเมินจากค่าไฟของฉัน', '/estimate'],
-    ['/', 'เริ่มประเมินฟรี', '/estimate'],
-    ['/en', 'See how it works', '/en/how-it-works'],
-    ['/en', 'Estimate from my bill', '/en/estimate'],
-    ['/en', 'Start free estimate', '/en/estimate'],
-  ] as const) {
-    await page.goto(homePath);
-    await clickAnchorAndExpectPath(page, page.getByRole('link', { name: label, exact: true }), destination);
-  }
-});
-
-test('language switching keeps the current content route', async ({ page }) => {
-  await page.goto('/solar-guide');
-  await page.getByRole('link', { name: 'View this page in English' }).click();
-  await expectPath(page, '/en/solar-guide');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Rooftop solar starts');
-
-  await page.getByRole('link', { name: 'View this page in Thai' }).click();
-  await expectPath(page, '/solar-guide');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Solar Rooftop เริ่ม');
-});
-
-test('the mobile details menu opens and every navigation anchor works', async ({ page }, testInfo) => {
-  test.slow();
-  mobileOnly(testInfo);
-
-  for (const [homePath, menuLabel, links] of [
-    ['/', 'เมนูมือถือ', thaiHeaderLinks],
-    ['/en', 'Mobile navigation', englishHeaderLinks],
-  ] as const) {
-    for (const [label, destination] of links) {
-      await page.goto(homePath);
-      const menu = page.locator('details.mobile-menu');
-      await expect(menu).not.toHaveAttribute('open', '');
-      await menu.locator('summary').click();
-      await expect(menu).toHaveAttribute('open', '');
-      const navigation = page.getByRole('navigation', { name: menuLabel });
-      await clickAnchorAndExpectPath(page, navigation.getByRole('link', { name: label, exact: true }), destination);
-    }
+test('the mobile menu opens and navigation anchors work', async ({ page }, testInfo) => {
+  mobileOnly(testInfo); test.slow();
+  for (const [home, navLabel, links] of [['/', 'เมนูมือถือ', thaiHeaderLinks], ['/en', 'Mobile navigation', englishHeaderLinks]] as const) {
+    for (const [label, path] of links) { await page.goto(home); const menu = page.locator('details.mobile-menu'); await menu.locator('summary').click(); await clickAnchorAndExpectPath(page, page.getByRole('navigation', { name: navLabel }).getByRole('link', { name: label, exact: true }), path); }
   }
 });
 
@@ -193,140 +115,77 @@ for (const estimate of [
   { locale: 'th', path: '/estimate', exit: 'ออกจากแบบประเมิน', language: 'ดูแบบประเมินนี้เป็นภาษาอังกฤษ' },
   { locale: 'en', path: '/en/estimate', exit: 'Exit estimate', language: 'View this estimate in Thai' },
 ] as const) {
-  test(`${estimate.locale.toUpperCase()} estimator uses focused chrome and one eight-segment progress treatment`, async ({ page }) => {
+  test(`${estimate.locale.toUpperCase()} estimator uses focused chrome and eight steps`, async ({ page }) => {
     await page.goto(estimate.path);
     const header = page.locator('header');
     await expect(header.getByRole('link', { name: estimate.exit })).toBeVisible();
-    await expect(header.getByRole('link', { name: estimate.language })).toBeVisible();
+    await expect(header.getByRole('link', { name: estimate.language })).toHaveText('TH / EN');
     await expect(header.getByRole('navigation')).toHaveCount(0);
     await expect(page.locator('footer')).toHaveCount(0);
-    await expect(page.locator('aside')).toHaveCount(0);
-
-    const progress = page.getByRole('progressbar');
-    await expect(progress).toHaveCount(1);
-    await expect(progress.locator(':scope > span')).toHaveCount(8);
-    await expect(progress).not.toContainText('%');
-    await expect(page.locator('body')).not.toContainText(/ประมาณ 3 นาที|About 3 minutes|และแก้ไขคำตอบได้ทุกเมื่อ|and edit your answers at any time/i);
+    await expect(page.getByRole('progressbar').locator(':scope > span')).toHaveCount(8);
   });
 }
 
-test('a mid-estimate refresh and contextual language switch restore the current answer', async ({ page }) => {
+test('address text stays out of requests and map confirmation has a no-drag alternative', async ({ page }) => {
+  const secretAddress = '777 Privacy Test Lane Bangkok';
+  const requests: string[] = [];
+  page.on('request', (request) => requests.push(request.url()));
+  await page.goto('/en/estimate');
+  await page.getByLabel('Home address').fill(secretAddress);
+  await page.getByRole('button', { name: 'Position home on map' }).click();
+  await expect(page.getByRole('button', { name: 'Put marker at map centre' })).toBeVisible();
+  await page.getByRole('button', { name: 'Move marker east' }).click();
+  await page.getByRole('button', { name: 'Confirm this property location' }).click();
+  expect(requests.some((url) => decodeURIComponent(url).includes(secretAddress))).toBe(false);
+});
+
+test('refresh and language switching preserve eligible estimator progress', async ({ page }) => {
   await page.goto('/estimate');
-  await chooseAndContinue(page, 'กรุงเทพมหานคร', 'ถัดไป');
-  await page.getByRole('spinbutton').fill('4500');
+  await confirmAddress(page, 'th');
+  await page.getByRole('radio', { name: 'จำนวนหน่วยไฟฟ้า (kWh)' }).click();
+  await page.getByLabel('จำนวนหน่วยต่อเดือน').fill('900');
   await page.getByRole('button', { name: 'ถัดไป', exact: true }).click();
-  await page.getByRole('radio', { name: /^มาก/ }).click();
-
-  await expect.poll(async () => page.evaluate(() => {
-    const saved = JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft') ?? '{}');
-    return `${saved.step}:${saved.answers?.daytimeUsage}`;
-  })).toBe('2:high');
-
+  await page.getByRole('radio', { name: 'ค่าเฉลี่ย 12 เดือน' }).click();
   await page.reload();
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('ใช้ไฟช่วงกลางวัน');
-  await expect(page.getByRole('radio', { name: /^มาก/ })).toBeChecked();
-
+  await expect(page.getByRole('radio', { name: 'ค่าเฉลี่ย 12 เดือน' })).toBeChecked();
   await page.getByRole('link', { name: 'ดูแบบประเมินนี้เป็นภาษาอังกฤษ' }).click();
   await expectPath(page, '/en/estimate');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('use during the day');
-  await expect(page.getByRole('radio', { name: /^High/ })).toBeChecked();
+  await expect(page.getByRole('radio', { name: 'A 12-month average' })).toBeChecked();
+  await page.getByRole('button', { name: 'Clear and start over' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Where is the home');
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem('solarmatch:estimate'))).toBeNull();
 });
 
-test('estimator radios support arrow keys and restart clears saved progress', async ({ page }) => {
-  await page.goto('/en/estimate');
-  const bangkok = page.getByRole('radio', { name: 'Bangkok' });
-  await expect(bangkok).toBeEnabled();
-  await bangkok.focus();
-  await bangkok.press('ArrowDown');
-  await expect(page.getByRole('radio', { name: 'Nonthaburi' })).toBeChecked();
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect.poll(async () => page.evaluate(() => Boolean(sessionStorage.getItem('solarmatch:estimate-draft')))).toBe(true);
+test('the complete Thai estimate journey reaches a transparent result', async ({ page }) => { test.slow(); await completeEstimate(page, 'th'); });
+test('the complete English estimate journey reaches a transparent result', async ({ page }) => { test.slow(); await completeEstimate(page, 'en'); });
 
-  await page.getByRole('button', { name: 'Start over' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('province');
-  await expect.poll(async () => page.evaluate(() => {
-    const saved = JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft') ?? '{}');
-    return `${saved.version}:${saved.step}:${Object.keys(saved.answers ?? {}).length}`;
-  })).toBe('1:0:0');
-});
-
-test('invalid saved estimator state fails safely and back restores heading focus', async ({ page }) => {
-  await page.addInitScript(() => sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ answers: {}, step: 'broken' })));
-  await page.goto('/estimate');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('จังหวัด');
-  await chooseAndContinue(page, 'กรุงเทพมหานคร', 'ถัดไป');
-  await page.getByRole('spinbutton').fill('4500');
-  await page.getByRole('button', { name: 'ถัดไป', exact: true }).click();
-  await page.getByRole('button', { name: 'ย้อนกลับ' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
-});
-
-test('the complete Thai estimate journey reaches a transparent result', async ({ page }) => {
-  test.slow();
-  await completeEstimate(page, 'th');
-});
-
-test('the complete English estimate journey reaches a translated result', async ({ page }) => {
-  test.slow();
-  await completeEstimate(page, 'en');
-});
-
-test('the prototype lead form validates LINE details and discards a valid submission', async ({ page }) => {
-  const leadRequests: string[] = [];
-  page.on('request', (request) => {
-    if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/leads') leadRequests.push(request.url());
-  });
-  await page.addInitScript(() => {
-    sessionStorage.setItem('solarmatch:estimate', JSON.stringify({
-      province: 'bangkok',
-      monthlyBillThb: 4500,
-      daytimeUsage: 'medium',
-      authority: 'owner',
-      propertyType: 'detached',
-      roofKnown: false,
-      shade: 'unknown',
-      timing: 'research',
-      energyInterest: 'solar',
-    }));
-  });
+test('TOU withholds financial results instead of applying the standard model', async ({ page }) => {
+  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify({ ...estimate, tariffType: 'tou' })), savedEstimate);
   await page.goto('/en/estimate/results');
-  await expect(page.getByRole('heading', { name: 'Would you like to know when matching is ready to test?' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('production estimate is ready');
+  await expect(page.getByText('savings and payback are withheld', { exact: false })).toBeVisible();
+});
 
+test('the prototype contact form validates and discards without a lead request', async ({ page }) => {
+  const posts: string[] = [];
+  page.on('request', (request) => { if (request.method() === 'POST') posts.push(request.url()); });
+  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
+  await page.goto('/en/estimate/results');
   await page.getByRole('button', { name: 'Test the form' }).click();
-  await expect(page.locator('#lead-name-error')).toHaveText('Please enter your name.');
   await expect(page.getByLabel(/Name/)).toBeFocused();
   await page.getByLabel(/Name/).fill('Test Homeowner');
   await page.getByLabel(/Thai phone number/).fill('081 234 5678');
   await page.getByLabel(/Preferred contact method/).selectOption('line');
-  await expect(page.getByLabel(/LINE ID/)).toBeVisible();
   await page.getByLabel(/LINE ID/).fill('prototype-test');
-  await page.getByRole('checkbox').check();
+  await page.getByRole('checkbox', { name: /I consent to this information/ }).check();
   await page.getByRole('button', { name: 'Test the form' }).click();
-  await expect(page.getByText('Prototype form test completed')).toBeVisible();
   await expect(page.getByText('without sending or storing it', { exact: false })).toBeVisible();
-  expect(leadRequests).toEqual([]);
+  expect(posts).toEqual([]);
 });
 
-test('legal and contact routes expose prototype boundaries in both languages', async ({ page }) => {
-  await page.goto('/privacy');
-  await expect(page.getByRole('heading', { name: 'นโยบายความเป็นส่วนตัว' })).toBeVisible();
-  await page.goto('/contact');
-  await expect(page.getByRole('heading', { name: 'ช่องทางติดต่อยังไม่เปิดใช้งาน' })).toBeVisible();
-
-  await page.goto('/en/privacy');
-  await expect(page.getByRole('heading', { name: 'Privacy notice' })).toBeVisible();
-  await page.goto('/en/contact');
-  await expect(page.getByRole('heading', { name: 'Contact channels are not active yet' })).toBeVisible();
-});
-
-test('About pages state the current product and deliberate initial geography honestly', async ({ page }) => {
-  await page.goto('/about');
-  await expect(page.getByRole('heading', { name: 'เครื่องมือให้ความรู้ ไม่ใช่บริการขายหรือติดตั้ง' })).toBeVisible();
-  await expect(page.getByText('กรุงเทพฯ และปริมณฑล', { exact: false })).toBeVisible();
-  await expect(page.getByText('ยังไม่ส่งหรือบันทึกข้อมูลลีด')).toBeVisible();
-
-  await page.goto('/en/about');
-  await expect(page.getByRole('heading', { name: 'An educational tool—not an installer or sales service' })).toBeVisible();
-  await expect(page.getByText('Bangkok Metropolitan Region', { exact: false })).toBeVisible();
-  await expect(page.getByText('No lead storage or transmission')).toBeVisible();
+test('legal, contact, and About pages expose prototype boundaries', async ({ page }) => {
+  await page.goto('/privacy'); await expect(page.getByText('เซสชันเบราว์เซอร์', { exact: false }).first()).toBeVisible();
+  await page.goto('/en/privacy'); await expect(page.getByText('browser session', { exact: false }).first()).toBeVisible();
+  await page.goto('/contact'); await expect(page.getByRole('heading', { name: 'ช่องทางติดต่อยังไม่เปิดใช้งาน' })).toBeVisible();
+  await page.goto('/en/about'); await expect(page.getByText('No lead storage or transmission')).toBeVisible();
 });

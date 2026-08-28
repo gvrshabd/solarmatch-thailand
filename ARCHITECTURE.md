@@ -7,13 +7,17 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - Next-compatible App Router application built by vinext for one isolated Cloudflare Worker named `solarmatch-thailand`.
 - Thai-first bilingual responsive shell with `/en` route parity, localized navigation, footer, estimator, results, legal drafts, and reusable content-page patterns.
 - Durable internal navigation implemented with semantic anchors so routes work under the deployed Workers runtime as well as local development.
-- Focused estimator experience with minimal chrome, one progress treatment, accessible controls, and browser-only draft recovery across refreshes and language changes.
+- Focused estimator experience with minimal chrome, one progress treatment, accessible controls, and browser-session draft recovery across refreshes and language changes.
+- Exact-address entry with an explicit privacy boundary, a user-confirmed Leaflet/OpenStreetMap position, province fallback, and no geocoder or server-side address handling.
 - Routes for the homepage, estimator, results, education, methodology, project information, contact placeholder, source register, and draft legal notices.
 - Config-driven estimator questions and a replaceable `Estimator` interface.
 - Versioned prototype calculations isolated under `lib/calculator/`, with progressive residential-bill logic kept separate from interface components.
 - Base-case value calculated from solar electricity used within the home before considering surplus electricity.
-- Active August 2026 tariff reference: the residential schedule effective from May 2023, current Ft, service charge, and VAT. The announced September 2026 tariff is documented as an upcoming version and is not applied early.
-- Transparent installation-cost reference ranges based on observed 3, 5, and 10 kW packages, plus explicit production-degradation, maintenance, and electricity-price-escalation assumptions.
+- Date-selected residential tariffs: the schedule effective through August 2026 and the published September–December 2026 schedule, each with versioned Ft, service charge, VAT, and tests.
+- One public planning value for system size, production, price, savings, and supported payback. An “up to” ceiling appears only behind evidence gates, uses the same system and exclusions, and is capped at 20% above planning.
+- Transparent cash-price anchors based on observed 1.5, 3, 5, and 10 kWp packages, plus explicit production degradation, routine upkeep, a year-13 inverter reserve, and 0% tariff escalation.
+- Direct-use savings calculated as the difference between progressive monthly residential bills, not one flat baht-per-kWh multiplier.
+- Evidence confidence based on input quality, with unsupported TOU/private financial outputs and low-confidence payback withheld.
 - Conditional policy information kept beside—but outside—the base result: surplus purchases at ฿2.20/kWh, a 5 kW AC export limit, a 10-year term, and quota/utility approval requirements.
 - Royal Decree No. 805 documented as a personal-income-tax exemption/deduction based on actual qualifying expenditure, capped at ฿200,000 through 2028. It is not described as a refund and is excluded from calculations.
 - Direct primary-source links and a visible last-checked date on the Thai and English Methodology and Resources pages.
@@ -26,9 +30,17 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - The About page states what the prototype does today, what is inactive, the evidence model, and the deliberate initial Bangkok Metropolitan Region validation boundary.
 - One Worker with no database, storage binding, payment integration, or shared resource with Milly's.
 
+## Calculator and map documentation
+
+- `docs/CALCULATOR_METHOD.md` records formulas, constants, rounding, gates, and exclusions.
+- `docs/CALCULATOR_SOURCES.md` separates primary evidence from transitional assumptions.
+- `docs/ADDRESS_MAP_PRIVACY.md` records the exact browser/provider data flow and the reason public geocoding is not used.
+- `docs/UX_RESEARCH.md` records the question-flow, confidence, accessibility, and ethical-persuasion decisions.
+
 ## Intentionally deferred
 
 - A site-specific engineering design, structural assessment, shading study, equipment selection, or production guarantee.
+- Exact-address geocoding, autocomplete, satellite roof imagery, automated roof polygons, LiDAR, or a provider contract. The current marker is user-confirmed manually.
 - Final qualification rules, installer qualification, buyer-specific lead criteria, geographic coverage, and niche-specific claims that depend on interviews.
 - Lead pricing, exclusivity, replacement policy, response-time rules, and routing.
 - Real lead storage, notifications, CRM, OTP, fraud controls, payment, or automation.

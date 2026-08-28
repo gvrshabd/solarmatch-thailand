@@ -7,7 +7,7 @@ import { formatMoney } from '@/lib/format/numbers';
 export function SavingsChart({ currentBill, estimatedBill, locale = 'th' }: { currentBill: number; estimatedBill: number; locale?: Locale }) {
   const english = locale === 'en';
   const before = english ? 'Before solar' : 'ก่อนติดโซลาร์';
-  const after = english ? 'After solar (mid-range)' : 'หลังติดโซลาร์ (ช่วงกลาง)';
+  const after = english ? 'After solar (planning)' : 'หลังติดโซลาร์ (เพื่อวางแผน)';
   const data = [{ name: english ? 'Monthly bill' : 'ค่าไฟต่อเดือน', [before]: currentBill, [after]: estimatedBill }];
   return (
     <div className="chart-wrap" aria-hidden="true">

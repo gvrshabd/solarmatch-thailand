@@ -1,72 +1,36 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPin } from 'lucide-react';
 import type { Locale } from '@/config/i18n';
 import { localizedPath } from '@/config/i18n';
-import { localizedProvinceOptions } from '@/config/provinces';
+import { makeInitialLocation } from '@/lib/maps/provider';
 
 export function HeroEstimator({ locale = 'th' }: { locale?: Locale }) {
   const english = locale === 'en';
-  const provinces = localizedProvinceOptions(locale);
-  const [province, setProvince] = useState('bangkok');
-  const [bill, setBill] = useState(5000);
+  const [address, setAddress] = useState('');
   const [ready, setReady] = useState(false);
 
   useEffect(() => { queueMicrotask(() => setReady(true)); }, []);
 
   function startEstimate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const location = makeInitialLocation(address.trim());
     sessionStorage.removeItem('solarmatch:estimate-draft');
     sessionStorage.removeItem('solarmatch:estimate');
-    sessionStorage.setItem(
-      'solarmatch:starter',
-      JSON.stringify({ province, monthlyBillThb: bill }),
-    );
+    sessionStorage.setItem('solarmatch:starter', JSON.stringify({ version: 2, answers: { location, province: location.province }, step: 0 }));
     window.location.assign(localizedPath('/estimate', locale));
   }
 
   return (
-    <form className="hero-estimator" id="hero-estimator" onSubmit={startEstimate}>
+    <form className="hero-estimator hero-address-starter" id="hero-estimator" onSubmit={startEstimate}>
       <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}>
-      <div className="field-grid">
-        <label>
-          <span>{english ? 'Which province is the home in?' : 'บ้านอยู่จังหวัดไหน?'}</span>
-          <select value={province} onChange={(event) => setProvince(event.target.value)}>
-            {provinces.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-          </select>
+        <label htmlFor="hero-home-address">
+          <span>{english ? 'Where is the home you are considering for solar?' : 'บ้านที่จะติดโซลาร์อยู่ที่ไหน?'}</span>
+          <div className="hero-address-input"><MapPin aria-hidden="true" /><input id="hero-home-address" required minLength={5} maxLength={240} autoComplete="street-address" value={address} onChange={(event) => setAddress(event.target.value)} placeholder={english ? 'House number, street, district and province' : 'บ้านเลขที่ ถนน เขต/อำเภอ และจังหวัด'} /></div>
         </label>
-        <label>
-          <span>{english ? 'Average monthly electricity bill' : 'ค่าไฟเฉลี่ยต่อเดือน'}</span>
-          <div className="currency-input">
-            <span>฿</span>
-            <input
-              inputMode="numeric"
-              min="500"
-              max="50000"
-              step="100"
-              type="number"
-              value={bill}
-              onChange={(event) => setBill(Number(event.target.value))}
-              aria-describedby="bill-suffix"
-            />
-            <small id="bill-suffix">{english ? '/ month' : '/ เดือน'}</small>
-          </div>
-        </label>
-      </div>
-      <input
-        aria-label={english ? 'Adjust monthly electricity bill' : 'ปรับค่าไฟต่อเดือน'}
-        className="bill-slider"
-        min="500"
-        max="20000"
-        step="500"
-        type="range"
-        value={Math.min(bill, 20000)}
-        onChange={(event) => setBill(Number(event.target.value))}
-      />
-      <button className="button estimator-button" type="submit">
-        {english ? 'See your initial estimate' : 'ดูผลประเมินเบื้องต้น'} <ArrowRight size={19} aria-hidden="true" />
-      </button>
+        <p>{english ? 'The address stays in this browser. You will position the home on a map next.' : 'ที่อยู่จะอยู่ในเบราว์เซอร์นี้ และขั้นต่อไปให้คุณวางตำแหน่งบ้านบนแผนที่'}</p>
+        <button className="button estimator-button" type="submit">{english ? 'Continue to map' : 'ไปวางตำแหน่งบนแผนที่'} <ArrowRight aria-hidden="true" /></button>
       </fieldset>
     </form>
   );

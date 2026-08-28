@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: '%s | SolarMatch Thailand',
   },
   description:
-    'ประเมินขนาดระบบโซลาร์และช่วงเงินที่อาจประหยัดได้เบื้องต้น ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
+    'ประเมินขนาดระบบโซลาร์และตัวเลขประหยัดเบื้องต้นเพื่อวางแผน ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
   robots: { index: false, follow: true },
   icons: { icon: '/favicon.svg' },
   openGraph: {

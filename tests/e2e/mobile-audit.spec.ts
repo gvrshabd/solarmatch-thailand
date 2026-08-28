@@ -10,12 +10,16 @@ const routes = [
 ];
 
 const savedEstimate = {
-  province: 'bangkok', monthlyBillThb: 4500, daytimeUsage: 'medium', authority: 'owner',
-  propertyType: 'detached', roofKnown: false, shade: 'unknown', timing: 'research', energyInterest: 'solar',
+  province: 'bangkok',
+  location: { address: '99 Test Road, Bangkok', latitude: 13.7563, longitude: 100.5018, province: 'bangkok', source: 'manual-map', confirmed: true },
+  electricityInputKind: 'kwh', monthlyKwh: 900, consumptionPeriod: 'average-12', tariffType: 'standard',
+  daytimePattern: 'work-or-ac', daytimeLoads: ['air-conditioning', 'home-office'], acDaytimeHours: '2-4',
+  roofMaterial: 'concrete-tile', shade: 'none', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
+  await page.route('https://tile.openstreetmap.org/**', (route) => route.abort());
 });
 
 for (const width of widths) {
@@ -65,6 +69,7 @@ test('the 320px header, menu, language control, and estimator controls remain to
 test('results keep dense data inside an explicit accessible scroll region', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.goto('/en/estimate/results');
+  await page.locator('.lifetime-details > summary').click();
   const region = page.getByRole('region', { name: 'Scrollable cumulative-cost data table' });
   await expect(region).toBeVisible();
   const metrics = await region.evaluate((element) => {
@@ -118,7 +123,7 @@ test('result card groups align on desktop and return to natural height on mobile
     expect(new Set(heights).size, `${selector} desktop heights: ${heights.join(', ')}`).toBe(1);
   }
   await expect(page.locator('.result-metrics-v2')).not.toContainText(/\d+\.\d{4,}/);
-  await expect(page.locator('.result-metrics-v2')).toContainText('to more than 25 years');
+  await expect(page.locator('.result-metrics-v2')).toContainText(/About \d+(?:\.\d)? years|Needs more information/);
 
   await page.setViewportSize({ width: 320, height: 844 });
   await page.goto('/en/estimate/results');

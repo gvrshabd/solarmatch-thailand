@@ -49,6 +49,14 @@ export const september2026ResidentialTariff: ResidentialTariff = {
   source: 'https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf',
 };
 
+export const residentialTariffs = [activeResidentialTariff, september2026ResidentialTariff] as const;
+
+export function selectResidentialTariff(billingDate = new Date()) {
+  const isoDate = billingDate.toISOString().slice(0, 10);
+  return [...residentialTariffs].reverse().find((tariff) => isoDate >= tariff.effectiveFrom && isoDate <= tariff.effectiveTo)
+    ?? (isoDate > september2026ResidentialTariff.effectiveTo ? september2026ResidentialTariff : activeResidentialTariff);
+}
+
 export function calculateResidentialBill(kwh: number, tariff = activeResidentialTariff) {
   const usage = Math.max(0, kwh);
   let previousLimit = 0;

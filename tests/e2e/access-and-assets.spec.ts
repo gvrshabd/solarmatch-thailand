@@ -10,14 +10,10 @@ const contentRoutes = [
 
 const savedEstimate = {
   province: 'bangkok',
-  monthlyBillThb: 4500,
-  daytimeUsage: 'medium',
-  authority: 'owner',
-  propertyType: 'detached',
-  roofKnown: false,
-  shade: 'unknown',
-  timing: 'research',
-  energyInterest: 'solar',
+  location: { address: '99 Test Road, Bangkok', latitude: 13.7563, longitude: 100.5018, province: 'bangkok', source: 'manual-map', confirmed: true },
+  electricityInputKind: 'kwh', monthlyKwh: 900, consumptionPeriod: 'average-12', tariffType: 'standard',
+  daytimePattern: 'work-or-ac', daytimeLoads: ['air-conditioning', 'home-office'], acDaytimeHours: '2-4',
+  roofMaterial: 'concrete-tile', shade: 'none', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
 function desktopOnly(testInfo: TestInfo) {
@@ -70,7 +66,7 @@ test('SSR metadata, language boundaries, images, and the disabled lead endpoint 
   const english = await (await request.get('/en/methodology')).text();
   expect(english).toContain('lang="en" data-locale="en"');
   expect(english).toMatch(/hrefLang="th-TH"/i);
-  expect(english).toContain('We show assumptions');
+  expect(english).toContain('One planning estimate, with the method kept open');
 
   const home = await (await request.get('/')).text();
   expect(home).toContain('/images/solar-home-real-768.webp 768w');
@@ -95,6 +91,7 @@ test('SSR metadata, language boundaries, images, and the disabled lead endpoint 
 test('all Thai and English content routes have no serious or critical axe findings', async ({ page }, testInfo) => {
   desktopOnly(testInfo);
   test.setTimeout(180_000);
+  await page.route('https://tile.openstreetmap.org/**', (route) => route.abort());
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   const failures: string[] = [];
 

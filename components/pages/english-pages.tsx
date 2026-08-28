@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { HeroEstimator } from '@/components/home/hero-estimator';
 import { AboutContent } from '@/components/pages/about-content';
+import { MethodologyContent } from '@/components/pages/methodology-content';
 import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
 import { PrototypeNotice } from '@/components/site/prototype-notice';
@@ -110,7 +111,7 @@ function EnglishHowItWorks() {
   return <main><PageHero eyebrow="How it works" title="Understand your home before requesting quotes"><p>SolarMatch breaks complicated information into three stages, showing what is known, what still needs checking, and what to ask an installer.</p></PageHero>
     <section className="site-shell numbered-sections">
       <article><span>01</span><ClipboardList /><div><h2>Start with available information</h2><p>Answer what you know about province, bills, usage, and the roof. There is no need to guess or upload documents.</p></div></article>
-      <article><span>02</span><Calculator /><div><h2>View an estimated range</h2><p>The prototype assumptions produce ranges for system size, production, and possible savings, together with a confidence level.</p></div></article>
+      <article><span>02</span><Calculator /><div><h2>View a practical planning figure</h2><p>The prototype produces a starting system size, production estimate, and savings figure together with evidence confidence and the best next checks.</p></div></article>
       <article><span>03</span><MessagesSquare /><div><h2>Choose your own next step</h2><p>Results always come before contact. In the future, data would only be shared when a user actively chooses to continue under clear consent.</p></div></article>
     </section>
     <section className="content-cta"><div className="site-shell"><h2>Ready to try it with your electricity bill?</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
@@ -121,12 +122,12 @@ function EnglishSolarGuide() {
   return <main><PageHero eyebrow="Solar guide" title="Rooftop solar starts with electricity use—not roof area alone"><p>The right system depends on several factors. This guide introduces the key ideas without promoting a brand or installer.</p></PageHero>
     <section className="site-shell guide-layout"><nav className="guide-index" aria-label="Contents"><strong>On this page</strong><a href="#daytime">Daytime electricity</a><a href="#roof">Roof and shade</a><a href="#size">System size</a><a href="#quotes">Comparing quotes</a></nav>
       <article className="prose guide-prose"><section id="daytime"><p className="eyebrow">01 · Behaviour</p><h2>Daytime electricity use matters</h2><p>Panels generate while the sun is shining. Homes using air conditioning, pumps, or work-from-home equipment during the day may consume more solar energy directly than homes whose main demand occurs at night.</p></section><section id="roof"><p className="eyebrow">02 · Site conditions</p><h2>Area does not tell the whole story</h2><p>Orientation, pitch, material, shade from trees or buildings, and structural strength all matter. A professional survey is still required before a real design.</p></section><section id="size"><p className="eyebrow">03 · Sizing</p><h2>Bigger is not always more suitable</h2><p>A system much larger than the home’s usage pattern may produce energy that creates less value than expected, particularly where export rules and rates are limited.</p></section><section id="quotes"><p className="eyebrow">04 · Comparing</p><h2>Ask quotations to explain the same things</h2><p>Compare DC and AC size, equipment models, warranties, production assumptions, structural work, installation standards, monitoring, and exclusions—not only the total on the first page.</p><div className="callout"><strong>Important</strong><p>SolarMatch has not vetted or endorsed any installer and does not yet operate a live quote-comparison service.</p></div></section></article>
-    </section><section className="content-cta"><div className="site-shell"><h2>Turn your bill into a possible system-size range</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
+    </section><section className="content-cta"><div className="site-shell"><h2>Turn your bill into a practical starting system size</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
   </main>;
 }
 
 function EnglishMethodology() {
-  return (
+  const legacyMethodology = (
     <main>
       <PageHero eyebrow="Methodology · Prototype" title="We show assumptions because useful figures should be traceable">
         <p>This result is an estimated range for asking better questions before requesting a quotation. It is not an engineering design, quotation, or savings guarantee.</p>
@@ -188,6 +189,8 @@ function EnglishMethodology() {
       </section>
     </main>
   );
+  void legacyMethodology;
+  return <MethodologyContent locale="en" />;
 }
 
 function EnglishContact() {
@@ -207,12 +210,14 @@ const resources = [
   { name: 'PEA · May 2023 electricity tariff (PDF)', note: 'Base residential tariff referenced for August 2026', href: 'https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf' },
   { name: 'PEA · September 2026 electricity tariff (PDF)', note: 'Residential tariff structure announced to take effect from September 2026', href: 'https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf' },
   { name: 'Energy Regulatory Commission · Automatic Ft', note: 'Official source for checking current fuel-adjustment charges and periods', href: 'https://www.erc.or.th/th/automatic' },
+  { name: 'European Commission JRC · PVGIS', note: 'Solar-resource evidence used to establish the province-level production anchors', href: 'https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en' },
+  { name: 'OpenStreetMap · Tile policy', note: 'Terms for the map used to confirm a location without sending typed address text to a geocoder', href: 'https://operations.osmfoundation.org/policies/tiles/' },
   { name: 'Greener Bangkok · Home solar installation guide', note: 'Reference information on production, roof review, and installation steps', href: 'https://greener.bangkok.go.th/en/solarcity/solar-installation-guide-for-homes/' },
-  { name: 'GRoof · May 2026 package brochure (PDF)', note: 'Package-price input used to build a market range; not an installer endorsement', href: 'https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf' },
+  { name: 'GRoof · May 2026 package brochure (PDF)', note: 'Package-price input used to build a planning anchor; not an installer endorsement', href: 'https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf' },
   { name: 'PEA Shopping · 5 kW Standard package', note: 'One observed market-price reference for a 5 kW system', href: 'https://peashopping.com/product/pea-solar-5kw-1-phase-standard-package/' },
-  { name: 'PEA Shopping · 5 kW Premium package', note: 'An upper-range price reference for a 5 kW system', href: 'https://peashopping.com/product/pea-solar-5kw-1-phase-premium-package/' },
+  { name: 'PEA Shopping · 5 kW Premium package', note: 'Another observed market-price reference for a 5 kW system', href: 'https://peashopping.com/product/pea-solar-5kw-1-phase-premium-package/' },
   { name: 'PEA Shopping · 10 kW Standard package', note: 'One observed market-price reference for a 10 kW system', href: 'https://peashopping.com/product/pea-solar-10kw-3-phase-standard-package/' },
-  { name: 'PEA Shopping · 10 kW Premium package', note: 'An upper-range price reference for a 10 kW system', href: 'https://peashopping.com/product/pea-solar-10kw-3-phase-premium-package/' },
+  { name: 'PEA Shopping · 10 kW Premium package', note: 'Another observed market-price reference for a 10 kW system', href: 'https://peashopping.com/product/pea-solar-10kw-3-phase-premium-package/' },
 ];
 
 function EnglishResources() {
@@ -238,7 +243,7 @@ function EnglishResources() {
 }
 
 function EnglishPrivacy() {
-  return <LegalShell locale="en" title="Privacy notice" summary="This page describes the principles intended for any future live system. The current contact form is a prototype and does not store submissions."><h2>1. Prototype status</h2><p>Estimate answers are kept in your browser’s session storage to produce a result on your device. The current contact form validates its format locally in the browser and immediately discards the values without sending them to a server. They are not stored, forwarded, or used for marketing.</p><h2>2. Information that may be collected in a live service</h2><p>Name, phone number, preferred contact channel and time, estimate answers, and consent records. A data controller, retention period, and recipients must be defined before this is enabled.</p><h2>3. Intended purposes</h2><p>Producing an estimate, responding to a user request, and—only with explicit consent—sending necessary information to an identified service provider.</p><h2>4. Your rights</h2><p>A live service must provide a channel to request access, correction, consent withdrawal, deletion, or objection under applicable law.</p><h2>5. Still to be defined</h2><p>The responsible legal entity, address, privacy contact, legal bases, processors, retention periods, transfers, and data-subject request procedures.</p></LegalShell>;
+  return <LegalShell locale="en" title="Privacy notice" summary="The estimator keeps its answers in your browser session. It has no SolarMatch address database, live lead submission, analytics or advertising."><h2>1. Address and map</h2><p>The exact address you type, confirmed coordinates, province and estimator answers are kept in session storage in your browser so the journey can survive refreshes and language changes. They are not sent to SolarMatch, an installer, a lead database, analytics, error reporting, or a geocoding search service. They are not placed in the page URL.</p><p>The map uses standard OpenStreetMap tiles. When the map is opened, OpenStreetMap receives normal web-request data including your IP address, browser user agent and referrer, plus the map-tile coordinates needed for the area you view. It does not receive the address text you typed from SolarMatch. The viewed map area may nevertheless indicate an approximate location.</p><h2>2. Current location</h2><p>The browser asks for location permission only after you select “Use my current location.” The position is used locally to move the marker. Opening map tiles around that position sends the viewed map area to OpenStreetMap as described above.</p><h2>3. Clearing temporary information</h2><p>Select “Clear and start over” in the estimator to remove the estimate, address and map position. Closing the browser session also clears session storage according to your browser’s behaviour.</p><h2>4. Contact prototype</h2><p>The current contact form validates locally and immediately discards its values without a network request. No name, phone number, LINE detail or consent answer is persisted.</p><h2>5. Before a live service</h2><p>A real service still needs an identified data controller, legal bases, recipients, retention periods, security review, data-subject procedures and final PDPA review before any address or lead information can be transmitted or stored.</p></LegalShell>;
 }
 
 function EnglishTerms() {
@@ -246,7 +251,7 @@ function EnglishTerms() {
 }
 
 function EnglishCookies() {
-  return <LegalShell locale="en" title="Cookies and browser storage" summary="The prototype has no analytics or advertising, so it does not display an unnecessary consent banner."><h2>1. What is used now</h2><p>The estimator uses session storage to carry answers from the estimate page to the results page. This information remains in the browser session and is not a SolarMatch database.</p><h2>2. What is not active</h2><p>There are no advertising cookies, analytics pixels, heatmaps, or cross-site tracking tools in this version.</p><h2>3. If this changes</h2><p>Before any non-essential tool is enabled, the website must describe its purpose, duration, provider, and user-choice mechanism.</p><h2>4. Removing temporary information</h2><p>You can close the browser tab or window to clear session storage according to your browser’s behaviour.</p></LegalShell>;
+  return <LegalShell locale="en" title="Cookies and browser storage" summary="The prototype uses browser session storage for estimator continuity and has no analytics or advertising cookies."><h2>1. What is kept locally</h2><p>The estimator keeps the typed address, confirmed map coordinates, province, electricity answers, roof answers and result in session storage. This lets refresh and language switching preserve the journey. It is not a SolarMatch database.</p><h2>2. What is not active</h2><p>There are no advertising cookies, analytics pixels, heatmaps, cross-site trackers, CRM integrations or server-side lead storage.</p><h2>3. Third-party map requests</h2><p>Opening the map requests OpenStreetMap tiles for the visible area. Those are ordinary third-party web requests governed by the OpenStreetMap Foundation’s terms and privacy policy; the typed address is not included in them.</p><h2>4. Removing temporary information</h2><p>Use “Clear and start over” to remove estimator storage immediately, or close the browser session according to your browser’s behaviour.</p></LegalShell>;
 }
 
 export function EnglishPage({ slug }: { slug: string }) {
