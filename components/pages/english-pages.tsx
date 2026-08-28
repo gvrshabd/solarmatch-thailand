@@ -7,18 +7,17 @@ import {
   ClipboardCheck,
   ClipboardList,
   ExternalLink,
-  Eye,
   FileSearch,
   Mail,
   MessageCircle,
   MessagesSquare,
   Phone,
-  Scale,
   ShieldCheck,
   SunMedium,
   Zap,
 } from 'lucide-react';
 import { HeroEstimator } from '@/components/home/hero-estimator';
+import { AboutContent } from '@/components/pages/about-content';
 import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
 import { PrototypeNotice } from '@/components/site/prototype-notice';
@@ -104,10 +103,7 @@ function EnglishHome() {
 }
 
 function EnglishAbout() {
-  return <main><PageHero eyebrow="About" title="A place for homeowners to think before being asked to decide"><p>SolarMatch Thailand is a prototype exploring whether a neutral explanation of solar needs can improve conversations between homeowners and installers.</p></PageHero>
-    <section className="site-shell about-grid"><article><Eye /><h2>Clarity first</h2><p>Show what is known, what is assumed, and what is not ready for real-world use.</p></article><article><Scale /><h2>No conclusion beyond the evidence</h2><p>Use ranges and never claim a system is “best” without a site survey.</p></article><article><ShieldCheck /><h2>Consent before any referral</h2><p>People should see their result first and know exactly what would be sent, to whom, and why.</p></article></section>
-    <section className="founder-note"><div className="site-shell"><p className="eyebrow">Project status</p><h2>Being built alongside market interviews</h2><p>Lead qualification, pricing, matching, and installer criteria are intentionally deferred until there is evidence from homeowners and potential buyers.</p><Link className="text-link" href={en('/methodology')}>See how prototype assumptions are separated from validated inputs <ArrowRight size={18} /></Link></div></section>
-  </main>;
+  return <AboutContent locale="en" />;
 }
 
 function EnglishHowItWorks() {

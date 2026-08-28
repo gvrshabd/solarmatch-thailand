@@ -16,7 +16,7 @@ export function thaiMetadata(title: string, path = ''): Metadata {
       locale: 'th_TH',
       url: thaiUrl,
       title,
-      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'AI-generated illustrative rooftop-solar scene for the SolarMatch Thailand prototype' }],
+      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Solar panels on a tiled residential roof with palm trees in the background' }],
     },
   };
 }

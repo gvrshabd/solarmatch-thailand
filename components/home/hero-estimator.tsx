@@ -4,9 +4,11 @@ import { FormEvent, useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Locale } from '@/config/i18n';
 import { localizedPath } from '@/config/i18n';
+import { localizedProvinceOptions } from '@/config/provinces';
 
 export function HeroEstimator({ locale = 'th' }: { locale?: Locale }) {
   const english = locale === 'en';
+  const provinces = localizedProvinceOptions(locale);
   const [province, setProvince] = useState('bangkok');
   const [bill, setBill] = useState(5000);
   const [ready, setReady] = useState(false);
@@ -31,11 +33,7 @@ export function HeroEstimator({ locale = 'th' }: { locale?: Locale }) {
         <label>
           <span>{english ? 'Which province is the home in?' : 'บ้านอยู่จังหวัดไหน?'}</span>
           <select value={province} onChange={(event) => setProvince(event.target.value)}>
-            <option value="bangkok">{english ? 'Bangkok' : 'กรุงเทพมหานคร'}</option>
-            <option value="nonthaburi">{english ? 'Nonthaburi' : 'นนทบุรี'}</option>
-            <option value="pathum-thani">{english ? 'Pathum Thani' : 'ปทุมธานี'}</option>
-            <option value="samut-prakan">{english ? 'Samut Prakan' : 'สมุทรปราการ'}</option>
-            <option value="other">{english ? 'Another province' : 'จังหวัดอื่น'}</option>
+            {provinces.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
           </select>
         </label>
         <label>

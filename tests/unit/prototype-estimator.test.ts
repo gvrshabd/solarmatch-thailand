@@ -39,4 +39,19 @@ describe('prototypeEstimator', () => {
     expect(high.estimatedExportRevenueThb).toBeNull();
     expect(low.estimatedExportRevenueThb).toBeNull();
   });
+
+  it('keeps payback outputs finite, positive, and ordered across supported input extremes', () => {
+    const bills = [500, 3500, 10_000, 50_000];
+    const usage = ['low', 'medium', 'high'] as const;
+    const roofStates = [true, false];
+
+    for (const monthlyBillThb of bills) for (const daytimeUsage of usage) for (const roofKnown of roofStates) {
+      const payback = prototypeEstimator.calculate({ ...base, monthlyBillThb, daytimeUsage, roofKnown }).estimatedPaybackYears;
+      if (!payback) continue;
+      expect(Number.isFinite(payback.min)).toBe(true);
+      expect(Number.isFinite(payback.max)).toBe(true);
+      expect(payback.min).toBeGreaterThan(0);
+      expect(payback.max).toBeGreaterThanOrEqual(payback.min);
+    }
+  });
 });

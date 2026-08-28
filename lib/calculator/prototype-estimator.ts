@@ -1,6 +1,7 @@
 import { activeResidentialTariff, calculateResidentialBill, estimateKwhFromBill } from '@/config/electricity-tariffs';
 import { solarAssumptions } from '@/config/solar-assumptions';
 import type { EstimateAnswers, EstimateResult, Estimator, LifetimeCostPoint, Range } from './types';
+import { formatNumber } from '@/lib/format/numbers';
 
 function round(value: number, step = 1) {
   return Math.round(value / step) * step;
@@ -143,7 +144,7 @@ export const prototypeEstimator: Estimator = {
       confidence: unknownRoof ? 'low' : answers.daytimeUsage === 'unknown' ? 'medium' : 'high',
       assumptionsUsed: [
         'คำนวณมูลค่าจากส่วนต่างของบิลอัตราก้าวหน้าก่อนและหลังใช้ไฟโซลาร์เอง',
-        `ผลผลิตอ้างอิงประมาณ ${solarAssumptions.referenceAnnualYieldKwhPerKwp.toLocaleString('th-TH')} kWh ต่อ kWp ต่อปี หลังเผื่อการสูญเสียของระบบ`,
+        `ผลผลิตอ้างอิงประมาณ ${formatNumber(solarAssumptions.referenceAnnualYieldKwhPerKwp, 'th')} kWh ต่อ kWp ต่อปี หลังเผื่อการสูญเสียของระบบ`,
         'ราคาติดตั้งเป็นช่วงอ้างอิงแพ็กเกจที่เผยแพร่ ไม่ใช่ใบเสนอราคา',
         'ผลหลักไม่รวมรายได้ขายไฟส่วนเกินหรือสิทธิประโยชน์ทางภาษี',
         'แบบจำลองระยะยาวไม่สมมติว่าค่าไฟเพิ่มขึ้น และเผื่อการเสื่อมของแผง 0.5% ต่อปี',

@@ -1,3 +1,5 @@
+import { localizedProvinceOptions } from './provinces';
+
 export type EstimateQuestionType = 'choice' | 'number' | 'roof';
 
 export type EstimateOption = {
@@ -24,13 +26,7 @@ export const estimateFlow: EstimateQuestion[] = [
     type: 'choice',
     required: true,
     analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'bangkok', label: 'กรุงเทพมหานคร' },
-      { value: 'nonthaburi', label: 'นนทบุรี' },
-      { value: 'pathum-thani', label: 'ปทุมธานี' },
-      { value: 'samut-prakan', label: 'สมุทรปราการ' },
-      { value: 'other', label: 'จังหวัดอื่น' },
-    ],
+    options: localizedProvinceOptions('th'),
   },
   {
     id: 'monthlyBillThb',
@@ -129,13 +125,7 @@ export const estimateFlowEn: EstimateQuestion[] = [
     type: 'choice',
     required: true,
     analyticsEvent: 'estimate_step_completed',
-    options: [
-      { value: 'bangkok', label: 'Bangkok' },
-      { value: 'nonthaburi', label: 'Nonthaburi' },
-      { value: 'pathum-thani', label: 'Pathum Thani' },
-      { value: 'samut-prakan', label: 'Samut Prakan' },
-      { value: 'other', label: 'Another province' },
-    ],
+    options: localizedProvinceOptions('en'),
   },
   {
     id: 'monthlyBillThb',

@@ -73,18 +73,22 @@ test('SSR metadata, language boundaries, images, and the disabled lead endpoint 
   expect(english).toContain('We show assumptions');
 
   const home = await (await request.get('/')).text();
-  expect(home).toContain('/images/solar-home-ai-768.webp 768w');
+  expect(home).toContain('/images/solar-home-real-768.webp 768w');
   expect(home).not.toContain('solar-home-hero.jpg');
+  expect(home).not.toContain('solar-home-ai-');
   expect(home).not.toMatch(/<img[^>]+src="https?:\/\//i);
 
-  const largeImage = await request.get('/images/solar-home-ai-1440.webp');
+  const largeImage = await request.get('/images/solar-home-real-1440.webp');
   expect(largeImage.status()).toBe(200);
   expect(largeImage.headers()['content-type']).toContain('image/webp');
   expect((await largeImage.body()).byteLength).toBeLessThan(350_000);
   expect((await request.get('/images/solar-home-hero.jpg')).status()).toBe(404);
+  expect((await request.get('/images/solar-home-ai-1440.webp')).status()).toBe(404);
+  expect((await request.get('/images/solar-home-ai-768.webp')).status()).toBe(404);
 
   const disabledLead = await request.post('/api/leads', { data: { name: 'not-read' } });
   expect(disabledLead.status()).toBe(410);
+  expect(disabledLead.headers()['cache-control']).toBe('no-store');
   expect(await disabledLead.json()).toMatchObject({ code: 'LEAD_SUBMISSION_DISABLED', persisted: false });
 });
 
@@ -95,12 +99,13 @@ test('all Thai and English content routes have no serious or critical axe findin
   const failures: string[] = [];
 
   for (const route of contentRoutes) {
-    await page.goto(route, { waitUntil: 'domcontentloaded' });
+    await page.goto(route, { waitUntil: 'load' });
+    await page.evaluate(() => document.fonts.ready);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     const blocking = results.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''));
-    if (blocking.length) failures.push(`${route}: ${blocking.map((item) => `${item.id} (${item.nodes.length})`).join(', ')}`);
+    if (blocking.length) failures.push(`${route}: ${blocking.map((item) => `${item.id} (${item.nodes.length}: ${item.nodes.map((node) => node.target.join(' ')).join(', ')})`).join(', ')}`);
   }
 
   expect(failures, failures.join('\n')).toEqual([]);

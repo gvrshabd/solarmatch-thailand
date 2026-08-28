@@ -11,6 +11,7 @@ import {
 import { HeroEstimator } from '@/components/home/hero-estimator';
 import Link from '@/components/site/internal-link';
 import { PrototypeNotice } from '@/components/site/prototype-notice';
+import { SectionHeading } from '@/components/ui/section-heading';
 import { localizedPath, type Locale } from '@/config/i18n';
 
 type HomeCopy = {
@@ -56,8 +57,8 @@ const copy: Record<Locale, HomeCopy> = {
     titleLead: 'ค่าไฟบ้านคุณ',
     titleEmphasis: 'เหมาะกับโซลาร์แค่ไหน?',
     lede: 'ประเมินขนาดระบบและช่วงเงินที่อาจประหยัดได้เบื้องต้น ก่อนตัดสินใจคุยกับผู้ติดตั้ง',
-    photoAlt: 'บ้านพักอาศัยที่ติดตั้งแผงโซลาร์บนหลังคา ท่ามกลางต้นไม้และแสงธรรมชาติ',
-    photoCaption: 'ภาพจำลองสร้างด้วย AI เพื่อประกอบเนื้อหา · สภาพหลังคาจริงต้องสำรวจหน้างาน',
+    photoAlt: 'แผงโซลาร์บนหลังคากระเบื้องของบ้านพักอาศัย โดยมีต้นปาล์มอยู่ด้านหลัง',
+    photoCaption: 'ภาพประกอบจากการติดตั้งที่อยู่อาศัยจริง · หลังคาของคุณยังต้องสำรวจหน้างาน',
     example: 'ตัวอย่างช่วงผลประเมิน',
     exampleNote: 'ไม่ใช่คำสัญญาหรือใบเสนอราคา',
     trust: ['ดูผลก่อนกรอกเบอร์', 'ไม่ต้องอัปโหลดบิล', 'ไม่มีค่าใช้จ่ายสำหรับเจ้าของบ้าน'],
@@ -81,7 +82,7 @@ const copy: Record<Locale, HomeCopy> = {
     previewDisclaimer: 'ตัวเลขตัวอย่างเพื่อแสดงรูปแบบหน้าจอ ไม่ใช่ผลของบ้านคุณ',
     previewCta: 'ประเมินจากค่าไฟของฉัน',
     evidenceEyebrow: 'สิ่งที่ตรวจสอบได้ตอนนี้',
-    evidenceTitle: 'สร้างความเชื่อมั่นด้วยวิธีทำงาน ไม่ใช่ตัวเลขแต่งขึ้น',
+    evidenceTitle: 'เชื่อมั่นในวิธีทำงาน ไม่ใช่คำอ้างความนิยม',
     evidenceBody: 'SolarMatch ยังอยู่ในระยะต้นแบบ จึงไม่แสดงรีวิว จำนวนลูกค้า หรือพันธมิตรที่ยังไม่มีหลักฐาน',
     evidence: [
       { title: 'ผลมาก่อนข้อมูลติดต่อ', body: 'เห็นข้อมูลประมาณการก่อนตัดสินใจว่าจะกรอกเบอร์หรือไม่' },
@@ -106,8 +107,8 @@ const copy: Record<Locale, HomeCopy> = {
     titleLead: 'Is rooftop solar',
     titleEmphasis: 'a good fit for your home?',
     lede: 'See an initial system-size and possible savings range before deciding whether to speak with an installer.',
-    photoAlt: 'A residential home with rooftop solar panels surrounded by greenery in natural daylight',
-    photoCaption: 'AI-generated illustrative scene · your roof still requires a site survey',
+    photoAlt: 'Solar panels on a tiled residential roof with palm trees in the background',
+    photoCaption: 'Illustrative residential solar installation · your roof still requires a site survey',
     example: 'Example estimate range',
     exampleNote: 'Not a promise or quotation',
     trust: ['See results before entering a phone number', 'No bill upload required', 'Free for homeowners'],
@@ -131,7 +132,7 @@ const copy: Record<Locale, HomeCopy> = {
     previewDisclaimer: 'Example figures demonstrate the interface; they are not an estimate for your home.',
     previewCta: 'Estimate from my bill',
     evidenceEyebrow: 'What you can verify today',
-    evidenceTitle: 'Trust the process—not invented popularity',
+    evidenceTitle: 'Trust the process, not popularity claims',
     evidenceBody: 'SolarMatch is still a prototype, so it does not display testimonials, customer counts, or installer partners that have not been validated.',
     evidence: [
       { title: 'Results before contact details', body: 'Review useful preliminary information before deciding whether to enter a phone number.' },
@@ -170,26 +171,28 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
             <PrototypeNotice compact locale={locale} />
           </div>
           <figure className="hero-photo">
-            <picture>
-              <source
-                type="image/webp"
-                srcSet="/images/solar-home-ai-768.webp 768w, /images/solar-home-ai-1440.webp 1440w"
-                sizes="(max-width: 700px) 100vw, (max-width: 980px) 67vw, 58vw"
-              />
-              <img
-                src="/images/solar-home-ai-1440.webp"
-                srcSet="/images/solar-home-ai-768.webp 768w, /images/solar-home-ai-1440.webp 1440w"
-                sizes="(max-width: 700px) 100vw, (max-width: 980px) 67vw, 58vw"
-                width="1440"
-                height="960"
-                alt={text.photoAlt}
-                fetchPriority="high"
-                decoding="async"
-              />
-            </picture>
+            <div className="hero-photo-frame">
+              <picture>
+                <source
+                  type="image/webp"
+                  srcSet="/images/solar-home-real-768.webp 768w, /images/solar-home-real-1440.webp 1440w"
+                  sizes="(max-width: 840px) 100vw, 56vw"
+                />
+                <img
+                  src="/images/solar-home-real-1440.webp"
+                  srcSet="/images/solar-home-real-768.webp 768w, /images/solar-home-real-1440.webp 1440w"
+                  sizes="(max-width: 840px) 100vw, 56vw"
+                  width="1440"
+                  height="960"
+                  alt={text.photoAlt}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </picture>
+              <div className="sunline" aria-hidden="true" />
+              <div className="result-peek result-peek-v2"><span>{text.example}</span><strong>3–5 <small>kW</small></strong><p>{text.exampleNote}</p></div>
+            </div>
             <figcaption>{text.photoCaption}</figcaption>
-            <div className="sunline" aria-hidden="true" />
-            <div className="result-peek result-peek-v2"><span>{text.example}</span><strong>3–5 <small>kW</small></strong><p>{text.exampleNote}</p></div>
           </figure>
           <div className="hero-estimator-panel">
             <HeroEstimator locale={locale} />
@@ -206,7 +209,7 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
 
       <section className="evidence-section"><div className="site-shell evidence-grid"><div className="evidence-heading"><p className="eyebrow">{text.evidenceEyebrow}</p><h2>{text.evidenceTitle}</h2><p>{text.evidenceBody}</p></div><div className="evidence-list">{text.evidence.map((item, index) => <article key={item.title}>{index === 0 ? <FileSearch /> : <ShieldCheck />}<div><h3>{item.title}</h3><p>{item.body}</p></div></article>)}</div></div></section>
 
-      <section className="faq-section"><div className="site-shell faq-grid"><div><p className="eyebrow">{text.faqEyebrow}</p><h2>{text.faqTitle}</h2></div><div className="faq-list">{text.faq.map((item, index) => <details key={item.question} open={index === 0}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</div></div></section>
+      <section className="faq-section"><div className="site-shell faq-grid"><SectionHeading eyebrow={text.faqEyebrow} title={text.faqTitle} /><div className="faq-list">{text.faq.map((item, index) => <details key={item.question} open={index === 0}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</div></div></section>
 
       <section className="final-cta"><div className="site-shell final-cta-inner"><div><h2>{text.finalTitle}</h2><p>{text.finalBody}</p></div><Link className="button button-gold" href={link('/estimate')}>{text.finalCta} <ArrowRight size={18} aria-hidden="true" /></Link></div></section>
     </main>

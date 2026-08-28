@@ -18,9 +18,9 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
 });
 
-test('every important Thai and English route avoids document overflow at required widths', async ({ page }) => {
-  test.setTimeout(240_000);
-  for (const width of widths) {
+for (const width of widths) {
+  test(`every important Thai and English route avoids document overflow at ${width}px`, async ({ page }) => {
+    test.setTimeout(180_000);
     await page.setViewportSize({ width, height: width === 768 ? 1024 : 844 });
     for (const route of routes) {
       await page.goto(route, { waitUntil: 'domcontentloaded' });
@@ -31,8 +31,8 @@ test('every important Thai and English route avoids document overflow at require
       }));
       expect(layout.scrollWidth, `${route} at ${width}px`).toBeLessThanOrEqual(layout.clientWidth + 1);
     }
-  }
-});
+  });
+}
 
 test('the 320px header, menu, language control, and estimator controls remain touch-friendly', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
@@ -88,8 +88,8 @@ test('mobile hero imagery is local, responsive, disclosed, and collision-free', 
     const figure = page.locator('.hero-photo');
     const image = figure.locator('img');
     await expect(image).toBeVisible();
-    await expect(image).toHaveAttribute('srcset', /solar-home-ai-768\.webp 768w/);
-    await expect(figure.locator('figcaption')).toContainText(route === '/' ? 'AI' : 'AI-generated');
+    await expect(image).toHaveAttribute('srcset', /solar-home-real-768\.webp 768w/);
+    await expect(figure.locator('figcaption')).toContainText(route === '/' ? 'ภาพประกอบ' : 'Illustrative');
     const overlap = await figure.evaluate((element) => {
       const caption = element.querySelector('figcaption')?.getBoundingClientRect();
       const card = element.querySelector('.result-peek')?.getBoundingClientRect();
@@ -97,7 +97,33 @@ test('mobile hero imagery is local, responsive, disclosed, and collision-free', 
       return !(caption.right <= card.left || caption.left >= card.right || caption.bottom <= card.top || caption.top >= card.bottom);
     });
     expect(overlap, `${route} caption and example card`).toBe(false);
+
+    const sectionOverlap = await page.locator('.hero-editorial').evaluate((element) => {
+      const photo = element.querySelector('.hero-photo')?.getBoundingClientRect();
+      const estimator = element.querySelector('.hero-estimator-panel')?.getBoundingClientRect();
+      if (!photo || !estimator) return true;
+      return !(photo.right <= estimator.left || photo.left >= estimator.right || photo.bottom <= estimator.top || photo.top >= estimator.bottom);
+    });
+    expect(sectionOverlap, `${route} photo and estimator`).toBe(false);
   }
+});
+
+test('result card groups align on desktop and return to natural height on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 900 });
+  await page.goto('/en/estimate/results');
+  for (const selector of ['.result-metrics-v2 article', '.energy-flow-grid article']) {
+    const cards = page.locator(selector);
+    await expect(cards).not.toHaveCount(0);
+    const heights = await cards.evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().height)));
+    expect(new Set(heights).size, `${selector} desktop heights: ${heights.join(', ')}`).toBe(1);
+  }
+  await expect(page.locator('.result-metrics-v2')).not.toContainText(/\d+\.\d{4,}/);
+  await expect(page.locator('.result-metrics-v2')).toContainText('to more than 25 years');
+
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto('/en/estimate/results');
+  const mobileRows = await page.locator('.result-metrics-v2 article').evaluateAll((elements) => elements.map((element) => getComputedStyle(element).height));
+  expect(mobileRows.every((height) => height !== '0px')).toBe(true);
 });
 
 test('landscape menus remain reachable and reduced-motion preferences are respected', async ({ page }) => {

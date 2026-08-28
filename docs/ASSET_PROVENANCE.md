@@ -2,53 +2,55 @@
 
 Last audited: **2026-08-28**
 
-This register records the provenance and rights basis of every visual asset intentionally used by the public prototype. It does not claim that copyright does not exist. It records why each asset may be used and any remaining limitation.
+This register records the provenance and rights basis of every visual asset intentionally used by the public prototype. It does not claim that copyright does not exist. It records why each asset may be used, how it was transformed, and any remaining limitation.
 
-## Project image files
+## Licensed photographic assets
 
-| Path | Purpose | Provenance and rights basis | Served | Attribution | Limitation |
-| --- | --- | --- | --- | --- | --- |
-| `public/images/solar-home-ai-1440.webp` | Large responsive homepage hero | Generated specifically for SolarMatch with OpenAI's built-in ImageGen tool on 2026-08-28, without input or reference images. SHA-256: `F6EDD261BB1DCC7788AE5D950757C661350FE6EF0E922F99A671AB24A95DD381`. | Local | None required | Synthetic illustration, not evidence of a customer, property, installation, or engineering outcome. |
-| `public/images/solar-home-ai-768.webp` | Small responsive homepage hero | Downscaled WebP derivative of the same project-specific ImageGen output. SHA-256: `A09EE71BF0364CFB61406BE390AE4CA8120D05698041D469B4FB5938DD5E9DC4`. | Local | None required | Same synthetic-image boundary as the large version. |
-| `public/og.png` | Open Graph/social preview | Generated specifically for the initial SolarMatch project with OpenAI ImageGen and introduced in repository commit `04e1629`. SHA-256: `0CCB9057587CB206DC260A9AE7E23B3298D4C3F23613D56141F3BD8B369DF36D`. | Local | None required | Photorealistic synthetic scene. The original full prompt was not retained in the repository; task history records that no third-party reference image was supplied. |
-| `public/favicon.svg` | Browser favicon | Original code-native mark created for this project on 2026-08-28 from the existing SolarMatch sun-and-roof brand motif. SHA-256: `7142282D8915D838468507D18C0D59D5F4FF1B46BF1767DAFCC9AE0C19A68AE1`. | Local | None required | Project branding only; no claim of trademark registration. |
+The homepage photograph is **“Solar Panel on Roof of House in California, USA” by Kindel Media**:
 
-### Homepage ImageGen prompt summary
+- Source page: <https://www.pexels.com/photo/solar-panel-on-roof-of-house-in-california-usa-9875438/>
+- Licence: Pexels Licence, checked 2026-08-28: <https://www.pexels.com/license/>
+- Rights basis: Pexels permits free use and modification, including use on websites. Attribution is not required. The licence prohibits presenting identifiable people or brands in a bad light, implying endorsement, and redistributing an unaltered copy as stock. This project does none of those things.
+- Download and processing: the original 4385×3289 JPEG was downloaded from Pexels on 2026-08-28. Only cropping, resizing, colour-preserving WebP encoding, and PNG palette optimisation were applied. The downloaded source file is not shipped or committed.
+- Presentation boundary: the photograph is used as an illustrative residential-solar scene. It is not described as Thailand, a SolarMatch customer, a SolarMatch installation, or evidence of a household-specific engineering result.
+- Delivery: all derivatives are served locally. The public site does not hotlink Pexels.
 
-- Use case: photorealistic-natural landing-page hero.
-- Scene: a plausible modest contemporary Thai detached home in a tropical residential setting.
-- Subject: physically plausible rooftop panels and mounting, with no people.
-- Presentation: natural architectural photography, restrained colour grading, and responsive-crop breathing room.
-- Exclusions: no input images, brands, logos, watermarks, readable text, copied property, identifiable people, artist imitation, vehicles, or claim of a real SolarMatch installation.
-- Disclosure: both Thai and English captions identify the scene as AI-generated illustration.
+| Path | Purpose and transformation | SHA-256 | Attribution | Limitation |
+| --- | --- | --- | --- | --- |
+| `public/images/solar-home-real-1440.webp` | 1440×960 responsive homepage crop, WebP quality 84 | `63D1CFA09E02C5811E597002ADCCE8E43787797635CE8BFA704AF3A5F70FEBBF` | Not required; creator and source are documented above | Illustrative only; not a SolarMatch customer or verified Thai installation |
+| `public/images/solar-home-real-768.webp` | 768×512 responsive homepage crop, WebP quality 82 | `4F4EBAD867F50712C1A86A9108A495B20AB9D9E51594D07284A2535F64024055` | Not required; creator and source are documented above | Same presentation boundary as the large derivative |
+| `public/og.png` | 1200×630 social-preview crop with 256-colour PNG optimisation | `57721998CAEDEFE703AF68794D86669E0B7C442AC8474329DBA8BEA1907B37EA` | Not required; creator and source are documented above | Social preview only; it does not imply endorsement |
 
-## Project-created and code-native visuals
+## Project branding and code-native visuals
 
 | Source | Purpose | Provenance and rights basis | Served | Attribution | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| `components/site/brand-mark.tsx` and associated rules in `app/globals.css` | SolarMatch wordmark and sun/roof symbol | Project-provided branding implemented with HTML and CSS. | Local code | None required | No claim of trademark registration or exclusivity. |
-| CSS compositions in `app/globals.css` | Decorative roof, sun, energy, chart, gradient, and placeholder treatments | Original code-native layout and decoration created for this project. | Local code | None required | Decorative or illustrative only. |
-| `components/home/home-page.tsx` sample bars | Example bill-comparison graphic | Original HTML/CSS data illustration. | Local code | None required | Values are explicitly labelled as interface examples, not household results. |
-| `app/contact/page.tsx` and `components/pages/english-pages.tsx` QR placeholder | Reserved LINE integration area | Original code-native placeholder; it is not a functioning or copied QR code. | Local code | None required | No live LINE account is connected. |
+| `public/favicon.svg` | Browser favicon | Original code-native mark created for this project from the SolarMatch sun-and-roof motif. SHA-256: `7142282D8915D838468507D18C0D59D5F4FF1B46BF1767DAFCC9AE0C19A68AE1`. | Local | None required | Project branding only; no claim of trademark registration |
+| `components/site/brand-mark.tsx` and associated rules in `app/globals.css` | SolarMatch wordmark and sun/roof symbol | Project-provided branding implemented with HTML and CSS | Local code | None required | No claim of trademark registration or exclusivity |
+| CSS compositions in `app/globals.css` | Decorative roof, sun, energy, chart, gradient, and placeholder treatments | Original code-native layout and decoration created for this project | Local code | None required | Decorative or illustrative only |
+| `components/home/home-page.tsx` sample bars | Example bill-comparison graphic | Original HTML/CSS data illustration | Local code | None required | Explicitly an interface example, not a household result |
+| Contact-page QR placeholder | Reserved LINE integration area | Original code-native placeholder; it is not a functioning or copied QR code | Local code | None required | No live LINE account is connected |
 
 ## Open-source icons, charts, and fonts
 
 | Package or family | Use | Licence and source | Served | Attribution |
 | --- | --- | --- | --- | --- |
-| `lucide-react` 1.34.0 | Interface icons rendered as inline SVG | ISC licence, with Feather-derived material under MIT. Licence text is distributed in `node_modules/lucide-react/LICENSE`; project source: <https://github.com/lucide-icons/lucide>. | Generated locally at runtime/build | No in-product attribution required by the applicable licences. |
-| `recharts` 3.10.1 | Savings and lifetime-cost charts rendered as SVG | MIT licence in `node_modules/recharts/LICENSE`; project source: <https://github.com/recharts/recharts>. | Generated locally at runtime/build | No in-product attribution required; retain licence notices with redistributed source/package material. |
-| Anuphan | Thai/Latin interface font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/anuphan/OFL.txt>. | Downloaded by the build and served locally | No visible attribution required; OFL terms apply to redistributed font files. |
-| Noto Sans Thai | Thai/Latin body font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/notosansthai/OFL.txt>. | Downloaded by the build and served locally | No visible attribution required; OFL terms apply to redistributed font files. |
-| Manrope | Latin/numeric display font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/manrope/OFL.txt>. | Downloaded by the build and served locally | No visible attribution required; OFL terms apply to redistributed font files. |
+| `lucide-react` 1.34.0 | Interface icons rendered as inline SVG | ISC licence, with Feather-derived material under MIT. Licence text is distributed in `node_modules/lucide-react/LICENSE`; source: <https://github.com/lucide-icons/lucide>. | Generated locally at build/runtime | No in-product attribution required by the applicable licences |
+| `recharts` 3.10.1 | Savings and lifetime-cost charts rendered as SVG | MIT licence in `node_modules/recharts/LICENSE`; source: <https://github.com/recharts/recharts>. | Generated locally at build/runtime | No in-product attribution required; retain licence notices with redistributed package material |
+| Anuphan | Thai/Latin interface font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/anuphan/OFL.txt> | Downloaded by the build and served locally | No visible attribution required; OFL terms apply |
+| Noto Sans Thai | Thai/Latin body font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/notosansthai/OFL.txt> | Downloaded by the build and served locally | No visible attribution required; OFL terms apply |
+| Manrope | Latin/numeric display font | SIL Open Font License 1.1: <https://github.com/google/fonts/blob/main/ofl/manrope/OFL.txt> | Downloaded by the build and served locally | No visible attribution required; OFL terms apply |
 
-The build-generated font files appear under `.vinext/fonts/` and the deployment output. The public pages do not hotlink Google Fonts.
+Build-generated font files appear under `.vinext/fonts/` and the deployment output. Public pages do not hotlink Google Fonts.
 
-## Removed asset
+## Removed assets
 
-`public/images/solar-home-hero.jpg` was a locally stored Pexels photograph credited to Robert So. It was removed on 2026-08-28 so that the deployed website no longer relies on third-party stock photography. It must not be restored without a deliberate provenance and product-authenticity review.
+- `public/images/solar-home-ai-1440.webp` and `public/images/solar-home-ai-768.webp` were project-generated synthetic illustrations. They were removed on 2026-08-28 when the site returned to clearly licensed real photography.
+- `public/images/solar-home-hero.jpg` was an earlier Pexels photograph credited to Robert So. It remains removed and must not be restored without a fresh provenance and product-fit review.
+- The former AI-generated `public/og.png` was replaced by the documented Kindel Media licensed crop.
 
 ## Remote visual-asset check
 
-The 2026-08-28 audit found no runtime-hotlinked image, remote CSS background, remote SVG, video, iframe, canvas image source, base64 visual, CDN image, stock-photo URL, manifest image, or remotely served logo. External URLs in Methodology and Resources are documentary source links, not visual assets loaded into SolarMatch pages.
+The 2026-08-28 audit found no runtime-hotlinked image, remote CSS background, remote SVG, video, iframe, canvas image source, base64 visual, CDN image, stock-photo URL, manifest image, or remotely served logo. External URLs in Methodology, Resources, and this register are documentary source links, not visual assets loaded into SolarMatch pages.
 
-Generated copies under `dist/client/` are deployment output, not separate source assets. Re-run this audit whenever a public image, icon package, font, social card, manifest, or remote media reference changes.
+Generated copies under deployment output are not separate source assets. Re-run this audit whenever a public image, icon package, font, social card, manifest, or remote media reference changes.

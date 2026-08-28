@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     locale: 'th_TH',
     title: 'SolarMatch Thailand',
     description: 'เริ่มเข้าใจ Solar Rooftop จากค่าไฟและรูปแบบการใช้ไฟของบ้านคุณ',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'AI-generated illustrative rooftop-solar scene for the SolarMatch Thailand prototype' }],
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Solar panels on a tiled residential roof with palm trees in the background' }],
   },
 };
 

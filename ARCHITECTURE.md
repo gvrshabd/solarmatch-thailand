@@ -22,7 +22,8 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - Contact-flow validation runs only in the browser and discards values without a network request. The legacy `/api/leads` route fails closed with `410 Gone` and does not read request bodies.
 - Staging discovery posture: complete metadata/sitemap plus `noindex, follow`; `Claude-User` is explicitly allowed for user-directed retrieval, while `ClaudeBot`, `Claude-SearchBot`, and the wildcard crawler group remain disallowed.
 - A plain-text `/llms.txt` describes canonical routes and prototype limitations without acting as an access-control mechanism.
-- Project-specific AI-generated homepage imagery is served locally in responsive formats and disclosed as illustrative. Complete asset provenance is recorded in `docs/ASSET_PROVENANCE.md`.
+- A real residential-solar photograph licensed for free use is served locally in responsive formats and presented as illustrative. Complete asset provenance is recorded in `docs/ASSET_PROVENANCE.md`.
+- The About page states what the prototype does today, what is inactive, the evidence model, and the deliberate initial Bangkok Metropolitan Region validation boundary.
 - One Worker with no database, storage binding, payment integration, or shared resource with Milly's.
 
 ## Intentionally deferred
@@ -38,14 +39,14 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - Installer profiles, reviews, testimonials, quote comparison, savings guarantees, and marketplace claims. Future social proof must remain behind a feature flag until it can be substantiated.
 - Automated monitoring of tariffs, Ft, programme quotas, law changes, and third-party package prices. All require re-verification before production use.
 - Final legal identity, PDPA review, production privacy/terms language, recipients, retention periods, and data-subject procedures.
-- Real customer or documentary installation photography. The current image is an AI-generated illustrative scene and is not evidence of a SolarMatch customer or installation.
+- Real SolarMatch customer photography or a documented Thai installation. The current licensed photograph is illustrative and is not evidence of a SolarMatch customer, a Thai property, or an engineering outcome.
 
 ## Visual-asset provenance
 
 - Canonical inventory: `docs/ASSET_PROVENANCE.md`.
-- The former Pexels photograph was removed during the 2026-08-28 asset-rights pass.
-- The replacement scene is generated specifically for this project, served locally, and disclosed as AI-generated illustration.
-- No remotely hosted runtime image or third-party stock photograph is used.
+- The homepage photograph is by Kindel Media and is used under the Pexels licence documented in the canonical inventory.
+- Responsive WebP derivatives and the social-preview crop are served locally; no runtime image is hotlinked.
+- The previous project-generated AI hero files and the earlier Robert So Pexels asset are removed and no longer referenced.
 
 ## Swap points
 
@@ -56,4 +57,4 @@ This boundary keeps the public prototype useful while buyer interviews, househol
 - Keep conditional surplus-purchase and tax modules disabled until household inputs, eligibility checks, and current policy are verified.
 - Enable integrations only through `config/feature-flags.ts` after their production configuration is complete.
 - Activate or replace `/api/leads` only after the data controller, recipients, retention period, consent text, security controls, and explicit production approval are complete.
-- Replace the AI-generated illustrative scene only with a project-created asset or a source whose provenance and licence can be documented before deployment.
+- Replace the licensed illustrative photograph only with a project-created asset or another source whose provenance and licence are documented before deployment.

@@ -18,7 +18,7 @@ Policy, tariff, and market references were last checked on **2026-08-28**. The a
 
 ## Visual assets
 
-The homepage uses a project-specific AI-generated illustrative scene stored locally as responsive WebP files. It is explicitly labelled as illustrative and must not be presented as a real customer, property, or verified installation. The former Pexels photograph has been removed. See [`docs/ASSET_PROVENANCE.md`](./docs/ASSET_PROVENANCE.md) for the complete visual-asset inventory, generation summary, licences, attribution requirements, and limitations.
+The homepage uses a real residential-solar photograph by Kindel Media under the Pexels licence, stored locally as responsive WebP files. It is presented as illustrative—not as a SolarMatch customer, a Thai installation, or proof of an engineering outcome. See [`docs/ASSET_PROVENANCE.md`](./docs/ASSET_PROVENANCE.md) for the complete visual-asset inventory, source links, transformations, licences, attribution requirements, and limitations.
 
 ## Local development
 

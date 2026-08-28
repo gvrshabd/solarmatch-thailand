@@ -318,3 +318,15 @@ test('legal and contact routes expose prototype boundaries in both languages', a
   await page.goto('/en/contact');
   await expect(page.getByRole('heading', { name: 'Contact channels are not active yet' })).toBeVisible();
 });
+
+test('About pages state the current product and deliberate initial geography honestly', async ({ page }) => {
+  await page.goto('/about');
+  await expect(page.getByRole('heading', { name: 'เครื่องมือให้ความรู้ ไม่ใช่บริการขายหรือติดตั้ง' })).toBeVisible();
+  await expect(page.getByText('กรุงเทพฯ และปริมณฑล', { exact: false })).toBeVisible();
+  await expect(page.getByText('ยังไม่ส่งหรือบันทึกข้อมูลลีด')).toBeVisible();
+
+  await page.goto('/en/about');
+  await expect(page.getByRole('heading', { name: 'An educational tool—not an installer or sales service' })).toBeVisible();
+  await expect(page.getByText('Bangkok Metropolitan Region', { exact: false })).toBeVisible();
+  await expect(page.getByText('No lead storage or transmission')).toBeVisible();
+});
