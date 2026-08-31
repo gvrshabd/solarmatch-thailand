@@ -10,8 +10,8 @@ const contentRoutes = [
 
 const savedEstimate = {
   province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', roofArea: '60-100',
-  daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'office-equipment'],
-  roofMaterial: 'concrete-tile', shade: 'almost-none', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
+  ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'home-office-equipment'], airConditionerCount: 5,
+  roofMaterial: 'concrete-tile', shade: 'almost-none', installationTimeframe: 'one-three-months', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
 function desktopOnly(testInfo: TestInfo) {
@@ -27,12 +27,13 @@ test('robots and review files express the intended agent policy', async ({ reque
   expect(robotsText).toMatch(/User-Agent:\s*Claude-User[\s\S]*Allow:\s*\//i);
   expect(robotsText).toMatch(/User-Agent:\s*ClaudeBot[\s\S]*Disallow:\s*\//i);
   expect(robotsText).toMatch(/User-Agent:\s*Claude-SearchBot[\s\S]*Disallow:\s*\//i);
-  expect(robotsText).toMatch(/User-Agent:\s*\*[\s\S]*Disallow:\s*\//i);
+  expect(robotsText).toMatch(/User-Agent:\s*\*[\s\S]*Allow:\s*\//i);
+  expect(robotsText).toMatch(/User-Agent:\s*\*[\s\S]*Disallow:\s*\/admin\//i);
 
   const llms = await request.get('/llms.txt');
   expect(llms.status()).toBe(200);
   expect(llms.headers()['content-type']).toContain('text/plain');
-  await expect.poll(async () => (await llms.text()).includes('prototype')).toBe(true);
+  await expect.poll(async () => (await llms.text()).includes('residential-solar assessment')).toBe(true);
 });
 
 test('public HTML is fetchable with browser, generic automation, and Anthropic user agents', async ({ request }, testInfo) => {
@@ -81,9 +82,33 @@ test('SSR metadata, language boundaries, images, and the disabled lead endpoint 
   expect((await request.get('/images/solar-home-ai-768.webp')).status()).toBe(404);
 
   const disabledLead = await request.post('/api/leads', { data: { name: 'not-read' } });
-  expect(disabledLead.status()).toBe(410);
+  expect(disabledLead.status()).toBe(403);
   expect(disabledLead.headers()['cache-control']).toBe('no-store');
-  expect(await disabledLead.json()).toMatchObject({ code: 'LEAD_SUBMISSION_DISABLED', persisted: false });
+  expect(await disabledLead.json()).toMatchObject({ code: 'invalid_origin' });
+});
+
+test('admin routes fail closed while public assessment configuration stays readable', async ({ request }, testInfo) => {
+  desktopOnly(testInfo);
+  const admin = await request.get('/admin/');
+  expect(admin.status()).toBe(200);
+  const adminHtml = await admin.text();
+  expect(adminHtml).toContain('Access denied');
+  expect(adminHtml).toMatch(/<meta name="robots" content="noindex, nofollow/i);
+  expect(adminHtml).not.toContain('Residential contact submissions');
+
+  const session = await request.get('/admin/api/session');
+  expect(session.status()).toBe(401);
+  expect(await session.json()).toMatchObject({ error: 'unauthorized' });
+
+  const forged = await request.get('/admin/api/session', { headers: { 'cf-access-authenticated-user-email': 'deluxejahseh@gmail.com' } });
+  expect(forged.status()).toBe(401);
+
+  const configuration = await request.get('/api/assessment/config');
+  expect(configuration.status()).toBe(200);
+  const publicConfiguration = await configuration.json();
+  expect(publicConfiguration.liveLeadSubmissions).toBe(false);
+  expect(publicConfiguration.assessmentToken).toBeNull();
+  expect(publicConfiguration.receivingCompany).toBeNull();
 });
 
 test('all Thai and English content routes have no serious or critical axe findings', async ({ page }, testInfo) => {

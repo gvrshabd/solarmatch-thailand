@@ -9,8 +9,8 @@ const routes = [
 
 const savedEstimate = {
   province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', roofArea: '60-100',
-  daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'office-equipment'],
-  roofMaterial: 'concrete-tile', shade: 'almost-none', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
+  ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'home-office-equipment'], airConditionerCount: 5,
+  roofMaterial: 'concrete-tile', shade: 'almost-none', installationTimeframe: 'one-three-months', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
 test.beforeEach(async ({ page }) => {
@@ -73,7 +73,7 @@ test('mobile results keep metrics, charts, tables, and lead fields readable', as
   await expect(page.locator('.result-metrics-v3 article')).toHaveCount(4);
   await expect(page.locator('.result-metrics-v3')).not.toContainText(/Needs more information/);
   await expect(page.getByRole('table', { name: 'Key lifetime cost points' })).toBeVisible();
-  await expect(page.getByLabel('Name')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Contact requests are temporarily unavailable' })).toBeVisible();
   const layout = await page.evaluate(() => ({ clientWidth: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
 });

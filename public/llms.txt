@@ -1,23 +1,23 @@
 # SolarMatch Thailand
 
-SolarMatch Thailand is a bilingual prototype that helps homeowners understand a possible rooftop-solar system-size and savings range before speaking with an installer.
+SolarMatch Thailand is a bilingual residential-solar assessment and lead-qualification service for homeowners in Thailand.
 
 Canonical public routes:
 - Thai home: https://solarmatch-thailand.deluxejahseh.workers.dev/
 - English home: https://solarmatch-thailand.deluxejahseh.workers.dev/en
-- Thai estimator: https://solarmatch-thailand.deluxejahseh.workers.dev/estimate
-- English estimator: https://solarmatch-thailand.deluxejahseh.workers.dev/en/estimate
+- Thai assessment: https://solarmatch-thailand.deluxejahseh.workers.dev/estimate
+- English assessment: https://solarmatch-thailand.deluxejahseh.workers.dev/en/estimate
 - Thai methodology: https://solarmatch-thailand.deluxejahseh.workers.dev/methodology
 - English methodology: https://solarmatch-thailand.deluxejahseh.workers.dev/en/methodology
-- Thai resources: https://solarmatch-thailand.deluxejahseh.workers.dev/resources
-- English resources: https://solarmatch-thailand.deluxejahseh.workers.dev/en/resources
+- Thai Privacy Notice: https://solarmatch-thailand.deluxejahseh.workers.dev/privacy
+- English Privacy Notice: https://solarmatch-thailand.deluxejahseh.workers.dev/en/privacy
 
-Prototype limitations:
-- Results are educational estimates, not engineering designs, quotations, or guarantees.
-- Current assumptions are versioned and may change after buyer and market validation.
-- Surplus-purchase income and tax relief are conditional and excluded from base headline results.
-- The contact form validates locally and discards the values; it does not store or transmit a lead.
-- There is no live installer matching, payment, advertising, analytics, CRM, LINE, email, OTP, or database integration.
-- The website is marked noindex while validation continues.
+Important limitations:
+- Results are preliminary estimates, not engineering designs, quotations, or guarantees.
+- Actual suitability and savings require a site assessment and depend on usage, roof conditions, equipment, design, price, and tariffs.
+- SolarMatch is not the installer and may be paid by a receiving solar company for a referral made with the user’s consent.
+- The contact form remains disabled until the legal operator, privacy contact, receiving company, and retention period are completely published.
+- There are no payments, customer accounts, multi-installer bidding, advertising, analytics, CRM, or automated buyer routing.
+- Public pages are marked noindex during the limited validation stage.
 
 This file is descriptive only. It is not an access-control or security policy.

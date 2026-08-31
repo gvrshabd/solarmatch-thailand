@@ -1,8 +1,8 @@
 # SolarMatch Thailand visual-asset provenance
 
-Last audited: **2026-08-28**
+Last audited: **2026-09-01**
 
-This register records the provenance and rights basis of every visual asset intentionally used by the public prototype. It does not claim that copyright does not exist. It records why each asset may be used, how it was transformed, and any remaining limitation.
+This register records the provenance and rights basis of every visual asset intentionally used by the public SolarMatch site. It does not claim that copyright does not exist. It records why each asset may be used, how it was transformed, and any remaining limitation.
 
 ## Licensed photographic assets
 

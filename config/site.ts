@@ -1,9 +1,8 @@
 export const siteConfig = {
   name: 'SolarMatch Thailand',
   shortName: 'SolarMatch',
-  mode: 'prototype' as const,
   description:
-    'ประเมิน Solar Rooftop เบื้องต้นและเตรียมเปรียบเทียบผู้ติดตั้งที่เหมาะสมในไทย',
+    'ประเมิน Solar Rooftop เบื้องต้นสำหรับบ้านในไทย ก่อนเลือกขอให้บริษัทโซลาร์ติดต่อ',
   url: 'https://solarmatch-thailand.deluxejahseh.workers.dev',
   contact: {
     lineUrl: '',
@@ -12,12 +11,7 @@ export const siteConfig = {
     email: '',
     businessHours: '',
   },
-  initialMarkets: [
-    'กรุงเทพมหานคร',
-    'นนทบุรี',
-    'ปทุมธานี',
-    'สมุทรปราการ',
-  ],
+  initialMarkets: ['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'สมุทรสาคร', 'นครปฐม'],
   assumptionVersion: 'thailand-ballpark-2026-08-28-v5',
 } as const;
 

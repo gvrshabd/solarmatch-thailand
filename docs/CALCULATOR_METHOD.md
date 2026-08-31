@@ -1,22 +1,24 @@
 # Calculator method
 
-Model version: `thailand-ballpark-2026-08-28-v5`
-Last reviewed: 2026-08-28
+Model version: `thailand-residential-ballpark-2026-09-01-v6`
+Last reviewed: 2026-09-01
 
 The model is a bill-led lead-qualification ballpark. It must produce a complete consumer result after the required flow, but it must not imitate an engineering design or quotation.
 
 ## Required inputs
 
-The eight required answers are:
+The ten required answers are:
 
 1. Province.
 2. Typical monthly electricity bill in baht.
 3. Property type.
-4. Approximate usable roof-area band.
-5. General daytime electricity intensity.
-6. Regular daytime loads.
-7. Roof material.
-8. Observable shade.
+4. Ownership or residential occupancy arrangement.
+5. Approximate usable roof-area band.
+6. General daytime electricity intensity.
+7. Regular daytime residential loads and installed AC count when air conditioning is selected.
+8. Roof material.
+9. Observable shade.
+10. Approximate installation timeframe.
 
 The homepage and estimator use the same bill field and session state. When province and bill come from the homepage, the estimator begins at the first unanswered question. There is no kWh, multi-month, period, TOU, or weather question in the consumer flow.
 
@@ -33,7 +35,7 @@ If a metric cannot be supported, the remedy is an easier input or a clearly docu
 
 ## Bill-to-consumption conversion
 
-Residential property types use the current effective PEA/MEA residential schedule. Shophouses, warehouses, and apartment buildings use the published PEA small-general-service schedule as the bill-only commercial fallback because it can be inverted without inventing a demand-charge input.
+Every public route and calculation uses the current effective PEA/MEA residential schedule. Commercial tariff classes and demand-charge assumptions are outside this release.
 
 `bill(kWh) = (service charge + tiered energy charge + kWh × Ft) × (1 + VAT)`
 
@@ -41,7 +43,7 @@ The inverse is solved exactly through the same piecewise tariff tiers, Ft, servi
 
 ## Starting system size
 
-Thai load-profile research supports roughly 30% annual-load matching for residential/small-general-service loads and 40–50% for more daytime-led commercial loads. The general daytime-use answer selects a point within that evidence envelope:
+Thai load-profile research supports a bounded annual-load matching range for residential loads. The general daytime-use answer selects a point within that evidence envelope:
 
 | Daytime intensity | Annual-load share |
 | --- | ---: |
@@ -51,7 +53,7 @@ Thai load-profile research supports roughly 30% annual-load matching for residen
 | High | 40% |
 | Very high | 48% |
 
-Commercial property types apply a research-bounded floor. A stated future high-use load moves the target by four percentage points, still capped inside the documented 24–52% planning envelope.
+Directly reported residential daytime loads can make a small bounded adjustment, still capped inside the documented planning envelope.
 
 `bill-led kWp = annual estimated kWh × target share ÷ province yield`
 
@@ -95,7 +97,7 @@ NREL's 2024 residential PV benchmark models fixed O&M at 1.02% of CAPEX and incl
 
 `simple payback = planning price ÷ (first-year avoided bill − annual reserve)`
 
-The required eight answers always produce an explicit payback outcome. When first-year avoided-bill value is greater than the annual reserve, the model displays the calculated simple payback. When it is not, the truthful result is “Not reached” / “ยังไม่คืนทุน”—never a manufactured denominator and never “Needs more information.”
+The required ten answers always produce an explicit payback outcome. When first-year avoided-bill value is greater than the annual reserve, the model displays the calculated simple payback. When it is not, the truthful result is “Not reached” / “ยังไม่คืนทุน”—never a manufactured denominator and never “Needs more information.”
 
 ## 25-year net value
 
@@ -109,4 +111,4 @@ The public “Save up to” value is the rounded-down conservative net value its
 
 Exact address/map, exact roof area, direction, slope, phase, future loads, and a comparable cash quotation are optional. Each applicable input immediately recalculates the same result and updates a visible status message. Address and coordinates remain in browser session storage and are not submitted.
 
-Material constants live in `config/solar-assumptions.ts` and `config/electricity-tariffs.ts`. Calculation code lives in `lib/calculator/prototype-estimator.ts`. Material changes require a source review, model-version update, and regression test.
+Material constants live in `config/solar-assumptions.ts` and `config/electricity-tariffs.ts`. Calculation code lives in `lib/calculator/residential-estimator.ts`. Lead qualification is separate and lives in `lib/qualification/scoring.ts`. Material changes require a source review, model-version update, and regression test.

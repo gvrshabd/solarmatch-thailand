@@ -2,7 +2,6 @@ import {
   calculateResidentialBill,
   estimateKwhFromBill,
   selectResidentialTariff,
-  smallGeneralServiceTariff,
 } from '@/config/electricity-tariffs';
 import { solarAssumptions } from '@/config/solar-assumptions';
 import type { EstimateAnswers, EstimateResult, Estimator, LifetimeCostPoint, Range } from './types';
@@ -21,10 +20,6 @@ function roundDown(value: number, step = 1) {
 
 function point(value: number): Range {
   return { min: value, max: value };
-}
-
-function isBusinessProperty(propertyType: EstimateAnswers['propertyType']) {
-  return ['shophouse', 'warehouse', 'apartment-building'].includes(propertyType);
 }
 
 function planningPrice(sizeKwp: number, phase: EstimateAnswers['electricityPhase']) {
@@ -48,8 +43,7 @@ function planningPrice(sizeKwp: number, phase: EstimateAnswers['electricityPhase
 function classifyLoad(answers: EstimateAnswers): EstimateResult['loadProfile'] {
   const index = ['very-low', 'low', 'moderate', 'high', 'very-high'].indexOf(answers.daytimePattern);
   let score = index;
-  if (answers.daytimeLoads.some((load) => ['business-equipment', 'other-high-use'].includes(load))) score += 1;
-  if (isBusinessProperty(answers.propertyType)) score += 1;
+  if (answers.daytimeLoads.some((load) => ['other-high-use', 'ev'].includes(load))) score += 1;
   if (score <= 1) return 'low';
   if (score >= 4) return 'high';
   return 'medium';
@@ -60,9 +54,9 @@ function roofCapacity(answers: EstimateAnswers) {
   return solarAssumptions.roofAreaCapacityKwp[answers.roofArea];
 }
 
-export const prototypeEstimator: Estimator = {
+export const residentialEstimator: Estimator = {
   calculate(answers: EstimateAnswers): EstimateResult {
-    const tariff = isBusinessProperty(answers.propertyType) ? smallGeneralServiceTariff : selectResidentialTariff();
+    const tariff = selectResidentialTariff();
     const monthlyConsumptionKwh = estimateKwhFromBill(answers.monthlyBillThb, tariff);
     const annualLoadKwh = monthlyConsumptionKwh * 12;
     const loadProfile = classifyLoad(answers);
@@ -72,10 +66,9 @@ export const prototypeEstimator: Estimator = {
     const slope = answers.roofSlope ?? 'unsure';
     const orientationFactor = solarAssumptions.slopeFactor[direction][slope];
     const shadeFactor = solarAssumptions.shadeFactor[answers.shade];
-    const propertyFloor = solarAssumptions.propertySizingFloor[answers.propertyType];
     const futureLoadAdjustment = answers.futureLoads?.some((load) => !['none', 'unsure'].includes(load)) ? 0.04 : 0;
     const targetShare = clamp(
-      Math.max(solarAssumptions.sizingTargetAnnualLoadShare[answers.daytimePattern], propertyFloor) + futureLoadAdjustment,
+      solarAssumptions.sizingTargetAnnualLoadShare[answers.daytimePattern] + futureLoadAdjustment,
       0.24,
       0.52,
     );
@@ -90,7 +83,7 @@ export const prototypeEstimator: Estimator = {
     const annualProduction = systemKw * provinceYield * orientationFactor * shadeFactor;
     const pvLoadRatio = annualProduction / Math.max(1, annualLoadKwh);
     const selfConsumptionBase = solarAssumptions.selfConsumptionAtBalancedSize[answers.daytimePattern];
-    const loadBonus = answers.daytimeLoads.some((load) => ['business-equipment', 'other-high-use', 'ev'].includes(load)) ? 0.03 : 0;
+    const loadBonus = answers.daytimeLoads.some((load) => ['other-high-use', 'ev'].includes(load)) ? 0.03 : 0;
     const selfConsumptionRatio = clamp(
       selfConsumptionBase + loadBonus - Math.max(0, pvLoadRatio - targetShare) * 0.25,
       0.35,
@@ -108,9 +101,7 @@ export const prototypeEstimator: Estimator = {
     }, 0);
     const modeledAnnualBill = calculateResidentialBill(monthlyConsumptionKwh, tariff) * 12;
 
-    const assumedPhase = answers.electricityPhase === 'single' || answers.electricityPhase === 'three'
-      ? answers.electricityPhase
-      : isBusinessProperty(answers.propertyType) ? 'three' : 'single';
+    const assumedPhase = answers.electricityPhase === 'three' ? 'three' : 'single';
     const marketPlanningCost = planningPrice(systemKw, assumedPhase);
     const comparableQuote = Boolean(answers.quoteCashPriceThb && answers.quoteSystemKw && !answers.quoteBatteryIncluded);
     const planningCost = round(comparableQuote ? answers.quoteCashPriceThb! : marketPlanningCost, 5000);
@@ -184,7 +175,7 @@ export const prototypeEstimator: Estimator = {
         { labelEn: 'Monthly bill', labelTh: 'ค่าไฟต่อเดือน', value: `฿${round(answers.monthlyBillThb).toLocaleString('en-US')}`, basisEn: 'Your answer', basisTh: 'คำตอบของคุณ' },
         { labelEn: 'Tariff', labelTh: 'อัตราค่าไฟ', value: tariff.labelEn, valueTh: tariff.labelTh, basisEn: tariff.source, basisTh: tariff.source },
         { labelEn: 'Estimated monthly use', labelTh: 'การใช้ไฟต่อเดือนโดยประมาณ', value: `${round(monthlyConsumptionKwh).toLocaleString('en-US')} kWh`, basisEn: 'Reverse-calculated from the current tariff', basisTh: 'คำนวณย้อนกลับจากอัตราค่าไฟปัจจุบัน' },
-        { labelEn: 'Starting size', labelTh: 'ขนาดระบบเริ่มต้น', value: `${roundedSystem} kWp`, basisEn: 'Bill, daytime use, property type and available roof area', basisTh: 'ค่าไฟ การใช้ไฟกลางวัน ประเภทสถานที่ และพื้นที่หลังคา' },
+        { labelEn: 'Starting size', labelTh: 'ขนาดระบบเริ่มต้น', value: `${roundedSystem} kWp`, basisEn: 'Bill, daytime use and available roof area', basisTh: 'ค่าไฟ การใช้ไฟช่วงกลางวัน และพื้นที่หลังคา' },
         { labelEn: 'Annual production', labelTh: 'ผลผลิตต่อปี', value: `${roundedProduction.toLocaleString('en-US')} kWh`, basisEn: 'Province yield, shade and optional roof details', basisTh: 'ผลผลิตอ้างอิงรายจังหวัด เงาบัง และข้อมูลหลังคาเสริม' },
         { labelEn: 'Planning price', labelTh: 'ราคาเพื่อวางแผน', value: `฿${roundedCost.toLocaleString('en-US')}`, basisEn: comparableQuote ? 'Your comparable cash quote' : 'Current PEA and Thai market package evidence', basisTh: comparableQuote ? 'ใบเสนอราคาเงินสดที่เปรียบเทียบได้ของคุณ' : 'ข้อมูลแพ็กเกจปัจจุบันของ PEA และตลาดไทย' },
         { labelEn: 'Lifetime reserve', labelTh: 'เงินสำรองค่าดูแล', value: `฿${annualReserve.toLocaleString('en-US')}/year`, basisEn: 'NREL 1.02% of CAPEX fixed O&M benchmark', basisTh: 'ค่าอ้างอิง NREL สำหรับการดูแลคงที่ 1.02% ของเงินลงทุน' },

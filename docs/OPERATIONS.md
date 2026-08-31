@@ -1,0 +1,70 @@
+# SolarMatch operations, backup, recovery, and release procedure
+
+Last reviewed: **2026-09-01**
+
+## Bound production resources
+
+- Worker: `solarmatch-thailand`
+- Production branch: `main`
+- D1 database: `solarmatch-thailand-admin` (`DB`)
+- Private R2 bucket: `solarmatch-thailand-storage` (`MEDIA`)
+- Cloudflare Access application: existing `/admin*` application
+- Initial application allowlist: `deluxejahseh@gmail.com`
+
+Never create replacement resources merely because a binding is unavailable in one local shell. Confirm the existing account resource and Worker binding first. Never broaden Access to public routes and never modify Milly's.
+
+## Initial migration
+
+1. Record the Git commit and current Worker deployment.
+2. Export D1 with `wrangler d1 export solarmatch-thailand-admin --remote --output <dated-file>` and record a D1 Time Travel bookmark.
+3. Confirm the private R2 bucket and bindings.
+4. Apply migrations locally, run the complete test suite, and inspect the schema.
+5. Run `wrangler d1 migrations list solarmatch-thailand-admin --remote`.
+6. Apply only pending versioned migrations with `wrangler d1 migrations apply solarmatch-thailand-admin --remote`.
+7. Deploy the matching Git commit through the existing GitHub → Cloudflare pipeline.
+8. Request `/api/assessment/config` once to seed the immutable initial release, then verify the D1 version and release rows.
+
+The seed release has `live_lead_submissions = 0` and an incomplete legal record. Applying the migration or deploying code cannot silently activate lead collection.
+
+## Secrets
+
+Configure these only as encrypted Worker secrets:
+
+- `ADMIN_EMAILS`
+- `CSRF_SECRET`
+- `ASSESSMENT_SIGNING_SECRET`
+
+The non-secret Access team URL and AUD remain in `wrangler.jsonc`. `.dev.vars.example` documents local names but contains no usable values. Rotate signing or CSRF secrets through Cloudflare, then verify the admin and public submission gates. Rotating the assessment secret invalidates outstanding short-lived assessment tokens and does not affect stored leads.
+
+## Routine backup
+
+- Export D1 before every schema migration and before any bulk administrative repair.
+- Keep dated encrypted exports outside the public repository and record the matching migration and Git revision.
+- Use D1 Time Travel for short-window recovery according to the Cloudflare account's available retention.
+- R2 objects are not the structured lead database. Keep an inventory/export of published media metadata and retain original licensed source provenance separately.
+- Questionnaire and rule rollback normally uses the admin “Restore as draft” action followed by preview and explicit publish. This creates a new version and preserves history.
+
+## Recovery
+
+- Application regression: revert only the task's Git commit, push normally, monitor the GitHub → Cloudflare deployment, and smoke-test public and admin boundaries.
+- D1 migration regression: stop writes, use the pre-migration export or Time Travel bookmark in accordance with Cloudflare's documented restore procedure, then verify row counts and foreign keys before reopening writes.
+- Configuration regression: restore the prior questionnaire/rule version as a new draft, preview, publish, and confirm the new release ID.
+- R2 media regression: archive the media metadata or restore an approved original under a new generated object key. Do not make the bucket public.
+- Permanent lead purge cannot be undone and must not be represented as recoverable.
+
+## Activation checklist
+
+Live contact collection must remain disabled until the user supplies and approves:
+
+- legal operator name in Thai and English;
+- legal/operator address;
+- public privacy-rights email or other contact channel;
+- receiving solar company legal name in Thai and English;
+- receiving company's privacy notice URL; and
+- the lead retention period in days.
+
+Then complete and review the Thai and English Privacy Notice and Terms, publish a complete legal version, create a new release with the named recipient and retention period, run successful/failed/duplicate/withdrawal/deletion tests, inspect logs for PII, and only then set `live_lead_submissions = 1`. Do not activate ads in the same change.
+
+## Post-deployment smoke test
+
+Verify Thai and English home, assessment, results, methodology, privacy, terms, robots, and llms routes. Verify `/admin/` redirects or denies anonymous visitors, accepts only the allowlisted Access identity, and keeps public pages unauthenticated. Confirm the public config reports contact collection disabled until the activation checklist is complete. Recheck the independent Milly's URL with a read-only request; do not mutate its repository, Worker, bindings, storage, or Access settings.

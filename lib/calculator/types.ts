@@ -2,20 +2,20 @@ export type Range = { min: number; max: number };
 
 export type PropertyType =
   | 'detached-home'
+  | 'semi-detached-home'
   | 'townhouse'
   | 'large-home'
-  | 'shophouse'
-  | 'warehouse'
-  | 'apartment-building'
-  | 'other';
+  | 'other-residential';
+
+export type OwnershipStatus = 'owner' | 'renter' | 'other';
+export type InstallationTimeframe = 'asap' | 'one-three-months' | 'three-six-months' | 'over-six-months' | 'researching';
 
 export type DaytimePattern = 'very-low' | 'low' | 'moderate' | 'high' | 'very-high';
 export type DaytimeLoad =
   | 'air-conditioning'
   | 'pump'
   | 'ev'
-  | 'office-equipment'
-  | 'business-equipment'
+  | 'home-office-equipment'
   | 'laundry-cooking'
   | 'other-high-use'
   | 'none';
@@ -24,7 +24,7 @@ export type RoofDirection = 'south-group' | 'east' | 'west' | 'north' | 'flat' |
 export type RoofSlope = 'flat' | 'gentle' | 'steep' | 'unsure';
 export type RoofArea = 'under-30' | '30-60' | '60-100' | '100-200' | 'over-200' | 'unsure';
 export type ElectricityPhase = 'single' | 'three' | 'unsure';
-export type FutureLoad = 'ev' | 'air-conditioning' | 'pump' | 'business-equipment' | 'none' | 'unsure';
+export type FutureLoad = 'ev' | 'air-conditioning' | 'pump' | 'none' | 'unsure';
 
 export type EstimateLocation = {
   address: string;
@@ -37,13 +37,20 @@ export type EstimateLocation = {
 
 export type EstimateAnswers = {
   province: string;
+  customLocation?: string;
   monthlyBillThb: number;
   propertyType: PropertyType;
+  customPropertyType?: string;
+  ownershipStatus: OwnershipStatus;
   roofArea: RoofArea;
   daytimePattern: DaytimePattern;
   daytimeLoads: DaytimeLoad[];
+  customDaytimeLoad?: string;
+  airConditionerCount?: number;
   roofMaterial: string;
+  customRoofMaterial?: string;
   shade: RoofShade;
+  installationTimeframe: InstallationTimeframe;
 
   // Optional precision inputs. These are never needed to unlock a complete result.
   location?: EstimateLocation;

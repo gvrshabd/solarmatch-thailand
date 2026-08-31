@@ -26,6 +26,8 @@ export function SiteHeader() {
   const focusMode = pathname === '/estimate' || pathname === '/en/estimate';
   const isCurrent = (href: string) => pathname === localizedPath(href, locale);
 
+  if (pathname.startsWith('/admin')) return null;
+
   if (focusMode) {
     return (
       <header className="site-header focus-header">

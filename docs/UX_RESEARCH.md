@@ -1,12 +1,12 @@
 # Lead journey and calculator UX rationale
 
-Last reviewed: **2026-08-28**
+Last reviewed: **2026-09-01**
 
 ## Principles applied
 
 ### A lead-generation journey with a useful result first
 
-SolarMatch is positioned as a lead-generation and qualification business, not as a calculator company. The estimate earns trust and helps a visitor become an informed, better-qualified enquiry. Results appear before the contact form, and the unfinished matching service validates then discards contact details instead of pretending a live handoff exists.
+SolarMatch is positioned as a lead-generation and qualification business, not as a calculator company. The estimate earns trust and helps a visitor become an informed, better-qualified enquiry. Results appear before the optional contact decision. Contact collection remains fail-closed until a named recipient, accountable operator details, privacy channel, retention period, and reviewed legal version are published.
 
 ### One meaningful question at a time
 
@@ -20,20 +20,22 @@ The estimator asks for observable roof material and shade directly. **Unsure** i
 
 The consumer flow asks only for a typical monthly electricity bill—not kWh, a billing period, TOU details, multiple months, or weather. The amount can be typed or adjusted with a smooth slider, can be emptied normally, and has no visible ฿50,000 business cap. The same field appears on the homepage and is not asked twice after handoff.
 
-### Eight required answers must be enough
+### Ten concise residential answers must be enough
 
 The required journey is:
 
 1. Province.
 2. Typical monthly electricity bill.
 3. Property type.
-4. Approximate usable roof area.
-5. General daytime electricity intensity.
-6. Regular daytime loads, including other unlisted high-use equipment.
-7. Main roof material, with **Unsure** last.
-8. General shade level, with **Unsure** last.
+4. Ownership or residential occupancy arrangement.
+5. Approximate usable roof area.
+6. General daytime electricity intensity.
+7. Regular daytime loads, including an AC count and other unlisted high-use equipment.
+8. Main roof material, with **Unsure** last.
+9. General shade level, with **Unsure** last.
+10. Approximate installation timeframe.
 
-Those eight answers always produce a starting system size, first-year production, installation-price figure, monthly bill reduction, simple cash payback, and conservative 25-year net value. Optional details refine an already complete result; they never unlock a metric that the required journey claimed it could provide.
+Those ten answers always produce a starting system size, first-year production, installation-price figure, monthly bill reduction, simple cash payback, and conservative 25-year net value. Ownership, AC count, and the other assessment answers also provide the server-side qualification evidence used only after a visitor voluntarily requests contact. Optional details refine an already complete result; they never unlock a metric that the required journey claimed it could provide.
 
 ### Progressive disclosure
 
@@ -59,4 +61,4 @@ The implementation applies relevant [WCAG 2.2 guidance](https://www.w3.org/WAI/s
 - Interview installers about price inclusions, phase constraints, roof material, structural work, service areas, and the qualification signals that make a lead valuable.
 - Run moderated Thai mobile sessions on the bill slider, answer wording, result comprehension, and the transition into the matching request.
 - Validate on physical iOS and Android devices; current automated coverage uses credible emulation where real devices are unavailable.
-- Do not activate lead collection, installer routing, address lookup, analytics, or advertising until the data, consent, and operating models are approved.
+- Do not activate lead collection until the named legal/recipient values are reviewed and published. Installer routing, address lookup, analytics, and advertising remain separate future decisions.

@@ -24,7 +24,7 @@ export function HeroEstimator({ locale = 'th' }: { locale?: Locale }) {
     }
     sessionStorage.removeItem('solarmatch:estimate-draft');
     sessionStorage.removeItem('solarmatch:estimate');
-    sessionStorage.setItem('solarmatch:starter', JSON.stringify({ version: 3, answers: { province, monthlyBillThb }, step: 0 }));
+    sessionStorage.setItem('solarmatch:starter', JSON.stringify({ version: 4, answers: { province, monthlyBillThb }, step: 0 }));
     window.location.assign(localizedPath('/estimate', locale));
   }
 

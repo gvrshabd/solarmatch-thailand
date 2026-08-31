@@ -22,7 +22,7 @@ import { LifetimeCostChart } from './lifetime-cost-chart';
 import { SavingsChart } from './savings-chart';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { mapProvinces, makeInitialLocation, provinceCenter } from '@/lib/maps/provider';
-import { prototypeEstimator } from '@/lib/calculator/prototype-estimator';
+import { calculateEstimate } from '@/lib/calculator';
 import type { EstimateAnswers, EstimateLocation, FutureLoad } from '@/lib/calculator/types';
 import { estimateAnswersSchema } from '@/lib/validation/estimate';
 import { track } from '@/lib/analytics/track';
@@ -66,7 +66,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     });
   }, []);
 
-  const result = useMemo(() => answers ? prototypeEstimator.calculate(answers) : null, [answers]);
+  const result = useMemo(() => answers ? calculateEstimate(answers) : null, [answers]);
 
   useEffect(() => {
     if (!result) return;
@@ -130,9 +130,9 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
 
   const afterSolarBill = Math.max(0, result.currentMonthlyBillThb - result.planningMonthlySavingsThb);
   const recommendation = {
-    'strong-fit': english ? ['Solar looks worth comparing for your property', 'Your bill and daytime use support getting matched quotes for a properly surveyed system.'] : ['โซลาร์มีแนวโน้มคุ้มค่าที่จะเปรียบเทียบ', 'ค่าไฟและการใช้ไฟกลางวันของคุณเหมาะกับการขอข้อเสนอที่สำรวจหน้างานจริง'],
-    'worth-comparing': english ? ['Solar may be worth comparing', 'The numbers justify checking installer options, while price and roof details will decide the final fit.'] : ['โซลาร์อาจคุ้มค่าที่จะเปรียบเทียบ', 'ตัวเลขเบื้องต้นเหมาะกับการเช็กตัวเลือกผู้ติดตั้ง โดยราคาและหน้างานจะเป็นตัวตัดสินสุดท้าย'],
-    'site-check-first': english ? ['A roof check should come first', 'Shade or available roof space may limit the system, so compare installers who will inspect the site carefully.'] : ['ควรตรวจหลังคาเป็นอันดับแรก', 'เงาบังหรือพื้นที่หลังคาอาจจำกัดระบบ ควรเปรียบเทียบผู้ติดตั้งที่ตรวจหน้างานอย่างละเอียด'],
+    'strong-fit': english ? ['Solar looks worth exploring for your home', 'Your bill and daytime use support arranging a properly surveyed residential system.'] : ['โซลาร์น่าจะเหมาะกับบ้านของคุณ', 'ค่าไฟและการใช้ไฟช่วงกลางวันสนับสนุนให้ประเมินหน้างานเพื่อออกแบบระบบที่เหมาะสม'],
+    'worth-comparing': english ? ['Solar may suit your home', 'The initial numbers support a site assessment, while price and roof details will determine the final fit.'] : ['โซลาร์อาจเหมาะกับบ้านของคุณ', 'ตัวเลขเบื้องต้นสนับสนุนให้ประเมินหน้างาน โดยราคาและรายละเอียดหลังคาจะเป็นตัวตัดสินสุดท้าย'],
+    'site-check-first': english ? ['A roof check should come first', 'Shade or available roof space may limit the system, so a careful site assessment is the useful next step.'] : ['ควรตรวจหลังคาเป็นอันดับแรก', 'เงาบังหรือพื้นที่หลังคาอาจจำกัดระบบ การประเมินหน้างานอย่างละเอียดจึงเป็นขั้นตอนถัดไปที่เหมาะสม'],
   }[result.recommendation];
 
   return (
@@ -164,7 +164,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       </section>
 
       <section className="site-shell result-lead-section">
-        <LeadCapture locale={locale} />
+        <LeadCapture locale={locale} answers={answers} />
       </section>
 
       <section className="site-shell accuracy-upgrade" aria-labelledby="accuracy-title">
@@ -190,7 +190,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
             <label>{english ? 'Roof slope' : 'ความลาดหลังคา'}<select value={answers.roofSlope ?? 'unsure'} onChange={(event) => update('roofSlope', event.target.value as EstimateAnswers['roofSlope'], english ? 'Roof slope applied to production.' : 'ใช้ความลาดหลังคาปรับผลผลิตแล้ว')}><option value="flat">{english ? 'Flat' : 'แบน'}</option><option value="gentle">{english ? 'Gentle' : 'ลาดเล็กน้อย'}</option><option value="steep">{english ? 'Steep' : 'ลาดชัน'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
             <label>{english ? 'Electricity phase' : 'ระบบไฟฟ้า'}<select value={answers.electricityPhase ?? 'unsure'} onChange={(event) => update('electricityPhase', event.target.value as EstimateAnswers['electricityPhase'], english ? 'Phase-specific package pricing applied.' : 'ใช้ราคาตามระบบไฟฟ้าแล้ว')}><option value="single">{english ? 'Single phase' : '1 เฟส'}</option><option value="three">{english ? 'Three phase' : '3 เฟส'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
             <fieldset className="future-loads"><legend>{english ? 'Planned future electricity use' : 'การใช้ไฟที่วางแผนเพิ่มในอนาคต'}</legend>{([
-              ['ev', english ? 'EV' : 'รถไฟฟ้า'], ['air-conditioning', english ? 'More air conditioning' : 'เพิ่มเครื่องปรับอากาศ'], ['pump', english ? 'Pool or water pump' : 'ปั๊มน้ำหรือปั๊มสระ'], ['business-equipment', english ? 'Business equipment' : 'อุปกรณ์ธุรกิจ'], ['none', english ? 'None planned' : 'ยังไม่มีแผน'], ['unsure', english ? 'Unsure' : 'ไม่แน่ใจ'],
+              ['ev', english ? 'EV' : 'รถไฟฟ้า'], ['air-conditioning', english ? 'More air conditioning' : 'เพิ่มเครื่องปรับอากาศ'], ['pump', english ? 'Pool or water pump' : 'ปั๊มน้ำหรือปั๊มสระ'], ['none', english ? 'None planned' : 'ยังไม่มีแผน'], ['unsure', english ? 'Unsure' : 'ไม่แน่ใจ'],
             ] as const).map(([value, label]) => <label key={value}><input type="checkbox" checked={answers.futureLoads?.includes(value) ?? false} onChange={() => toggleFutureLoad(value)} /> {label}</label>)}</fieldset>
           </div>
           {updateStatus && <p className="calculation-updated" role="status"><RefreshCcw aria-hidden="true" /> {updateStatus}</p>}

@@ -1,19 +1,19 @@
 # Address and map privacy
 
-Last reviewed: **2026-08-28**
+Last reviewed: **2026-09-01**
 
 ## Current design
 
 The required estimator asks only for a province. Exact address and map positioning are optional precision inputs on the results page. If used, the typed address is treated as personal information.
 
-In the current prototype:
+In the current release:
 
 - the address text is never sent to SolarMatch, an installer, an analytics service, a geocoder, a database, a URL, or a log by application code;
 - address, coordinates, and calculator answers are held in `sessionStorage`, so they survive a refresh and language switch within the tab and are removed when the user clears the estimate or the browser session ends;
 - the user chooses to open the map, then positions and confirms a marker manually;
 - simple province names in Thai or English are matched locally to choose an initial map centre;
 - the browser asks for device location only after the user presses “Use my current location”; and
-- no contact details are stored with the estimate.
+- no contact details are stored in browser session storage. When lead collection is eventually activated, only a deliberate, consented contact-form submission is stored server-side; optional exact address and coordinates remain excluded.
 
 ## Map provider and data flow
 
@@ -30,7 +30,7 @@ The map does not prefetch tiles, scrape tiles, use offline bulk downloading, or 
 
 ## Why exact-address autocomplete is not active
 
-The public [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) prohibits client-side autocomplete, limits request rates, and warns against submitting personal or confidential data. Sending exact home addresses there would conflict with the prototype’s privacy posture. It is therefore not used.
+The public [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) prohibits client-side autocomplete, limits request rates, and warns against submitting personal or confidential data. Sending exact home addresses there would conflict with this release’s privacy posture. It is therefore not used.
 
 Commercial geocoders can offer better address search and roof imagery, but they require an account, API key, contract, billing policy, privacy review, and often data-retention disclosures. None has been connected. Satellite imagery is also intentionally absent because no fully free option with sufficiently clear production licensing, service terms, and privacy handling was validated for this release.
 

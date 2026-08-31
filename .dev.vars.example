@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local administration testing. Never commit real values.
+ADMIN_EMAILS=approved-admin@example.com
+CSRF_SECRET=replace-with-a-long-random-local-secret
+ASSESSMENT_SIGNING_SECRET=replace-with-a-different-long-random-local-secret

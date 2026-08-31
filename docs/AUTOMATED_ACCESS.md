@@ -2,7 +2,7 @@
 
 Last checked: **2026-08-28**
 
-SolarMatch remains a public but pre-validation prototype. The intended posture is to permit ordinary direct HTTP retrieval and user-directed Claude review without opting the site into model-training or AI-search crawling.
+SolarMatch remains a public, noindex residential assessment during its limited validation stage. The intended posture is to permit ordinary direct HTTP retrieval and user-directed Claude review without opting the site into model-training or AI-search crawling.
 
 ## Current Anthropic agents
 
@@ -11,7 +11,7 @@ The names and categories below were checked against Anthropic and Cloudflare's c
 | User agent | Category | SolarMatch policy |
 | --- | --- | --- |
 | `Claude-User` | AI Assistant / retrieval initiated by a Claude user | Allowed |
-| `Claude-SearchBot` | AI Search crawler | Disallowed while the prototype remains pre-validation |
+| `Claude-SearchBot` | AI Search crawler | Disallowed during the limited validation stage |
 | `ClaudeBot` | AI crawler that may collect content for model development/training | Disallowed |
 
 Authoritative references:
@@ -37,10 +37,12 @@ User-Agent: Claude-SearchBot
 Disallow: /
 
 User-Agent: *
-Disallow: /
+Allow: /
+Disallow: /admin/
+Disallow: /admin/api/
 ```
 
-The specific `Claude-User` group permits user-directed retrieval. The wildcard group preserves the previous conservative crawler posture for unrelated agents. Public pages use `noindex, follow` metadata so an allowed retrieval agent can read the page and observe that it should not be indexed.
+The specific `Claude-User` group permits user-directed retrieval. Ordinary public fetching is also allowed, while admin routes are explicitly disallowed. Public pages use `noindex, follow` metadata so a retrieval agent can read the page and observe that it should not be indexed. Admin pages use `noindex, nofollow` and remain protected by Cloudflare Access plus application authorization; `robots.txt` is not treated as a security control.
 
 `/llms.txt` is a descriptive plain-text review aid. It is not a security control and does not override `robots.txt`.
 

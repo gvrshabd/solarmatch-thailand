@@ -3,105 +3,21 @@ import { notFound } from 'next/navigation';
 import {
   ArrowRight,
   Calculator,
-  Check,
-  ClipboardCheck,
   ClipboardList,
   ExternalLink,
-  FileSearch,
-  Mail,
-  MessageCircle,
   MessagesSquare,
-  Phone,
   ShieldCheck,
-  SunMedium,
-  Zap,
 } from 'lucide-react';
-import { HeroEstimator } from '@/components/home/hero-estimator';
+import { HomePage } from '@/components/home/home-page';
 import { AboutContent } from '@/components/pages/about-content';
 import { MethodologyContent } from '@/components/pages/methodology-content';
 import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
-import { PrototypeNotice } from '@/components/site/prototype-notice';
-import { SectionHeading } from '@/components/ui/section-heading';
 import { PageHero } from '@/components/content/page-hero';
 import { LegalShell } from '@/components/content/legal-shell';
 import { solarAssumptions } from '@/config/solar-assumptions';
 
 const en = (path = '') => `/en${path}`;
-
-function EnglishHome() {
-  const trustItems = ['See results before entering a phone number', 'No bill upload required', 'Free for homeowners'];
-  return (
-    <main>
-      <section className="hero" id="top">
-        <div className="site-shell hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow"><SunMedium size={16} aria-hidden="true" /> Rooftop solar estimates for homes in Thailand</p>
-            <h1>How suitable is your home<br /><em>for rooftop solar?</em></h1>
-            <p className="hero-lede">See an initial system-size and possible savings range before deciding whether to speak with an installer.</p>
-            <PrototypeNotice compact locale="en" />
-            <HeroEstimator locale="en" />
-            <ul className="trust-list" aria-label="Important information">
-              {trustItems.map((item) => <li key={item}><Check size={16} aria-hidden="true" />{item}</li>)}
-            </ul>
-          </div>
-          <div className="hero-visual" aria-label="Illustration of a modern Thai home with rooftop solar">
-            <div className="sun-orbit" aria-hidden="true" />
-            <div className="visual-caption"><span>Start with information you already have</span><strong>Electricity bill + usage pattern</strong></div>
-            <div className="roof-form" aria-hidden="true"><div className="roof-plane roof-plane-one" /><div className="roof-plane roof-plane-two" /><div className="house-wall" /></div>
-            <div className="result-peek"><span>Example estimate</span><strong>3–5 <small>kW</small></strong><p>Shown as a range, not a guaranteed figure</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section className="value-intro" id="how">
-        <div className="site-shell value-grid">
-          <div><p className="eyebrow">Before requesting a quote</p><h2>First understand what your home may actually need</h2></div>
-          <div className="value-copy"><p>SolarMatch organizes the basics in plain language, helping you ask better questions and avoid starting from zero when speaking with installers.</p><Link className="text-link" href={en('/how-it-works')}>See how it works <ArrowRight size={18} aria-hidden="true" /></Link></div>
-        </div>
-      </section>
-
-      <section className="home-process">
-        <div className="site-shell">
-          <SectionHeading eyebrow="Start with what you know" title="From one electricity bill to better questions" align="center"><p>This tool organizes initial information. It does not replace a site survey or engineering advice.</p></SectionHeading>
-          <div className="process-grid">
-            <article><span>01</span><ClipboardCheck /><h3>Answer from what you know</h3><p>Province, electricity bill, and daytime use. No document upload required.</p></article>
-            <article><span>02</span><FileSearch /><h3>See a range</h3><p>View system size, production, and possible savings as ranges that reflect uncertainty.</p></article>
-            <article><span>03</span><MessageCircle /><h3>Choose whether to continue</h3><p>You always see the result first. Contact is separate and remains disabled in this prototype.</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section className="principles-section">
-        <div className="site-shell principles-grid">
-          <div className="principles-visual" aria-hidden="true"><div className="energy-line line-one" /><div className="energy-line line-two" /><div className="principle-orb"><SunMedium /><strong>Understand</strong><span>before deciding</span></div></div>
-          <div>
-            <SectionHeading eyebrow="Designed for homeowners" title="Figures with assumptions you can inspect"><p>Assumptions, limitations, and confidence are kept close to each result.</p></SectionHeading>
-            <ul className="principle-list">
-              <li><ShieldCheck /><span><strong>No manufactured urgency</strong><small>No countdown timers or pressure to submit contact details.</small></span></li>
-              <li><Zap /><span><strong>No hiding what remains unknown</strong><small>Export income, tax benefits, and payback are excluded until the inputs are validated.</small></span></li>
-              <li><Check /><span><strong>Assumptions can change cleanly</strong><small>The calculator and content are modular, ready to be updated after research.</small></span></li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="faq-section">
-        <div className="site-shell faq-grid">
-          <SectionHeading eyebrow="Frequently asked questions" title="Start without already knowing solar" />
-          <div className="faq-list">
-            <details open><summary>How accurate is this estimate?</summary><p>It is an initial screen based on electricity cost and usage patterns. Accuracy improves with roof, load, and site-survey information.</p></details>
-            <details><summary>Do I need to enter a phone number before seeing results?</summary><p>No. You see the estimate first. The contact form appears afterwards and currently validates in the browser, then discards the values without transmitting them.</p></details>
-            <details><summary>Is SolarMatch an installer?</summary><p>No. This prototype is testing a tool that helps homeowners understand their needs before speaking with service providers.</p></details>
-            <details><summary>Why is payback not calculated yet?</summary><p>Installation price, warranty structure, maintenance, and policy all matter. We will not publish a payback figure until the market assumptions are validated.</p></details>
-          </div>
-        </div>
-      </section>
-
-      <section className="final-cta"><div className="site-shell final-cta-inner"><div><h2>Start understanding what kind of system your home may need</h2><p>See results before entering contact information.</p></div><Link className="button button-gold" href={en('/estimate')}>Start free estimate <ArrowRight size={18} /></Link></div></section>
-    </main>
-  );
-}
 
 function EnglishAbout() {
   return <AboutContent locale="en" />;
@@ -111,8 +27,8 @@ function EnglishHowItWorks() {
   return <main><PageHero eyebrow="How it works" title="Understand your home before requesting quotes"><p>SolarMatch breaks complicated information into three stages, showing what is known, what still needs checking, and what to ask an installer.</p></PageHero>
     <section className="site-shell numbered-sections">
       <article><span>01</span><ClipboardList /><div><h2>Start with available information</h2><p>Answer what you know about province, bills, usage, and the roof. There is no need to guess or upload documents.</p></div></article>
-      <article><span>02</span><Calculator /><div><h2>View a practical planning figure</h2><p>Get a starting system size, production, price, savings, and payback from the eight answers, with a method and source trail you can inspect.</p></div></article>
-      <article><span>03</span><MessagesSquare /><div><h2>Prepare to compare installers</h2><p>See the result before entering a phone number, then decide whether you want SolarMatch to qualify your request and connect you when matching opens.</p></div></article>
+      <article><span>02</span><Calculator /><div><h2>View a practical planning figure</h2><p>Get a starting system size, production, price, savings, and payback from ten simple answers, with a method and source trail you can inspect.</p></div></article>
+      <article><span>03</span><MessagesSquare /><div><h2>Choose whether to request contact</h2><p>See the result before entering a phone number, then decide whether you want a named solar company to contact you about a site assessment.</p></div></article>
     </section>
     <section className="content-cta"><div className="site-shell"><h2>Ready to try it with your electricity bill?</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
   </main>;
@@ -129,7 +45,7 @@ function EnglishSolarGuide() {
 function EnglishMethodology() {
   const legacyMethodology = (
     <main>
-      <PageHero eyebrow="Methodology · Prototype" title="We show assumptions because useful figures should be traceable">
+      <PageHero eyebrow="Methodology" title="We show assumptions because useful figures should be traceable">
         <p>This result is an estimated range for asking better questions before requesting a quotation. It is not an engineering design, quotation, or savings guarantee.</p>
         <p className="updated-date">Assumption version {solarAssumptions.version} · policy sources last checked 2026-08-28</p>
       </PageHero>
@@ -194,9 +110,7 @@ function EnglishMethodology() {
 }
 
 function EnglishContact() {
-  return <main><PageHero eyebrow="Contact" title="Contact channels are not active yet"><p>The structure is ready, but no real LINE account, phone number, or email address will be displayed until ownership and consent wording are complete.</p></PageHero>
-    <section className="site-shell contact-layout"><div className="contact-cards"><article><MessageCircle /><div><h2>LINE Official Account</h2><p>Waiting for account connection and automated-message review</p></div><button disabled>Not active</button></article><article><Phone /><div><h2>Phone</h2><p>Waiting for service hours and an accountable recipient</p></div><button disabled>Not active</button></article><article><Mail /><div><h2>Email</h2><p>Waiting for an inbox owner and data-handling policy</p></div><button disabled>Not active</button></article></div><aside className="line-placeholder"><PrototypeNotice locale="en" /><div className="qr-placeholder" aria-label="Reserved space for a future LINE QR code"><span>LINE QR</span><small>placeholder</small></div><p>When enabled, the button and QR code will be controlled from one setting in <code>config/site.ts</code>.</p></aside></section>
-  </main>;
+  return <main><PageHero eyebrow="Contact" title="Contact channels will open after accountable details are complete"><p>SolarMatch will not display or activate LINE, phone, or email until the legal operator, privacy channel, and data recipient have been correctly confirmed.</p></PageHero><section className="site-shell contact-status-card"><ShieldCheck /><div><h2>The assessment remains available</h2><p>You can see results without providing personal information. When contact requests open, the receiving solar company will be named clearly before consent is requested.</p><Link className="text-link" href={en('/privacy')}>Read the Privacy Notice <ArrowRight /></Link></div></section></main>;
 }
 
 const resources = [
@@ -243,20 +157,20 @@ function EnglishResources() {
 }
 
 function EnglishPrivacy() {
-  return <LegalShell locale="en" title="Privacy notice" summary="The estimator keeps answers in your browser session. It has no SolarMatch address database, live lead submission, analytics, or advertising."><h2>1. Optional address and map</h2><p>The required estimate only asks for a province. If you choose the optional precision map, the address, coordinates, province, and answers stay in browser session storage. They are not sent to SolarMatch, an installer, a lead database, analytics, error reporting, or a geocoding service, and are not placed in the page URL.</p><p>When opened, OpenStreetMap receives ordinary web-request data such as IP address, user agent, referrer, and the tile coordinates for the viewed area. SolarMatch does not send the typed address to a geocoder. The viewed map area may still indicate an approximate location.</p><h2>2. Current location</h2><p>The browser asks for location permission only after you select “Use current location.” The position moves the marker locally; viewing tiles around it sends the viewed map area to OpenStreetMap.</p><h2>3. Clearing temporary information</h2><p>Select “Clear and start over” to remove the estimate and any optional location. Closing the browser session also clears session storage according to browser behaviour.</p><h2>4. Installer-matching request</h2><p>Matching is not accepting submissions yet. The current form validates locally and immediately discards its values without a network request. No name, phone, LINE detail, ownership, timeframe, or consent answer is persisted.</p><h2>5. Before live collection</h2><p>A live service still needs an identified data controller, legal bases, recipients, retention periods, security review, data-subject procedures, and final PDPA review before lead information can be transmitted or stored.</p></LegalShell>;
+  return <LegalShell locale="en" title="Privacy Notice" summary="Assessment answers remain in the browser session. Contact requests activate only after the operator, recipient, purpose, and retention period have been completely published."><h2>1. Assessment information</h2><p>Province, bill, home type, ownership, appliances, AC count, and roof answers are kept in browser session storage so the assessment survives refresh and language switching. They are not sent to SolarMatch unless you see your result, choose contact, and submit the form yourself.</p><h2>2. Optional address and map</h2><p>Optional address and coordinates stay in the browser and are never put in the URL. OpenStreetMap receives ordinary tile-request data for the viewed area, including IP address, user agent, referrer, and tile coordinates. SolarMatch does not send typed address text to a geocoder.</p><h2>3. Contact requests</h2><p>When requests open, the form will name the receiving solar company before asking for consent. Stored data may include legal name, phone, optional LINE ID, assessment answers, version references, and consent evidence. SolarMatch is not the installer and may be paid by the receiving company.</p><h2>4. Current status</h2><p>Contact requests are currently disabled because the legal operator, privacy contact, receiving company, and retention period have not all been published. The system therefore refuses personal-information submissions.</p><h2>5. Local deletion and rights</h2><p>Use “Clear and start over” to remove browser data. The access, correction, withdrawal, and deletion channel will be published before contact collection opens; if it is absent, the form must remain disabled.</p></LegalShell>;
 }
 
 function EnglishTerms() {
-  return <LegalShell locale="en" title="Terms of use" summary="Draft terms for the service before installer matching opens. These are not final legal terms."><h2>1. Nature of the service</h2><p>SolarMatch provides preliminary information to help users prepare to compare installers. It is not an installer, engineering adviser, financial provider, or licensed broker.</p><h2>2. Estimated results</h2><p>Results come from user-provided information and disclosed assumptions. They do not guarantee system size, production, savings, income, returns, or property suitability.</p><h2>3. Checks before making a decision</h2><p>Users should obtain a site survey and check structure, electrical systems, permits, contracts, warranties, and current policy with qualified professionals and relevant authorities.</p><h2>4. Features not active</h2><p>Installer matching, payments, quotations, and real contact-data transmission are not active yet.</p><h2>5. Required before a live launch</h2><p>Legal-entity information, governing law, liability limits, complaint procedures, suspension rules, and partner details require legal review.</p></LegalShell>;
+  return <LegalShell locale="en" title="Terms of use" summary="SolarMatch provides a preliminary residential solar assessment, not an engineering design, quotation, or guarantee."><h2>1. Nature of the service</h2><p>SolarMatch is a residential solar lead-generation and qualification service. It helps homeowners understand initial information before optionally asking a solar company to contact them. SolarMatch is not the installer, an engineering adviser, a financial provider, or a licensed broker, and may be paid by the receiving company for a consented referral.</p><h2>2. Preliminary results</h2><p>Results come from user-provided information and disclosed assumptions. They do not guarantee system size, production, savings, income, payback, or suitability. Actual outcomes depend on usage, roof conditions, equipment, design, price, and tariffs.</p><h2>3. Checks before deciding</h2><p>Users should obtain a site survey and check structure, electrical systems, permissions, contracts, warranties, and current policy with qualified professionals before installation or payment.</p><h2>4. Optional contact</h2><p>Contact is not required to see results. The form will name the recipient before consent. Pricing, contracting, and installation are between the user and the solar company.</p><h2>5. Service status</h2><p>Contact collection remains disabled until legal and recipient details are complete. There are no payments, customer accounts, multi-installer bidding, or automatic lead sales.</p></LegalShell>;
 }
 
 function EnglishCookies() {
-  return <LegalShell locale="en" title="Cookies and browser storage" summary="The site uses browser session storage for estimator continuity and has no analytics or advertising cookies."><h2>1. What is kept locally</h2><p>The estimator keeps province, bill, usage, roof answers, and results in session storage, plus address and coordinates only if you choose the optional map. This preserves refreshes and language switching. It is not a SolarMatch database.</p><h2>2. What is not active</h2><p>There are no advertising cookies, analytics pixels, heatmaps, cross-site trackers, CRM integrations, or server-side lead storage.</p><h2>3. Third-party map requests</h2><p>Opening the optional map requests OpenStreetMap tiles for the visible area. Those requests follow the OpenStreetMap Foundation’s terms and privacy policy; the typed address is not included.</p><h2>4. Removing temporary information</h2><p>Use “Clear and start over” to remove estimator storage immediately, or close the browser session according to browser behaviour.</p></LegalShell>;
+  return <LegalShell locale="en" title="Cookies and browser storage" summary="The site uses session storage for estimator continuity and does not currently activate advertising or behaviour-analytics cookies."><h2>1. What is kept locally</h2><p>The estimator keeps answers, results, and a short-lived secure session token in browser session storage so refresh and language switching do not restart the assessment.</p><h2>2. What is not active</h2><p>There are no advertising cookies, analytics pixels, heatmaps, cross-site trackers, or CRM integrations. Any future non-essential technology must follow an appropriate consent architecture before activation.</p><h2>3. Third-party map requests</h2><p>Opening the optional map requests OpenStreetMap tiles for the visible area under the OpenStreetMap Foundation’s terms and privacy policy; typed address text is not included.</p><h2>4. Removing local information</h2><p>Use “Clear and start over” or end the browser session to remove estimator storage.</p></LegalShell>;
 }
 
 export function EnglishPage({ slug }: { slug: string }) {
   switch (slug) {
-    case '': return <EnglishHome />;
+    case '': return <HomePage locale="en" />;
     case 'estimate': return <EstimateShell locale="en" />;
     case 'estimate/results': return <ResultsShell locale="en" />;
     case 'how-it-works': return <EnglishHowItWorks />;

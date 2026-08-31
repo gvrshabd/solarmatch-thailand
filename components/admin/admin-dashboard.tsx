@@ -1,0 +1,290 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Archive, Check, ChevronDown, Clipboard, FileClock, Image as ImageIcon, LayoutList, RefreshCcw, Save, Search, Settings2, ShieldCheck, Trash2, Upload } from 'lucide-react';
+import type { EstimateAnswers } from '@/lib/calculator/types';
+import type { QuestionnaireDocument } from '@/lib/questionnaire/types';
+import { calculateLeadAssessment, type ScoringConfiguration } from '@/lib/qualification/scoring';
+
+type Lead = {
+  id: string; created_at: string; legal_first_name: string; legal_last_name: string; phone_display: string;
+  preferred_contact_method: 'phone' | 'line'; line_id: string | null; province: string; custom_location: string | null;
+  ownership_status: string; air_conditioner_count: number; monthly_bill_thb: number; daytime_pattern: string;
+  quality_score: number; raw_score: number; hard_eligible: number; status: string; exported_at: string | null;
+  selected: boolean; selectionReason: string; explanation: { factors: Array<{ key: string; points: number; maximum: number; explanationEn: string }> };
+};
+
+type ConfigurationPayload = {
+  questionnaires: Array<{ id: string; version_number: number; state: string; document: QuestionnaireDocument; created_by: string; created_at: string; published_at: string | null }>;
+  rules: Array<{ id: string; version_number: number; state: string; configuration: ScoringConfiguration; created_by: string; created_at: string; published_at: string | null }>;
+  release: Record<string, unknown> | null;
+  audit: Array<{ id: string; actor_email: string; action: string; entity_type: string; entity_id: string; created_at: string }>;
+};
+
+type LeadDetailPayload = {
+  lead: Record<string, unknown> & {
+    id: string; legal_first_name: string; legal_last_name: string; phone_display: string;
+    preferred_contact_method: string; line_id?: string | null; quality_score: number; raw_score: number;
+    hard_eligible: number; questionnaire_version_id: string; rule_version_id: string; release_id: string;
+    answers: Record<string, unknown>; scoringExplanation: { factors?: Array<{ key: string; points: number; maximum: number; explanationEn: string }>; eligibilityReasons?: Array<{ key: string; passed: boolean; explanationEn: string }> };
+  };
+  scoreHistory: Array<Record<string, unknown>>;
+  statusEvents: Array<Record<string, unknown>>;
+  notes: Array<{ id: string; note: string; actor_email: string; created_at: string }>;
+};
+
+type Tab = 'leads' | 'assessment' | 'scoring' | 'media' | 'history';
+
+const targetProvinceOptions = [
+  ['bangkok', 'Bangkok'], ['nonthaburi', 'Nonthaburi'], ['pathum-thani', 'Pathum Thani'],
+  ['samut-prakan', 'Samut Prakan'], ['samut-sakhon', 'Samut Sakhon'], ['nakhon-pathom', 'Nakhon Pathom'],
+] as const;
+
+const scorePreviewCases: Array<{ name: string; answers: EstimateAnswers }> = [
+  {
+    name: 'Strong owner lead: 8 AC units, high daytime use',
+    answers: {
+      province: 'bangkok', monthlyBillThb: 12000, propertyType: 'large-home', ownershipStatus: 'owner',
+      roofArea: '100-200', daytimePattern: 'very-high', daytimeLoads: ['air-conditioning', 'pump', 'ev'],
+      airConditionerCount: 8, roofMaterial: 'concrete-tile', shade: 'almost-none', installationTimeframe: 'one-three-months',
+    },
+  },
+  {
+    name: 'Low-suitability owner: 2 AC units, shade and limited roof',
+    answers: {
+      province: 'bangkok', monthlyBillThb: 2500, propertyType: 'townhouse', ownershipStatus: 'owner',
+      roofArea: 'under-30', daytimePattern: 'low', daytimeLoads: ['air-conditioning'], airConditionerCount: 2,
+      roofMaterial: 'unsure', shade: 'a-lot', installationTimeframe: 'researching',
+    },
+  },
+  {
+    name: 'Renter with otherwise strong signals',
+    answers: {
+      province: 'nonthaburi', monthlyBillThb: 12000, propertyType: 'detached-home', ownershipStatus: 'renter',
+      roofArea: '100-200', daytimePattern: 'very-high', daytimeLoads: ['air-conditioning', 'pump', 'ev'],
+      airConditionerCount: 8, roofMaterial: 'metal-sheet', shade: 'little', installationTimeframe: 'asap',
+    },
+  },
+];
+
+async function readJson<T>(response: Response): Promise<T> {
+  const body = await response.json().catch(() => null) as T | { error?: string } | null;
+  if (!response.ok) throw new Error((body as { error?: string } | null)?.error ?? `Request failed (${response.status})`);
+  return body as T;
+}
+
+function leadClipboard(leads: Lead[]) {
+  const lines = ['SolarMatch Thailand — selected residential leads', `Prepared: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' })}`, ''];
+  leads.forEach((lead, index) => {
+    lines.push(`${index + 1}. ${lead.legal_first_name} ${lead.legal_last_name}`);
+    lines.push(`Phone: ${lead.phone_display}`);
+    lines.push(`Preferred contact: ${lead.preferred_contact_method === 'line' ? `LINE${lead.line_id ? ` (${lead.line_id})` : ''}` : 'Phone'}`);
+    lines.push(`Location: ${lead.custom_location || lead.province}`);
+    lines.push(`Qualification: ${lead.quality_score}/5 · ${lead.ownership_status} · ${lead.air_conditioner_count} AC units · typical bill ฿${lead.monthly_bill_thb.toLocaleString('en-US')}`);
+    lines.push(`Sellable under current rules: ${lead.hard_eligible ? 'Yes' : 'No'}`, '');
+  });
+  return lines.join('\n').trim();
+}
+
+export function AdminDashboard({ csrfToken, signedInEmail }: { csrfToken: string; signedInEmail: string }) {
+  const [tab, setTab] = useState<Tab>('leads');
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [configuration, setConfiguration] = useState<ConfigurationPayload | null>(null);
+  const [questionnaireDraft, setQuestionnaireDraft] = useState<QuestionnaireDocument | null>(null);
+  const [rulesDraft, setRulesDraft] = useState<ScoringConfiguration | null>(null);
+  const [media, setMedia] = useState<Array<Record<string, unknown>>>([]);
+  const [query, setQuery] = useState('');
+  const [score, setScore] = useState('');
+  const [eligibility, setEligibility] = useState('');
+  const [ownership, setOwnership] = useState('');
+  const [location, setLocation] = useState('');
+  const [minimumAc, setMinimumAc] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [status, setStatus] = useState('active');
+  const [sort, setSort] = useState('recent');
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [detail, setDetail] = useState<LeadDetailPayload | null>(null);
+  const [note, setNote] = useState('');
+  const selected = useMemo(() => leads.filter((lead) => lead.selected), [leads]);
+  const scorePreview = useMemo(() => rulesDraft ? scorePreviewCases.map((testCase) => ({
+    name: testCase.name,
+    result: calculateLeadAssessment(testCase.answers, rulesDraft),
+  })) : [], [rulesDraft]);
+
+  const api = useCallback(async (url: string, init?: RequestInit) => readJson(await fetch(url, { cache: 'no-store', ...init, headers: { ...(init?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), 'X-CSRF-Token': csrfToken, ...init?.headers } })), [csrfToken]);
+
+  const loadLeads = useCallback(async () => {
+    const parameters = new URLSearchParams({ sort, status });
+    if (query.trim()) parameters.set('query', query.trim());
+    if (score) parameters.set('score', score);
+    if (eligibility) parameters.set('eligibility', eligibility);
+    if (ownership) parameters.set('ownership', ownership);
+    if (location) parameters.set('location', location);
+    if (minimumAc) parameters.set('minimumAc', minimumAc);
+    if (from) parameters.set('from', from);
+    if (to) parameters.set('to', to);
+    const response = await api(`/admin/api/leads?${parameters}`) as { leads: Lead[] };
+    setLeads(response.leads);
+  }, [api, eligibility, from, location, minimumAc, ownership, query, score, sort, status, to]);
+
+  const loadConfiguration = useCallback(async () => {
+    const response = await api('/admin/api/config') as ConfigurationPayload;
+    setConfiguration(response);
+    setQuestionnaireDraft(structuredClone(response.questionnaires.find((version) => version.state === 'draft')?.document ?? response.questionnaires.find((version) => version.state === 'published')?.document ?? null));
+    setRulesDraft(structuredClone(response.rules.find((version) => version.state === 'draft')?.configuration ?? response.rules.find((version) => version.state === 'published')?.configuration ?? null));
+  }, [api]);
+
+  const loadMedia = useCallback(async () => {
+    const response = await api('/admin/api/media') as { media: Array<Record<string, unknown>> };
+    setMedia(response.media);
+  }, [api]);
+
+  useEffect(() => {
+    queueMicrotask(() => { void Promise.all([loadLeads(), loadConfiguration(), loadMedia()]).catch((error: Error) => setMessage(error.message)); });
+  }, [loadConfiguration, loadLeads, loadMedia]);
+
+  async function mutateLeads(body: Record<string, unknown>, success: string) {
+    setBusy(true); setMessage('');
+    try { await api('/admin/api/leads', { method: 'POST', body: JSON.stringify(body) }); await loadLeads(); setMessage(success); }
+    catch (error) { setMessage(error instanceof Error ? error.message : 'Action failed'); }
+    finally { setBusy(false); }
+  }
+
+  async function changeSelection(lead: Lead, selectedValue: boolean) {
+    await mutateLeads({ action: 'set-selection', leadId: lead.id, selection: selectedValue ? 'selected' : 'deselected' }, selectedValue ? 'Lead selected.' : 'Lead deselected.');
+  }
+
+  async function copySelected() {
+    if (!selected.length) { setMessage('Select at least one lead before copying.'); return; }
+    const text = leadClipboard(selected);
+    try { await navigator.clipboard.writeText(text); setMessage(`${selected.length} lead${selected.length === 1 ? '' : 's'} copied. Use “Mark copied/exported” when you have pasted them successfully.`); }
+    catch {
+      const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.select();
+      const copied = document.execCommand('copy'); textarea.remove(); setMessage(copied ? `${selected.length} leads copied.` : 'Clipboard access failed. Please try from a secure browser context.');
+    }
+  }
+
+  async function saveQuestionnaireDraft() {
+    if (!questionnaireDraft) return;
+    setBusy(true);
+    try { await api('/admin/api/config', { method: 'POST', body: JSON.stringify({ action: 'save-questionnaire-draft', document: questionnaireDraft }) }); await loadConfiguration(); setMessage('Assessment draft saved. Public visitors still receive the published version.'); }
+    catch (error) { setMessage(error instanceof Error ? error.message : 'Draft could not be saved.'); }
+    finally { setBusy(false); }
+  }
+
+  async function saveRulesDraft() {
+    if (!rulesDraft) return;
+    setBusy(true);
+    try { await api('/admin/api/config', { method: 'POST', body: JSON.stringify({ action: 'save-rules-draft', configuration: rulesDraft }) }); await loadConfiguration(); setMessage('Scoring draft saved. Historic lead scores were not changed.'); }
+    catch (error) { setMessage(error instanceof Error ? error.message : 'Draft could not be saved.'); }
+    finally { setBusy(false); }
+  }
+
+  async function publish(kind: 'questionnaire' | 'rules') {
+    const version = kind === 'questionnaire' ? configuration?.questionnaires.find((item) => item.state === 'draft') : configuration?.rules.find((item) => item.state === 'draft');
+    if (!version || !confirm(`Publish ${version.id}? New submissions will use this version; historic records keep their original version.`)) return;
+    setBusy(true);
+    try { await api('/admin/api/config', { method: 'POST', body: JSON.stringify({ action: 'publish', kind, versionId: version.id }) }); await loadConfiguration(); setMessage(`${kind === 'questionnaire' ? 'Assessment' : 'Scoring rules'} published.`); }
+    catch (error) { setMessage(error instanceof Error ? error.message : 'Publish failed.'); }
+    finally { setBusy(false); }
+  }
+
+  async function restoreVersion(kind: 'questionnaire' | 'rules', versionId: string) {
+    if (!confirm(`Create a new draft from ${versionId}? The public release will not change until you publish that draft.`)) return;
+    setBusy(true);
+    try { await api('/admin/api/config', { method: 'POST', body: JSON.stringify({ action: 'restore', kind, versionId }) }); await loadConfiguration(); setTab(kind === 'questionnaire' ? 'assessment' : 'scoring'); setMessage(`${versionId} restored as a new draft.`); }
+    catch (error) { setMessage(error instanceof Error ? error.message : 'Version could not be restored.'); }
+    finally { setBusy(false); }
+  }
+
+  async function openLead(id: string) {
+    try { setDetail(await api(`/admin/api/leads/${id}`) as LeadDetailPayload); } catch (error) { setMessage(error instanceof Error ? error.message : 'Lead could not be opened.'); }
+  }
+
+  async function addLeadNote() {
+    if (!detail || !note.trim()) return;
+    try {
+      await api(`/admin/api/leads/${detail.lead.id}`, { method: 'POST', body: JSON.stringify({ action: 'add-note', note: note.trim() }) });
+      setNote('');
+      await openLead(detail.lead.id);
+      setMessage('Internal note added.');
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Note could not be added.'); }
+  }
+
+  return <main className="admin-dashboard">
+    <header className="admin-topbar"><div><p>SolarMatch Thailand</p><h1>Administration</h1></div><div className="admin-identity"><ShieldCheck /><span>Protected by Cloudflare Access</span><small>{signedInEmail}</small></div></header>
+    {!csrfToken && <div className="admin-alert error" role="alert">State-changing controls are disabled because CSRF protection is unavailable.</div>}
+    {message && <div className="admin-alert" role="status">{message}<button type="button" onClick={() => setMessage('')}>Dismiss</button></div>}
+    <nav className="admin-tabs" aria-label="Administration sections">
+      {([['leads', LayoutList, 'Leads'], ['assessment', Settings2, 'Assessment'], ['scoring', ShieldCheck, 'Scoring'], ['media', ImageIcon, 'Media'], ['history', FileClock, 'History']] as const).map(([value, Icon, label]) => <button type="button" key={value} className={tab === value ? 'active' : ''} onClick={() => setTab(value)}><Icon />{label}</button>)}
+    </nav>
+
+    {tab === 'leads' && <section className="admin-section"><div className="admin-section-heading"><div><h2>Residential contact submissions</h2><p>Stored submissions are distinct from sellable leads. The quality score is never shown to public users.</p></div><button className="admin-button secondary" type="button" onClick={() => void loadLeads()}><RefreshCcw />Refresh</button></div>
+      <div className="admin-filters"><label><span>Search name or phone</span><div><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void loadLeads(); }} /></div></label><label><span>Score</span><select value={score} onChange={(event) => setScore(event.target.value)}><option value="">All</option>{[5,4,3,2,1].map((value) => <option value={value} key={value}>{value}/5</option>)}</select></label><label><span>Sellability</span><select value={eligibility} onChange={(event) => setEligibility(event.target.value)}><option value="">All</option><option value="sellable">Sellable</option><option value="non-sellable">Non-sellable</option></select></label><label><span>Ownership</span><select value={ownership} onChange={(event) => setOwnership(event.target.value)}><option value="">All</option><option value="owner">Owner</option><option value="renter">Renter</option><option value="other">Other</option></select></label><label><span>Province</span><select value={location} onChange={(event) => setLocation(event.target.value)}><option value="">All</option><option value="bangkok">Bangkok</option><option value="nonthaburi">Nonthaburi</option><option value="pathum-thani">Pathum Thani</option><option value="samut-prakan">Samut Prakan</option><option value="samut-sakhon">Samut Sakhon</option><option value="nakhon-pathom">Nakhon Pathom</option><option value="other">Other</option></select></label><label><span>Minimum AC units</span><input type="number" min="0" max="100" value={minimumAc} onChange={(event) => setMinimumAc(event.target.value)} /></label><label><span>From date</span><input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label><label><span>To date</span><input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label><label><span>Records</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="active">Active</option><option value="exported">Exported</option><option value="archived">Archived</option><option value="deleted">Deleted</option></select></label><label><span>Sort</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recent">Newest</option><option value="score">Highest score</option></select></label><button className="admin-button" type="button" onClick={() => void loadLeads()}>Apply</button></div>
+      <div className="admin-bulkbar"><strong>{selected.length} selected</strong>{status !== 'deleted' && <><button type="button" onClick={() => void copySelected()} disabled={!selected.length}><Clipboard />Copy relevant leads info</button><button type="button" disabled={!selected.length || busy} onClick={() => void mutateLeads({ action: 'mark-exported', leadIds: selected.map((lead) => lead.id) }, 'Selected leads marked copied/exported.')}><Check />Mark copied/exported</button><button type="button" disabled={!selected.length || busy} onClick={() => void mutateLeads({ action: status === 'archived' ? 'restore' : 'archive', leadIds: selected.map((lead) => lead.id) }, status === 'archived' ? 'Leads restored.' : 'Leads archived.')}><Archive />{status === 'archived' ? 'Restore' : 'Archive'}</button><button type="button" className="danger" disabled={!selected.length || busy} onClick={() => { if (confirm('Soft-delete the selected records? They can still be permanently purged later.')) void mutateLeads({ action: 'soft-delete', leadIds: selected.map((lead) => lead.id) }, 'Selected leads moved to deleted state.'); }}><Trash2 />Delete</button></>}{status === 'deleted' && <button type="button" className="danger" disabled={!selected.length || busy} onClick={() => { const confirmation = prompt('Permanent deletion cannot be undone. Type PERMANENTLY DELETE to purge the selected personal data.'); if (confirmation === 'PERMANENTLY DELETE') void mutateLeads({ action: 'purge', leadIds: selected.map((lead) => lead.id), confirmation }, 'Selected personal data permanently purged.'); }}><Trash2 />Permanently purge</button>}</div>
+      <div className="admin-table-wrap"><table className="admin-lead-table"><thead><tr><th>Submitted</th><th>Contact</th><th>Location</th><th>Qualification</th><th>Status</th><th>Selection reason</th><th>Actions</th><th className="selection-column">Select</th></tr></thead><tbody>{leads.length ? leads.map((lead) => <tr key={lead.id}><td><time dateTime={lead.created_at}>{new Date(lead.created_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' })}</time></td><td><button type="button" className="admin-lead-link" onClick={() => void openLead(lead.id)}>{lead.legal_first_name} {lead.legal_last_name}</button><small>{lead.phone_display} · {lead.preferred_contact_method.toUpperCase()}</small></td><td>{lead.custom_location || lead.province}</td><td><span className={`admin-score score-${lead.quality_score}`}>{lead.quality_score}/5</span><small>{lead.hard_eligible ? 'Sellable' : 'Non-sellable'} · {lead.air_conditioner_count} AC</small></td><td>{lead.status}{lead.exported_at && <small>Copied {new Date(lead.exported_at).toLocaleDateString('en-GB')}</small>}</td><td><small>{lead.selectionReason}</small></td><td><button type="button" className="admin-row-action" onClick={() => void openLead(lead.id)}>View</button>{status !== 'deleted' && <button type="button" className="admin-row-action danger" onClick={() => { if (confirm(`Soft-delete ${lead.legal_first_name} ${lead.legal_last_name}?`)) void mutateLeads({ action: 'soft-delete', leadIds: [lead.id] }, 'Lead moved to deleted state.'); }}>Delete</button>}</td><td className="selection-column"><input aria-label={`Select ${lead.legal_first_name} ${lead.legal_last_name}`} type="checkbox" checked={lead.selected} onChange={(event) => void changeSelection(lead, event.target.checked)} /></td></tr>) : <tr><td colSpan={8} className="empty-admin-table">No submissions match these filters.</td></tr>}</tbody></table></div>
+    </section>}
+
+    {tab === 'assessment' && questionnaireDraft && <section className="admin-section">
+      <div className="admin-section-heading"><div><h2>Assessment configuration</h2><p>Edit bilingual wording and order in a draft. The public flow changes only after explicit publishing.</p></div><div className="admin-heading-actions"><button className="admin-button secondary" type="button" onClick={() => window.open(`/admin/preview?questionnaireVersion=${encodeURIComponent(configuration?.questionnaires.find((item) => item.state === 'draft')?.id ?? configuration?.questionnaires.find((item) => item.state === 'published')?.id ?? '')}`, '_blank', 'noopener')}>Preview</button><button className="admin-button secondary" type="button" disabled={busy || !csrfToken} onClick={() => void saveQuestionnaireDraft()}><Save />Save new draft</button><button className="admin-button" type="button" disabled={busy || !configuration?.questionnaires.some((item) => item.state === 'draft')} onClick={() => void publish('questionnaire')}>Publish draft</button></div></div>
+      <p className="admin-guardrail-note">Question IDs, input types, required status, and option values are fixed semantic contracts because calculations, validation, and historic lead records depend on them. Wording, help text, question order, option order, and conditional-field copy are safely editable here.</p>
+      <div className="admin-editor-list">{questionnaireDraft.questions.map((question, questionIndex) => <details open={questionIndex === 0} key={question.id} className="admin-editor-card">
+        <summary><span>{questionIndex + 1}. {question.title.en}</span><code>{question.id} · {question.type}</code><ChevronDown /></summary>
+        <div className="admin-editor-fields">
+          <label>English question<input value={question.title.en} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].title.en = event.target.value; return next; })} /></label>
+          <label>Thai question<input lang="th" value={question.title.th} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].title.th = event.target.value; return next; })} /></label>
+          <label>English help<textarea value={question.help.en} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].help.en = event.target.value; return next; })} /></label>
+          <label>Thai help<textarea lang="th" value={question.help.th} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].help.th = event.target.value; return next; })} /></label>
+          <label className="admin-checkbox"><input type="checkbox" checked={question.required} disabled />Required core answer</label>
+          <div className="admin-question-flags" aria-label="Question relevance"><span>Calculation: {question.relevance.calculation ? 'yes' : 'no'}</span><span>Qualification: {question.relevance.qualification ? 'yes' : 'no'}</span><span>Scoring: {question.relevance.scoring ? 'yes' : 'no'}</span></div>
+          <div className="admin-order-buttons"><button type="button" disabled={questionIndex === 0} onClick={() => setQuestionnaireDraft((current) => { const next = structuredClone(current!); [next.questions[questionIndex - 1], next.questions[questionIndex]] = [next.questions[questionIndex], next.questions[questionIndex - 1]]; return next; })}>Move up</button><button type="button" disabled={questionIndex === questionnaireDraft.questions.length - 1} onClick={() => setQuestionnaireDraft((current) => { const next = structuredClone(current!); [next.questions[questionIndex + 1], next.questions[questionIndex]] = [next.questions[questionIndex], next.questions[questionIndex + 1]]; return next; })}>Move down</button></div>
+        </div>
+        {question.conditionalFields?.map((field, fieldIndex) => <div className="admin-conditional-editor" key={field.id}><h3>Conditional field · <code>{field.id}</code></h3><p>Shown when <code>{field.whenOption}</code> is selected.</p><div><label>English label<input value={field.label.en} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].conditionalFields![fieldIndex].label.en = event.target.value; return next; })} /></label><label>Thai label<input lang="th" value={field.label.th} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].conditionalFields![fieldIndex].label.th = event.target.value; return next; })} /></label>{field.placeholder && <><label>English placeholder<input value={field.placeholder.en} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].conditionalFields![fieldIndex].placeholder!.en = event.target.value; return next; })} /></label><label>Thai placeholder<input lang="th" value={field.placeholder.th} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].conditionalFields![fieldIndex].placeholder!.th = event.target.value; return next; })} /></label></>}</div></div>)}
+        {question.options && <div className="admin-option-editor"><h3>Answer options</h3>{question.options.map((option, optionIndex) => <div key={option.value}><code>{option.value}</code><input aria-label={`${option.value} English`} value={option.label.en} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].options![optionIndex].label.en = event.target.value; return next; })} /><input lang="th" aria-label={`${option.value} Thai`} value={option.label.th} onChange={(event) => setQuestionnaireDraft((current) => { const next = structuredClone(current!); next.questions[questionIndex].options![optionIndex].label.th = event.target.value; return next; })} /><span className="admin-option-order"><button type="button" aria-label={`Move ${option.value} up`} disabled={optionIndex === 0} onClick={() => setQuestionnaireDraft((current) => { const next = structuredClone(current!); [next.questions[questionIndex].options![optionIndex - 1], next.questions[questionIndex].options![optionIndex]] = [next.questions[questionIndex].options![optionIndex], next.questions[questionIndex].options![optionIndex - 1]]; return next; })}>↑</button><button type="button" aria-label={`Move ${option.value} down`} disabled={optionIndex === question.options!.length - 1} onClick={() => setQuestionnaireDraft((current) => { const next = structuredClone(current!); [next.questions[questionIndex].options![optionIndex + 1], next.questions[questionIndex].options![optionIndex]] = [next.questions[questionIndex].options![optionIndex], next.questions[questionIndex].options![optionIndex + 1]]; return next; })}>↓</button></span></div>)}</div>}
+      </details>)}</div>
+    </section>}
+
+    {tab === 'scoring' && rulesDraft && <section className="admin-section">
+      <div className="admin-section-heading"><div><h2>Qualification and quality scoring</h2><p>Hard eligibility and the 1–5 quality score remain separate. New rules affect new leads only.</p></div><div className="admin-heading-actions"><button className="admin-button secondary" disabled={busy || !csrfToken} type="button" onClick={() => void saveRulesDraft()}><Save />Save new draft</button><button className="admin-button" type="button" disabled={busy || !configuration?.rules.some((item) => item.state === 'draft')} onClick={() => void publish('rules')}>Publish draft</button></div></div>
+      <div className="admin-rule-grid">
+        <label>Require owner<select value={rulesDraft.ownerRequired ? 'yes' : 'no'} onChange={(event) => setRulesDraft({ ...rulesDraft, ownerRequired: event.target.value === 'yes' })}><option value="yes">Yes</option><option value="no">No</option></select></label>
+        <label>Minimum installed AC units<input type="number" min="0" max="100" value={rulesDraft.minimumAirConditioners} onChange={(event) => setRulesDraft({ ...rulesDraft, minimumAirConditioners: Number(event.target.value) })} /></label>
+        <label>High-quality threshold<select value={rulesDraft.highQualityThreshold} onChange={(event) => setRulesDraft({ ...rulesDraft, highQualityThreshold: Number(event.target.value) as 1|2|3|4|5 })}>{[1,2,3,4,5].map((value) => <option key={value} value={value}>{value}/5</option>)}</select></label>
+        <label>Automatic selection threshold<select value={rulesDraft.automaticSelectionThreshold} onChange={(event) => setRulesDraft({ ...rulesDraft, automaticSelectionThreshold: Number(event.target.value) as 1|2|3|4|5 })}>{[1,2,3,4,5].map((value) => <option key={value} value={value}>{value}/5</option>)}</select></label>
+      </div>
+      <h3>Factor weights <small>must total exactly 100</small></h3>
+      <div className="admin-weight-grid">{Object.entries(rulesDraft.weights).map(([key, value]) => <label key={key}><span>{key.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`)}</span><input type="number" min="0" max="100" value={value} onChange={(event) => setRulesDraft({ ...rulesDraft, weights: { ...rulesDraft.weights, [key]: Number(event.target.value) } })} /></label>)}</div>
+      <p className={`admin-weight-total ${Object.values(rulesDraft.weights).reduce((sum, value) => sum + value, 0) === 100 ? 'valid' : 'invalid'}`}>Current total: {Object.values(rulesDraft.weights).reduce((sum, value) => sum + value, 0)} / 100</p>
+      <h3>Monthly-bill thresholds</h3>
+      <div className="admin-weight-grid">{rulesDraft.billThresholdsThb.map((value, index) => <label key={index}><span>Threshold {index + 1}</span><input type="number" min="1" value={value} onChange={(event) => { const values = [...rulesDraft.billThresholdsThb] as ScoringConfiguration['billThresholdsThb']; values[index] = Number(event.target.value); setRulesDraft({ ...rulesDraft, billThresholdsThb: values }); }} /></label>)}</div>
+      <fieldset className="admin-checkbox-grid"><legend>Target locations</legend>{targetProvinceOptions.map(([value, label]) => <label key={value}><input type="checkbox" checked={rulesDraft.targetProvinces.includes(value)} onChange={(event) => setRulesDraft({ ...rulesDraft, targetProvinces: event.target.checked ? [...rulesDraft.targetProvinces, value] : rulesDraft.targetProvinces.filter((province) => province !== value) })} />{label}</label>)}</fieldset>
+      <h3>Quality bands <small>must cover every point from 0 through 100 exactly once</small></h3>
+      <div className="admin-band-grid">{rulesDraft.bands.map((band, index) => <fieldset key={band.score}><legend>{band.score}/5</legend><label>Minimum<input type="number" min="0" max="100" value={band.min} onChange={(event) => { const bands = structuredClone(rulesDraft.bands); bands[index].min = Number(event.target.value); setRulesDraft({ ...rulesDraft, bands }); }} /></label><label>Maximum<input type="number" min="0" max="100" value={band.max} onChange={(event) => { const bands = structuredClone(rulesDraft.bands); bands[index].max = Number(event.target.value); setRulesDraft({ ...rulesDraft, bands }); }} /></label></fieldset>)}</div>
+      <div className="admin-score-preview"><h3>Preview test cases</h3><p>These examples recalculate immediately and are never written to the lead database.</p><div>{scorePreview.map(({ name, result }) => <article key={name}><strong>{name}</strong><span>{result.qualityScore}/5 · {result.rawPoints}/100</span><small>{result.hardEligible ? 'Sellable under this draft' : 'Not sellable under this draft'}</small></article>)}</div></div>
+    </section>}
+
+    {tab === 'media' && <MediaPanel media={media} csrfToken={csrfToken} onChanged={loadMedia} setMessage={setMessage} />}
+    {tab === 'history' && <section className="admin-section"><div className="admin-section-heading"><div><h2>Versions and audit history</h2><p>Published releases are immutable references for historic submissions. Restoring creates a new draft; it never rewrites an old version.</p></div></div><div className="admin-history-grid"><article><h3>Questionnaire versions</h3>{configuration?.questionnaires.map((version) => <div key={version.id}><strong>{version.id}</strong><span>{version.state}</span><small>{new Date(version.created_at).toLocaleString('en-GB')}</small><button type="button" disabled={busy} onClick={() => void restoreVersion('questionnaire', version.id)}>Restore as draft</button></div>)}</article><article><h3>Scoring versions</h3>{configuration?.rules.map((version) => <div key={version.id}><strong>{version.id}</strong><span>{version.state}</span><small>{new Date(version.created_at).toLocaleString('en-GB')}</small><button type="button" disabled={busy} onClick={() => void restoreVersion('rules', version.id)}>Restore as draft</button></div>)}</article><article><h3>Recent audit events</h3>{configuration?.audit.map((event) => <div key={event.id}><strong>{event.action}</strong><span>{event.entity_type}</span><small>{new Date(event.created_at).toLocaleString('en-GB')} · {event.actor_email}</small></div>)}</article></div></section>}
+
+    {detail && <div className="admin-modal-backdrop" role="presentation" onMouseDown={() => setDetail(null)}><section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="lead-detail-title" onMouseDown={(event) => event.stopPropagation()}><div className="admin-modal-heading"><div><p>Residential contact submission</p><h2 id="lead-detail-title">{detail.lead.legal_first_name} {detail.lead.legal_last_name}</h2></div><button type="button" onClick={() => setDetail(null)}>Close</button></div><div className="admin-detail-summary"><article><span>Contact</span><strong>{detail.lead.phone_display}</strong><small>{detail.lead.preferred_contact_method.toUpperCase()}{detail.lead.line_id ? ` · ${detail.lead.line_id}` : ''}</small></article><article><span>Quality</span><strong>{detail.lead.quality_score}/5</strong><small>{detail.lead.raw_score}/100 points</small></article><article><span>Sellability</span><strong>{detail.lead.hard_eligible ? 'Sellable' : 'Non-sellable'}</strong><small>Scoring never changes this hard gate</small></article></div><section className="admin-detail-section"><h3>Why this result was assigned</h3>{detail.lead.scoringExplanation.eligibilityReasons?.map((reason) => <p key={reason.key}><strong>{reason.passed ? 'Pass' : 'Fail'}:</strong> {reason.explanationEn}</p>)}<div className="admin-factor-list">{detail.lead.scoringExplanation.factors?.map((factor) => <div key={factor.key}><strong>{factor.key}</strong><span>{factor.points}/{factor.maximum}</span><small>{factor.explanationEn}</small></div>)}</div></section><section className="admin-detail-section"><h3>Assessment answers</h3><dl>{Object.entries(detail.lead.answers).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{Array.isArray(value) ? value.join(', ') : String(value ?? '—')}</dd></div>)}</dl></section><section className="admin-detail-section"><h3>Version record</h3><p>Questionnaire: <code>{detail.lead.questionnaire_version_id}</code></p><p>Rules: <code>{detail.lead.rule_version_id}</code></p><p>Release: <code>{detail.lead.release_id}</code></p></section><section className="admin-detail-section"><h3>Internal notes</h3>{detail.notes.length ? detail.notes.map((item) => <article key={item.id}><p>{item.note}</p><small>{new Date(item.created_at).toLocaleString('en-GB')} · {item.actor_email}</small></article>) : <p>No notes yet.</p>}<label>Add a note<textarea value={note} maxLength={2000} onChange={(event) => setNote(event.target.value)} /></label><button className="admin-button" type="button" disabled={!note.trim() || busy} onClick={() => void addLeadNote()}>Add note</button></section><details className="admin-technical-detail"><summary>Technical record and history</summary><pre>{JSON.stringify({ scoreHistory: detail.scoreHistory, statusEvents: detail.statusEvents }, null, 2)}</pre></details></section></div>}
+  </main>;
+}
+
+function MediaPanel({ media, csrfToken, onChanged, setMessage }: { media: Array<Record<string, unknown>>; csrfToken: string; onChanged: () => Promise<void>; setMessage: (message: string) => void }) {
+  async function upload(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    try {
+      await readJson(await fetch('/admin/api/media', { method: 'POST', headers: { 'X-CSRF-Token': csrfToken }, body: form }));
+      event.currentTarget.reset(); await onChanged(); setMessage('Image uploaded as a private draft. Publish it explicitly before use.');
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Upload failed.'); }
+  }
+  async function action(id: string, value: 'publish'|'archive'|'delete') {
+    if (value === 'delete' && !confirm('Delete this media object from private storage?')) return;
+    try { await readJson(await fetch('/admin/api/media', { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }, body: JSON.stringify({ id, action: value }) })); await onChanged(); setMessage(`Media ${value} action completed.`); }
+    catch (error) { setMessage(error instanceof Error ? error.message : 'Media action failed.'); }
+  }
+  return <section className="admin-section"><div className="admin-section-heading"><div><h2>Approved website media</h2><p>Uploads remain in the private R2 bucket and are not public until explicitly published.</p></div></div><form className="admin-media-form" onSubmit={(event) => void upload(event)}><label>Image file<input name="file" type="file" accept="image/jpeg,image/png,image/webp" required /></label><label>Purpose<input name="purpose" required maxLength={100} /></label><label>English alternative text<input name="altEn" required maxLength={300} /></label><label>Thai alternative text<input name="altTh" lang="th" required maxLength={300} /></label><button className="admin-button" type="submit" disabled={!csrfToken}><Upload />Upload private draft</button></form><div className="admin-media-grid">{media.map((asset) => <article key={String(asset.id)}><div><ImageIcon /><strong>{String(asset.original_filename)}</strong><small>{String(asset.width)}×{String(asset.height)} · {Math.round(Number(asset.byte_size)/1024)} KB</small><span>{String(asset.publication_state)}</span></div><div><button type="button" onClick={() => void action(String(asset.id), 'publish')}>Publish</button><button type="button" onClick={() => void action(String(asset.id), 'archive')}>Archive</button><button type="button" className="danger" onClick={() => void action(String(asset.id), 'delete')}>Delete</button></div></article>)}</div></section>;
+}

@@ -26,7 +26,7 @@ export function MethodologyContent({ locale = 'th' }: { locale?: Locale }) {
           </ol>
 
           <h2>{english ? 'What the result means' : 'ความหมายของผลลัพธ์'}</h2>
-          <p>{english ? 'The result is a lead-qualification ballpark: useful for deciding whether to compare installers and what to ask them. It is not an engineering design, quotation, financial guarantee, or approval from a utility or tax authority.' : 'ผลลัพธ์เป็นค่าประเมินเพื่อคัดกรองความสนใจ ช่วยตัดสินใจว่าจะเปรียบเทียบผู้ติดตั้งหรือไม่ และควรถามอะไร ไม่ใช่แบบวิศวกรรม ใบเสนอราคา การรับประกันทางการเงิน หรือการอนุมัติจากการไฟฟ้าหรือหน่วยงานภาษี'}</p>
+          <p>{english ? 'The result is a lead-qualification ballpark: useful for deciding whether to request a site assessment and what to ask a solar company. It is not an engineering design, quotation, financial guarantee, or approval from a utility or tax authority.' : 'ผลลัพธ์เป็นค่าประเมินเพื่อคัดกรองความสนใจ ช่วยตัดสินใจว่าจะขอประเมินหน้างานหรือไม่ และควรถามบริษัทโซลาร์เรื่องใด ไม่ใช่แบบวิศวกรรม ใบเสนอราคา การรับประกันทางการเงิน หรือการอนุมัติจากการไฟฟ้าหรือหน่วยงานภาษี'}</p>
 
           <h2>{english ? 'Primary evidence' : 'หลักฐานหลัก'}</h2>
           <ul>

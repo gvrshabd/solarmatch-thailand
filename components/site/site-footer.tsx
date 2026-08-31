@@ -12,15 +12,14 @@ export function SiteFooter() {
   const link = (path: string) => localizedPath(path, locale);
   const focusMode = pathname === '/estimate' || pathname === '/en/estimate';
 
-  if (focusMode) return null;
+  if (focusMode || pathname.startsWith('/admin')) return null;
 
   return (
     <footer className="site-footer">
       <div className="site-shell footer-grid">
         <div className="footer-brand">
           <BrandMark />
-          <p>{english ? 'Understand rooftop solar, then prepare to compare suitable installers.' : 'เข้าใจ Solar Rooftop แล้วเตรียมเปรียบเทียบผู้ติดตั้งที่เหมาะสม'}</p>
-          <span className="prototype-chip">{english ? 'Installer matching is not accepting submissions yet' : 'ระบบจับคู่ผู้ติดตั้งยังไม่เปิดรับคำขอจริง'}</span>
+          <p>{english ? 'A residential solar assessment for Thai homeowners, with useful results before optional contact.' : 'แบบประเมินโซลาร์สำหรับเจ้าของบ้านในไทย แสดงผลที่เป็นประโยชน์ก่อนเลือกให้ติดต่อกลับ'}</p>
         </div>
         <div>
           <h2>{english ? 'Get started' : 'เริ่มต้น'}</h2>
@@ -37,7 +36,7 @@ export function SiteFooter() {
         </div>
         <div>
           <h2>{english ? 'Legal' : 'ข้อกำหนด'}</h2>
-          <Link href={link('/privacy')}>{english ? 'Privacy' : 'ความเป็นส่วนตัว'}</Link>
+          <Link href={link('/privacy')}>{english ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว'}</Link>
           <Link href={link('/terms')}>{english ? 'Terms of use' : 'ข้อกำหนดการใช้งาน'}</Link>
           <Link href={link('/cookies')}>{english ? 'Cookies' : 'คุกกี้'}</Link>
         </div>

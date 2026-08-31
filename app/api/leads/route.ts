@@ -1,7 +1,109 @@
-export async function POST() {
-  // Fail closed: the current prototype validates locally and must not accept contact data.
-  return Response.json(
-    { ok: false, code: 'LEAD_SUBMISSION_DISABLED', persisted: false },
-    { status: 410, headers: { 'cache-control': 'no-store' } },
-  );
+import { NextRequest, NextResponse } from 'next/server';
+import { calculateLeadAssessment } from '@/lib/qualification/scoring';
+import { verifyAssessmentToken } from '@/lib/server/assessment-token';
+import { sha256 } from '@/lib/server/crypto';
+import { getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
+import { requireDatabase } from '@/lib/server/runtime';
+import { leadSchema, normalizeThaiPhone } from '@/lib/validation/lead';
+
+export const dynamic = 'force-dynamic';
+
+function jsonError(code: string, status: number) {
+  return NextResponse.json({ ok: false, code }, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
+}
+
+function isSameOrigin(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  if (!origin) return false;
+  try { return new URL(origin).host === request.nextUrl.host; } catch { return false; }
+}
+
+async function enforceRateLimit(request: NextRequest, database: D1Database) {
+  const address = request.headers.get('cf-connecting-ip') ?? request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  const keyHash = await sha256(`lead-submit:${address}`);
+  const windowStart = new Date(Math.floor(Date.now() / 60_000) * 60_000).toISOString();
+  const results = await database.batch([
+    database.prepare("DELETE FROM public_request_limits WHERE window_start < datetime('now', '-2 days')"),
+    database.prepare(`INSERT INTO public_request_limits (key_hash, window_start, request_count)
+      VALUES (?, ?, 1)
+      ON CONFLICT(key_hash, window_start) DO UPDATE SET request_count = request_count + 1
+      RETURNING request_count`).bind(keyHash, windowStart),
+  ]);
+  const row = results[1]?.results?.[0] as { request_count?: number } | undefined;
+  return (row?.request_count ?? 99) <= 5;
+}
+
+export async function POST(request: NextRequest) {
+  if (!isSameOrigin(request)) return jsonError('invalid_origin', 403);
+  if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) return jsonError('invalid_content_type', 415);
+  if (Number(request.headers.get('content-length') ?? 0) > 64_000) return jsonError('request_too_large', 413);
+
+  let raw: unknown;
+  try { raw = await request.json(); } catch { return jsonError('invalid_json', 400); }
+  const parsed = leadSchema.safeParse(raw);
+  if (!parsed.success) return jsonError('invalid_submission', 400);
+  if (parsed.data.website) return NextResponse.json({ ok: true }, { status: 202 });
+
+  const token = await verifyAssessmentToken(parsed.data.assessmentToken);
+  if (!token || Date.now() - token.issuedAt < 1_500) return jsonError('invalid_assessment_session', 403);
+
+  const database = requireDatabase();
+  if (!await enforceRateLimit(request, database)) return jsonError('rate_limited', 429);
+  const release = await getCurrentRelease(database);
+  if (!release || !release.live_lead_submissions || !release.legal_complete) return jsonError('submissions_unavailable', 503);
+  if (!release.receiving_company_en || !release.receiving_company_th || !release.receiving_company_privacy_url || !release.retention_days) return jsonError('submissions_unavailable', 503);
+  if (token.releaseId !== release.release_id || token.questionnaireVersionId !== release.questionnaire_version_id || token.ruleVersionId !== release.rule_version_id) return jsonError('assessment_version_expired', 409);
+
+  const assessment = calculateLeadAssessment(parsed.data.answers, parseScoringConfiguration(release));
+  const phoneE164 = normalizeThaiPhone(parsed.data.phone);
+  const existing = await database.prepare('SELECT id FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string }>();
+  if (existing) return NextResponse.json({ ok: true, leadId: existing.id, duplicate: true }, { headers: { 'Cache-Control': 'no-store' } });
+
+  const leadId = crypto.randomUUID();
+  const consentedAt = new Date().toISOString();
+  const requestFingerprint = await sha256(`${phoneE164}:${token.nonce}:${release.release_id}`);
+  const consentTextEn = `I consent to SolarMatch Thailand storing my request and sharing it with ${release.receiving_company_en} so that the company may contact me about a residential solar site assessment. I have read the Privacy Notice and understand that SolarMatch is not the installer and may be paid by the receiving company.`;
+  const consentTextTh = `ข้าพเจ้ายินยอมให้ SolarMatch Thailand จัดเก็บคำขอนี้และส่งต่อให้ ${release.receiving_company_th} เพื่อให้บริษัทดังกล่าวติดต่อเกี่ยวกับการประเมินหน้างานโซลาร์สำหรับที่พักอาศัย ข้าพเจ้าได้อ่านประกาศความเป็นส่วนตัวแล้ว และเข้าใจว่า SolarMatch ไม่ใช่ผู้ติดตั้งและอาจได้รับค่าตอบแทนจากบริษัทผู้รับข้อมูล`;
+  const answers = parsed.data.answers;
+  const explanation = JSON.stringify({ factors: assessment.factors, eligibilityReasons: assessment.eligibilityReasons });
+
+  try {
+    await database.batch([
+      database.prepare(`INSERT INTO leads (
+        id, idempotency_key, request_fingerprint, legal_first_name, legal_last_name, phone_e164, phone_display,
+        preferred_contact_method, line_id, province, custom_location, ownership_status, property_type, custom_property_type,
+        daytime_loads_json, custom_daytime_load, air_conditioner_count, monthly_bill_thb, roof_material, custom_roof_material,
+        roof_shade, roof_area, daytime_pattern, installation_timeframe, answers_json, questionnaire_version_id,
+        rule_version_id, release_id, raw_score, quality_score, hard_eligible, high_quality, scoring_explanation_json,
+        consent_version, consent_text_en, consent_text_th, consented_at, receiving_company_en, receiving_company_th,
+        source_locale, user_agent_summary)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .bind(
+          leadId, parsed.data.idempotencyKey, requestFingerprint, parsed.data.legalFirstName, parsed.data.legalLastName,
+          phoneE164, parsed.data.phone, parsed.data.contactMethod, parsed.data.lineId ?? null, answers.province,
+          answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
+          JSON.stringify(answers.daytimeLoads), answers.customDaytimeLoad ?? null, answers.airConditionerCount ?? 0,
+          Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
+          answers.roofArea, answers.daytimePattern, answers.installationTimeframe, JSON.stringify(answers),
+          release.questionnaire_version_id, release.rule_version_id, release.release_id, assessment.rawPoints,
+          assessment.qualityScore, assessment.hardEligible ? 1 : 0, assessment.highQuality ? 1 : 0, explanation,
+          `privacy:${release.release_id}`, consentTextEn, consentTextTh, consentedAt,
+          release.receiving_company_en, release.receiving_company_th, parsed.data.locale,
+          request.headers.get('user-agent')?.slice(0, 160) ?? null,
+        ),
+      database.prepare(`INSERT INTO lead_score_history
+        (id, lead_id, rule_version_id, raw_score, quality_score, hard_eligible, explanation_json, reason, is_original, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'original-submission', 1, 'system:lead-submission')`)
+        .bind(crypto.randomUUID(), leadId, release.rule_version_id, assessment.rawPoints, assessment.qualityScore,
+          assessment.hardEligible ? 1 : 0, explanation),
+    ]);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('UNIQUE constraint failed: leads.idempotency_key')) {
+      const duplicate = await database.prepare('SELECT id FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string }>();
+      if (duplicate) return NextResponse.json({ ok: true, leadId: duplicate.id, duplicate: true }, { headers: { 'Cache-Control': 'no-store' } });
+    }
+    return jsonError('submission_failed', 500);
+  }
+
+  return NextResponse.json({ ok: true, leadId }, { status: 201, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
 }

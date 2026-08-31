@@ -13,7 +13,7 @@ const titles: Record<string, string> = {
   about: 'About SolarMatch',
   contact: 'Contact',
   resources: 'Official resources',
-  privacy: 'Draft privacy notice',
+  privacy: 'Privacy Notice',
   terms: 'Draft terms of use',
   cookies: 'Cookies and browser storage',
 };

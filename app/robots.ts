@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'Claude-User', allow: '/' },
       { userAgent: 'ClaudeBot', disallow: '/' },
       { userAgent: 'Claude-SearchBot', disallow: '/' },
-      { userAgent: '*', disallow: '/' },
+      { userAgent: '*', allow: '/', disallow: ['/admin/', '/admin/api/'] },
     ],
   };
 }

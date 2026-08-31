@@ -6,12 +6,12 @@ This register distinguishes authoritative inputs, observed market evidence, and 
 
 | Subject | Source | Model use |
 | --- | --- | --- |
-| Tariff register | [PEA](https://www.pea.co.th/our-services/tariff) | Effective residential and small-general-service schedules |
+| Tariff register | [PEA](https://www.pea.co.th/our-services/tariff) | Effective residential schedules |
 | Sep–Dec 2026 Ft | [Energy Regulatory Commission](https://erc.or.th/th/news-release/3458) | ฿0.1623/kWh Ft and published period |
-| May 2023 tariff PDF | [PEA](https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf) | Residential schedule through Aug 2026 and bill-only small-general-service fallback |
+| May 2023 tariff PDF | [PEA](https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf) | Residential schedule through Aug 2026 |
 | Sep 2026 tariff PDF | [PEA](https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf) | Residential tiers from Sep 2026 |
 | Solar resource | [European Commission JRC PVGIS](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en) | Stored province-level long-run yield anchors |
-| Thai self-consumption/load profiles | [Energies 14(11), 3329](https://www.mdpi.com/1996-1073/14/11/3329) | Residential and commercial annual-load matching and self-consumption envelope |
+| Thai self-consumption/load profiles | [Energies 14(11), 3329](https://www.mdpi.com/1996-1073/14/11/3329) | Residential annual-load matching and self-consumption envelope |
 | Thai customer load-profile study | [Renewable Energy 131, 1149–1162](https://www.sciencedirect.com/science/article/pii/S0960148118308541) | Evidence that Thai customer classes have distinct load shapes |
 | Thai residential economics | [Renewable Energy 138, 395–408](https://www.sciencedirect.com/science/article/pii/S0960148119301004) | 3 kW/4,097 kWh-year and PV/load-ratio context |
 | 5 kW current package | [PEA Shopping](https://peashopping.com/product/pea-solar-5kw-1-phase-standard-package/) | Current public package-price anchor |
@@ -29,10 +29,9 @@ This register distinguishes authoritative inputs, observed market evidence, and 
 - Unknown direction/slope uses a documented 0.95 production factor.
 - “Unsure” shade uses 0.90, more conservative than the former 0.95 fallback.
 - “More than 200 m²” has no invented upper capacity cap.
-- Commercial property types use small-general-service billing as a bill-only screen. A real medium/large general-service bill with demand charges requires installer review; the public result remains a lead-qualification ballpark.
 - Public installed-price evidence begins at 3 kWp. A calculated 1.5–2.5 kWp starting size therefore uses the evidenced 3 kWp package-price floor rather than an invented small-system discount.
 - The base assumes 0% tariff escalation and excludes export, tax, and finance.
 
 ## Review gate before live acquisition
 
-Before advertising or transmitting leads, recheck tariffs, Ft, price packages, surplus rules, tax terms, legal wording, and regression fixtures. Buyer interviews still determine lead qualification, pricing, exclusivity, routing, replacement policy, and service levels.
+Before advertising or transmitting leads, recheck tariffs, Ft, price packages, surplus rules, tax terms, legal wording, and regression fixtures. Buyer interviews may refine the versioned lead qualification model, pricing, exclusivity, routing, replacement policy, and service levels without rewriting historic lead scores.

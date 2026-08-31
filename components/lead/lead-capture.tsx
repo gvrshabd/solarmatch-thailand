@@ -1,91 +1,155 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from '@/components/site/internal-link';
 import { ArrowRight, LockKeyhole } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { leadSchema, type LeadInput } from '@/lib/validation/lead';
-import { track } from '@/lib/analytics/track';
+import Link from '@/components/site/internal-link';
+import { assessmentContextStorageKey } from '@/components/estimate/estimate-shell';
 import { localizedPath, type Locale } from '@/config/i18n';
+import type { EstimateAnswers } from '@/lib/calculator/types';
+import type { PublicAssessmentConfig } from '@/lib/questionnaire/types';
+import { leadSchema } from '@/lib/validation/lead';
+import { track } from '@/lib/analytics/track';
 
 type Fields = {
-  name: string;
+  legalFirstName: string;
+  legalLastName: string;
   phone: string;
   contactMethod: 'phone' | 'line';
   lineId?: string;
-  propertyOwnership: 'owner' | 'decision-maker' | 'tenant' | 'other';
-  timeframe: 'asap' | 'one-three-months' | 'three-six-months' | 'researching';
-  convenientTime: 'morning' | 'afternoon' | 'evening' | 'anytime';
+  website?: string;
   consent: boolean;
 };
 
-export function LeadCapture({ locale = 'th' }: { locale?: Locale }) {
+function readContext() {
+  try { return JSON.parse(sessionStorage.getItem(assessmentContextStorageKey) ?? 'null') as PublicAssessmentConfig | null; } catch { return null; }
+}
+
+function newIdempotencyKey() {
+  return crypto.randomUUID();
+}
+
+export function LeadCapture({ locale = 'th', answers }: { locale?: Locale; answers: EstimateAnswers }) {
   const english = locale === 'en';
-  const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [decision, setDecision] = useState<'yes' | 'no' | null>(null);
+  const [configuration, setConfiguration] = useState<PublicAssessmentConfig | null>(null);
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const [method, setMethod] = useState<'phone' | 'line'>('phone');
+  const [submissionError, setSubmissionError] = useState('');
+  const [idempotencyKey, setIdempotencyKey] = useState('');
   const successRef = useRef<HTMLDivElement>(null);
-  const { register, handleSubmit, setError, setFocus, formState: { errors } } = useForm<Fields>({ defaultValues: { contactMethod: 'phone', propertyOwnership: 'owner', timeframe: 'researching', convenientTime: 'anytime', consent: false } });
+  const { register, handleSubmit, setError, setFocus, formState: { errors } } = useForm<Fields>({
+    defaultValues: { contactMethod: 'phone', consent: false, website: '' },
+  });
+
+  useEffect(() => {
+    queueMicrotask(() => setIdempotencyKey(newIdempotencyKey()));
+    const stored = readContext();
+    if (stored) queueMicrotask(() => setConfiguration(stored));
+    fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
+      .then(async (response) => response.ok ? response.json() as Promise<PublicAssessmentConfig> : Promise.reject(new Error('unavailable')))
+      .then((next) => {
+        setConfiguration(next);
+        try { sessionStorage.setItem(assessmentContextStorageKey, JSON.stringify(next)); } catch { /* Submission still works for this view. */ }
+      })
+      .catch(() => { /* Stored configuration, if present, remains authoritative for this browser session. */ });
+  }, []);
 
   useEffect(() => {
     if (state === 'sent') successRef.current?.focus();
   }, [state]);
 
-  function submit(raw: Fields) {
-    const parsed = leadSchema.safeParse(raw);
+  async function submit(raw: Fields) {
+    if (!configuration?.assessmentToken || !configuration.receivingCompany || !configuration.liveLeadSubmissions) {
+      setSubmissionError(english ? 'Site-assessment requests are temporarily unavailable.' : 'ขณะนี้ยังไม่สามารถส่งคำขอนัดประเมินหน้างานได้');
+      return;
+    }
+    const payload = {
+      ...raw,
+      locale,
+      answers,
+      assessmentToken: configuration.assessmentToken,
+      idempotencyKey,
+    };
+    const parsed = leadSchema.safeParse(payload);
     if (!parsed.success) {
       let firstField: keyof Fields | null = null;
       parsed.error.issues.forEach((issue) => {
         const field = issue.path[0] as keyof Fields;
+        if (!['legalFirstName', 'legalLastName', 'phone', 'lineId', 'consent'].includes(field)) return;
         firstField ??= field;
-        const englishMessages: Partial<Record<keyof Fields, string>> = {
-          name: 'Please enter your name.',
-          phone: 'Please enter a valid Thai phone number.',
-          lineId: 'Please enter your LINE ID.',
-          consent: 'Please confirm your consent.',
+        const messages: Record<string, { en: string; th: string }> = {
+          legalFirstName: { en: 'Enter your legal first name.', th: 'กรอกชื่อตามเอกสารทางราชการ' },
+          legalLastName: { en: 'Enter your legal last name.', th: 'กรอกนามสกุลตามเอกสารทางราชการ' },
+          phone: { en: 'Enter a valid Thai phone number.', th: 'กรอกเบอร์โทรศัพท์ไทยให้ถูกต้อง' },
+          lineId: { en: 'Enter your LINE ID.', th: 'กรอก LINE ID' },
+          consent: { en: 'Confirm your consent before submitting.', th: 'กรุณายืนยันความยินยอมก่อนส่งคำขอ' },
         };
-        setError(field, { message: english ? englishMessages[field] ?? 'Please check this field.' : issue.message });
+        setError(field, { message: messages[field]?.[locale] ?? (english ? 'Check this field.' : 'ตรวจสอบข้อมูลในช่องนี้') });
       });
-      if (firstField) {
-        const fieldToFocus = firstField;
-        queueMicrotask(() => setFocus(fieldToFocus));
-      }
+      if (firstField) queueMicrotask(() => setFocus(firstField!));
       return;
     }
+
     setState('sending');
-    const validated = parsed.data satisfies LeadInput;
-    track('lead_form_submitted', { contactMethod: validated.contactMethod, prototype: true, localOnly: true });
-    queueMicrotask(() => setState('sent'));
+    setSubmissionError('');
+    track('lead_form_submitted', { contactMethod: parsed.data.contactMethod });
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(parsed.data),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { code?: string } | null;
+        if (body?.code === 'assessment_version_expired' || body?.code === 'invalid_assessment_session') {
+          setSubmissionError(english ? 'Your secure assessment session expired. Refresh this page and try once more.' : 'เซสชันแบบประเมินหมดอายุ กรุณารีเฟรชหน้าแล้วลองอีกครั้ง');
+        } else if (body?.code === 'rate_limited') {
+          setSubmissionError(english ? 'Please wait a minute before trying again.' : 'กรุณารอสักครู่แล้วลองอีกครั้ง');
+        } else {
+          setSubmissionError(english ? 'We could not save your request. Your details were not accepted; please try again.' : 'ยังไม่สามารถบันทึกคำขอได้ ระบบยังไม่ได้รับข้อมูลของคุณ กรุณาลองอีกครั้ง');
+        }
+        setState('failed');
+        return;
+      }
+      setState('sent');
+      setIdempotencyKey(newIdempotencyKey());
+    } catch {
+      setState('failed');
+      setSubmissionError(english ? 'The connection was interrupted. Please try again.' : 'การเชื่อมต่อขัดข้อง กรุณาลองอีกครั้ง');
+    }
   }
 
-  if (state === 'sent') return <div className="lead-success" role="status" aria-live="polite" tabIndex={-1} ref={successRef}><strong>{english ? 'Your request is complete' : 'ข้อมูลคำขอครบแล้ว'}</strong><p>{english ? 'Matching is not live yet, so this information was checked in your browser and then discarded. Nothing was sent or stored.' : 'ระบบจับคู่ยังไม่เปิดรับข้อมูล จึงตรวจข้อมูลในเบราว์เซอร์แล้วทิ้งทันที โดยไม่มีการส่งหรือบันทึก'}</p></div>;
+  if (!configuration?.liveLeadSubmissions || !configuration.receivingCompany) {
+    return <section className="lead-panel lead-unavailable" aria-labelledby="lead-title"><div className="lead-copy"><p className="eyebrow">{english ? 'Site assessment' : 'การประเมินหน้างาน'}</p><h2 id="lead-title">{english ? 'Contact requests are temporarily unavailable' : 'ขณะนี้ยังไม่เปิดรับคำขอติดต่อ'}</h2><p>{english ? 'Your estimate remains available without entering personal information. You can continue with the solar guide or return later.' : 'คุณยังดูผลประเมินได้โดยไม่ต้องกรอกข้อมูลส่วนบุคคล และสามารถอ่านคู่มือโซลาร์หรือกลับมาใหม่ภายหลังได้'}</p><Link className="text-link" href={localizedPath('/solar-guide', locale)}>{english ? 'Continue to the solar guide' : 'อ่านคู่มือโซลาร์ต่อ'} <ArrowRight size={18} /></Link></div></section>;
+  }
 
-  const errorMessages = (Object.values(errors) as Array<{ message?: unknown }>)
-    .map((item) => typeof item.message === 'string' ? item.message : '')
-    .filter(Boolean);
+  if (state === 'sent') return <div className="lead-success" role="status" aria-live="polite" tabIndex={-1} ref={successRef}><strong>{english ? 'Your request has been received' : 'ได้รับคำขอของคุณแล้ว'}</strong><p>{english ? `${configuration.receivingCompany.en} may contact you using your selected method. Your estimate remains available on this device.` : `${configuration.receivingCompany.th} อาจติดต่อคุณผ่านช่องทางที่เลือก โดยผลประเมินยังคงแสดงอยู่บนอุปกรณ์นี้`}</p></div>;
 
-  return (
-    <section className="lead-panel" aria-labelledby="lead-title">
-      <div className="lead-copy">
-        <p className="eyebrow">{english ? 'Compare suitable installers' : 'เปรียบเทียบผู้ติดตั้งที่เหมาะสม'}</p>
-        <h2 id="lead-title">{english ? 'Prepare your installer-matching request' : 'เตรียมคำขอจับคู่ผู้ติดตั้ง'}</h2>
-        <p>{english ? 'SolarMatch is being built to connect qualified customers with suitable solar companies. Matching is not accepting submissions yet, so this form only checks the experience and discards the details.' : 'SolarMatch กำลังสร้างระบบเชื่อมลูกค้าที่มีความต้องการจริงกับบริษัทโซลาร์ที่เหมาะสม ขณะนี้ยังไม่เปิดรับคำขอจริง แบบฟอร์มจึงตรวจเฉพาะขั้นตอนและทิ้งข้อมูลทันที'}</p>
-        <div className="privacy-inline"><LockKeyhole size={17} /><span>{english ? 'Nothing is stored · Read the ' : 'ไม่มีการบันทึกข้อมูล · อ่าน '}<Link href={localizedPath('/privacy', locale)}>{english ? 'draft privacy notice' : 'ร่างนโยบายความเป็นส่วนตัว'}</Link></span></div>
+  return <section className="lead-panel" aria-labelledby="lead-title">
+    <div className="lead-copy">
+      <p className="eyebrow">{english ? 'Optional next step' : 'ขั้นตอนถัดไป (ไม่บังคับ)'}</p>
+      <h2 id="lead-title">{english ? 'Would you like a solar company to contact you to arrange a site assessment?' : 'ต้องการให้บริษัทโซลาร์ติดต่อเพื่อนัดประเมินหรือสำรวจหน้างานไหม?'}</h2>
+      <p>{english ? 'Your results are already available. Choose yes only if you would like the named company to contact you.' : 'คุณดูผลประเมินได้แล้ว เลือก “ต้องการให้ติดต่อ” เฉพาะเมื่อคุณต้องการให้บริษัทที่ระบุติดต่อกลับ'}</p>
+      <div className="lead-decision-actions"><button type="button" className={`button ${decision === 'yes' ? '' : 'button-secondary'}`} onClick={() => setDecision('yes')}>{english ? 'Yes, I would like to be contacted' : 'ต้องการให้ติดต่อ'}</button><button type="button" className={`button ${decision === 'no' ? '' : 'button-secondary'}`} onClick={() => setDecision('no')}>{english ? 'Not right now' : 'ยังไม่ต้องการตอนนี้'}</button></div>
+    </div>
+
+    {decision === 'no' && <div className="lead-decline" role="status"><strong>{english ? 'Your results remain available' : 'คุณยังดูผลประเมินต่อได้'}</strong><p>{english ? 'You do not need to provide personal information. You can review the guide or change your mind later.' : 'คุณไม่จำเป็นต้องให้ข้อมูลส่วนบุคคล สามารถอ่านคู่มือเพิ่มเติมหรือกลับมาเลือกให้ติดต่อภายหลังได้'}</p><button type="button" className="text-link" onClick={() => setDecision('yes')}>{english ? 'I would like to reconsider' : 'เปลี่ยนใจและขอให้ติดต่อ'}</button></div>}
+
+    {decision === 'yes' && <form className="lead-form" noValidate onSubmit={handleSubmit(submit)}>
+      <div className="form-grid">
+        <label htmlFor="lead-first-name">{english ? 'Legal first name' : 'ชื่อตามเอกสารทางราชการ'}<span aria-hidden="true">*</span><input id="lead-first-name" autoComplete="given-name" required aria-invalid={Boolean(errors.legalFirstName)} aria-describedby={errors.legalFirstName ? 'lead-first-name-error' : undefined} {...register('legalFirstName')} />{errors.legalFirstName && <small className="field-error" id="lead-first-name-error">{errors.legalFirstName.message}</small>}</label>
+        <label htmlFor="lead-last-name">{english ? 'Legal last name' : 'นามสกุลตามเอกสารทางราชการ'}<span aria-hidden="true">*</span><input id="lead-last-name" autoComplete="family-name" required aria-invalid={Boolean(errors.legalLastName)} aria-describedby={errors.legalLastName ? 'lead-last-name-error' : undefined} {...register('legalLastName')} />{errors.legalLastName && <small className="field-error" id="lead-last-name-error">{errors.legalLastName.message}</small>}</label>
+        <label htmlFor="lead-phone">{english ? 'Thai phone number' : 'เบอร์โทรศัพท์ไทย'}<span aria-hidden="true">*</span><input id="lead-phone" inputMode="tel" autoComplete="tel" placeholder="08X XXX XXXX" required aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'lead-phone-error' : undefined} {...register('phone')} />{errors.phone && <small className="field-error" id="lead-phone-error">{errors.phone.message}</small>}</label>
+        <label htmlFor="lead-method">{english ? 'Preferred contact method' : 'ช่องทางที่สะดวกให้ติดต่อ'}<span aria-hidden="true">*</span><select id="lead-method" required {...register('contactMethod', { onChange: (event) => setMethod(event.target.value as 'phone' | 'line') })}><option value="phone">{english ? 'Phone' : 'โทรศัพท์'}</option><option value="line">LINE</option></select></label>
+        {method === 'line' && <label htmlFor="lead-line">LINE ID<span aria-hidden="true">*</span><input id="lead-line" autoComplete="off" required aria-invalid={Boolean(errors.lineId)} aria-describedby={errors.lineId ? 'lead-line-error' : undefined} {...register('lineId')} />{errors.lineId && <small className="field-error" id="lead-line-error">{errors.lineId.message}</small>}</label>}
+        <label className="honeypot-field" aria-hidden="true" htmlFor="lead-website">Website<input id="lead-website" tabIndex={-1} autoComplete="off" {...register('website')} /></label>
       </div>
-      <form className="lead-form" noValidate onSubmit={handleSubmit(submit)} onFocus={() => track('lead_form_started', { contactMethod: method })}>
-        <div className="form-grid">
-          <label htmlFor="lead-name">{english ? 'Name' : 'ชื่อ'}<span aria-hidden="true">*</span><input id="lead-name" autoComplete="name" required aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'lead-name-error' : undefined} {...register('name')} />{errors.name && <small className="field-error" id="lead-name-error">{errors.name.message}</small>}</label>
-          <label htmlFor="lead-phone">{english ? 'Thai phone number' : 'เบอร์โทรศัพท์ไทย'}<span aria-hidden="true">*</span><input id="lead-phone" inputMode="tel" autoComplete="tel" placeholder="08X XXX XXXX" required aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'lead-phone-error' : undefined} {...register('phone')} />{errors.phone && <small className="field-error" id="lead-phone-error">{errors.phone.message}</small>}</label>
-          <label htmlFor="lead-method">{english ? 'Preferred contact method' : 'ช่องทางที่สะดวก'}<span aria-hidden="true">*</span><select id="lead-method" required {...register('contactMethod', { onChange: (event) => setMethod(event.target.value as 'phone' | 'line') })}><option value="phone">{english ? 'Phone' : 'โทรศัพท์'}</option><option value="line">LINE</option></select></label>
-          {method === 'line' && <label htmlFor="lead-line">LINE ID<span aria-hidden="true">*</span><input id="lead-line" autoComplete="off" required aria-invalid={Boolean(errors.lineId)} aria-describedby={errors.lineId ? 'lead-line-error' : undefined} {...register('lineId')} />{errors.lineId && <small className="field-error" id="lead-line-error">{errors.lineId.message}</small>}</label>}
-          <label htmlFor="lead-ownership">{english ? 'Your role for this property' : 'บทบาทของคุณต่อสถานที่นี้'}<span aria-hidden="true">*</span><select id="lead-ownership" required {...register('propertyOwnership')}><option value="owner">{english ? 'Owner' : 'เจ้าของ'}</option><option value="decision-maker">{english ? 'Decision-maker' : 'ผู้ตัดสินใจ'}</option><option value="tenant">{english ? 'Tenant' : 'ผู้เช่า'}</option><option value="other">{english ? 'Other' : 'อื่น ๆ'}</option></select></label>
-          <label htmlFor="lead-timeframe">{english ? 'When are you considering installation?' : 'วางแผนติดตั้งเมื่อไร'}<span aria-hidden="true">*</span><select id="lead-timeframe" required {...register('timeframe')}><option value="asap">{english ? 'As soon as possible' : 'เร็วที่สุด'}</option><option value="one-three-months">{english ? 'Within 1–3 months' : 'ภายใน 1–3 เดือน'}</option><option value="three-six-months">{english ? 'Within 3–6 months' : 'ภายใน 3–6 เดือน'}</option><option value="researching">{english ? 'Researching for now' : 'กำลังศึกษาข้อมูล'}</option></select></label>
-          <label htmlFor="lead-time">{english ? 'Convenient time' : 'ช่วงเวลาที่สะดวก'}<span aria-hidden="true">*</span><select id="lead-time" required {...register('convenientTime')}><option value="anytime">{english ? 'Any time' : 'เวลาใดก็ได้'}</option><option value="morning">09:00–12:00</option><option value="afternoon">12:00–17:00</option><option value="evening">17:00–20:00</option></select></label>
-        </div>
-        <label className="consent-check" htmlFor="lead-consent"><input id="lead-consent" type="checkbox" required aria-invalid={Boolean(errors.consent)} aria-describedby={errors.consent ? 'lead-consent-error' : undefined} {...register('consent')} /><span>{english ? 'I understand matching is not live and consent to this local form check under the privacy notice.' : 'ฉันเข้าใจว่าระบบจับคู่ยังไม่เปิดใช้งาน และยินยอมให้ตรวจแบบฟอร์มภายในเบราว์เซอร์ตามนโยบายความเป็นส่วนตัว'}</span></label>
-        {errors.consent && <small className="field-error" id="lead-consent-error">{errors.consent.message}</small>}
-        {errorMessages.length > 0 && <div className="form-error form-error-summary" role="alert"><strong>{english ? 'Please check the highlighted fields.' : 'กรุณาตรวจสอบช่องที่ระบุ'}</strong><ul>{errorMessages.map((message) => <li key={message}>{message}</li>)}</ul></div>}
-        <button className="button" disabled={state === 'sending'} type="submit">{state === 'sending' ? (english ? 'Checking…' : 'กำลังตรวจสอบ…') : (english ? 'Check my request' : 'ตรวจคำขอของฉัน')} <ArrowRight size={18} /></button>
-      </form>
-    </section>
-  );
+      <label className="consent-check" htmlFor="lead-consent"><input id="lead-consent" type="checkbox" required aria-invalid={Boolean(errors.consent)} aria-describedby={errors.consent ? 'lead-consent-error' : undefined} {...register('consent')} /><span>{english ? `I consent to SolarMatch Thailand storing this request and sharing it with ${configuration.receivingCompany.en} so that the company may contact me about a residential solar site assessment. I understand that SolarMatch is not the installer and may be paid by the receiving company.` : `ข้าพเจ้ายินยอมให้ SolarMatch Thailand จัดเก็บคำขอนี้และส่งต่อให้ ${configuration.receivingCompany.th} เพื่อให้บริษัทดังกล่าวติดต่อเกี่ยวกับการประเมินหน้างานโซลาร์สำหรับที่พักอาศัย และเข้าใจว่า SolarMatch ไม่ใช่ผู้ติดตั้งและอาจได้รับค่าตอบแทนจากบริษัทผู้รับข้อมูล`}</span></label>
+      {errors.consent && <small className="field-error" id="lead-consent-error">{errors.consent.message}</small>}
+      <div className="privacy-inline"><LockKeyhole size={17} /><span>{english ? 'Read the ' : 'อ่าน '}<Link href={localizedPath('/privacy', locale)}>{english ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว'}</Link>{english ? ' before submitting.' : ' ก่อนส่งคำขอ'}</span></div>
+      {submissionError && <div className="form-error form-error-summary" role="alert">{submissionError}</div>}
+      <button className="button" disabled={state === 'sending'} type="submit">{state === 'sending' ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : (english ? 'Request a site assessment' : 'ขอให้ติดต่อเพื่อนัดประเมินหน้างาน')} <ArrowRight size={18} /></button>
+    </form>}
+  </section>;
 }
