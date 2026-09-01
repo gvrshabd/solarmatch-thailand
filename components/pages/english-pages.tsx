@@ -28,8 +28,8 @@ function EnglishHowItWorks() {
   return <main><PageHero eyebrow="How it works" title="Understand your home before requesting quotes"><p>SolarMatch breaks complicated information into three stages, showing what is known, what still needs checking, and what to ask an installer.</p></PageHero>
     <section className="site-shell numbered-sections">
       <article><span>01</span><ClipboardList /><div><h2>Start with available information</h2><p>Answer what you know about province, bills, usage, and the roof. There is no need to guess or upload documents.</p></div></article>
-      <article><span>02</span><Calculator /><div><h2>View a practical planning figure</h2><p>Get a starting system size, production, price, savings, and payback from nine simple answers, with a method and source trail you can inspect.</p></div></article>
-      <article><span>03</span><MessagesSquare /><div><h2>Choose whether to request contact</h2><p>See the result before entering a phone number, then decide whether you want participating residential solar companies to contact you about a site assessment.</p></div></article>
+      <article><span>02</span><Calculator /><div><h2>Prepare a practical planning figure</h2><p>Your assessment answers produce a starting system size, production, price, savings, and payback with a method and source trail you can inspect.</p></div></article>
+      <article><span>03</span><MessagesSquare /><div><h2>Choose whether to request quotes</h2><p>Request real quotes and provide your preferred contact method, or continue straight to the full result without sharing contact details.</p></div></article>
     </section>
     <section className="content-cta"><div className="site-shell"><h2>Ready to try it with your electricity bill?</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
   </main>;
