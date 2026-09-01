@@ -3398,6 +3398,9 @@ body.calculation-loading-active .site-footer { display: none; }
   border-radius: 9px;
   background: #f8fbf9;
 }
+.admin-export-scope > div:first-child { grid-column: 1 / -1; }
+.admin-export-scope > div:first-child strong { color: #173d2b; }
+.admin-export-scope > div:first-child p { margin: 4px 0 0; color: #52645a; font-size: 13px; line-height: 1.5; }
 .admin-export-scope label,
 .admin-contact-grid label { display: grid; gap: 6px; color: #42564a; font-size: 12px; font-weight: 800; }
 .admin-export-scope select,

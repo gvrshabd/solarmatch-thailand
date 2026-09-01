@@ -9,7 +9,7 @@ import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { assessContactReadiness, type ContactConfigurationRow } from '@/lib/server/contact-mode';
 import { restrictedSiteAccessConfiguration } from '@/lib/server/private-preview-auth';
-import { ensureInitialRelease, ensureLegalLaunchRelease, ensureOperationalContactRelease } from '@/lib/server/releases';
+import { ensureInitialRelease, ensureLegalLaunchRelease, ensureLockedConsentRelease } from '@/lib/server/releases';
 import { requireDatabase } from '@/lib/server/runtime';
 
 export const dynamic = 'force-dynamic';
@@ -147,7 +147,7 @@ async function insertQuestionRows(database: D1Database, versionId: string, docum
 export async function GET(request: Request) {
   const identity = await requireAdminRequest(request);
   if (isAdminError(identity)) return identity;
-  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database); await ensureOperationalContactRelease(database);
+  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database); await ensureLockedConsentRelease(database);
   const [questionnaires, rules, contacts, factVersions, release, audit] = await Promise.all([
     database.prepare('SELECT id, version_number, state, document_json, created_by, created_at, published_at, restored_from_id FROM questionnaire_versions ORDER BY version_number DESC LIMIT 30').all(),
     database.prepare('SELECT id, version_number, state, configuration_json, created_by, created_at, published_at, restored_from_id FROM rule_versions ORDER BY version_number DESC LIMIT 30').all(),
@@ -227,7 +227,7 @@ export async function POST(request: Request) {
     if (!parsed.success) return NextResponse.json({ error: 'invalid_configuration', issues: parsed.error.issues.map((issue) => ({ path: issue.path, message: issue.message })) }, { status: 400 });
     body = parsed.data;
   } catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }); }
-  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database); await ensureOperationalContactRelease(database);
+  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database); await ensureLockedConsentRelease(database);
 
   if (body.action === 'save-questionnaire-draft') {
     const version = await nextNumber(database, 'questionnaire_versions'); const id = `residential-questionnaire-v${version}`;

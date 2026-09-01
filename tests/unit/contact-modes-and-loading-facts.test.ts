@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { lockedSharedConsentCopy } from '@/config/contact-content';
 import { initialLoadingFactSet } from '@/config/loading-facts';
 import { loadingDurationMs, nextFactHistory, selectLoadingFact } from '@/lib/loading-facts/selection';
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
@@ -79,7 +80,7 @@ describe('contact-mode readiness and consent', () => {
     expect(publicConfig.question?.en).toBe('Want real quotes from local installers?');
     expect(publicConfig.yesLabel?.en).toBe('Yes, I would like solar companies to contact me');
     expect(publicConfig.noLabel?.en).toBe('No');
-    expect(publicConfig.consent?.en).toContain("If you choose Yes, we'll share your name");
+    expect(publicConfig.consent).toEqual(lockedSharedConsentCopy);
   });
 });
 

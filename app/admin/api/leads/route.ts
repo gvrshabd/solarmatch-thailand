@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { isLegacyExportCompatible, resolveAdministratorReviewSelection, type LegacyExportScope } from '@/lib/admin/lead-selection';
 import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { sha256 } from '@/lib/server/crypto';
@@ -9,7 +10,7 @@ import { requireDatabase } from '@/lib/server/runtime';
 export const dynamic = 'force-dynamic';
 
 const actionSchema = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('set-selection'), leadId: z.string().uuid(), selection: z.enum(['selected', 'deselected', 'automatic']), exportScope: z.enum(['solar_match_validation_followup', 'named_installer_handoff']), recipientKey: z.string().max(100).default('') }),
+  z.object({ action: z.literal('set-selection'), leadId: z.string().uuid(), selection: z.enum(['selected', 'deselected', 'automatic']) }),
   z.object({ action: z.enum(['archive', 'restore', 'soft-delete']), leadIds: z.array(z.string().uuid()).min(1).max(200) }),
   z.object({ action: z.literal('mark-exported'), leadIds: z.array(z.string().uuid()).min(1).max(200), exportScope: z.enum(['solar_match_validation_followup', 'named_installer_handoff']), recipientKey: z.string().max(100).default('') }),
   z.object({ action: z.literal('purge'), leadIds: z.array(z.string().uuid()).min(1).max(50), confirmation: z.literal('PERMANENTLY DELETE') }),
@@ -53,21 +54,13 @@ type LeadRow = {
   suppressed: number;
 };
 
-type ExportScope = 'solar_match_validation_followup' | 'named_installer_handoff';
-
-function compatibleWithScope(lead: LeadRow, exportScope: ExportScope, recipientKey: string) {
-  if (lead.is_test_submission || !lead.distribution_allowed || lead.suppressed) return false;
-  if (exportScope === 'solar_match_validation_followup') return lead.contact_collection_mode === 'validation_interest' && Boolean(lead.solar_match_followup_authorized) && !lead.third_party_disclosure_authorized;
-  return lead.contact_collection_mode === 'named_installer_handoff' && Boolean(lead.third_party_disclosure_authorized) && Boolean(recipientKey) && lead.contact_configuration_version_id === recipientKey;
-}
-
 export async function GET(request: Request) {
   const identity = await requireAdminRequest(request);
   if (isAdminError(identity)) return identity;
   const database = requireDatabase();
   await ensureInitialRelease(database);
   const url = new URL(request.url);
-  const exportScope: ExportScope = url.searchParams.get('exportScope') === 'named_installer_handoff' ? 'named_installer_handoff' : 'solar_match_validation_followup';
+  const exportScope: LegacyExportScope = url.searchParams.get('exportScope') === 'named_installer_handoff' ? 'named_installer_handoff' : 'solar_match_validation_followup';
   const recipientKey = url.searchParams.get('recipientKey')?.slice(0, 100) ?? '';
   const clauses: string[] = [];
   const values: unknown[] = [];
@@ -114,21 +107,18 @@ export async function GET(request: Request) {
     FROM leads WHERE ${clauses.length ? clauses.join(' AND ') : '1 = 1'} ORDER BY ${order} LIMIT 200`).bind(...values).all<LeadRow>();
   const release = await getCurrentRelease(database);
   const threshold = release ? parseScoringConfiguration(release).automaticSelectionThreshold : 4;
-  const selectionRows = result.results.length ? await database.prepare(`SELECT lead_id, selection_state FROM lead_export_selections
-    WHERE export_scope = ? AND recipient_key = ? AND lead_id IN (${result.results.map(() => '?').join(',')})`)
-    .bind(exportScope, recipientKey, ...result.results.map((lead) => lead.id)).all<{ lead_id: string; selection_state: 'selected'|'deselected' }>() : { results: [] as Array<{ lead_id: string; selection_state: 'selected'|'deselected' }> };
-  const selections = new Map(selectionRows.results.map((row) => [row.lead_id, row.selection_state]));
   return NextResponse.json({
     leads: result.results.map((lead) => {
-      const compatible = compatibleWithScope(lead, exportScope, recipientKey);
-      const selection = selections.get(lead.id) ?? lead.selection_override;
-      const automatic = compatible && Boolean(lead.hard_eligible) && lead.quality_score >= threshold;
+      const compatible = isLegacyExportCompatible(lead, exportScope, recipientKey);
+      const reviewSelection = resolveAdministratorReviewSelection(lead, threshold);
       return ({
       ...lead,
       explanation: JSON.parse(lead.scoring_explanation_json),
-      selected: compatible && (selection === 'selected' || (selection !== 'deselected' && automatic)),
-      selectionCompatible: compatible,
-       selectionReason: lead.is_test_submission ? 'Historical test record — partner export is permanently blocked' : !lead.distribution_allowed || lead.suppressed ? 'Distribution is suppressed' : !compatible ? (lead.contact_collection_mode === 'shared_solar_company_handoff' ? 'Use the partner-delivery workflow to select an eligible recipient' : exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export') : selection === 'selected' ? 'Manually selected for this consent scope' : selection === 'deselected' ? 'Manually deselected for this consent scope' : automatic ? `Automatic: consent-compatible, sellable and ${threshold}/5 or above` : 'Not automatically selected',
+      selected: reviewSelection.selected,
+      selectionCompatible: true,
+      exportCompatible: compatible,
+      selectionReason: reviewSelection.reason,
+      exportReason: lead.is_test_submission ? 'Historical test record — external delivery is permanently blocked' : !lead.distribution_allowed || lead.suppressed ? 'External delivery is suppressed' : compatible ? 'Compatible with the selected legacy export scope' : lead.contact_collection_mode === 'shared_solar_company_handoff' ? 'Use Legal launch → Manual shared-lead distribution to choose and record each recipient' : exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export',
     }); }),
     automaticSelectionThreshold: threshold,
     exportScope,
@@ -149,22 +139,14 @@ export async function POST(request: Request) {
   const requestId = crypto.randomUUID();
 
   if (parsedBody.action === 'set-selection') {
-    const lead = await database.prepare(`SELECT id, COALESCE(contact_collection_mode_v2, contact_collection_mode) AS contact_collection_mode,
-      contact_configuration_version_id, COALESCE(consent_scope_v2, consent_scope) AS consent_scope,
-      COALESCE(solar_match_followup_authorized_v2, solar_match_followup_authorized) AS solar_match_followup_authorized,
-      COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
-      submission_environment, is_test_submission, distribution_allowed, suppressed
-      FROM leads WHERE id = ? LIMIT 1`).bind(parsedBody.leadId).first<LeadRow>();
+    const lead = await database.prepare('SELECT id FROM leads WHERE id = ? LIMIT 1').bind(parsedBody.leadId).first<{ id: string }>();
     if (!lead) return NextResponse.json({ error: 'lead_not_found' }, { status: 404 });
-    if (!compatibleWithScope(lead, parsedBody.exportScope, parsedBody.recipientKey)) return NextResponse.json({ error: 'consent_scope_mismatch' }, { status: 409 });
     const selectionStatement = parsedBody.selection === 'automatic'
-      ? database.prepare('DELETE FROM lead_export_selections WHERE lead_id = ? AND export_scope = ? AND recipient_key = ?').bind(parsedBody.leadId, parsedBody.exportScope, parsedBody.recipientKey)
-      : database.prepare(`INSERT INTO lead_export_selections (lead_id, export_scope, recipient_key, selection_state, updated_by, updated_at)
-          VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(lead_id, export_scope, recipient_key) DO UPDATE SET selection_state = excluded.selection_state, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP`)
-        .bind(parsedBody.leadId, parsedBody.exportScope, parsedBody.recipientKey, parsedBody.selection, identity.email);
+      ? database.prepare('UPDATE leads SET selection_override = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(parsedBody.leadId)
+      : database.prepare('UPDATE leads SET selection_override = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(parsedBody.selection, parsedBody.leadId);
     await database.batch([
       selectionStatement,
-      auditStatement(database, { actorEmail: identity.email, action: 'lead.selection.changed', entityType: 'lead', entityId: parsedBody.leadId, next: { selection: parsedBody.selection, exportScope: parsedBody.exportScope, recipientKey: parsedBody.recipientKey }, requestId }),
+      auditStatement(database, { actorEmail: identity.email, action: 'lead.review-selection.changed', entityType: 'lead', entityId: parsedBody.leadId, next: { selection: parsedBody.selection }, requestId }),
     ]);
     return NextResponse.json({ ok: true });
   }
@@ -196,7 +178,7 @@ export async function POST(request: Request) {
       COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
       recipient_snapshot_json, submission_environment, is_test_submission, distribution_allowed, suppressed
       FROM leads WHERE id IN (${placeholders}) AND status <> 'deleted'`).bind(...parsedBody.leadIds).all<LeadRow>();
-    const incompatible = rows.results.filter((lead) => !compatibleWithScope(lead, parsedBody.exportScope, parsedBody.recipientKey));
+    const incompatible = rows.results.filter((lead) => !isLegacyExportCompatible(lead, parsedBody.exportScope, parsedBody.recipientKey));
     if (incompatible.length || rows.results.length !== parsedBody.leadIds.length) return NextResponse.json({ error: 'consent_scope_mismatch', incompatibleLeadIds: incompatible.map((lead) => lead.id) }, { status: 409 });
     const batchId = crypto.randomUUID();
     const recipientSnapshot = parsedBody.exportScope === 'named_installer_handoff' ? rows.results[0]?.recipient_snapshot_json ?? null : null;

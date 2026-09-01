@@ -8,8 +8,8 @@ const savedEstimate = {
 };
 
 const exactSharedConsent = {
-  en: "If you choose Yes, we'll share your name, contact info, location, and your answers from this assessment with home solar companies in your area who work with us. More than one company may contact you. We may get paid by these companies for connecting you. If you choose No, you'll still get your estimate.",
-  th: 'หากคุณเลือก "ใช่" เราจะแชร์ชื่อ ข้อมูลติดต่อ ที่อยู่ และคำตอบจากแบบประเมินของคุณ ให้กับบริษัทติดตั้งโซลาร์ในพื้นที่ของคุณที่เป็นพันธมิตรกับเรา อาจมีมากกว่าหนึ่งบริษัทติดต่อคุณผ่านทางโทรศัพท์หรือไลน์ และจำนวนอาจแตกต่างกันไป เราอาจได้รับค่าตอบแทนจากบริษัทเหล่านี้สำหรับการแนะนำ หากคุณเลือก "ไม่ใช่" คุณจะยังคงได้รับผลประเมินของคุณ',
+  en: 'I explicitly consent to SolarMatch storing my request and information, and I give SolarMatch permission to share my name, contact details, location and relevant assessment answers with solar service providers, installers, their authorized representatives, or other businesses involved in providing solar services, so they may contact me with relevant solar information and/or offers for solar-related services. I understand that SolarMatch may be paid for the connection and that choosing Yes does not guarantee that I will be contacted or receive a quotation. I have read the Privacy Notice.',
+  th: 'ข้าพเจ้ายินยอมโดยชัดแจ้งให้ SolarMatch จัดเก็บคำขอและข้อมูลของข้าพเจ้า และอนุญาตให้ SolarMatch ส่งต่อหรือเปิดเผยชื่อ ข้อมูลติดต่อ สถานที่ตั้ง และคำตอบที่เกี่ยวข้องจากแบบประเมินของข้าพเจ้าแก่ผู้ให้บริการด้านโซลาร์ ผู้ติดตั้ง ตัวแทนที่ได้รับอนุญาตของผู้ให้บริการหรือผู้ติดตั้งดังกล่าว หรือธุรกิจอื่นที่เกี่ยวข้องกับการให้บริการด้านโซลาร์ เพื่อให้บุคคลหรือธุรกิจเหล่านั้นสามารถติดต่อข้าพเจ้าพร้อมข้อมูลที่เกี่ยวข้องกับโซลาร์ และ/หรือข้อเสนอเกี่ยวกับบริการที่เกี่ยวข้องกับโซลาร์ ข้าพเจ้าเข้าใจว่า SolarMatch อาจได้รับค่าตอบแทนจากการเชื่อมโยงดังกล่าว และการเลือก “ใช่” ไม่ได้รับประกันว่าจะมีผู้ใดติดต่อข้าพเจ้า หรือว่าข้าพเจ้าจะได้รับใบเสนอราคา ข้าพเจ้าได้อ่านประกาศความเป็นส่วนตัวแล้ว',
 };
 
 function operationalConfiguration() {
@@ -18,7 +18,7 @@ function operationalConfiguration() {
     accessRestrictedSession: true,
     restrictedSiteCollectionEnabled: true,
     publicCollectionEnabled: false,
-    releaseId: 'residential-release-v3',
+    releaseId: 'residential-release-v4',
     questionnaireVersionId: 'residential-questionnaire-v3',
     ruleVersionId: 'residential-rules-v3',
     questionnaire: initialQuestionnaire,
@@ -29,9 +29,9 @@ function operationalConfiguration() {
     contact: {
       enabled: true, preview: false, restrictedSiteCollectionEnabled: true, publicCollectionEnabled: false,
       operationalDistributionEnabled: false, mode: 'shared_solar_company_handoff',
-      contactConfigurationVersionId: 'restricted-operational-contact-v1', contentVersionId: 'residential-content-v3', privacyVersion: 'legal-placeholder-v1',
+      contactConfigurationVersionId: 'contact-configuration-consent-v2', contentVersionId: 'residential-content-consent-v2', privacyVersion: 'legal-placeholder-v1',
       retentionDays: null, distributionWindowDays: null, recipientCategory: 'participating_residential_solar_companies',
-      adultConfirmationVersionId: 'restricted-operational-adult-v1', consentVersionId: 'restricted-operational-consent-v1', privacyNoticeVersionId: 'legal-placeholder-v1', termsVersionId: null, cookiePolicyVersionId: null,
+      adultConfirmationVersionId: 'restricted-operational-adult-v1', consentVersionId: 'restricted-operational-consent-v2', privacyNoticeVersionId: 'legal-placeholder-v1', termsVersionId: null, cookiePolicyVersionId: null,
       question: { en: 'Want real quotes from local installers?', th: 'อยากได้ใบเสนอราคาจริงจากผู้ติดตั้งในพื้นที่ไหม?' },
       help: { en: 'Choose Yes or No to continue.', th: 'เลือกใช่หรือไม่ใช่เพื่อดำเนินการต่อ' },
       yesLabel: { en: 'Yes, I would like solar companies to contact me', th: 'ต้องการให้บริษัทโซลาร์ติดต่อกลับ' },
@@ -223,7 +223,7 @@ test('integrated quote question starts unselected and No reaches the full estima
 
   const yes = page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' });
   const no = page.getByRole('radio', { name: 'No', exact: true });
-  const consent = page.getByRole('checkbox', { name: /If you choose Yes/u });
+  const consent = page.getByRole('checkbox', { name: /I explicitly consent to SolarMatch storing my request/u });
   await expect(page.getByRole('heading', { name: 'Want real quotes from local installers?' })).toBeVisible();
   await expect(yes).not.toBeChecked();
   await expect(no).not.toBeChecked();
@@ -238,6 +238,17 @@ test('integrated quote question starts unselected and No reaches the full estima
   await expect(page.locator('input[autocomplete="given-name"]')).toHaveCount(0);
 });
 
+test('Thai contact consent is verbatim, unselected, and links its Privacy Notice phrase', async ({ page }) => {
+  await page.route('**/api/assessment/config', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(operationalConfiguration()) }));
+  await primeQuoteStep(page);
+  await page.goto('/estimate');
+
+  const consent = page.getByRole('checkbox', { name: /ข้าพเจ้ายินยอมโดยชัดแจ้งให้ SolarMatch จัดเก็บคำขอ/u });
+  await expect(consent).not.toBeChecked();
+  await expect(page.locator('.quote-consent-check')).toHaveText(exactSharedConsent.th);
+  await expect(page.getByRole('link', { name: 'ประกาศความเป็นส่วนตัว', exact: true })).toHaveAttribute('href', '/privacy');
+});
+
 test('Yes requires disclosure consent and stores an operational request from one contact form', async ({ page }) => {
   let submitted: Record<string, unknown> | null = null;
   await page.route('**/api/assessment/config', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(operationalConfiguration()) }));
@@ -249,9 +260,10 @@ test('Yes requires disclosure consent and stores an operational request from one
   await page.goto('/en/estimate');
 
   await page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' }).click();
-  const consent = page.getByRole('checkbox', { name: /If you choose Yes/u });
+  const consent = page.getByRole('checkbox', { name: /I explicitly consent to SolarMatch storing my request/u });
   await expect(consent).not.toBeChecked();
-  await expect(page.getByRole('link', { name: 'Read the Privacy Notice' })).toHaveAttribute('href', '/en/privacy');
+  await expect(page.getByRole('link', { name: 'Privacy Notice', exact: true })).toHaveAttribute('href', '/en/privacy');
+  await expect(page.locator('.quote-consent-check')).toHaveText(exactSharedConsent.en);
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Tick the consent box');
   await consent.check();

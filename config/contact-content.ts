@@ -29,6 +29,11 @@ export type ContactContent = {
   };
 };
 
+export const lockedSharedConsentCopy: LocalizedText = {
+  en: 'I explicitly consent to SolarMatch storing my request and information, and I give SolarMatch permission to share my name, contact details, location and relevant assessment answers with solar service providers, installers, their authorized representatives, or other businesses involved in providing solar services, so they may contact me with relevant solar information and/or offers for solar-related services. I understand that SolarMatch may be paid for the connection and that choosing Yes does not guarantee that I will be contacted or receive a quotation. I have read the Privacy Notice.',
+  th: 'ข้าพเจ้ายินยอมโดยชัดแจ้งให้ SolarMatch จัดเก็บคำขอและข้อมูลของข้าพเจ้า และอนุญาตให้ SolarMatch ส่งต่อหรือเปิดเผยชื่อ ข้อมูลติดต่อ สถานที่ตั้ง และคำตอบที่เกี่ยวข้องจากแบบประเมินของข้าพเจ้าแก่ผู้ให้บริการด้านโซลาร์ ผู้ติดตั้ง ตัวแทนที่ได้รับอนุญาตของผู้ให้บริการหรือผู้ติดตั้งดังกล่าว หรือธุรกิจอื่นที่เกี่ยวข้องกับการให้บริการด้านโซลาร์ เพื่อให้บุคคลหรือธุรกิจเหล่านั้นสามารถติดต่อข้าพเจ้าพร้อมข้อมูลที่เกี่ยวข้องกับโซลาร์ และ/หรือข้อเสนอเกี่ยวกับบริการที่เกี่ยวข้องกับโซลาร์ ข้าพเจ้าเข้าใจว่า SolarMatch อาจได้รับค่าตอบแทนจากการเชื่อมโยงดังกล่าว และการเลือก “ใช่” ไม่ได้รับประกันว่าจะมีผู้ใดติดต่อข้าพเจ้า หรือว่าข้าพเจ้าจะได้รับใบเสนอราคา ข้าพเจ้าได้อ่านประกาศความเป็นส่วนตัวแล้ว',
+};
+
 export const contactContent: ContactContent = {
   contactModes: {
     validation_interest: {
@@ -74,10 +79,7 @@ export const contactContent: ContactContent = {
       },
       yesLabel: { en: 'Yes, I would like solar companies to contact me', th: 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ' },
       noLabel: { en: 'No', th: 'ไม่ใช่' },
-      consent: {
-        en: "If you choose Yes, we'll share your name, contact info, location, and your answers from this assessment with home solar companies in your area who work with us. More than one company may contact you. We may get paid by these companies for connecting you. If you choose No, you'll still get your estimate.",
-        th: 'หากคุณเลือก "ใช่" เราจะแชร์ชื่อ ข้อมูลติดต่อ ที่อยู่ และคำตอบจากแบบประเมินของคุณ ให้กับบริษัทติดตั้งโซลาร์ในพื้นที่ของคุณที่เป็นพันธมิตรกับเรา อาจมีมากกว่าหนึ่งบริษัทติดต่อคุณผ่านทางโทรศัพท์หรือไลน์ และจำนวนอาจแตกต่างกันไป เราอาจได้รับค่าตอบแทนจากบริษัทเหล่านี้สำหรับการแนะนำ หากคุณเลือก "ไม่ใช่" คุณจะยังคงได้รับผลประเมินของคุณ',
-      },
+      consent: lockedSharedConsentCopy,
     },
     common: {
       declineTitle: { en: 'Continue without contact details', th: 'ดูผลประเมินต่อโดยไม่ต้องให้ข้อมูลติดต่อ' },

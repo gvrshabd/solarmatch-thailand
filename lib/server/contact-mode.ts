@@ -164,7 +164,7 @@ export function restrictedOperationalContactConfiguration(row: ContactConfigurat
     distributionWindowDays: row.distribution_window_days ?? null,
     recipientCategory: 'participating_residential_solar_companies',
     adultConfirmationVersionId: row.adult_confirmation_version_id ?? 'restricted-operational-adult-v1',
-    consentVersionId: row.consent_version_id ?? 'restricted-operational-consent-v1',
+    consentVersionId: row.consent_version_id ?? 'restricted-operational-consent-v2',
     privacyNoticeVersionId: row.privacy_notice_version_id ?? row.legal_document_version_id,
     termsVersionId: row.terms_version_id ?? null,
     cookiePolicyVersionId: row.cookie_policy_version_id ?? null,

@@ -11,6 +11,7 @@ import { LeadCapture } from '@/components/lead/lead-capture';
 import Link from '@/components/site/internal-link';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
 import { initialQuestionnaire } from '@/config/assessment';
+import { lockedSharedConsentCopy } from '@/config/contact-content';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { provinceOptions } from '@/config/provinces';
 import { track } from '@/lib/analytics/track';
@@ -19,6 +20,14 @@ import type { DaytimeLoad, EstimateAnswers } from '@/lib/calculator/types';
 import type { AssessmentQuestion, ConditionalField, PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questionnaire/types';
 
 type Draft = Partial<EstimateAnswers>;
+
+function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
+  const privacyLabel = locale === 'en' ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว';
+  const privacyIndex = copy.lastIndexOf(privacyLabel);
+  if (privacyIndex < 0) return <>{copy}</>;
+  return <>{copy.slice(0, privacyIndex)}<Link href={localizedPath('/privacy', locale)} target="_blank" rel="noopener">{privacyLabel}</Link>{copy.slice(privacyIndex + privacyLabel.length)}</>;
+}
+
 type SavedDraft = {
   version: 4 | 5 | 6;
   answers: Draft;
@@ -379,8 +388,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {question.type === 'bill' && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
       {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{question.options?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
       {question.id === 'quoteContactRequested' && <div className="quote-consent-block">
-        <label className="quote-consent-check"><input type="checkbox" disabled={draft.quoteContactRequested === false} checked={draft.quoteConsentAccepted ?? false} onChange={(event) => setValue('quoteConsentAccepted', event.target.checked ? true : undefined)} /><span>{assessmentConfig?.contact.consent?.[locale] ?? (english ? "If you choose Yes, we'll share your name, contact info, location, and your answers from this assessment with home solar companies in your area who work with us. More than one company may contact you. We may get paid by these companies for connecting you. If you choose No, you'll still get your estimate." : 'หากคุณเลือก "ใช่" เราจะแชร์ชื่อ ข้อมูลติดต่อ ที่อยู่ และคำตอบจากแบบประเมินของคุณ ให้กับบริษัทติดตั้งโซลาร์ในพื้นที่ของคุณที่เป็นพันธมิตรกับเรา อาจมีมากกว่าหนึ่งบริษัทติดต่อคุณผ่านทางโทรศัพท์หรือไลน์ และจำนวนอาจแตกต่างกันไป เราอาจได้รับค่าตอบแทนจากบริษัทเหล่านี้สำหรับการแนะนำ หากคุณเลือก "ไม่ใช่" คุณจะยังคงได้รับผลประเมินของคุณ')}</span></label>
-        <Link className="quote-privacy-link" href={localizedPath('/privacy', locale)} target="_blank" rel="noopener">{english ? 'Read the Privacy Notice' : 'อ่านประกาศความเป็นส่วนตัว'}</Link>
+        <label className="quote-consent-check"><input type="checkbox" disabled={draft.quoteContactRequested === false} checked={draft.quoteConsentAccepted ?? false} onChange={(event) => setValue('quoteConsentAccepted', event.target.checked ? true : undefined)} /><span><ConsentCopy copy={assessmentConfig?.contact.consent?.[locale] ?? lockedSharedConsentCopy[locale]} locale={locale} /></span></label>
       </div>}
       {question.type === 'multichoice' && <div className="choice-grid multichoice-grid" aria-labelledby="estimate-question">{question.options?.map((option) => { const checked = draft.daytimeLoads?.includes(option.value as DaytimeLoad) ?? false; const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="checkbox" aria-checked={checked} className={`choice-card visual-choice ${checked ? 'selected' : ''}`} onClick={() => toggleDaytimeLoad(option.value as DaytimeLoad)}><Icon className="choice-icon" aria-hidden="true" /><strong>{option.label[locale]}</strong><span className="choice-indicator checkbox-indicator" aria-hidden="true">{checked && <Check />}</span></button>; })}</div>}
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}

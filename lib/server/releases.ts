@@ -301,10 +301,77 @@ export async function ensureOperationalContactRelease(database = requireDatabase
   await database.batch(statements);
 }
 
+/**
+ * Publishes an immutable content/contact release for the locked bilingual
+ * consent wording. The assessment and scoring versions remain unchanged, and
+ * previously accepted consent snapshots continue to reference their original
+ * wording/version.
+ */
+export async function ensureLockedConsentRelease(database = requireDatabase()) {
+  await ensureOperationalContactRelease(database);
+  const releaseId = 'residential-release-v4';
+  const existing = await database.prepare('SELECT id FROM public_releases WHERE id = ? LIMIT 1')
+    .bind(releaseId).first<{ id: string }>();
+  if (existing) return;
+
+  const source = await database.prepare(`SELECT id, questionnaire_version_id, rule_version_id,
+      legal_document_version_id, live_lead_submissions, contact_configuration_version_id, fact_set_version_id
+    FROM public_releases WHERE is_current = 1 LIMIT 1`).first<{
+      id: string;
+      questionnaire_version_id: string;
+      rule_version_id: string;
+      legal_document_version_id: string;
+      live_lead_submissions: number;
+      contact_configuration_version_id: string;
+      fact_set_version_id: string | null;
+    }>();
+  if (!source) throw new Error('The current SolarMatch release is unavailable.');
+
+  const actor = 'system:locked-consent-v2';
+  const contentVersionId = 'residential-content-consent-v2';
+  const contactVersionId = 'contact-configuration-consent-v2';
+  const contentVersion = await database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM content_versions').first<{ value: number }>();
+  const contactVersion = await database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM contact_configuration_versions').first<{ value: number }>();
+  const releaseVersion = await database.prepare('SELECT COALESCE(MAX(release_number), 0) + 1 AS value FROM public_releases').first<{ value: number }>();
+
+  await database.batch([
+    database.prepare(`INSERT INTO content_versions
+      (id, version_number, state, content_json, created_by, published_by, published_at)
+      VALUES (?, ?, 'published', ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(contentVersionId, contentVersion?.value ?? 4, JSON.stringify(contactContent), actor, actor),
+    database.prepare(`INSERT INTO contact_configuration_versions
+      (id, version_number, state, contact_collection_mode, contact_collection_enabled, retention_days,
+       receiving_company_en, receiving_company_th, receiving_company_privacy_url,
+       permitted_contact_methods_json, shared_fields_json, created_by, published_by, published_at,
+       restored_from_id, contact_collection_mode_v2, distribution_window_days, recipient_category,
+       adult_confirmation_version_id, consent_version_id, privacy_notice_version_id, terms_version_id,
+       cookie_policy_version_id, operator_profile_version_id, internal_recipient_cap, readiness_state,
+       readiness_issues_json, restricted_site_collection_enabled, public_collection_enabled)
+      SELECT ?, ?, 'published', contact_collection_mode, contact_collection_enabled, retention_days,
+       receiving_company_en, receiving_company_th, receiving_company_privacy_url,
+       permitted_contact_methods_json, shared_fields_json, ?, ?, CURRENT_TIMESTAMP,
+       id, contact_collection_mode_v2, distribution_window_days, recipient_category,
+       adult_confirmation_version_id, 'restricted-operational-consent-v2', privacy_notice_version_id, terms_version_id,
+       cookie_policy_version_id, operator_profile_version_id, internal_recipient_cap, readiness_state,
+       readiness_issues_json, restricted_site_collection_enabled, public_collection_enabled
+      FROM contact_configuration_versions WHERE id = ?`)
+      .bind(contactVersionId, contactVersion?.value ?? 4, actor, actor, source.contact_configuration_version_id),
+    database.prepare('UPDATE public_releases SET is_current = 0 WHERE is_current = 1'),
+    database.prepare(`INSERT INTO public_releases
+      (id, release_number, questionnaire_version_id, rule_version_id, content_version_id,
+       legal_document_version_id, live_lead_submissions, is_current, contact_configuration_version_id,
+       fact_set_version_id, created_by, published_by, published_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(releaseId, releaseVersion?.value ?? 4, source.questionnaire_version_id, source.rule_version_id,
+        contentVersionId, source.legal_document_version_id, source.live_lead_submissions,
+        contactVersionId, source.fact_set_version_id, actor, actor),
+  ]);
+}
+
 export async function getCurrentRelease(database = requireDatabase()) {
   await ensureInitialRelease(database);
   await ensureLegalLaunchRelease(database);
-  await ensureOperationalContactRelease(database);
+  await ensureLockedConsentRelease(database);
   return database.prepare(`SELECT
       r.id AS release_id, r.questionnaire_version_id, r.rule_version_id,
       q.document_json AS questionnaire_json, rv.configuration_json AS rules_json,
