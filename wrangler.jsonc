@@ -7,8 +7,7 @@
   "vars": {
     "ACCESS_TEAM_DOMAIN": "https://millys.cloudflareaccess.com",
     "ACCESS_AUD": "b717abfa537a10f8817266c0b9fdab777a99154fbdc53679e88e067151e7bccd",
-    "PRIVATE_SITE_ACCESS_AUD": "633047706f0772daa15ccba333afda4b2da9352e26a61c20259c9698ebb6af6e",
-    "PRIVATE_CONTACT_PREVIEW_ENABLED": "true"
+    "PRIVATE_SITE_ACCESS_AUD": "633047706f0772daa15ccba333afda4b2da9352e26a61c20259c9698ebb6af6e"
   },
   "assets": {
     "directory": "dist/client",

@@ -8,8 +8,8 @@ import { questionnaireDocumentSchema, scoringConfigurationSchema } from '@/lib/q
 import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { assessContactReadiness, type ContactConfigurationRow } from '@/lib/server/contact-mode';
-import { privatePreviewAccessConfiguration } from '@/lib/server/private-preview-auth';
-import { ensureInitialRelease, ensureLegalLaunchRelease } from '@/lib/server/releases';
+import { restrictedSiteAccessConfiguration } from '@/lib/server/private-preview-auth';
+import { ensureInitialRelease, ensureLegalLaunchRelease, ensureOperationalContactRelease } from '@/lib/server/releases';
 import { requireDatabase } from '@/lib/server/runtime';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +49,8 @@ const loadingFactSetSchema = z.object({ id: z.string().max(100), schemaVersion: 
 const contactDraftSchema = z.object({
   mode: z.enum(['disabled', 'validation_interest', 'named_installer_handoff', 'shared_solar_company_handoff']),
   enabled: z.boolean(),
+  restrictedSiteCollectionEnabled: z.boolean(),
+  publicCollectionEnabled: z.boolean(),
   retentionDays: z.number().int().min(1).max(3650).nullable(),
   distributionWindowDays: z.number().int().min(1).max(365).nullable(),
   recipientCategory: z.string().trim().max(200).nullable(),
@@ -65,6 +67,7 @@ const contactDraftSchema = z.object({
   sharedFields: z.array(z.enum(['legalFirstName', 'legalLastName', 'phone', 'preferredContactMethod', 'lineId', 'assessmentAnswers'])).min(1).max(6),
 }).superRefine((value, context) => {
   if (value.mode === 'disabled' && value.enabled) context.addIssue({ code: 'custom', path: ['enabled'], message: 'Disabled mode cannot be enabled.' });
+  if (!value.enabled && (value.restrictedSiteCollectionEnabled || value.publicCollectionEnabled)) context.addIssue({ code: 'custom', path: ['enabled'], message: 'Collection switches require the contact configuration to be enabled.' });
   if (value.mode === 'validation_interest' && (value.receivingCompanyEn || value.receivingCompanyTh || value.receivingCompanyPrivacyUrl)) context.addIssue({ code: 'custom', path: ['mode'], message: 'Validation mode cannot name an installer.' });
   if (value.mode === 'shared_solar_company_handoff' && value.recipientCategory !== 'participating_residential_solar_companies') context.addIssue({ code: 'custom', path: ['recipientCategory'], message: 'Shared mode must use the disclosed participating residential solar-company category.' });
 });
@@ -144,7 +147,7 @@ async function insertQuestionRows(database: D1Database, versionId: string, docum
 export async function GET(request: Request) {
   const identity = await requireAdminRequest(request);
   if (isAdminError(identity)) return identity;
-  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database);
+  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database); await ensureOperationalContactRelease(database);
   const [questionnaires, rules, contacts, factVersions, release, audit] = await Promise.all([
     database.prepare('SELECT id, version_number, state, document_json, created_by, created_at, published_at, restored_from_id FROM questionnaire_versions ORDER BY version_number DESC LIMIT 30').all(),
     database.prepare('SELECT id, version_number, state, configuration_json, created_by, created_at, published_at, restored_from_id FROM rule_versions ORDER BY version_number DESC LIMIT 30').all(),
@@ -160,7 +163,7 @@ export async function GET(request: Request) {
     rules: rules.results.map((row) => ({ ...row, configuration: JSON.parse(String(row.configuration_json)) })),
     contacts: contacts.results.map((row) => ({ ...row, permittedContactMethods: JSON.parse(String(row.permitted_contact_methods_json)), sharedFields: JSON.parse(String(row.shared_fields_json)) })),
     facts, release, audit: audit.results,
-    privatePreview: { configured: Boolean(privatePreviewAccessConfiguration()) },
+    restrictedSiteAccess: { configured: Boolean(restrictedSiteAccessConfiguration()) },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -193,7 +196,7 @@ async function createRelease(
     const row = await database.prepare('SELECT * FROM contact_configuration_versions WHERE id = ?').bind(versionId).first<Record<string, unknown>>();
     if (!row) throw new Error('version_not_found');
     const resolvedMode = (row.contact_collection_mode_v2 ?? row.contact_collection_mode) as ContactCollectionMode;
-    live = Number(row.contact_collection_enabled);
+    live = Number(row.public_collection_enabled);
     recipientEn = resolvedMode === 'named_installer_handoff' && row.receiving_company_en ? String(row.receiving_company_en) : null;
     recipientTh = resolvedMode === 'named_installer_handoff' && row.receiving_company_th ? String(row.receiving_company_th) : null;
     recipientUrl = resolvedMode === 'named_installer_handoff' && row.receiving_company_privacy_url ? String(row.receiving_company_privacy_url) : null;
@@ -224,7 +227,7 @@ export async function POST(request: Request) {
     if (!parsed.success) return NextResponse.json({ error: 'invalid_configuration', issues: parsed.error.issues.map((issue) => ({ path: issue.path, message: issue.message })) }, { status: 400 });
     body = parsed.data;
   } catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }); }
-  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database);
+  const database = requireDatabase(); await ensureInitialRelease(database); await ensureLegalLaunchRelease(database); await ensureOperationalContactRelease(database);
 
   if (body.action === 'save-questionnaire-draft') {
     const version = await nextNumber(database, 'questionnaire_versions'); const id = `residential-questionnaire-v${version}`;
@@ -244,13 +247,15 @@ export async function POST(request: Request) {
     await database.batch([
       database.prepare("UPDATE contact_configuration_versions SET state = 'archived', archived_at = CURRENT_TIMESTAMP WHERE state = 'draft'"),
       database.prepare(`INSERT INTO contact_configuration_versions
-        (id, version_number, state, contact_collection_mode, contact_collection_mode_v2, contact_collection_enabled, retention_days, receiving_company_en,
+        (id, version_number, state, contact_collection_mode, contact_collection_mode_v2, contact_collection_enabled,
+         restricted_site_collection_enabled, public_collection_enabled, retention_days, receiving_company_en,
          receiving_company_th, receiving_company_privacy_url, permitted_contact_methods_json, shared_fields_json,
          distribution_window_days, recipient_category, adult_confirmation_version_id, consent_version_id,
          privacy_notice_version_id, terms_version_id, cookie_policy_version_id, internal_recipient_cap,
          readiness_state, readiness_issues_json, created_by)
-        VALUES (?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'incomplete', '[]', ?)`)
-        .bind(id, version, legacyContactMode(value.mode), value.mode, value.mode === 'disabled' ? 0 : value.enabled ? 1 : 0, value.retentionDays,
+        VALUES (?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'incomplete', '[]', ?)`)
+        .bind(id, version, legacyContactMode(value.mode), value.mode, value.mode === 'disabled' ? 0 : value.enabled ? 1 : 0,
+          value.restrictedSiteCollectionEnabled ? 1 : 0, value.publicCollectionEnabled ? 1 : 0, value.retentionDays,
           validation ? null : value.receivingCompanyEn || null, validation ? null : value.receivingCompanyTh || null,
           validation ? null : value.receivingCompanyPrivacyUrl || null, JSON.stringify(value.permittedContactMethods), JSON.stringify(value.sharedFields),
           value.distributionWindowDays, value.recipientCategory, value.adultConfirmationVersionId, value.consentVersionId,
@@ -295,14 +300,16 @@ export async function POST(request: Request) {
       await database.batch([database.prepare("UPDATE rule_versions SET state = 'archived', archived_at = CURRENT_TIMESTAMP WHERE state = 'draft'"), database.prepare("INSERT INTO rule_versions (id, version_number, state, configuration_json, created_by, restored_from_id) VALUES (?, ?, 'draft', ?, ?, ?)").bind(id, version, JSON.stringify(configuration), identity.email, body.versionId), auditStatement(database, { actorEmail: identity.email, action: 'rules.restored-to-draft', entityType: 'rule-version', entityId: id, previous: { source: body.versionId } })]);
     } else if (body.kind === 'contact') {
       await database.batch([database.prepare("UPDATE contact_configuration_versions SET state = 'archived', archived_at = CURRENT_TIMESTAMP WHERE state = 'draft'"), database.prepare(`INSERT INTO contact_configuration_versions
-        (id, version_number, state, contact_collection_mode, contact_collection_mode_v2, contact_collection_enabled, retention_days, receiving_company_en,
+        (id, version_number, state, contact_collection_mode, contact_collection_mode_v2, contact_collection_enabled,
+         restricted_site_collection_enabled, public_collection_enabled, retention_days, receiving_company_en,
          receiving_company_th, receiving_company_privacy_url, permitted_contact_methods_json, shared_fields_json,
          distribution_window_days, recipient_category, adult_confirmation_version_id, consent_version_id,
          privacy_notice_version_id, terms_version_id, cookie_policy_version_id, internal_recipient_cap,
          readiness_state, readiness_issues_json, created_by, restored_from_id)
-        VALUES (?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'incomplete', '[]', ?, ?)`)
+        VALUES (?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'incomplete', '[]', ?, ?)`)
         .bind(id, version, legacyContactMode((target.contact_collection_mode_v2 ?? target.contact_collection_mode) as ContactCollectionMode),
-          target.contact_collection_mode_v2 ?? target.contact_collection_mode, 0, target.retention_days, target.receiving_company_en,
+          target.contact_collection_mode_v2 ?? target.contact_collection_mode, 0,
+          target.restricted_site_collection_enabled ?? 0, 0, target.retention_days, target.receiving_company_en,
           target.receiving_company_th, target.receiving_company_privacy_url, target.permitted_contact_methods_json,
           target.shared_fields_json, target.distribution_window_days, target.recipient_category,
           target.adult_confirmation_version_id, target.consent_version_id, target.privacy_notice_version_id,
@@ -331,6 +338,8 @@ export async function POST(request: Request) {
     const row: ContactConfigurationRow = {
       contact_configuration_version_id: String(target.id), contact_collection_mode: (target.contact_collection_mode_v2 ?? target.contact_collection_mode) as ContactCollectionMode,
       contact_collection_enabled: Number(target.contact_collection_enabled), retention_days: target.retention_days === null ? null : Number(target.retention_days),
+      restricted_site_collection_enabled: Number(target.restricted_site_collection_enabled ?? 0),
+      public_collection_enabled: Number(target.public_collection_enabled ?? 0),
       distribution_window_days: target.distribution_window_days === null ? null : Number(target.distribution_window_days),
       recipient_category: target.recipient_category as string | null,
       adult_confirmation_version_id: target.adult_confirmation_version_id as string | null,
@@ -349,7 +358,8 @@ export async function POST(request: Request) {
       shared_fields_json: String(target.shared_fields_json), legal_complete: Number(release?.legal_complete ?? 0), content_version_id: String(release?.content_version_id ?? ''), legal_document_version_id: String(release?.legal_document_version_id ?? ''), content_json: String(release?.content_json ?? '{}'),
     };
     const readiness = assessContactReadiness(row);
-    if (row.contact_collection_enabled && !readiness.active) return NextResponse.json({ error: 'contact_configuration_not_ready', issues: readiness.issues }, { status: 409 });
+    if (row.public_collection_enabled && !readiness.active) return NextResponse.json({ error: 'contact_configuration_not_ready', issues: readiness.issues }, { status: 409 });
+    if (row.restricted_site_collection_enabled && !restrictedSiteAccessConfiguration()) return NextResponse.json({ error: 'restricted_site_access_not_configured' }, { status: 409 });
   }
   try {
     const releaseId = await createRelease(database, identity.email, body.kind, body.versionId, descriptor.table);

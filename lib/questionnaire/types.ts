@@ -26,6 +26,7 @@ export type AssessmentQuestion = {
   id:
     | 'province'
     | 'monthlyBillThb'
+    | 'activelyPlanningSolar'
     | 'propertyType'
     | 'ownershipStatus'
     | 'roofArea'
@@ -33,6 +34,7 @@ export type AssessmentQuestion = {
     | 'daytimeLoads'
     | 'roofMaterial'
     | 'shade'
+    | 'quoteContactRequested'
     | 'installationTimeframe';
   type: 'province' | 'bill' | 'choice' | 'multichoice';
   title: LocalizedText;
@@ -49,7 +51,7 @@ export type AssessmentQuestion = {
 
 export type QuestionnaireDocument = {
   id: string;
-  schemaVersion: 4 | 5;
+  schemaVersion: 4 | 5 | 6;
   questions: AssessmentQuestion[];
 };
 
@@ -58,6 +60,8 @@ export type ContactCollectionMode = 'disabled' | 'validation_interest' | 'named_
 export type PublicContactConfiguration = {
   enabled: boolean;
   preview: boolean;
+  restrictedSiteCollectionEnabled: boolean;
+  publicCollectionEnabled: boolean;
   operationalDistributionEnabled: boolean;
   mode: ContactCollectionMode;
   contactConfigurationVersionId: string;
@@ -93,6 +97,9 @@ export type PublicContactConfiguration = {
 
 export type PublicAssessmentConfig = {
   privatePreview: boolean;
+  accessRestrictedSession: boolean;
+  restrictedSiteCollectionEnabled: boolean;
+  publicCollectionEnabled: boolean;
   releaseId: string;
   questionnaireVersionId: string;
   ruleVersionId: string;

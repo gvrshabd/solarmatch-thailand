@@ -39,6 +39,7 @@ export type EstimateAnswers = {
   province: string;
   customLocation?: string;
   monthlyBillThb: number;
+  activelyPlanningSolar: boolean;
   propertyType: PropertyType;
   customPropertyType?: string;
   ownershipStatus: OwnershipStatus;
@@ -50,6 +51,8 @@ export type EstimateAnswers = {
   roofMaterial: string;
   customRoofMaterial?: string;
   shade: RoofShade;
+  quoteContactRequested: boolean;
+  quoteConsentAccepted?: boolean;
   // Kept only for reading historic v1 assessment records.
   installationTimeframe?: InstallationTimeframe;
 

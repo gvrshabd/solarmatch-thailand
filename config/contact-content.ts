@@ -65,18 +65,18 @@ export const contactContent: ContactContent = {
     },
     shared_solar_company_handoff: {
       question: {
-        en: 'Would you like to be contacted by solar companies?',
-        th: 'ต้องการให้บริษัทโซลาร์ติดต่อกลับไหม?',
+        en: 'Want real quotes from local installers?',
+        th: 'อยากได้ใบเสนอราคาจริงจากผู้ติดตั้งในพื้นที่ไหม?',
       },
       help: {
-        en: 'If you choose Yes, SolarMatch may share your name, contact details, location and relevant assessment answers with participating residential solar companies that serve your area. More than one company may receive your information and contact you by phone or LINE, and the number may vary. SolarMatch may receive payment from these companies for the introduction. You will still receive your estimate if you choose No.',
-        th: 'หากเลือก “ต้องการ” SolarMatch อาจส่งชื่อ ข้อมูลติดต่อ พื้นที่ และคำตอบที่เกี่ยวข้องจากแบบประเมินของคุณให้บริษัทติดตั้งโซลาร์สำหรับที่พักอาศัยที่เข้าร่วมและให้บริการในพื้นที่ของคุณ ข้อมูลของคุณอาจถูกส่งให้มากกว่าหนึ่งบริษัท และแต่ละบริษัทอาจติดต่อคุณทางโทรศัพท์หรือ LINE โดยจำนวนบริษัทอาจแตกต่างกันไป SolarMatch อาจได้รับค่าตอบแทนจากบริษัทเหล่านี้สำหรับการแนะนำลูกค้า คุณยังคงได้รับผลประเมินแม้เลือก “ไม่ต้องการ”',
+        en: 'Choose Yes or No to continue.',
+        th: 'เลือกใช่หรือไม่ใช่เพื่อดำเนินการต่อ',
       },
-      yesLabel: { en: 'Yes, I would like solar companies to contact me', th: 'ต้องการให้บริษัทโซลาร์ติดต่อกลับ' },
-      noLabel: { en: 'No, show me my estimate', th: 'ไม่ต้องการ ดูผลประเมินต่อ' },
+      yesLabel: { en: 'Yes, I would like solar companies to contact me', th: 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ' },
+      noLabel: { en: 'No', th: 'ไม่ใช่' },
       consent: {
-        en: 'I explicitly consent to SolarMatch sharing my name, contact details, location and relevant assessment answers with participating residential solar companies that serve my area, so they may contact me about a residential solar site survey and quotation. I understand that more than one company may receive my information, the number may vary, and SolarMatch may receive payment for the introduction. I have read the Privacy Notice.',
-        th: 'ฉันยินยอมโดยชัดแจ้งให้ SolarMatch ส่งชื่อ ข้อมูลติดต่อ พื้นที่ และคำตอบที่เกี่ยวข้องจากแบบประเมินของฉันให้บริษัทติดตั้งโซลาร์สำหรับที่พักอาศัยที่เข้าร่วมและให้บริการในพื้นที่ของฉัน เพื่อให้บริษัทเหล่านั้นติดต่อเกี่ยวกับการสำรวจหน้างานและใบเสนอราคา ฉันเข้าใจว่าข้อมูลของฉันอาจถูกส่งให้มากกว่าหนึ่งบริษัท จำนวนบริษัทอาจแตกต่างกันไป และ SolarMatch อาจได้รับค่าตอบแทนสำหรับการแนะนำลูกค้า ฉันได้อ่านประกาศความเป็นส่วนตัวแล้ว',
+        en: "If you choose Yes, we'll share your name, contact info, location, and your answers from this assessment with home solar companies in your area who work with us. More than one company may contact you. We may get paid by these companies for connecting you. If you choose No, you'll still get your estimate.",
+        th: 'หากคุณเลือก "ใช่" เราจะแชร์ชื่อ ข้อมูลติดต่อ ที่อยู่ และคำตอบจากแบบประเมินของคุณ ให้กับบริษัทติดตั้งโซลาร์ในพื้นที่ของคุณที่เป็นพันธมิตรกับเรา อาจมีมากกว่าหนึ่งบริษัทติดต่อคุณผ่านทางโทรศัพท์หรือไลน์ และจำนวนอาจแตกต่างกันไป เราอาจได้รับค่าตอบแทนจากบริษัทเหล่านี้สำหรับการแนะนำ หากคุณเลือก "ไม่ใช่" คุณจะยังคงได้รับผลประเมินของคุณ',
       },
     },
     common: {

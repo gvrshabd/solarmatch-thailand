@@ -1,7 +1,7 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
 import { getRuntimeEnv, type SolarMatchRuntimeEnv } from './runtime';
 
-export type PrivatePreviewIdentity = {
+export type RestrictedSiteIdentity = {
   email: string;
   subject: string;
   tokenId: string;
@@ -9,15 +9,11 @@ export type PrivatePreviewIdentity = {
 
 type AssertionVerifier = (assertion: string, certificateUrl: URL) => Promise<JWTPayload>;
 
-function enabled(value: string | undefined) {
-  return value === '1' || value?.toLowerCase() === 'true';
-}
-
-export function privatePreviewAccessConfiguration(runtime: SolarMatchRuntimeEnv = getRuntimeEnv()) {
+export function restrictedSiteAccessConfiguration(runtime: SolarMatchRuntimeEnv = getRuntimeEnv()) {
   const teamDomain = runtime.ACCESS_TEAM_DOMAIN?.replace(/\/$/u, '');
   const audience = runtime.PRIVATE_SITE_ACCESS_AUD?.trim();
   const allowedEmails = new Set((runtime.ADMIN_EMAILS ?? '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean));
-  if (!enabled(runtime.PRIVATE_CONTACT_PREVIEW_ENABLED) || !teamDomain || !audience || allowedEmails.size === 0) return null;
+  if (!teamDomain || !audience || allowedEmails.size === 0) return null;
   return { teamDomain, audience, allowedEmails };
 }
 
@@ -30,11 +26,11 @@ async function verifyWithCloudflare(assertion: string, certificateUrl: URL) {
   return verified.payload;
 }
 
-export async function authenticatePrivatePreview(
+export async function authenticateRestrictedSiteOwner(
   headers: Headers,
   options: { runtime?: SolarMatchRuntimeEnv; verifyAssertion?: AssertionVerifier; nowMs?: number } = {},
-): Promise<PrivatePreviewIdentity | null> {
-  const configuration = privatePreviewAccessConfiguration(options.runtime);
+): Promise<RestrictedSiteIdentity | null> {
+  const configuration = restrictedSiteAccessConfiguration(options.runtime);
   const assertion = headers.get('cf-access-jwt-assertion');
   if (!configuration || !assertion) return null;
 

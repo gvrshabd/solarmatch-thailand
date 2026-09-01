@@ -7,6 +7,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
+import { LeadCapture } from '@/components/lead/lead-capture';
+import Link from '@/components/site/internal-link';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
 import { initialQuestionnaire } from '@/config/assessment';
 import { localizedPath, type Locale } from '@/config/i18n';
@@ -18,7 +20,7 @@ import type { AssessmentQuestion, ConditionalField, PublicAssessmentConfig, Ques
 
 type Draft = Partial<EstimateAnswers>;
 type SavedDraft = {
-  version: 4 | 5;
+  version: 4 | 5 | 6;
   answers: Draft;
   step: number;
   questionnaireVersionId?: string;
@@ -28,6 +30,7 @@ type SavedDraft = {
 };
 
 const resultStorageKey = 'solarmatch:estimate';
+const resultViewStorageKey = 'solarmatch:result-view-state';
 const draftStorageKey = 'solarmatch:estimate-draft';
 const starterStorageKey = 'solarmatch:starter';
 export const assessmentContextStorageKey = 'solarmatch:assessment-context';
@@ -116,6 +119,9 @@ function firstQuestionError(question: AssessmentQuestion, draft: Draft, english:
   if (question.id === 'daytimeLoads' && (!draft.daytimeLoads?.length)) {
     return english ? 'Select at least one answer.' : 'เลือกอย่างน้อยหนึ่งข้อ';
   }
+  if (question.id === 'quoteContactRequested' && draft.quoteContactRequested && draft.quoteConsentAccepted !== true) {
+    return english ? 'Tick the consent box before continuing to the contact form.' : 'กรุณาทำเครื่องหมายในช่องความยินยอมก่อนกรอกข้อมูลติดต่อ';
+  }
   if (question.required && (value === undefined || value === '' || (Array.isArray(value) && value.length === 0))) {
     return english ? 'Choose an answer before continuing.' : 'กรุณาเลือกคำตอบก่อนดำเนินการต่อ';
   }
@@ -173,6 +179,8 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const [ready, setReady] = useState(false);
   const [direction, setDirection] = useState<ScreenDirection>('forward');
   const [transitioning, setTransitioning] = useState(false);
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactResetKey, setContactResetKey] = useState(0);
   const initializedRef = useRef(false);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const navigationLockRef = useRef(false);
@@ -215,7 +223,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   useEffect(() => {
     if (!ready) return;
     const saved: SavedDraft = {
-      version: 4, answers: draft, step,
+      version: 6, answers: draft, step,
       questionnaireVersionId: assessmentConfig?.questionnaireVersionId,
       releaseId: assessmentConfig?.releaseId,
       assessmentToken: assessmentConfig?.assessmentToken ?? undefined,
@@ -259,7 +267,31 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function selected(id: string, value: string) {
-    return draft[id as keyof Draft] === value;
+    const current = draft[id as keyof Draft];
+    if (id === 'activelyPlanningSolar' || id === 'quoteContactRequested') return current === (value === 'yes');
+    return current === value;
+  }
+
+  function chooseOption(id: string, value: string) {
+    if (id === 'activelyPlanningSolar') {
+      setValue('activelyPlanningSolar', value === 'yes');
+      return;
+    }
+    if (id === 'quoteContactRequested') {
+      const requested = value === 'yes';
+      setDraft((current) => {
+        const next: Draft = { ...current, quoteContactRequested: requested };
+        if (!requested) delete next.quoteConsentAccepted;
+        return next;
+      });
+      if (!requested) {
+        setContactResetKey((current) => current + 1);
+        setShowContactForm(false);
+      }
+      setError('');
+      return;
+    }
+    setValue(id as keyof EstimateAnswers, value as never);
   }
 
   function handleRadioKeys(event: KeyboardEvent<HTMLDivElement>) {
@@ -291,9 +323,23 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       setError(english ? 'One answer still needs attention.' : 'ยังมีคำตอบที่ต้องตรวจสอบอีกหนึ่งข้อ');
       return;
     }
-    writeSessionValue(resultStorageKey, parsed.data);
+    if (parsed.data.quoteContactRequested) {
+      if (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions) {
+        setError(english ? 'Contact requests are temporarily unavailable. Choose No to continue to your estimate.' : 'ขณะนี้ยังไม่สามารถส่งคำขอติดต่อได้ กรุณาเลือก “ไม่ใช่” เพื่อดูผลประเมิน');
+        return;
+      }
+      setShowContactForm(true);
+      window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      return;
+    }
+    completeJourney(parsed.data);
+  }
+
+  function completeJourney(answers: EstimateAnswers) {
+    writeSessionValue(resultStorageKey, answers);
     if (assessmentConfig) writeSessionValue(assessmentContextStorageKey, assessmentConfig);
     removeSessionValue(draftStorageKey);
+    removeSessionValue(resultViewStorageKey);
     window.location.assign(localizedPath('/estimate/results', locale));
   }
 
@@ -305,7 +351,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   function restart() {
     [starterStorageKey, draftStorageKey, resultStorageKey, assessmentContextStorageKey].forEach(removeSessionValue);
-    setDirection('backward'); setDraft({}); setStep(0); setError(''); window.scrollTo({ top: 0, behavior: 'auto' });
+    setDirection('backward'); setDraft({}); setStep(0); setError(''); setShowContactForm(false); setContactResetKey((current) => current + 1); window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   function toggleDaytimeLoad(value: DaytimeLoad) {
@@ -322,19 +368,36 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   if (!question) return null;
 
-  return <main className="estimate-page"><div className="site-shell estimate-focus-layout"><section className="estimate-card focus-card" aria-labelledby="estimate-question">
+  const completedAnswers = estimateAnswersSchema.safeParse(draft);
+
+  return <main className="estimate-page"><div className="site-shell estimate-focus-layout"><section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
     <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage">
       <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1><p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p></div>
       {question.type === 'province' && <label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>}
       {question.type === 'bill' && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
-      {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{question.options?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => setValue(question.id as keyof EstimateAnswers, option.value as never)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
+      {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{question.options?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
+      {question.id === 'quoteContactRequested' && <div className="quote-consent-block">
+        <label className="quote-consent-check"><input type="checkbox" disabled={draft.quoteContactRequested === false} checked={draft.quoteConsentAccepted ?? false} onChange={(event) => setValue('quoteConsentAccepted', event.target.checked ? true : undefined)} /><span>{assessmentConfig?.contact.consent?.[locale] ?? (english ? "If you choose Yes, we'll share your name, contact info, location, and your answers from this assessment with home solar companies in your area who work with us. More than one company may contact you. We may get paid by these companies for connecting you. If you choose No, you'll still get your estimate." : 'หากคุณเลือก "ใช่" เราจะแชร์ชื่อ ข้อมูลติดต่อ ที่อยู่ และคำตอบจากแบบประเมินของคุณ ให้กับบริษัทติดตั้งโซลาร์ในพื้นที่ของคุณที่เป็นพันธมิตรกับเรา อาจมีมากกว่าหนึ่งบริษัทติดต่อคุณผ่านทางโทรศัพท์หรือไลน์ และจำนวนอาจแตกต่างกันไป เราอาจได้รับค่าตอบแทนจากบริษัทเหล่านี้สำหรับการแนะนำ หากคุณเลือก "ไม่ใช่" คุณจะยังคงได้รับผลประเมินของคุณ')}</span></label>
+        <Link className="quote-privacy-link" href={localizedPath('/privacy', locale)} target="_blank" rel="noopener">{english ? 'Read the Privacy Notice' : 'อ่านประกาศความเป็นส่วนตัว'}</Link>
+      </div>}
       {question.type === 'multichoice' && <div className="choice-grid multichoice-grid" aria-labelledby="estimate-question">{question.options?.map((option) => { const checked = draft.daytimeLoads?.includes(option.value as DaytimeLoad) ?? false; const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="checkbox" aria-checked={checked} className={`choice-card visual-choice ${checked ? 'selected' : ''}`} onClick={() => toggleDaytimeLoad(option.value as DaytimeLoad)}><Icon className="choice-icon" aria-hidden="true" /><strong>{option.label[locale]}</strong><span className="choice-indicator checkbox-indicator" aria-hidden="true">{checked && <Check />}</span></button>; })}</div>}
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
-      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
+      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
     </ScreenTransition></fieldset>
-    <div className="estimate-privacy-line"><span>{english ? 'Assessment answers stay in this browser. If optional contact is available, you can choose it after finishing the assessment; your full result is never conditional on contact.' : 'คำตอบแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ หากมีตัวเลือกให้ติดต่อกลับ คุณจะเลือกได้หลังตอบแบบประเมินเสร็จ และยังดูผลประเมินฉบับเต็มได้เสมอไม่ว่าจะเลือกให้ติดต่อหรือไม่'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
-  </section></div></main>;
+    <div className="estimate-privacy-line"><span>{english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
+  </section>
+  {assessmentConfig && completedAnswers.success && <LeadCapture
+    locale={locale}
+    answers={completedAnswers.data}
+    configuration={assessmentConfig}
+    active={showContactForm}
+    resetKey={contactResetKey}
+    onBack={() => { setShowContactForm(false); setDirection('backward'); setError(''); }}
+    onConfigurationChanged={(configuration) => { setAssessmentConfig(configuration); writeSessionValue(assessmentContextStorageKey, configuration); }}
+    onContinue={() => completeJourney(completedAnswers.data)}
+  />}
+  </div></main>;
 }

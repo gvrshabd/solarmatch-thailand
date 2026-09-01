@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateLeadAssessment } from '@/lib/qualification/scoring';
-import { consentSnapshot, privatePreviewContactConfiguration, publicContactConfiguration } from '@/lib/server/contact-mode';
+import { consentSnapshot, publicContactConfiguration, restrictedOperationalContactConfiguration } from '@/lib/server/contact-mode';
 import { verifyAssessmentToken } from '@/lib/server/assessment-token';
 import { auditStatement } from '@/lib/server/audit';
 import { sha256 } from '@/lib/server/crypto';
-import { authenticatePrivatePreview } from '@/lib/server/private-preview-auth';
+import { authenticateRestrictedSiteOwner } from '@/lib/server/private-preview-auth';
 import { getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
 import { requireDatabase } from '@/lib/server/runtime';
 import { leadSchema, normalizeThaiPhone } from '@/lib/validation/lead';
@@ -53,24 +53,30 @@ export async function POST(request: NextRequest) {
   const database = requireDatabase();
   if (!await enforceRateLimit(request, database)) return jsonError('rate_limited', 429);
   const release = await getCurrentRelease(database);
-  const previewIdentity = await authenticatePrivatePreview(request.headers);
-  const privatePreview = Boolean(previewIdentity);
-  if (!release || (!privatePreview && (!release.live_lead_submissions || !release.legal_complete))) return jsonError('submissions_unavailable', 503);
-  const contact = privatePreview ? privatePreviewContactConfiguration(release) : publicContactConfiguration(release);
+  const restrictedIdentity = await authenticateRestrictedSiteOwner(request.headers);
+  const restrictedAccess = Boolean(restrictedIdentity);
+  if (!release) return jsonError('submissions_unavailable', 503);
+  const contact = restrictedAccess ? restrictedOperationalContactConfiguration(release) : publicContactConfiguration(release);
+  const restrictedCollectionAllowed = restrictedAccess && contact.restrictedSiteCollectionEnabled;
+  const publicCollectionAllowed = !restrictedAccess && contact.publicCollectionEnabled
+    && Boolean(release.live_lead_submissions) && Boolean(release.legal_complete);
+  if (!restrictedCollectionAllowed && !publicCollectionAllowed) return jsonError('submissions_unavailable', 503);
   if (!contact.enabled || contact.mode === 'disabled') return jsonError('submissions_unavailable', 503);
   if (token.releaseId !== release.release_id || token.questionnaireVersionId !== release.questionnaire_version_id || token.ruleVersionId !== release.rule_version_id) return jsonError('assessment_version_expired', 409);
 
   const assessment = calculateLeadAssessment(parsed.data.answers, parseScoringConfiguration(release));
-  const phoneE164 = normalizeThaiPhone(parsed.data.phone);
+  const phoneDisplay = parsed.data.contactMethod === 'phone' ? parsed.data.phone ?? null : null;
+  const phoneE164 = phoneDisplay ? normalizeThaiPhone(phoneDisplay) : null;
+  const lineId = parsed.data.contactMethod === 'line' ? parsed.data.lineId ?? null : null;
   const existing = await database.prepare('SELECT id FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string }>();
   if (existing) return NextResponse.json({ ok: true, leadId: existing.id, duplicate: true }, { headers: { 'Cache-Control': 'no-store' } });
 
   const leadId = crypto.randomUUID();
   const consentedAt = new Date().toISOString();
-  const distributionExpiresAt = !privatePreview && contact.mode === 'shared_solar_company_handoff' && contact.distributionWindowDays
+  const distributionExpiresAt = contact.mode === 'shared_solar_company_handoff' && contact.distributionWindowDays
     ? new Date(Date.now() + contact.distributionWindowDays * 86_400_000).toISOString()
     : null;
-  const requestFingerprint = await sha256(`${phoneE164}:${token.nonce}:${release.release_id}`);
+  const requestFingerprint = await sha256(`${phoneE164 ?? lineId}:${token.nonce}:${release.release_id}`);
   const consent = consentSnapshot(contact);
   const answers = parsed.data.answers;
   const explanation = JSON.stringify({ factors: assessment.factors, eligibilityReasons: assessment.eligibilityReasons });
@@ -88,7 +94,8 @@ export async function POST(request: NextRequest) {
     'id', 'idempotency_key', 'request_fingerprint', 'legal_first_name', 'legal_last_name', 'phone_e164', 'phone_display',
     'preferred_contact_method', 'line_id', 'province', 'custom_location', 'ownership_status', 'property_type', 'custom_property_type',
     'daytime_loads_json', 'custom_daytime_load', 'air_conditioner_count', 'monthly_bill_thb', 'roof_material', 'custom_roof_material',
-    'roof_shade', 'roof_area', 'daytime_pattern', 'installation_timeframe', 'answers_json', 'questionnaire_version_id',
+    'roof_shade', 'roof_area', 'daytime_pattern', 'installation_timeframe', 'actively_planning_solar',
+    'quote_contact_requested', 'answers_json', 'questionnaire_version_id',
     'rule_version_id', 'release_id', 'raw_score', 'quality_score', 'hard_eligible', 'high_quality', 'scoring_explanation_json',
     'consent_version', 'consent_text_en', 'consent_text_th', 'consented_at', 'receiving_company_en', 'receiving_company_th',
     'source_locale', 'user_agent_summary', 'contact_collection_mode', 'contact_collection_mode_v2',
@@ -100,15 +107,17 @@ export async function POST(request: NextRequest) {
     'disclosed_fields_snapshot_json', 'adult_confirmation_version', 'adult_confirmation_text_en',
     'adult_confirmation_text_th', 'adult_confirmed_at', 'privacy_notice_version_id', 'terms_version_id',
     'cookie_policy_version_id', 'submission_environment', 'is_test_submission', 'distribution_allowed',
+    'access_restricted_at_submission',
     'suppressed', 'suppression_reason', 'suppressed_at',
   ];
   const leadValues = [
     leadId, parsed.data.idempotencyKey, requestFingerprint, parsed.data.legalFirstName, parsed.data.legalLastName,
-    phoneE164, parsed.data.phone, parsed.data.contactMethod, parsed.data.lineId ?? null, answers.province,
+    phoneE164, phoneDisplay, parsed.data.contactMethod, lineId, answers.province,
     answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
     JSON.stringify(answers.daytimeLoads), answers.customDaytimeLoad ?? null, answers.airConditionerCount ?? 0,
     Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
-    answers.roofArea, answers.daytimePattern, answers.installationTimeframe ?? 'not-collected-v2', JSON.stringify(answers),
+    answers.roofArea, answers.daytimePattern, answers.installationTimeframe ?? 'not-collected-v3',
+    answers.activelyPlanningSolar ? 1 : 0, answers.quoteContactRequested ? 1 : 0, JSON.stringify(answers),
     release.questionnaire_version_id, release.rule_version_id, release.release_id, assessment.rawPoints,
     assessment.qualityScore, assessment.hardEligible ? 1 : 0, assessment.highQuality ? 1 : 0, explanation,
     contact.consentVersionId ?? `content:${contact.contentVersionId}`, consent.consentText.en, consent.consentText.th, consentedAt,
@@ -122,8 +131,8 @@ export async function POST(request: NextRequest) {
     JSON.stringify(contact.sharedFields), contact.adultConfirmationVersionId,
     consent.adultConfirmationText?.en ?? '', consent.adultConfirmationText?.th ?? '', consentedAt,
     contact.privacyNoticeVersionId, contact.termsVersionId, contact.cookiePolicyVersionId,
-    privatePreview ? 'private_development_preview' : 'production', privatePreview ? 1 : 0, privatePreview ? 0 : 1,
-    privatePreview ? 1 : 0, privatePreview ? 'private_development_test' : null, privatePreview ? consentedAt : null,
+    restrictedAccess ? 'restricted_site_operational' : 'production', 0, 1, restrictedAccess ? 1 : 0,
+    0, null, null,
   ];
 
   try {
@@ -135,13 +144,13 @@ export async function POST(request: NextRequest) {
         .bind(crypto.randomUUID(), leadId, release.rule_version_id, assessment.rawPoints, assessment.qualityScore,
           assessment.hardEligible ? 1 : 0, explanation),
     ];
-    if (privatePreview && previewIdentity) {
+    if (restrictedAccess && restrictedIdentity) {
       statements.push(auditStatement(database, {
-        actorEmail: previewIdentity.email,
-        action: 'lead.private-preview-submitted',
+        actorEmail: restrictedIdentity.email,
+        action: 'lead.restricted-operational-submitted',
         entityType: 'lead',
         entityId: leadId,
-        next: { submissionEnvironment: 'private_development_preview', distributionAllowed: false },
+        next: { submissionEnvironment: 'restricted_site_operational', distributionAllowed: true },
       }));
     }
     await database.batch(statements);
@@ -153,5 +162,5 @@ export async function POST(request: NextRequest) {
     return jsonError('submission_failed', 500);
   }
 
-  return NextResponse.json({ ok: true, leadId, testSubmission: privatePreview }, { status: 201, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
+  return NextResponse.json({ ok: true, leadId, testSubmission: false }, { status: 201, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
 }

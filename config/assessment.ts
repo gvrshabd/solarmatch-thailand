@@ -1,6 +1,6 @@
 import type { AssessmentQuestion, QuestionnaireDocument } from '@/lib/questionnaire/types';
 
-const questions: AssessmentQuestion[] = [
+const residentialCoreQuestions: AssessmentQuestion[] = [
   {
     id: 'province', type: 'province', required: true,
     title: { en: 'Where is the property located?', th: 'บ้านหรือที่พักอาศัยนี้อยู่ที่ไหน?' },
@@ -160,10 +160,48 @@ const questions: AssessmentQuestion[] = [
   },
 ];
 
+const activePlanningQuestion: AssessmentQuestion = {
+  id: 'activelyPlanningSolar', type: 'choice', required: true,
+  title: { en: 'Are you actively planning to install solar?', th: 'คุณกำลังวางแผนติดตั้งโซลาร์อยู่หรือไม่?' },
+  help: {
+    en: 'This helps us understand how close you are to taking the next step.',
+    th: 'คำตอบนี้ช่วยให้เราเข้าใจว่าคุณกำลังพิจารณาขั้นตอนต่อไปมากน้อยเพียงใด',
+  },
+  options: [
+    { value: 'yes', label: { en: 'Yes', th: 'ใช่' } },
+    { value: 'no', label: { en: 'No', th: 'ไม่ใช่' } },
+  ],
+  relevance: { calculation: false, qualification: false, scoring: true },
+};
+
+const quoteContactQuestion: AssessmentQuestion = {
+  id: 'quoteContactRequested', type: 'choice', required: true,
+  title: { en: 'Want real quotes from local installers?', th: 'อยากได้ใบเสนอราคาจริงจากผู้ติดตั้งในพื้นที่ไหม?' },
+  help: { en: 'Choose one option to continue.', th: 'เลือกหนึ่งตัวเลือกเพื่อดำเนินการต่อ' },
+  options: [
+    { value: 'yes', label: { en: 'Yes, I would like solar companies to contact me', th: 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ' } },
+    { value: 'no', label: { en: 'No', th: 'ไม่ใช่' } },
+  ],
+  relevance: { calculation: false, qualification: false, scoring: false },
+};
+
+const questionsV3: AssessmentQuestion[] = [
+  ...residentialCoreQuestions.slice(0, 2),
+  activePlanningQuestion,
+  ...residentialCoreQuestions.slice(2),
+  quoteContactQuestion,
+];
+
 export const initialQuestionnaire: QuestionnaireDocument = {
+  id: 'residential-questionnaire-v3',
+  schemaVersion: 6,
+  questions: questionsV3,
+};
+
+export const legacyQuestionnaireV2: QuestionnaireDocument = {
   id: 'residential-questionnaire-v2',
   schemaVersion: 5,
-  questions,
+  questions: residentialCoreQuestions,
 };
 
 // Immutable compatibility document for historic releases and migration tests.
@@ -172,7 +210,7 @@ export const legacyQuestionnaireV1: QuestionnaireDocument = {
   id: 'residential-questionnaire-v1',
   schemaVersion: 4,
   questions: [
-    ...questions,
+    ...residentialCoreQuestions,
     {
       id: 'installationTimeframe', type: 'choice', required: true,
       title: { en: 'When are you considering installing solar?', th: 'คุณกำลังวางแผนติดตั้งโซลาร์เมื่อไร?' },

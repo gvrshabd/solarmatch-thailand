@@ -20,8 +20,8 @@ type LeadRow = {
   created_at: string;
   legal_first_name: string;
   legal_last_name: string;
-  phone_display: string;
-  phone_e164: string;
+  phone_display: string | null;
+  phone_e164: string | null;
   preferred_contact_method: 'phone' | 'line';
   line_id: string | null;
   province: string;
@@ -30,6 +30,8 @@ type LeadRow = {
   air_conditioner_count: number;
   monthly_bill_thb: number;
   daytime_pattern: string;
+  actively_planning_solar: number | null;
+  quote_contact_requested: number | null;
   quality_score: number;
   raw_score: number;
   hard_eligible: number;
@@ -45,7 +47,7 @@ type LeadRow = {
   solar_match_followup_authorized: number;
   third_party_disclosure_authorized: number;
   recipient_snapshot_json: string | null;
-  submission_environment: 'production' | 'private_development_preview';
+  submission_environment: 'production' | 'private_development_preview' | 'restricted_site_operational';
   is_test_submission: number;
   distribution_allowed: number;
   suppressed: number;
@@ -94,14 +96,15 @@ export async function GET(request: Request) {
   const query = url.searchParams.get('query')?.trim();
   if (query) {
     const escaped = query.replace(/[\\%_]/gu, '\\$&');
-    clauses.push("(legal_first_name LIKE ? ESCAPE '\\' OR legal_last_name LIKE ? ESCAPE '\\' OR phone_display LIKE ? ESCAPE '\\' OR phone_e164 LIKE ? ESCAPE '\\')");
+    clauses.push("(legal_first_name LIKE ? ESCAPE '\\' OR legal_last_name LIKE ? ESCAPE '\\' OR COALESCE(phone_display, '') LIKE ? ESCAPE '\\' OR COALESCE(phone_e164, '') LIKE ? ESCAPE '\\' OR COALESCE(line_id, '') LIKE ? ESCAPE '\\')");
     const pattern = `%${escaped}%`;
-    values.push(pattern, pattern, pattern, pattern);
+    values.push(pattern, pattern, pattern, pattern, pattern);
   }
   const order = url.searchParams.get('sort') === 'score' ? 'quality_score DESC, created_at DESC' : 'created_at DESC';
   const result = await database.prepare(`SELECT id, created_at, legal_first_name, legal_last_name, phone_display, phone_e164,
       preferred_contact_method, line_id, province, custom_location, ownership_status, air_conditioner_count,
-      monthly_bill_thb, daytime_pattern, quality_score, raw_score, hard_eligible, high_quality,
+      monthly_bill_thb, daytime_pattern, actively_planning_solar, quote_contact_requested,
+      quality_score, raw_score, hard_eligible, high_quality,
       scoring_explanation_json, status, selection_override, exported_at, archived_at,
       COALESCE(contact_collection_mode_v2, contact_collection_mode) AS contact_collection_mode,
       contact_configuration_version_id, COALESCE(consent_scope_v2, consent_scope) AS consent_scope,
@@ -125,7 +128,7 @@ export async function GET(request: Request) {
       explanation: JSON.parse(lead.scoring_explanation_json),
       selected: compatible && (selection === 'selected' || (selection !== 'deselected' && automatic)),
       selectionCompatible: compatible,
-       selectionReason: lead.is_test_submission ? 'Private-preview test record — partner export is permanently blocked' : !lead.distribution_allowed || lead.suppressed ? 'Distribution is suppressed' : !compatible ? (exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export') : selection === 'selected' ? 'Manually selected for this consent scope' : selection === 'deselected' ? 'Manually deselected for this consent scope' : automatic ? `Automatic: consent-compatible, sellable and ${threshold}/5 or above` : 'Not automatically selected',
+       selectionReason: lead.is_test_submission ? 'Historical test record — partner export is permanently blocked' : !lead.distribution_allowed || lead.suppressed ? 'Distribution is suppressed' : !compatible ? (lead.contact_collection_mode === 'shared_solar_company_handoff' ? 'Use the partner-delivery workflow to select an eligible recipient' : exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export') : selection === 'selected' ? 'Manually selected for this consent scope' : selection === 'deselected' ? 'Manually deselected for this consent scope' : automatic ? `Automatic: consent-compatible, sellable and ${threshold}/5 or above` : 'Not automatically selected',
     }); }),
     automaticSelectionThreshold: threshold,
     exportScope,

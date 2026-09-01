@@ -8,9 +8,9 @@ const routes = [
 ];
 
 const savedEstimate = {
-  province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', roofArea: '60-100',
+  province: 'bangkok', monthlyBillThb: 6000, activelyPlanningSolar: true, propertyType: 'detached-home', roofArea: '60-100',
   ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'home-office-equipment'], airConditionerCount: 5,
-  roofMaterial: 'concrete-tile', shade: 'almost-none', installationTimeframe: 'one-three-months', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
+  roofMaterial: 'concrete-tile', shade: 'almost-none', quoteContactRequested: false, roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
 test.beforeEach(async ({ page }) => {
@@ -90,4 +90,5 @@ test('landscape menu remains reachable and reduced motion is respected', async (
   await page.goto('/en/estimate/results');
   await expect(page.locator('.solar-loading-indicator')).toBeVisible();
   await expect(page.locator('.solar-loading-indicator')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.solar-loading-indicator-progress')).toBeVisible();
 });

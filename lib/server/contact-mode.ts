@@ -5,6 +5,8 @@ export type ContactConfigurationRow = {
   contact_configuration_version_id: string | null;
   contact_collection_mode: ContactCollectionMode | null;
   contact_collection_enabled: number | null;
+  restricted_site_collection_enabled?: number | null;
+  public_collection_enabled?: number | null;
   retention_days: number | null;
   distribution_window_days?: number | null;
   recipient_category?: string | null;
@@ -74,6 +76,7 @@ export function assessContactReadiness(row: ContactConfigurationRow): ContactRea
   const issues: string[] = [];
   if (mode === 'disabled') return { active: false, mode, issues };
   if (!row.contact_collection_enabled) issues.push('contact configuration is not explicitly enabled');
+  if (!row.public_collection_enabled) issues.push('public collection is not explicitly enabled');
   if (!row.legal_complete) issues.push('legal operator and privacy information is incomplete');
   if (!row.retention_days) issues.push('retention period is missing');
   if (!row.adult_confirmation_version_id) issues.push('adult confirmation version is missing');
@@ -102,6 +105,8 @@ export function publicContactConfiguration(row: ContactConfigurationRow): Public
   const disabled: PublicContactConfiguration = {
     enabled: false,
     preview: false,
+    restrictedSiteCollectionEnabled: Boolean(row.restricted_site_collection_enabled),
+    publicCollectionEnabled: Boolean(row.public_collection_enabled),
     operationalDistributionEnabled: false,
     mode: readiness.mode,
     contactConfigurationVersionId: row.contact_configuration_version_id ?? 'contact-configuration-v1',
@@ -138,24 +143,28 @@ export function publicContactConfiguration(row: ContactConfigurationRow): Public
 }
 
 /**
- * Builds the owner-only development experience without changing the published
- * legal-readiness state. The request must already have passed the separate
+ * Builds the operational owner-only experience without broadening collection
+ * to anonymous visitors. The request must already have passed the separate
  * whole-site Access assertion check before this function is used.
  */
-export function privatePreviewContactConfiguration(row: ContactConfigurationRow): PublicContactConfiguration {
+export function restrictedOperationalContactConfiguration(row: ContactConfigurationRow): PublicContactConfiguration {
   const baseline = publicContactConfiguration(row);
   const copy = resolvedContent(row.content_json).contactModes;
+  if (!row.restricted_site_collection_enabled || !row.contact_collection_enabled || row.contact_collection_mode === 'disabled') {
+    return baseline;
+  }
   return {
     ...baseline,
     enabled: true,
-    preview: true,
-    operationalDistributionEnabled: false,
+    preview: false,
+    restrictedSiteCollectionEnabled: true,
+    operationalDistributionEnabled: true,
     mode: 'shared_solar_company_handoff',
-    retentionDays: null,
-    distributionWindowDays: null,
+    retentionDays: row.retention_days,
+    distributionWindowDays: row.distribution_window_days ?? null,
     recipientCategory: 'participating_residential_solar_companies',
-    adultConfirmationVersionId: row.adult_confirmation_version_id ?? 'private-preview-adult-v1',
-    consentVersionId: row.consent_version_id ?? 'private-preview-consent-v1',
+    adultConfirmationVersionId: row.adult_confirmation_version_id ?? 'restricted-operational-adult-v1',
+    consentVersionId: row.consent_version_id ?? 'restricted-operational-consent-v1',
     privacyNoticeVersionId: row.privacy_notice_version_id ?? row.legal_document_version_id,
     termsVersionId: row.terms_version_id ?? null,
     cookiePolicyVersionId: row.cookie_policy_version_id ?? null,

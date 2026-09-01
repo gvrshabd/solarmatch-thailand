@@ -32,12 +32,44 @@ export function CalculationLoading({
   const [duration] = useState(() => initialDurationMs ?? loadingDurationMs());
   const [startedAt] = useState(() => initialStartedAt ?? Date.now());
   const [fact] = useState<PublicLoadingFact | null>(() => initialFact ?? selectLoadingFact(facts, readHistory()));
+  const [progress, setProgress] = useState(0.015);
   const startedRef = useRef(false);
 
   useLayoutEffect(() => {
     document.body.classList.add('calculation-loading-active');
     return () => document.body.classList.remove('calculation-loading-active');
   }, []);
+
+  useEffect(() => {
+    let frame = 0;
+    let lastProgress = 0.015;
+    const seedSource = `${fact?.id ?? 'generic'}:${startedAt}:${duration}`;
+    let seed = 0;
+    for (let index = 0; index < seedSource.length; index += 1) seed = Math.imul(seed ^ seedSource.charCodeAt(index), 16777619);
+    const firstBreakpoint = 0.18 + (Math.abs(seed) % 7) / 100;
+    const secondBreakpoint = 0.65 + (Math.abs(seed >>> 3) % 9) / 100;
+    const firstFill = 0.24 + (Math.abs(seed >>> 5) % 8) / 100;
+    const secondFill = 0.76 + (Math.abs(seed >>> 7) % 9) / 100;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const update = () => {
+      const elapsedRatio = Math.max(0, Math.min(1, (Date.now() - startedAt) / duration));
+      let next: number;
+      if (elapsedRatio <= firstBreakpoint) {
+        next = 0.015 + (firstFill - 0.015) * (elapsedRatio / firstBreakpoint);
+      } else if (elapsedRatio <= secondBreakpoint) {
+        next = firstFill + (secondFill - firstFill) * ((elapsedRatio - firstBreakpoint) / (secondBreakpoint - firstBreakpoint));
+      } else {
+        const tail = (elapsedRatio - secondBreakpoint) / (1 - secondBreakpoint);
+        next = secondFill + (1 - secondFill) * (1 - Math.pow(1 - tail, 1.65));
+      }
+      if (elapsedRatio >= 1) next = 1;
+      lastProgress = Math.max(lastProgress, next);
+      setProgress(reducedMotion && elapsedRatio < 1 ? Math.floor(lastProgress * 4) / 4 : lastProgress);
+      if (elapsedRatio < 1) frame = window.requestAnimationFrame(update);
+    };
+    frame = window.requestAnimationFrame(update);
+    return () => window.cancelAnimationFrame(frame);
+  }, [duration, fact?.id, startedAt]);
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -65,10 +97,10 @@ export function CalculationLoading({
         <h1 id="preparing-title" className="calculation-loading-sr-title" tabIndex={-1}>
           {english ? 'Preparing your solar estimate' : 'กำลังเตรียมผลประเมินโซลาร์ของคุณ'}
         </h1>
-        <span className="solar-loading-indicator" aria-hidden="true">
+        <span className="solar-loading-indicator solar-loading-progress" aria-hidden="true">
           <svg viewBox="0 0 52 52" focusable="false">
             <circle className="solar-loading-track" cx="26" cy="26" r="20" />
-            <circle className="solar-loading-arc" cx="26" cy="26" r="20" />
+            <circle className="solar-loading-arc solar-loading-indicator-progress" cx="26" cy="26" r="20" pathLength="1" style={{ strokeDashoffset: 1 - progress }} />
             <circle className="solar-loading-core" cx="26" cy="26" r="5" />
           </svg>
         </span>

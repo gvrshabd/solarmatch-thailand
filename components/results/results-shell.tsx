@@ -17,7 +17,6 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from '@/components/site/internal-link';
-import { LeadCapture } from '@/components/lead/lead-capture';
 import { ScreenTransition } from '@/components/ui/screen-transition';
 import { assessmentContextStorageKey } from '@/components/estimate/estimate-shell';
 import { CalculationLoading } from './calculation-loading';
@@ -41,7 +40,7 @@ const storageKey = 'solarmatch:estimate';
 const resultViewStorageKey = 'solarmatch:result-view-state';
 
 type ContactOutcome = 'declined' | 'submitted' | 'skipped';
-type JourneyPhase = 'initializing' | 'contact' | 'preparing' | 'result';
+type JourneyPhase = 'initializing' | 'preparing' | 'result';
 type ResultViewState = {
   signature: string;
   factSetVersionId: string;
@@ -117,10 +116,8 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   const [ready, setReady] = useState(false);
   const [journey, setJourney] = useState<JourneyPhase>('initializing');
   const [selectedFact, setSelectedFact] = useState<PublicLoadingFact | null>(null);
-  const [contactOutcome, setContactOutcome] = useState<ContactOutcome | null>(null);
   const [loadingDuration, setLoadingDuration] = useState<number | undefined>();
   const [loadingStartedAt, setLoadingStartedAt] = useState<number | undefined>();
-  const [reconsiderContact, setReconsiderContact] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [updateStatus, setUpdateStatus] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
@@ -143,11 +140,9 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       setAnswers(parsed.data);
       setConfiguration(nextConfiguration);
       setSelectedFact(storedView?.fact ?? null);
-      setContactOutcome(storedView?.contactOutcome ?? null);
       setLoadingDuration(storedView?.loadingDurationMs);
       setLoadingStartedAt(storedView?.loadingStartedAt);
       if (storedView?.viewed) setJourney('result');
-      else if (nextConfiguration?.contact.enabled) setJourney('contact');
       else setJourney('preparing');
       setReady(true);
     };
@@ -187,18 +182,6 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   useEffect(() => {
     if (result) persistResultView({ resultSnapshot: result });
   }, [persistResultView, result]);
-
-  const continueAfterContact = useCallback((outcome: ContactOutcome) => {
-    setContactOutcome(outcome);
-    persistResultView({ contactOutcome: outcome });
-    setJourney('preparing');
-  }, [persistResultView]);
-
-  const updateConfiguration = useCallback((nextConfiguration: PublicAssessmentConfig) => {
-    setConfiguration(nextConfiguration);
-    if (journey === 'contact' && !nextConfiguration.contact.enabled) setJourney('preparing');
-    if (journey === 'result' && !nextConfiguration.contact.enabled) setReconsiderContact(false);
-  }, [journey]);
 
   const loadingStarted = useCallback((fact: PublicLoadingFact | null, durationMs: number, startedAt: number) => {
     setSelectedFact(fact);
@@ -268,10 +251,6 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
 
   if (!answers || !result) return <main className="results-page"><section className="site-shell empty-result"><Sun aria-hidden="true" /><h1>{english ? 'Start with your electricity bill' : 'เริ่มจากค่าไฟของคุณ'}</h1><p>{english ? 'Complete the short estimator to see a practical solar starting point.' : 'ตอบคำถามสั้น ๆ เพื่อดูจุดเริ่มต้นโซลาร์ที่เหมาะกับสถานที่ของคุณ'}</p><Link className="button" href={localizedPath('/estimate', locale)}>{english ? 'Start estimate' : 'เริ่มประเมิน'} <ArrowRight /></Link></section></main>;
 
-  if (journey === 'contact' && configuration?.contact.enabled) {
-    return <ScreenTransition transitionKey="journey-contact" direction="forward" pace="result" className="journey-transition-surface"><main className="contact-journey-page"><LeadCapture locale={locale} answers={answers} configuration={configuration} onContinue={continueAfterContact} onConfigurationChanged={updateConfiguration} /></main></ScreenTransition>;
-  }
-
   if (journey === 'preparing' || journey === 'initializing') {
     return <ScreenTransition transitionKey="journey-preparing" direction="forward" pace="result" className="journey-transition-surface"><CalculationLoading
       facts={configuration?.loadingFacts ?? []}
@@ -323,11 +302,6 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
         <article><Sun aria-hidden="true" /><span>{english ? 'First-year production' : 'ผลผลิตปีแรก'}</span><strong>{number(result.planningAnnualProductionKwh)} kWh</strong><small>{english ? 'Long-run solar data; not a clear-sky assumption' : 'ใช้ข้อมูลแดดระยะยาว ไม่ได้สมมติว่าฟ้าใสทุกวัน'}</small></article>
         <article><Gauge aria-hidden="true" /><span>{english ? 'Estimated monthly use' : 'การใช้ไฟต่อเดือนโดยประมาณ'}</span><strong>{number(result.estimatedMonthlyConsumptionKwh)} kWh</strong><small>{english ? 'Reverse-calculated from your bill' : 'คำนวณย้อนกลับจากยอดค่าไฟ'}</small></article>
       </section>
-
-      {configuration?.contact.enabled && (contactOutcome === 'declined' || contactOutcome === 'skipped') && <section className="site-shell result-reconsider-section">
-        {!reconsiderContact ? <div><p>{english ? 'Changed your mind about contact?' : 'หากเปลี่ยนใจและต้องการให้ติดต่อกลับ'}</p><button type="button" className="button button-secondary" onClick={() => setReconsiderContact(true)}>{english ? 'Review the optional contact step' : 'ดูขั้นตอนติดต่อกลับอีกครั้ง'}</button></div>
-          : <LeadCapture locale={locale} answers={answers} configuration={configuration} reconsider onConfigurationChanged={updateConfiguration} onContinue={(outcome) => { setContactOutcome(outcome); persistResultView({ contactOutcome: outcome, viewed: true }); setReconsiderContact(false); }} />}
-      </section>}
 
       <section className="site-shell accuracy-upgrade" aria-labelledby="accuracy-title">
         <details>

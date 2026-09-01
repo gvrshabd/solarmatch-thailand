@@ -21,9 +21,9 @@ const optionSchema = z.object({
 
 export const questionnaireDocumentSchema = z.object({
   id: z.string().min(1).max(100),
-  schemaVersion: z.union([z.literal(4), z.literal(5)]),
+  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6)]),
   questions: z.array(z.object({
-    id: z.enum(['province', 'monthlyBillThb', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'installationTimeframe']),
+    id: z.enum(['province', 'monthlyBillThb', 'activelyPlanningSolar', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'quoteContactRequested', 'installationTimeframe']),
     type: z.enum(['province', 'bill', 'choice', 'multichoice']),
     title: localizedTextSchema,
     help: localizedTextSchema,
@@ -31,7 +31,7 @@ export const questionnaireDocumentSchema = z.object({
     options: z.array(optionSchema).max(30).optional(),
     conditionalFields: z.array(conditionalFieldSchema).max(5).optional(),
     relevance: z.object({ calculation: z.boolean(), qualification: z.boolean(), scoring: z.boolean() }),
-  })).min(9).max(10),
+  })).min(9).max(11),
 }).superRefine((document, context) => {
   const ids = document.questions.map((question) => question.id);
   if (new Set(ids).size !== ids.length) context.addIssue({ code: 'custom', path: ['questions'], message: 'Question IDs must be unique.' });
@@ -39,6 +39,13 @@ export const questionnaireDocumentSchema = z.object({
   requiredIds.forEach((id) => { if (!ids.includes(id as never)) context.addIssue({ code: 'custom', path: ['questions'], message: `Missing required question: ${id}` }); });
   if (document.schemaVersion === 4 && !ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 4 requires installationTimeframe.' });
   if (document.schemaVersion === 5 && ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 5 must not include installationTimeframe.' });
+  if (document.schemaVersion === 6) {
+    if (ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 6 must not include installationTimeframe.' });
+    if (!ids.includes('activelyPlanningSolar')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 6 requires activelyPlanningSolar.' });
+    if (!ids.includes('quoteContactRequested')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 6 requires quoteContactRequested.' });
+    if (ids.indexOf('activelyPlanningSolar') !== ids.indexOf('monthlyBillThb') + 1) context.addIssue({ code: 'custom', path: ['questions'], message: 'Active planning must follow the monthly bill.' });
+    if (ids.at(-1) !== 'quoteContactRequested') context.addIssue({ code: 'custom', path: ['questions'], message: 'The quote decision must be the final assessment question.' });
+  }
   document.questions.forEach((question, questionIndex) => {
     const values = question.options?.map((option) => option.value) ?? [];
     if (new Set(values).size !== values.length) context.addIssue({ code: 'custom', path: ['questions', questionIndex, 'options'], message: 'Option values must be unique.' });
@@ -57,6 +64,7 @@ export const scoringConfigurationSchema = z.object({
   automaticSelectionThreshold: z.number().int().min(1).max(5),
   weights: z.object({
     ownership: z.number().int().min(0).max(100),
+    activePlanning: z.number().int().min(0).max(100).optional(),
     airConditioners: z.number().int().min(0).max(100),
     monthlyBill: z.number().int().min(0).max(100),
     daytimeUse: z.number().int().min(0).max(100),

@@ -18,6 +18,7 @@ export type ScoringConfiguration = {
   automaticSelectionThreshold: number;
   weights: {
     ownership: number;
+    activePlanning?: number;
     airConditioners: number;
     monthlyBill: number;
     daytimeUse: number;
@@ -44,7 +45,7 @@ export type LeadAssessment = {
 };
 
 export const initialScoringConfiguration: ScoringConfiguration = {
-  id: 'residential-rules-v2',
+  id: 'residential-rules-v3',
   maximumPoints: 100,
   ownerRequired: true,
   minimumAirConditioners: 4,
@@ -52,15 +53,16 @@ export const initialScoringConfiguration: ScoringConfiguration = {
   automaticSelectionThreshold: 4,
   weights: {
     ownership: 10,
-    airConditioners: 18,
-    monthlyBill: 17,
-    daytimeUse: 13,
+    activePlanning: 10,
+    airConditioners: 16,
+    monthlyBill: 15,
+    daytimeUse: 12,
     daytimeLoads: 5,
-    roofArea: 11,
-    shade: 11,
-    roofMaterial: 5,
-    propertyType: 5,
-    location: 5,
+    roofArea: 10,
+    shade: 10,
+    roofMaterial: 4,
+    propertyType: 4,
+    location: 4,
   },
   billThresholdsThb: [1500, 3000, 5000, 8000, 12000],
   targetProvinces: ['bangkok', 'nonthaburi', 'pathum-thani', 'samut-prakan', 'samut-sakhon', 'nakhon-pathom'],
@@ -73,8 +75,25 @@ export const initialScoringConfiguration: ScoringConfiguration = {
   ],
 };
 
-export const legacyScoringConfigurationV1: ScoringConfiguration = {
+export const legacyScoringConfigurationV2: ScoringConfiguration = {
   ...initialScoringConfiguration,
+  id: 'residential-rules-v2',
+  weights: {
+    ownership: 10,
+    airConditioners: 18,
+    monthlyBill: 17,
+    daytimeUse: 13,
+    daytimeLoads: 5,
+    roofArea: 11,
+    shade: 11,
+    roofMaterial: 5,
+    propertyType: 5,
+    location: 5,
+  },
+};
+
+export const legacyScoringConfigurationV1: ScoringConfiguration = {
+  ...legacyScoringConfigurationV2,
   id: 'residential-rules-v1',
   weights: {
     ownership: 10,
@@ -104,8 +123,15 @@ export function calculateLeadAssessment(
   configuration: ScoringConfiguration = initialScoringConfiguration,
 ): LeadAssessment {
   const acCount = answers.airConditionerCount ?? 0;
+  const legacyRules = configuration.id !== 'residential-rules-v3';
   const ownershipPoints = weighted(bracket(answers.ownershipStatus, { owner: 10, other: 2, renter: 0 }), 10, configuration.weights.ownership);
-  const acPoints = weighted(acCount >= 9 ? 18 : acCount >= 7 ? 16 : acCount >= 5 ? 13 : acCount >= 4 ? 10 : acCount === 3 ? 6 : acCount >= 1 ? 3 : 0, 18, configuration.weights.airConditioners);
+  const activePlanningMaximum = configuration.weights.activePlanning ?? 0;
+  const activePlanningPoints = answers.activelyPlanningSolar && activePlanningMaximum > 0 ? activePlanningMaximum : 0;
+  const acBaseMaximum = legacyRules ? 18 : 16;
+  const acBasePoints = legacyRules
+    ? (acCount >= 9 ? 18 : acCount >= 7 ? 16 : acCount >= 5 ? 13 : acCount >= 4 ? 10 : acCount === 3 ? 6 : acCount >= 1 ? 3 : 0)
+    : (acCount >= 9 ? 16 : acCount >= 7 ? 14 : acCount >= 5 ? 12 : acCount >= 4 ? 9 : acCount === 3 ? 6 : acCount >= 1 ? 3 : 0);
+  const acPoints = weighted(acBasePoints, acBaseMaximum, configuration.weights.airConditioners);
   const bill = answers.monthlyBillThb;
   const [billLow, billMediumLow, billMedium, billHigh, billVeryHigh] = configuration.billThresholdsThb;
   const billPoints = weighted(bill >= billVeryHigh ? 15 : bill >= billHigh ? 13 : bill >= billMedium ? 10 : bill >= billMediumLow ? 7 : bill >= billLow ? 3 : 0, 15, configuration.weights.monthlyBill);
@@ -117,11 +143,16 @@ export function calculateLeadAssessment(
     + (answers.daytimeLoads.includes('home-office-equipment') ? 1 : 0)
     + (answers.daytimeLoads.includes('laundry-cooking') ? 1 : 0)), 5, configuration.weights.daytimeLoads);
   const roofAreaPoints = weighted(bracket(answers.roofArea, { 'under-30': 1, '30-60': 5, '60-100': 8, '100-200': 10, 'over-200': 10, unsure: 3 }), 10, configuration.weights.roofArea);
-  const shadePoints = weighted(bracket(answers.shade, { 'almost-none': 10, little: 8, some: 5, 'a-lot': 0, unsure: 4 }), 10, configuration.weights.shade);
-  const roofMaterialPoints = weighted(answers.roofMaterial === 'unsure' ? 2 : answers.roofMaterial === 'other' ? 3 : 5, 5, configuration.weights.roofMaterial);
-  const propertyPoints = weighted(bracket(answers.propertyType, { 'detached-home': 5, 'large-home': 5, 'semi-detached-home': 4, townhouse: 3, 'other-residential': 2 }), 5, configuration.weights.propertyType);
+  const shadePoints = weighted(bracket(answers.shade, { 'almost-none': 10, little: 8, some: 5, 'a-lot': 0, unsure: legacyRules ? 4 : 3 }), 10, configuration.weights.shade);
+  const roofMaterialBaseMaximum = legacyRules ? 5 : 4;
+  const roofMaterialPoints = weighted(answers.roofMaterial === 'unsure' ? (legacyRules ? 2 : 1) : answers.roofMaterial === 'other' ? 3 : roofMaterialBaseMaximum, roofMaterialBaseMaximum, configuration.weights.roofMaterial);
+  const propertyBaseMaximum = legacyRules ? 5 : 4;
+  const propertyPoints = weighted(bracket(answers.propertyType, legacyRules
+    ? { 'detached-home': 5, 'large-home': 5, 'semi-detached-home': 4, townhouse: 3, 'other-residential': 2 }
+    : { 'detached-home': 4, 'large-home': 4, 'semi-detached-home': 3, townhouse: 2, 'other-residential': 1 }), propertyBaseMaximum, configuration.weights.propertyType);
   const targetProvinces = new Set(configuration.targetProvinces);
-  const locationPoints = weighted(targetProvinces.has(answers.province) ? 5 : 1, 5, configuration.weights.location);
+  const locationBaseMaximum = legacyRules ? 5 : 4;
+  const locationPoints = weighted(targetProvinces.has(answers.province) ? locationBaseMaximum : 1, locationBaseMaximum, configuration.weights.location);
   const timeframeMaximum = configuration.weights.timeframe ?? 0;
   const timeframePoints = answers.installationTimeframe && timeframeMaximum > 0
     ? weighted(bracket(answers.installationTimeframe, { asap: 5, 'one-three-months': 5, 'three-six-months': 4, 'over-six-months': 2, researching: 1 }), 5, timeframeMaximum)
@@ -129,6 +160,7 @@ export function calculateLeadAssessment(
 
   const factors: ScoringFactor[] = [
     { key: 'ownership', points: ownershipPoints, maximum: configuration.weights.ownership, value: answers.ownershipStatus, explanationEn: `${answers.ownershipStatus} ownership status`, explanationTh: `สถานะต่อทรัพย์สิน: ${answers.ownershipStatus}` },
+    ...(activePlanningMaximum > 0 ? [{ key: 'active-planning', points: activePlanningPoints, maximum: activePlanningMaximum, value: answers.activelyPlanningSolar, explanationEn: answers.activelyPlanningSolar ? 'Actively planning an installation' : 'Not actively planning yet', explanationTh: answers.activelyPlanningSolar ? 'กำลังวางแผนติดตั้ง' : 'ยังไม่ได้วางแผนติดตั้งอย่างจริงจัง' }] : []),
     { key: 'air-conditioners', points: acPoints, maximum: configuration.weights.airConditioners, value: acCount, explanationEn: `${acCount} installed AC units`, explanationTh: `ติดตั้งเครื่องปรับอากาศ ${acCount} เครื่อง` },
     { key: 'monthly-bill', points: billPoints, maximum: configuration.weights.monthlyBill, value: bill, explanationEn: `Typical bill ฿${Math.round(bill).toLocaleString('en-US')}`, explanationTh: `ค่าไฟเดือนปกติประมาณ ${Math.round(bill).toLocaleString('th-TH')} บาท` },
     { key: 'daytime-use', points: daytimePoints, maximum: configuration.weights.daytimeUse, value: answers.daytimePattern, explanationEn: `${answers.daytimePattern} daytime use`, explanationTh: `การใช้ไฟช่วงกลางวัน: ${answers.daytimePattern}` },

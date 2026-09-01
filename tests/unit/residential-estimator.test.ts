@@ -5,6 +5,7 @@ import type { EstimateAnswers } from '@/lib/calculator/types';
 const base: EstimateAnswers = {
   province: 'bangkok',
   monthlyBillThb: 6000,
+  activelyPlanningSolar: true,
   propertyType: 'detached-home',
   ownershipStatus: 'owner',
   roofArea: '60-100',
@@ -14,6 +15,7 @@ const base: EstimateAnswers = {
   roofMaterial: 'concrete-tile',
   shade: 'almost-none',
   installationTimeframe: 'one-three-months',
+  quoteContactRequested: false,
 };
 
 describe('Thailand bill-led planning estimator', () => {

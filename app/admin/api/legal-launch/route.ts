@@ -92,7 +92,7 @@ async function nextVersion(database: D1Database, table: string) {
 }
 
 type DistributionLead = {
-  id: string; created_at: string; legal_first_name: string; legal_last_name: string; phone_e164: string;
+  id: string; created_at: string; legal_first_name: string; legal_last_name: string; phone_e164: string | null;
   preferred_contact_method: string; line_id: string | null; province: string; custom_location: string | null;
   property_type: string; custom_property_type: string | null; ownership_status: string; air_conditioner_count: number;
   monthly_bill_thb: number; daytime_pattern: string; roof_area: string; roof_material: string; custom_roof_material: string | null;
@@ -121,7 +121,7 @@ async function validatedDistribution(database: D1Database, leadId: string, partn
       suppressed, consent_withdrawn_at, contact_configuration_version_id, is_test_submission, distribution_allowed
     FROM leads WHERE id = ? AND status NOT IN ('deleted', 'archived') LIMIT 1`).bind(leadId).first<DistributionLead>();
   if (!lead) throw new Error('lead_not_found');
-  if (lead.is_test_submission || !lead.distribution_allowed) throw new Error('private_preview_distribution_blocked');
+  if (lead.is_test_submission || !lead.distribution_allowed) throw new Error('historical_test_distribution_blocked');
   if (lead.contact_collection_mode !== 'shared_solar_company_handoff' || !lead.third_party_disclosure_authorized) throw new Error('consent_scope_mismatch');
   if (!lead.hard_eligible) throw new Error('lead_not_commercially_eligible');
   if (lead.suppressed || lead.consent_withdrawn_at) throw new Error('lead_suppressed');
@@ -163,7 +163,7 @@ function deliveryCopy(lead: DistributionLead, partner: DistributionPartner) {
     'SOLARMATCH RESIDENTIAL ENQUIRY', `Recipient: ${name}`, `Lead ID: ${lead.id}`, `Submitted: ${lead.created_at}`, '',
   ];
   if (allowed.has('legalFirstName') || allowed.has('legalLastName')) lines.push(`Name: ${allowed.has('legalFirstName') ? lead.legal_first_name : ''} ${allowed.has('legalLastName') ? lead.legal_last_name : ''}`.trim());
-  if (allowed.has('phone')) lines.push(`Thai mobile: ${lead.phone_e164}`);
+  if (allowed.has('phone')) lines.push(`Thai mobile: ${lead.phone_e164 || 'NOT PROVIDED'}`);
   if (allowed.has('preferredContactMethod')) lines.push(`Preferred contact: ${lead.preferred_contact_method.toUpperCase()}`);
   if (allowed.has('lineId')) lines.push(`LINE ID: ${lead.line_id || 'NOT PROVIDED'}`);
   if (allowed.has('assessmentAnswers')) lines.push(

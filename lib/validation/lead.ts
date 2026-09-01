@@ -13,7 +13,7 @@ export function normalizeThaiPhone(value: string) {
 export const leadSchema = z.object({
   legalFirstName: z.string().trim().min(1).max(80),
   legalLastName: z.string().trim().min(1).max(80),
-  phone: z.string().trim().transform((value) => value.replace(/[\s()-]/gu, '')).refine((value) => thaiPhonePattern.test(value), 'invalid_thai_phone'),
+  phone: z.string().trim().transform((value) => value.replace(/[\s()-]/gu, '')).optional(),
   contactMethod: z.enum(['phone', 'line']),
   lineId: z.string().trim().min(2).max(80).optional(),
   adultConfirmed: z.literal(true),
@@ -24,8 +24,20 @@ export const leadSchema = z.object({
   website: z.string().max(0).optional(),
   answers: estimateAnswersSchema,
 }).strict().superRefine((value, context) => {
+  if (!value.answers.quoteContactRequested || !value.answers.quoteConsentAccepted) {
+    context.addIssue({ code: 'custom', path: ['answers', 'quoteContactRequested'], message: 'contact_request_and_consent_required' });
+  }
+  if (value.contactMethod === 'phone' && (!value.phone || !thaiPhonePattern.test(value.phone))) {
+    context.addIssue({ code: 'custom', path: ['phone'], message: 'invalid_thai_phone' });
+  }
   if (value.contactMethod === 'line' && !value.lineId) {
     context.addIssue({ code: 'custom', path: ['lineId'], message: 'line_id_required' });
+  }
+  if (value.contactMethod === 'phone' && value.lineId) {
+    context.addIssue({ code: 'custom', path: ['lineId'], message: 'line_id_not_allowed' });
+  }
+  if (value.contactMethod === 'line' && value.phone) {
+    context.addIssue({ code: 'custom', path: ['phone'], message: 'phone_not_allowed' });
   }
 });
 

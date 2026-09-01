@@ -13,6 +13,7 @@ export const estimateAnswersSchema = z.object({
   province: z.enum(['bangkok', 'nonthaburi', 'pathum-thani', 'samut-prakan', 'samut-sakhon', 'nakhon-pathom', 'other']),
   customLocation: z.string().trim().min(2).max(100).optional(),
   monthlyBillThb: z.number().finite().positive().max(100_000_000),
+  activelyPlanningSolar: z.boolean(),
   propertyType: z.enum(['detached-home', 'semi-detached-home', 'townhouse', 'large-home', 'other-residential']),
   customPropertyType: z.string().trim().min(2).max(100).optional(),
   ownershipStatus: z.enum(['owner', 'renter', 'other']),
@@ -24,6 +25,8 @@ export const estimateAnswersSchema = z.object({
   roofMaterial: z.string().min(1),
   customRoofMaterial: z.string().trim().min(2).max(100).optional(),
   shade: z.enum(['almost-none', 'little', 'some', 'a-lot', 'unsure']),
+  quoteContactRequested: z.boolean(),
+  quoteConsentAccepted: z.boolean().optional(),
   installationTimeframe: z.enum(['asap', 'one-three-months', 'three-six-months', 'over-six-months', 'researching']).optional(),
   location: locationSchema.optional(),
   exactRoofAreaSqm: z.number().positive().max(100000).optional(),
@@ -57,10 +60,16 @@ export const estimateAnswersSchema = z.object({
   if (answers.roofMaterial === 'other' && !answers.customRoofMaterial) {
     context.addIssue({ code: 'custom', path: ['customRoofMaterial'], message: 'Please specify the roof material.' });
   }
+  if (answers.quoteContactRequested && answers.quoteConsentAccepted !== true) {
+    context.addIssue({ code: 'custom', path: ['quoteConsentAccepted'], message: 'Consent is required when contact is requested.' });
+  }
+  if (!answers.quoteContactRequested && answers.quoteConsentAccepted !== undefined) {
+    context.addIssue({ code: 'custom', path: ['quoteConsentAccepted'], message: 'Consent must be empty when contact is declined.' });
+  }
 });
 
 export const estimateDraftSchema = z.object({
-  version: z.union([z.literal(4), z.literal(5)]),
+  version: z.union([z.literal(4), z.literal(5), z.literal(6)]),
   answers: z.record(z.string(), z.unknown()),
   step: z.number().int().nonnegative(),
   questionnaireVersionId: z.string().optional(),
