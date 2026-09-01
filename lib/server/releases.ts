@@ -334,12 +334,13 @@ export async function ensureLockedConsentRelease(database = requireDatabase()) {
   const contactVersion = await database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM contact_configuration_versions').first<{ value: number }>();
   const releaseVersion = await database.prepare('SELECT COALESCE(MAX(release_number), 0) + 1 AS value FROM public_releases').first<{ value: number }>();
 
-  await database.batch([
-    database.prepare(`INSERT INTO content_versions
+  try {
+    await database.batch([
+      database.prepare(`INSERT INTO content_versions
       (id, version_number, state, content_json, created_by, published_by, published_at)
       VALUES (?, ?, 'published', ?, ?, ?, CURRENT_TIMESTAMP)`)
       .bind(contentVersionId, contentVersion?.value ?? 4, JSON.stringify(contactContent), actor, actor),
-    database.prepare(`INSERT INTO contact_configuration_versions
+      database.prepare(`INSERT INTO contact_configuration_versions
       (id, version_number, state, contact_collection_mode, contact_collection_enabled, retention_days,
        receiving_company_en, receiving_company_th, receiving_company_privacy_url,
        permitted_contact_methods_json, shared_fields_json, created_by, published_by, published_at,
@@ -356,8 +357,8 @@ export async function ensureLockedConsentRelease(database = requireDatabase()) {
        readiness_issues_json, restricted_site_collection_enabled, public_collection_enabled
       FROM contact_configuration_versions WHERE id = ?`)
       .bind(contactVersionId, contactVersion?.value ?? 4, actor, actor, source.contact_configuration_version_id),
-    database.prepare('UPDATE public_releases SET is_current = 0 WHERE is_current = 1'),
-    database.prepare(`INSERT INTO public_releases
+      database.prepare('UPDATE public_releases SET is_current = 0 WHERE is_current = 1'),
+      database.prepare(`INSERT INTO public_releases
       (id, release_number, questionnaire_version_id, rule_version_id, content_version_id,
        legal_document_version_id, live_lead_submissions, is_current, contact_configuration_version_id,
        fact_set_version_id, created_by, published_by, published_at)
@@ -365,7 +366,21 @@ export async function ensureLockedConsentRelease(database = requireDatabase()) {
       .bind(releaseId, releaseVersion?.value ?? 4, source.questionnaire_version_id, source.rule_version_id,
         contentVersionId, source.legal_document_version_id, source.live_lead_submissions,
         contactVersionId, source.fact_set_version_id, actor, actor),
-  ]);
+    ]);
+  } catch (error) {
+    // Several public/admin requests can reach a newly deployed release at once.
+    // D1 serializes each batch, so a second initializer may observe "missing"
+    // before the first batch commits and then lose the unique-key race. Treat
+    // that expected race as success only after the complete release is current.
+    const createdByAnotherRequest = await database.prepare(
+      `SELECT id FROM public_releases
+       WHERE id = ? AND is_current = 1 AND content_version_id = ?
+         AND contact_configuration_version_id = ?
+       LIMIT 1`,
+    ).bind(releaseId, contentVersionId, contactVersionId).first<{ id: string }>();
+    if (createdByAnotherRequest) return;
+    throw error;
+  }
 }
 
 export async function getCurrentRelease(database = requireDatabase()) {
