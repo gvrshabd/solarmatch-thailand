@@ -6,8 +6,8 @@ const savedEstimate = {
   roofMaterial: 'concrete-tile', shade: 'almost-none', installationTimeframe: 'one-three-months', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
-const thaiHeaderLinks = [['ประเมินโซลาร์', '/estimate'], ['วิธีการทำงาน', '/how-it-works'], ['คู่มือโซลาร์', '/solar-guide'], ['วิธีคำนวณ', '/methodology'], ['เกี่ยวกับเรา', '/about']] as const;
-const englishHeaderLinks = [['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'], ['Methodology', '/en/methodology'], ['About', '/en/about']] as const;
+const thaiHeaderLinks = [['หน้าหลัก', '/'], ['ประเมินโซลาร์', '/estimate'], ['วิธีการทำงาน', '/how-it-works'], ['คู่มือโซลาร์', '/solar-guide'], ['วิธีคำนวณ', '/methodology'], ['เกี่ยวกับเรา', '/about']] as const;
+const englishHeaderLinks = [['Home', '/en'], ['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'], ['Methodology', '/en/methodology'], ['About', '/en/about']] as const;
 
 function desktopOnly(testInfo: TestInfo) { test.skip(testInfo.project.name !== 'desktop-chromium', 'Desktop-only coverage.'); }
 async function expectPath(page: Page, path: string) { await expect.poll(() => new URL(page.url()).pathname).toBe(path); }
@@ -44,7 +44,7 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await page.getByRole('button', { name: en ? 'See my estimate' : 'ดูผลประเมิน', exact: true }).click();
   await expectPath(page, en ? '/en/estimate/results' : '/estimate/results');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByText(en ? 'Simple cash payback' : 'คืนทุนเงินสดอย่างง่าย')).toBeVisible();
+  await expect(page.getByText(en ? 'Simple cash payback' : 'คืนทุนเงินสดอย่างง่าย')).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('main')).not.toContainText(/Needs more information|ต้องมีข้อมูลเพิ่ม|Evidence confidence|ความมั่นใจจากหลักฐาน/);
 }
 
@@ -118,17 +118,22 @@ test('refresh and language switching preserve estimator progress', async ({ page
   await expect(page.getByRole('radio', { name: 'Detached house', exact: true })).toBeChecked();
 });
 
-test('complete Thai and English journeys produce every metric', async ({ page }) => { await completeEstimate(page, 'th'); await completeEstimate(page, 'en'); });
+test('complete Thai and English journeys produce every metric', async ({ page }) => {
+  test.setTimeout(60_000);
+  await completeEstimate(page, 'th');
+  await completeEstimate(page, 'en');
+});
 
 test('optional precision details visibly recalculate results', async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.goto('/en/estimate/results');
+  await expect(page.getByText('First-year production')).toBeVisible({ timeout: 10_000 });
   const production = page.getByText('First-year production').locator('..').locator('strong');
   const before = await production.textContent();
   await page.locator('.accuracy-upgrade summary').click();
   await page.getByLabel('Main roof direction').selectOption('north');
   await page.getByLabel('Roof slope').selectOption('steep');
-  await expect(page.getByRole('status')).toContainText('Roof slope applied');
+  await expect(page.locator('.calculation-updated[role="status"]')).toContainText('Roof slope applied');
   await expect(production).not.toHaveText(before ?? '');
 });
 
@@ -147,6 +152,36 @@ test('optional map never sends the typed address to a geocoder', async ({ page }
 test('disabled contact release requests no personal information', async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.goto('/en/estimate/results');
-  await expect(page.getByRole('heading', { name: 'Contact requests are temporarily unavailable' })).toBeVisible();
-  await expect(page.getByLabel('Thai phone number')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Preparing your solar estimate' })).toBeVisible();
+  await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByLabel(/Thai mobile number|legal first name/i)).toHaveCount(0);
+  await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(1);
+});
+
+test('loading fact stays paired and is recalled on results', async ({ page }) => {
+  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
+  await page.goto('/en/estimate/results');
+  const loadingFact = page.locator('.calculation-loading-card .solar-fact-card');
+  await expect(loadingFact).toBeVisible();
+  const title = await loadingFact.getByRole('heading', { level: 2 }).textContent();
+  const href = await loadingFact.getByRole('link').getAttribute('href');
+  await expect(page.locator('.result-fact-section .solar-fact-card')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.result-fact-section .solar-fact-card').getByRole('heading', { level: 2 })).toHaveText(title ?? '');
+  await expect(page.locator('.result-fact-section .solar-fact-card').getByRole('link')).toHaveAttribute('href', href ?? '');
+  await page.reload();
+  await expect(page.getByText('Simple cash payback')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Preparing your solar estimate' })).toHaveCount(0);
+});
+
+test('bilingual Resources pages expose all five fact anchors and references', async ({ page }) => {
+  const ids = ['home-value', 'carbon-trees', 'neighbor-effect', 'patio-gardens', 'water-use'];
+  for (const route of ['/resources', '/en/resources']) {
+    await page.goto(route);
+    for (const id of ids) {
+      const card = page.locator(`#${id}`);
+      await expect(card).toBeVisible();
+      await expect(card.getByRole('link')).toHaveAttribute('href', /^https:\/\//u);
+      await expect(card.locator('img')).toHaveAttribute('alt', /.+/u);
+    }
+  }
 });

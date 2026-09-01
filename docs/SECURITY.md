@@ -13,7 +13,7 @@ The public submission route requires:
 - strict Zod validation and normalized Thai phone numbers;
 - a honeypot, signed assessment session, minimum dwell time, and five-attempt-per-minute hashed-IP rate limit;
 - current release/questionnaire/rule IDs;
-- complete legal and recipient configuration plus an explicit live-release flag;
+- complete mode-specific legal/contact configuration plus an explicit live-release flag;
 - server-side qualification and scoring; and
 - an idempotency key, with D1 uniqueness enforcement.
 
@@ -40,14 +40,14 @@ The R2 bucket is private. Administrator uploads accept only JPEG, PNG, or WebP, 
 
 ## Fail-closed release gate
 
-Contact fields and signed assessment tokens remain unavailable until all of the following are true:
+Contact fields and signed assessment tokens remain unavailable while the contact mode is disabled. For either enabled mode, all of the following must be true:
 
 1. the legal document version is marked complete;
 2. the legal operator and privacy contact have been reviewed;
-3. the receiving solar company is named in Thai and English;
-4. the recipient privacy URL is present;
-5. a retention period from 1–3650 days is present;
-6. required Worker secrets are configured; and
-7. the current release explicitly enables lead submissions.
+3. a retention period from 1–3650 days is present;
+4. required Worker secrets are configured; and
+5. the current release explicitly enables lead submissions.
+
+Named-installer handoff additionally requires the receiving solar company in Thai and English and its privacy URL. SolarMatch-only validation follow-up must not name or imply an installer recipient and may be exported only for the `solar_match_validation_followup` operational purpose. Named-installer records may be selected or exported only for the exact consented contact-configuration version and recipient. Admin manual selection cannot override either restriction.
 
 The present release deliberately fails this gate and therefore stores no public contact submissions.

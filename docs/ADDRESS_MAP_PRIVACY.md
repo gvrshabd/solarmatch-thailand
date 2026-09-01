@@ -13,7 +13,7 @@ In the current release:
 - the user chooses to open the map, then positions and confirms a marker manually;
 - simple province names in Thai or English are matched locally to choose an initial map centre;
 - the browser asks for device location only after the user presses “Use my current location”; and
-- no contact details are stored in browser session storage. When lead collection is eventually activated, only a deliberate, consented contact-form submission is stored server-side; optional exact address and coordinates remain excluded.
+- no contact details are stored in browser session storage. If an approved contact mode is activated, only a deliberate, consented contact-form submission is stored server-side; optional exact address and coordinates remain excluded.
 
 ## Map provider and data flow
 

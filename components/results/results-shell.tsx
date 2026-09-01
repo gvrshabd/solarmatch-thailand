@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   BadgeCheck,
@@ -18,12 +18,17 @@ import {
 } from 'lucide-react';
 import Link from '@/components/site/internal-link';
 import { LeadCapture } from '@/components/lead/lead-capture';
+import { assessmentContextStorageKey } from '@/components/estimate/estimate-shell';
+import { CalculationLoading } from './calculation-loading';
 import { LifetimeCostChart } from './lifetime-cost-chart';
 import { SavingsChart } from './savings-chart';
+import { SolarFactCard } from './solar-fact-card';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { mapProvinces, makeInitialLocation, provinceCenter } from '@/lib/maps/provider';
 import { calculateEstimate } from '@/lib/calculator';
-import type { EstimateAnswers, EstimateLocation, FutureLoad } from '@/lib/calculator/types';
+import type { EstimateAnswers, EstimateLocation, EstimateResult, FutureLoad } from '@/lib/calculator/types';
+import type { PublicLoadingFact } from '@/lib/loading-facts/types';
+import type { PublicAssessmentConfig } from '@/lib/questionnaire/types';
 import { estimateAnswersSchema } from '@/lib/validation/estimate';
 import { track } from '@/lib/analytics/track';
 
@@ -33,6 +38,20 @@ const AddressMap = dynamic(() => import('@/components/estimate/address-map'), {
 });
 
 const storageKey = 'solarmatch:estimate';
+const resultViewStorageKey = 'solarmatch:result-view-state';
+
+type ContactOutcome = 'declined' | 'submitted' | 'skipped';
+type JourneyPhase = 'initializing' | 'contact' | 'preparing' | 'result';
+type ResultViewState = {
+  signature: string;
+  factSetVersionId: string;
+  fact: PublicLoadingFact | null;
+  contactOutcome: ContactOutcome | null;
+  viewed: boolean;
+  loadingDurationMs?: number;
+  loadingStartedAt?: number;
+  resultSnapshot?: EstimateResult;
+};
 
 function money(value: number, locale: Locale) {
   return `฿${Math.abs(value).toLocaleString(locale === 'en' ? 'en-US' : 'th-TH', { maximumFractionDigits: 0 })}`;
@@ -50,28 +69,136 @@ function readAnswers() {
   }
 }
 
+function answerSignature(answers: EstimateAnswers) {
+  const source = JSON.stringify(answers);
+  let hash = 2166136261;
+  for (let index = 0; index < source.length; index += 1) {
+    hash ^= source.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function readAssessmentContext() {
+  try {
+    const value = JSON.parse(sessionStorage.getItem(assessmentContextStorageKey) ?? 'null') as PublicAssessmentConfig | null;
+    return value?.questionnaire && value?.contact ? value : null;
+  } catch { return null; }
+}
+
+function readResultViewState(signature: string) {
+  try {
+    const value = JSON.parse(sessionStorage.getItem(resultViewStorageKey) ?? 'null') as ResultViewState | null;
+    return value?.signature === signature ? value : null;
+  } catch { return null; }
+}
+
 export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   const english = locale === 'en';
   const [answers, setAnswers] = useState<EstimateAnswers | null>(null);
+  const [configuration, setConfiguration] = useState<PublicAssessmentConfig | null>(null);
   const [ready, setReady] = useState(false);
+  const [journey, setJourney] = useState<JourneyPhase>('initializing');
+  const [selectedFact, setSelectedFact] = useState<PublicLoadingFact | null>(null);
+  const [contactOutcome, setContactOutcome] = useState<ContactOutcome | null>(null);
+  const [loadingDuration, setLoadingDuration] = useState<number | undefined>();
+  const [loadingStartedAt, setLoadingStartedAt] = useState<number | undefined>();
+  const [reconsiderContact, setReconsiderContact] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [updateStatus, setUpdateStatus] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
 
+  const resultHeadingRef = useRef<HTMLHeadingElement>(null);
+  const resultsViewedTrackedRef = useRef(false);
+
   useEffect(() => {
+    let active = true;
     const parsed = readAnswers();
-    queueMicrotask(() => {
-      if (parsed.success) setAnswers(parsed.data);
+    if (!parsed.success) {
+      queueMicrotask(() => { if (active) setReady(true); });
+      return () => { active = false; };
+    }
+    const signature = answerSignature(parsed.data);
+    const storedView = readResultViewState(signature);
+    const storedConfiguration = readAssessmentContext();
+    const finish = (nextConfiguration: PublicAssessmentConfig | null) => {
+      if (!active) return;
+      setAnswers(parsed.data);
+      setConfiguration(nextConfiguration);
+      setSelectedFact(storedView?.fact ?? null);
+      setContactOutcome(storedView?.contactOutcome ?? null);
+      setLoadingDuration(storedView?.loadingDurationMs);
+      setLoadingStartedAt(storedView?.loadingStartedAt);
+      if (storedView?.viewed) setJourney('result');
+      else if (nextConfiguration?.contact.enabled) setJourney('contact');
+      else setJourney('preparing');
       setReady(true);
-    });
+    };
+    if (storedConfiguration) {
+      queueMicrotask(() => finish(storedConfiguration));
+    } else {
+      fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
+        .then(async (response) => response.ok ? response.json() as Promise<PublicAssessmentConfig> : null)
+        .then(finish)
+        .catch(() => finish(null));
+    }
+    return () => { active = false; };
   }, []);
 
   const result = useMemo(() => answers ? calculateEstimate(answers) : null, [answers]);
 
   useEffect(() => {
-    if (!result) return;
+    if (!result || journey !== 'result' || resultsViewedTrackedRef.current) return;
+    resultsViewedTrackedRef.current = true;
     track('estimate_result_viewed', { recommendation: result.recommendation, systemKw: result.planningSystemKw });
-  }, [result]);
+    track('results_viewed', { language: locale, recommendation: result.recommendation });
+    const frame = requestAnimationFrame(() => resultHeadingRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [journey, locale, result, selectedFact?.id]);
+
+  const persistResultView = useCallback((patch: Partial<ResultViewState>) => {
+    if (!answers) return;
+    const signature = answerSignature(answers);
+    const current = readResultViewState(signature);
+    const next: ResultViewState = {
+      signature,
+      factSetVersionId: configuration?.loadingFactSetVersionId ?? current?.factSetVersionId ?? 'unavailable',
+      fact: current?.fact ?? null,
+      contactOutcome: current?.contactOutcome ?? null,
+      viewed: current?.viewed ?? false,
+      ...patch,
+    };
+    try { sessionStorage.setItem(resultViewStorageKey, JSON.stringify(next)); } catch { /* Journey still works without storage. */ }
+  }, [answers, configuration?.loadingFactSetVersionId]);
+
+  useEffect(() => {
+    if (result) persistResultView({ resultSnapshot: result });
+  }, [persistResultView, result]);
+
+  const continueAfterContact = useCallback((outcome: ContactOutcome) => {
+    setContactOutcome(outcome);
+    persistResultView({ contactOutcome: outcome });
+    setJourney('preparing');
+  }, [persistResultView]);
+
+  const updateConfiguration = useCallback((nextConfiguration: PublicAssessmentConfig) => {
+    setConfiguration(nextConfiguration);
+    if (journey === 'contact' && !nextConfiguration.contact.enabled) setJourney('preparing');
+    if (journey === 'result' && !nextConfiguration.contact.enabled) setReconsiderContact(false);
+  }, [journey]);
+
+  const loadingStarted = useCallback((fact: PublicLoadingFact | null, durationMs: number, startedAt: number) => {
+    setSelectedFact(fact);
+    setLoadingDuration(durationMs);
+    setLoadingStartedAt(startedAt);
+    persistResultView({ fact, loadingDurationMs: durationMs, loadingStartedAt: startedAt, viewed: false });
+  }, [persistResultView]);
+
+  const loadingCompleted = useCallback((fact: PublicLoadingFact | null) => {
+    setSelectedFact(fact);
+    persistResultView({ fact, viewed: true });
+    setJourney('result');
+  }, [persistResultView]);
 
   function update<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K] | undefined, status: string) {
     setAnswers((current) => {
@@ -128,6 +255,22 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
 
   if (!answers || !result) return <main className="results-page"><section className="site-shell empty-result"><Sun aria-hidden="true" /><h1>{english ? 'Start with your electricity bill' : 'เริ่มจากค่าไฟของคุณ'}</h1><p>{english ? 'Complete the short estimator to see a practical solar starting point.' : 'ตอบคำถามสั้น ๆ เพื่อดูจุดเริ่มต้นโซลาร์ที่เหมาะกับสถานที่ของคุณ'}</p><Link className="button" href={localizedPath('/estimate', locale)}>{english ? 'Start estimate' : 'เริ่มประเมิน'} <ArrowRight /></Link></section></main>;
 
+  if (journey === 'contact' && configuration?.contact.enabled) {
+    return <main className="contact-journey-page"><LeadCapture locale={locale} answers={answers} configuration={configuration} onContinue={continueAfterContact} onConfigurationChanged={updateConfiguration} /></main>;
+  }
+
+  if (journey === 'preparing' || journey === 'initializing') {
+    return <CalculationLoading
+      facts={configuration?.loadingFacts ?? []}
+      locale={locale}
+      initialFact={selectedFact}
+      initialDurationMs={loadingDuration}
+      initialStartedAt={loadingStartedAt}
+      onStarted={loadingStarted}
+      onComplete={loadingCompleted}
+    />;
+  }
+
   const afterSolarBill = Math.max(0, result.currentMonthlyBillThb - result.planningMonthlySavingsThb);
   const recommendation = {
     'strong-fit': english ? ['Solar looks worth exploring for your home', 'Your bill and daytime use support arranging a properly surveyed residential system.'] : ['โซลาร์น่าจะเหมาะกับบ้านของคุณ', 'ค่าไฟและการใช้ไฟช่วงกลางวันสนับสนุนให้ประเมินหน้างานเพื่อออกแบบระบบที่เหมาะสม'],
@@ -137,11 +280,12 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
 
   return (
     <main className="results-page">
+      <p className="sr-only" role="status" aria-live="polite">{english ? 'Your solar estimate is ready.' : 'ผลประเมินโซลาร์ของคุณพร้อมแล้ว'}</p>
       <section className="result-hero-v3">
         <div className="site-shell result-hero-grid">
           <div className="result-recommendation">
             <p className="eyebrow">{english ? 'Your SolarMatch estimate' : 'ผลประเมินจาก SolarMatch'}</p>
-            <h1>{recommendation[0]}</h1>
+            <h1 ref={resultHeadingRef} tabIndex={-1}>{recommendation[0]}</h1>
             <p>{recommendation[1]}</p>
             <div className="result-saving-headline">
               <span>{result.planningTwentyFiveYearNetBenefitThb > 0 ? (english ? 'Potential 25-year net savings' : 'เงินประหยัดสุทธิที่เป็นไปได้ใน 25 ปี') : (english ? 'Estimated monthly bill reduction' : 'ค่าไฟที่คาดว่าจะลดได้ต่อเดือน')}</span>
@@ -163,9 +307,12 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
         <article><Gauge aria-hidden="true" /><span>{english ? 'Estimated monthly use' : 'การใช้ไฟต่อเดือนโดยประมาณ'}</span><strong>{number(result.estimatedMonthlyConsumptionKwh)} kWh</strong><small>{english ? 'Reverse-calculated from your bill' : 'คำนวณย้อนกลับจากยอดค่าไฟ'}</small></article>
       </section>
 
-      <section className="site-shell result-lead-section">
-        <LeadCapture locale={locale} answers={answers} />
-      </section>
+      {selectedFact && <section className="site-shell result-fact-section"><SolarFactCard fact={selectedFact} locale={locale} recall /></section>}
+
+      {configuration?.contact.enabled && (contactOutcome === 'declined' || contactOutcome === 'skipped') && <section className="site-shell result-reconsider-section">
+        {!reconsiderContact ? <div><p>{english ? 'Changed your mind about contact?' : 'หากเปลี่ยนใจและต้องการให้ติดต่อกลับ'}</p><button type="button" className="button button-secondary" onClick={() => setReconsiderContact(true)}>{english ? 'Review the optional contact step' : 'ดูขั้นตอนติดต่อกลับอีกครั้ง'}</button></div>
+          : <LeadCapture locale={locale} answers={answers} configuration={configuration} reconsider onConfigurationChanged={updateConfiguration} onContinue={(outcome) => { setContactOutcome(outcome); persistResultView({ contactOutcome: outcome, viewed: true }); setReconsiderContact(false); }} />}
+      </section>}
 
       <section className="site-shell accuracy-upgrade" aria-labelledby="accuracy-title">
         <details>

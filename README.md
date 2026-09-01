@@ -1,24 +1,19 @@
 # SolarMatch Thailand
 
-Thai-first public prototype for helping residential homeowners understand rooftop-solar needs before speaking with an installer. The English routes mirror the Thai experience at `/en`.
+Thai-first residential solar assessment and consent-aware lead-validation system. English routes mirror the public experience under `/en`; the private administration area is under `/admin/`.
 
-## Status
+## Current production posture
 
-This repository is intentionally in **prototype mode**:
+- The assessment and calculator are functional. Results are preliminary planning estimates—not an engineering design, quotation, or savings guarantee.
+- After the ten-question assessment is calculated, the public journey can optionally ask about contact, prepare the result for 3–5 seconds with one cited solar fact, and then show the full result. Declining or abandoning contact never blocks the result.
+- Contact collection has three versioned modes: `disabled`, `validation_interest`, and `named_installer_handoff`.
+- Production remains `disabled`. The current release issues no assessment-submission token and renders no PII fields because legal operator, privacy-contact, and retention requirements are incomplete.
+- D1 is authoritative for published questionnaire, scoring, contact, and fact-set versions; releases; consented submissions; audit history; and export state.
+- The private R2 bucket stores only approved administrator media. Structured leads never use R2.
+- `/admin*` is protected by Cloudflare Access and an application-level exact email allowlist. State-changing actions also require same-origin CSRF validation.
+- Analytics, advertising, automated buyer routing, payments, OTP, live LINE automation, and commercial solar remain disabled.
 
-- The estimator is functional and keeps a draft in the visitor's browser. Every result remains labelled as an estimate rather than an engineering design, quotation, or savings guarantee.
-- The base calculation values solar electricity used within the home first. It uses a versioned progressive residential tariff, observed installation-cost ranges, degradation and maintenance assumptions, and an explicitly conservative long-term view.
-- Conditional surplus purchases (฿2.20/kWh, 5 kW AC export limit, 10 years, subject to quota and utility approval) are explained but excluded from the base result.
-- Royal Decree No. 805 is documented as a personal-income-tax exemption/deduction based on actual qualifying spend, capped at ฿200,000 through 2028. It is not a ฿200,000 refund and is excluded from the estimate.
-- Contact values are validated and discarded entirely in the visitor's browser. The disabled `/api/leads` route rejects submissions without reading a request body.
-- Analytics, LINE, OTP, databases, payments, ads, buyer routing and installer matching are disabled.
-- Pages remain `noindex, follow` while validation is underway. The user-directed `Claude-User` agent may fetch public pages, while Anthropic training/search crawlers and the wildcard crawler group remain disallowed.
-
-Policy, tariff, and market references were last checked on **2026-08-28**. The active August 2026 model references the May 2023 residential tariff and current Ft; the announced September 2026 tariff is documented separately so it is not applied before its effective date. See the bilingual Methodology and Resources pages for direct source links.
-
-## Visual assets
-
-The homepage uses a real residential-solar photograph by Kindel Media under the Pexels licence, stored locally as responsive WebP files. It is presented as illustrative—not as a SolarMatch customer, a Thai installation, or proof of an engineering outcome. See [`docs/ASSET_PROVENANCE.md`](./docs/ASSET_PROVENANCE.md) for the complete visual-asset inventory, source links, transformations, licences, attribution requirements, and limitations.
+The calculator values electricity used within the home first. Conditional surplus purchase and tax information remain outside the base estimate. See the bilingual Methodology and Resources pages and `docs/CALCULATOR_METHOD.md`.
 
 ## Local development
 
@@ -26,35 +21,33 @@ Requirements: Node 22.13+ and pnpm.
 
 ```bash
 pnpm install
+pnpm db:migrate:local
 pnpm dev
 ```
 
 Open `http://localhost:3000`.
 
-## Checks
+## Verification
 
 ```bash
-pnpm typecheck
 pnpm lint
+pnpm typecheck
 pnpm test
 pnpm build
-```
-
-With the local server running:
-
-```bash
 pnpm test:e2e
 ```
 
-## Deployment
+The E2E suite expects the local server at `http://localhost:3000` unless `PLAYWRIGHT_BASE_URL` is set.
 
-The project is configured for one isolated Cloudflare Worker named `solarmatch-thailand`. Cloudflare should use:
+## Production resources
 
-- Production branch: `main`
-- Build command: `pnpm build`
-- Deploy command: `npx wrangler deploy`
-- Worker configuration: `wrangler.jsonc`
+- Repository: `gvrshabd/solarmatch-thailand`
+- Branch: `main`
+- Worker: `solarmatch-thailand`
+- D1: `solarmatch-thailand-admin`, binding `DB`
+- Private R2: `solarmatch-thailand-storage`, binding `MEDIA`
+- Access: existing application protecting `/admin*` only
 
-It creates no D1 database, R2 bucket, route, secret or account-wide setting. It must never reuse or modify Milly's Worker, repository, bindings or deployment configuration.
+Migrations are versioned under `migrations/`. Never create duplicate D1, R2, Access, or Worker resources. This project must never modify Milly’s repository, Worker, bindings, storage, or Access settings.
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the fixed/deferred boundary.
+See [ARCHITECTURE.md](./ARCHITECTURE.md), [docs/SECURITY.md](./docs/SECURITY.md), [docs/OPERATIONS.md](./docs/OPERATIONS.md), and [docs/ASSET_PROVENANCE.md](./docs/ASSET_PROVENANCE.md).

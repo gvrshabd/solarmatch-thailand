@@ -9,9 +9,9 @@ import { requireDatabase } from '@/lib/server/runtime';
 export const dynamic = 'force-dynamic';
 
 const actionSchema = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('set-selection'), leadId: z.string().uuid(), selection: z.enum(['selected', 'deselected', 'automatic']) }),
+  z.object({ action: z.literal('set-selection'), leadId: z.string().uuid(), selection: z.enum(['selected', 'deselected', 'automatic']), exportScope: z.enum(['solar_match_validation_followup', 'named_installer_handoff']), recipientKey: z.string().max(100).default('') }),
   z.object({ action: z.enum(['archive', 'restore', 'soft-delete']), leadIds: z.array(z.string().uuid()).min(1).max(200) }),
-  z.object({ action: z.literal('mark-exported'), leadIds: z.array(z.string().uuid()).min(1).max(200) }),
+  z.object({ action: z.literal('mark-exported'), leadIds: z.array(z.string().uuid()).min(1).max(200), exportScope: z.enum(['solar_match_validation_followup', 'named_installer_handoff']), recipientKey: z.string().max(100).default('') }),
   z.object({ action: z.literal('purge'), leadIds: z.array(z.string().uuid()).min(1).max(50), confirmation: z.literal('PERMANENTLY DELETE') }),
 ]);
 
@@ -39,7 +39,20 @@ type LeadRow = {
   selection_override: string | null;
   exported_at: string | null;
   archived_at: string | null;
+  contact_collection_mode: 'validation_interest' | 'named_installer_handoff';
+  contact_configuration_version_id: string;
+  consent_scope: 'solar_match_validation_followup' | 'named_installer_site_assessment';
+  solar_match_followup_authorized: number;
+  third_party_disclosure_authorized: number;
+  recipient_snapshot_json: string | null;
 };
+
+type ExportScope = 'solar_match_validation_followup' | 'named_installer_handoff';
+
+function compatibleWithScope(lead: LeadRow, exportScope: ExportScope, recipientKey: string) {
+  if (exportScope === 'solar_match_validation_followup') return lead.contact_collection_mode === 'validation_interest' && Boolean(lead.solar_match_followup_authorized) && !lead.third_party_disclosure_authorized;
+  return lead.contact_collection_mode === 'named_installer_handoff' && Boolean(lead.third_party_disclosure_authorized) && Boolean(recipientKey) && lead.contact_configuration_version_id === recipientKey;
+}
 
 export async function GET(request: Request) {
   const identity = await requireAdminRequest(request);
@@ -47,6 +60,8 @@ export async function GET(request: Request) {
   const database = requireDatabase();
   await ensureInitialRelease(database);
   const url = new URL(request.url);
+  const exportScope: ExportScope = url.searchParams.get('exportScope') === 'named_installer_handoff' ? 'named_installer_handoff' : 'solar_match_validation_followup';
+  const recipientKey = url.searchParams.get('recipientKey')?.slice(0, 100) ?? '';
   const clauses: string[] = [];
   const values: unknown[] = [];
   const score = Number(url.searchParams.get('score'));
@@ -79,18 +94,31 @@ export async function GET(request: Request) {
   const result = await database.prepare(`SELECT id, created_at, legal_first_name, legal_last_name, phone_display, phone_e164,
       preferred_contact_method, line_id, province, custom_location, ownership_status, air_conditioner_count,
       monthly_bill_thb, daytime_pattern, quality_score, raw_score, hard_eligible, high_quality,
-      scoring_explanation_json, status, selection_override, exported_at, archived_at
+      scoring_explanation_json, status, selection_override, exported_at, archived_at, contact_collection_mode,
+      contact_configuration_version_id, consent_scope, solar_match_followup_authorized, third_party_disclosure_authorized,
+      recipient_snapshot_json
     FROM leads WHERE ${clauses.length ? clauses.join(' AND ') : '1 = 1'} ORDER BY ${order} LIMIT 200`).bind(...values).all<LeadRow>();
   const release = await getCurrentRelease(database);
   const threshold = release ? parseScoringConfiguration(release).automaticSelectionThreshold : 4;
+  const selectionRows = result.results.length ? await database.prepare(`SELECT lead_id, selection_state FROM lead_export_selections
+    WHERE export_scope = ? AND recipient_key = ? AND lead_id IN (${result.results.map(() => '?').join(',')})`)
+    .bind(exportScope, recipientKey, ...result.results.map((lead) => lead.id)).all<{ lead_id: string; selection_state: 'selected'|'deselected' }>() : { results: [] as Array<{ lead_id: string; selection_state: 'selected'|'deselected' }> };
+  const selections = new Map(selectionRows.results.map((row) => [row.lead_id, row.selection_state]));
   return NextResponse.json({
-    leads: result.results.map((lead) => ({
+    leads: result.results.map((lead) => {
+      const compatible = compatibleWithScope(lead, exportScope, recipientKey);
+      const selection = selections.get(lead.id) ?? lead.selection_override;
+      const automatic = compatible && Boolean(lead.hard_eligible) && lead.quality_score >= threshold;
+      return ({
       ...lead,
       explanation: JSON.parse(lead.scoring_explanation_json),
-      selected: lead.selection_override === 'selected' || (lead.selection_override !== 'deselected' && Boolean(lead.hard_eligible) && lead.quality_score >= threshold),
-      selectionReason: lead.selection_override === 'selected' ? 'Manually selected' : lead.selection_override === 'deselected' ? 'Manually deselected' : Boolean(lead.hard_eligible) && lead.quality_score >= threshold ? `Automatic: sellable and ${threshold}/5 or above` : 'Not automatically selected',
-    })),
+      selected: compatible && (selection === 'selected' || (selection !== 'deselected' && automatic)),
+      selectionCompatible: compatible,
+      selectionReason: !compatible ? (exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export') : selection === 'selected' ? 'Manually selected for this consent scope' : selection === 'deselected' ? 'Manually deselected for this consent scope' : automatic ? `Automatic: consent-compatible, sellable and ${threshold}/5 or above` : 'Not automatically selected',
+    }); }),
     automaticSelectionThreshold: threshold,
+    exportScope,
+    recipientKey,
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -107,10 +135,18 @@ export async function POST(request: Request) {
   const requestId = crypto.randomUUID();
 
   if (parsedBody.action === 'set-selection') {
-    const value = parsedBody.selection === 'automatic' ? null : parsedBody.selection;
+    const lead = await database.prepare(`SELECT id, contact_collection_mode, contact_configuration_version_id, consent_scope,
+      solar_match_followup_authorized, third_party_disclosure_authorized FROM leads WHERE id = ? LIMIT 1`).bind(parsedBody.leadId).first<LeadRow>();
+    if (!lead) return NextResponse.json({ error: 'lead_not_found' }, { status: 404 });
+    if (!compatibleWithScope(lead, parsedBody.exportScope, parsedBody.recipientKey)) return NextResponse.json({ error: 'consent_scope_mismatch' }, { status: 409 });
+    const selectionStatement = parsedBody.selection === 'automatic'
+      ? database.prepare('DELETE FROM lead_export_selections WHERE lead_id = ? AND export_scope = ? AND recipient_key = ?').bind(parsedBody.leadId, parsedBody.exportScope, parsedBody.recipientKey)
+      : database.prepare(`INSERT INTO lead_export_selections (lead_id, export_scope, recipient_key, selection_state, updated_by, updated_at)
+          VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(lead_id, export_scope, recipient_key) DO UPDATE SET selection_state = excluded.selection_state, updated_by = excluded.updated_by, updated_at = CURRENT_TIMESTAMP`)
+        .bind(parsedBody.leadId, parsedBody.exportScope, parsedBody.recipientKey, parsedBody.selection, identity.email);
     await database.batch([
-      database.prepare('UPDATE leads SET selection_override = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(value, parsedBody.leadId),
-      auditStatement(database, { actorEmail: identity.email, action: 'lead.selection.changed', entityType: 'lead', entityId: parsedBody.leadId, next: { selection: parsedBody.selection }, requestId }),
+      selectionStatement,
+      auditStatement(database, { actorEmail: identity.email, action: 'lead.selection.changed', entityType: 'lead', entityId: parsedBody.leadId, next: { selection: parsedBody.selection, exportScope: parsedBody.exportScope, recipientKey: parsedBody.recipientKey }, requestId }),
     ]);
     return NextResponse.json({ ok: true });
   }
@@ -135,16 +171,24 @@ export async function POST(request: Request) {
 
   const placeholders = parsedBody.leadIds.map(() => '?').join(',');
   if (parsedBody.action === 'mark-exported') {
-    const rows = await database.prepare(`SELECT id, legal_first_name, legal_last_name, phone_display, preferred_contact_method, line_id, province, custom_location, quality_score, ownership_status, air_conditioner_count FROM leads WHERE id IN (${placeholders}) AND status <> 'deleted'`).bind(...parsedBody.leadIds).all();
+    const rows = await database.prepare(`SELECT id, legal_first_name, legal_last_name, phone_display, preferred_contact_method, line_id, province, custom_location, quality_score, ownership_status, air_conditioner_count,
+      contact_collection_mode, contact_configuration_version_id, consent_scope, solar_match_followup_authorized,
+      third_party_disclosure_authorized, recipient_snapshot_json FROM leads WHERE id IN (${placeholders}) AND status <> 'deleted'`).bind(...parsedBody.leadIds).all<LeadRow>();
+    const incompatible = rows.results.filter((lead) => !compatibleWithScope(lead, parsedBody.exportScope, parsedBody.recipientKey));
+    if (incompatible.length || rows.results.length !== parsedBody.leadIds.length) return NextResponse.json({ error: 'consent_scope_mismatch', incompatibleLeadIds: incompatible.map((lead) => lead.id) }, { status: 409 });
     const batchId = crypto.randomUUID();
-    const statements: D1PreparedStatement[] = [database.prepare('INSERT INTO export_batches (id, created_by, lead_count, format_version) VALUES (?, ?, ?, ?)').bind(batchId, identity.email, rows.results.length, 'clipboard-v1')];
+    const recipientSnapshot = parsedBody.exportScope === 'named_installer_handoff' ? rows.results[0]?.recipient_snapshot_json ?? null : null;
+    const statements: D1PreparedStatement[] = [database.prepare(`INSERT INTO export_batches
+      (id, created_by, lead_count, format_version, export_scope, contact_collection_mode, recipient_snapshot_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`)
+      .bind(batchId, identity.email, rows.results.length, 'clipboard-v2', parsedBody.exportScope, parsedBody.exportScope === 'named_installer_handoff' ? 'named_installer_handoff' : 'validation_interest', recipientSnapshot)];
     rows.results.forEach((row) => statements.push(database.prepare('INSERT INTO export_batch_items (export_batch_id, lead_id, snapshot_json) VALUES (?, ?, ?)').bind(batchId, String(row.id), JSON.stringify(row))));
     rows.results.forEach((row) => statements.push(database.prepare(`INSERT INTO lead_status_events
       (id, lead_id, previous_status, new_status, reason, actor_email)
       SELECT ?, id, status, 'exported', 'clipboard-export-confirmed', ? FROM leads WHERE id = ?`)
       .bind(crypto.randomUUID(), identity.email, String(row.id))));
     statements.push(database.prepare(`UPDATE leads SET status = 'exported', exported_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id IN (${placeholders})`).bind(...parsedBody.leadIds));
-    statements.push(auditStatement(database, { actorEmail: identity.email, action: 'leads.marked-exported', entityType: 'export-batch', entityId: batchId, next: { leadIds: parsedBody.leadIds }, requestId }));
+    statements.push(auditStatement(database, { actorEmail: identity.email, action: 'leads.marked-exported', entityType: 'export-batch', entityId: batchId, next: { leadIds: parsedBody.leadIds, exportScope: parsedBody.exportScope, recipientKey: parsedBody.recipientKey }, requestId }));
     await database.batch(statements);
     return NextResponse.json({ ok: true, exportBatchId: batchId });
   }

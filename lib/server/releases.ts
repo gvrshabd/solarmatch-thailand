@@ -1,6 +1,10 @@
 import { initialQuestionnaire } from '@/config/assessment';
+import { contactContent } from '@/config/contact-content';
+import { initialLoadingFactSet } from '@/config/loading-facts';
+import type { LoadingFactReference, PublicLoadingFact } from '@/lib/loading-facts/types';
 import { initialScoringConfiguration, type ScoringConfiguration } from '@/lib/qualification/scoring';
 import type { PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questionnaire/types';
+import { publicContactConfiguration, type ContactConfigurationRow } from './contact-mode';
 import { createAssessmentToken } from './assessment-token';
 import { requireDatabase } from './runtime';
 
@@ -10,43 +14,38 @@ const rulesId = initialScoringConfiguration.id;
 const contentId = 'residential-content-v1';
 const legalId = 'legal-placeholder-v1';
 const releaseId = 'residential-release-v1';
+const contactConfigurationId = 'contact-configuration-v1';
+const factSetId = initialLoadingFactSet.id;
 
-export const initialPublicContent = {
-  contactQuestion: {
-    en: 'Would you like a solar company to contact you to arrange a site assessment?',
-    th: 'ต้องการให้บริษัทโซลาร์ติดต่อเพื่อนัดประเมินหรือสำรวจหน้างานไหม?',
-  },
-  contactHelp: {
-    en: 'If you choose yes, we will show exactly which company may receive your details before you submit them.',
-    th: 'หากเลือกว่าต้องการติดต่อ เราจะแจ้งชื่อบริษัทที่จะได้รับข้อมูลของคุณอย่างชัดเจนก่อนส่งแบบฟอร์ม',
-  },
-  contactYes: { en: 'Yes, I would like to be contacted', th: 'ต้องการให้ติดต่อ' },
-  contactNo: { en: 'Not right now', th: 'ยังไม่ต้องการตอนนี้' },
-  declineTitle: { en: 'Your results remain available', th: 'คุณยังดูผลประเมินต่อได้' },
-  declineBody: {
-    en: 'You do not need to provide personal information. You can review the guide or change your mind later.',
-    th: 'คุณไม่จำเป็นต้องให้ข้อมูลส่วนบุคคล สามารถอ่านคู่มือเพิ่มเติมหรือกลับมาเลือกให้ติดต่อภายหลังได้',
-  },
-  submitLabel: { en: 'Request a site assessment', th: 'ขอให้ติดต่อเพื่อนัดประเมินหน้างาน' },
-  successTitle: { en: 'Your request has been received', th: 'ได้รับคำขอของคุณแล้ว' },
-  successBody: {
-    en: 'The named solar company may contact you using your selected method. Your assessment results remain available on this device.',
-    th: 'บริษัทโซลาร์ที่ระบุอาจติดต่อคุณผ่านช่องทางที่เลือก โดยผลประเมินยังคงแสดงอยู่บนอุปกรณ์นี้',
-  },
-};
+export const initialPublicContent = contactContent;
 
-type ReleaseRow = {
+export type ReleaseRow = ContactConfigurationRow & {
   release_id: string;
   questionnaire_version_id: string;
   rule_version_id: string;
   questionnaire_json: string;
   rules_json: string;
   live_lead_submissions: number;
-  receiving_company_en: string | null;
-  receiving_company_th: string | null;
-  receiving_company_privacy_url: string | null;
-  retention_days: number | null;
-  legal_complete: number;
+  fact_set_version_id: string | null;
+};
+
+type FactRow = {
+  stable_fact_id: string;
+  title_en: string;
+  title_th: string;
+  fact_copy_en: string;
+  fact_copy_th: string;
+  alt_en: string;
+  alt_th: string;
+  sketch_source_type: 'built-in' | 'r2-media';
+  built_in_sketch_id: string | null;
+  media_asset_id: string | null;
+  short_citation: string;
+  reference_json: string;
+  resources_anchor: string;
+  enabled: number;
+  weight: number;
+  source_reviewed_on: string;
 };
 
 export async function ensureInitialRelease(database = requireDatabase()) {
@@ -72,9 +71,9 @@ export async function ensureInitialRelease(database = requireDatabase()) {
       .bind(legalId, JSON.stringify({ operator: null, privacyContact: null, privacy: null, terms: null }), seedActor, seedActor),
     database.prepare(`INSERT INTO public_releases
       (id, release_number, questionnaire_version_id, rule_version_id, content_version_id, legal_document_version_id,
-       live_lead_submissions, is_current, created_by, published_by, published_at)
-      VALUES (?, 1, ?, ?, ?, ?, 0, 1, ?, ?, CURRENT_TIMESTAMP)`)
-      .bind(releaseId, questionnaireId, rulesId, contentId, legalId, seedActor, seedActor),
+       live_lead_submissions, is_current, contact_configuration_version_id, fact_set_version_id, created_by, published_by, published_at)
+      VALUES (?, 1, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(releaseId, questionnaireId, rulesId, contentId, legalId, contactConfigurationId, factSetId, seedActor, seedActor),
   ];
 
   initialQuestionnaire.questions.forEach((question, questionIndex) => {
@@ -119,27 +118,67 @@ export async function getCurrentRelease(database = requireDatabase()) {
   return database.prepare(`SELECT
       r.id AS release_id, r.questionnaire_version_id, r.rule_version_id,
       q.document_json AS questionnaire_json, rv.configuration_json AS rules_json,
-      r.live_lead_submissions, r.receiving_company_en, r.receiving_company_th,
-      r.receiving_company_privacy_url, r.retention_days, l.is_complete AS legal_complete
+      r.live_lead_submissions, r.contact_configuration_version_id, r.fact_set_version_id,
+      r.content_version_id, r.legal_document_version_id, c.content_json,
+      cc.contact_collection_mode, cc.contact_collection_enabled, cc.retention_days,
+      cc.receiving_company_en, cc.receiving_company_th, cc.receiving_company_privacy_url,
+      cc.permitted_contact_methods_json, cc.shared_fields_json,
+      l.is_complete AS legal_complete
     FROM public_releases r
     JOIN questionnaire_versions q ON q.id = r.questionnaire_version_id
     JOIN rule_versions rv ON rv.id = r.rule_version_id
+    JOIN content_versions c ON c.id = r.content_version_id
     JOIN legal_document_versions l ON l.id = r.legal_document_version_id
-    WHERE r.is_current = 1 AND q.state = 'published' AND rv.state = 'published' AND l.state = 'published'
+    LEFT JOIN contact_configuration_versions cc ON cc.id = r.contact_configuration_version_id
+    WHERE r.is_current = 1 AND q.state = 'published' AND rv.state = 'published' AND c.state = 'published' AND l.state = 'published'
     LIMIT 1`).first<ReleaseRow>();
+}
+
+export async function getPublishedLoadingFacts(factSetVersionId: string, database = requireDatabase()): Promise<PublicLoadingFact[]> {
+  const version = await database.prepare("SELECT id FROM loading_fact_set_versions WHERE id = ? AND state = 'published' LIMIT 1").bind(factSetVersionId).first();
+  if (!version) return [];
+  const rows = await database.prepare(`SELECT stable_fact_id, title_en, title_th, fact_copy_en, fact_copy_th,
+      alt_en, alt_th, sketch_source_type, built_in_sketch_id, media_asset_id, short_citation,
+      reference_json, resources_anchor, enabled, weight, source_reviewed_on
+    FROM loading_facts WHERE fact_set_version_id = ? AND enabled = 1 ORDER BY display_order, stable_fact_id`)
+    .bind(factSetVersionId).all<FactRow>();
+  return rows.results.map((row) => {
+    const reference = JSON.parse(row.reference_json) as LoadingFactReference;
+    const sketchId = row.built_in_sketch_id;
+    return {
+      id: row.stable_fact_id,
+      title: { en: row.title_en, th: row.title_th },
+      copy: { en: row.fact_copy_en, th: row.fact_copy_th },
+      alt: { en: row.alt_en, th: row.alt_th },
+      sketchSource: row.sketch_source_type === 'r2-media' ? 'media' : 'built-in',
+      sketchId,
+      mediaId: row.media_asset_id,
+      imageUrl: row.sketch_source_type === 'built-in' && sketchId ? `/images/loading-facts/${sketchId}.svg` : `/media/${row.media_asset_id}`,
+      resourcesAnchor: row.resources_anchor,
+      reference: { ...reference, citation: row.short_citation },
+      enabled: Boolean(row.enabled),
+      weight: row.weight,
+      reviewedOn: row.source_reviewed_on,
+    };
+  });
 }
 
 export async function getPublicAssessmentConfig(): Promise<PublicAssessmentConfig> {
   const release = await getCurrentRelease();
   if (!release) throw new Error('No published SolarMatch release is available.');
-  const liveLeadSubmissions = Boolean(release.live_lead_submissions && release.legal_complete && release.receiving_company_en && release.receiving_company_th && release.receiving_company_privacy_url && release.retention_days);
-  const token = liveLeadSubmissions
+  const configuredContact = publicContactConfiguration(release);
+  const shouldIssueToken = configuredContact.enabled && Boolean(release.live_lead_submissions);
+  const token = shouldIssueToken
     ? await createAssessmentToken({
       releaseId: release.release_id,
       questionnaireVersionId: release.questionnaire_version_id,
       ruleVersionId: release.rule_version_id,
     })
     : null;
+  const liveLeadSubmissions = Boolean(shouldIssueToken && token);
+  const contact = liveLeadSubmissions ? configuredContact : { ...configuredContact, enabled: false };
+  const loadingFactSetVersionId = release.fact_set_version_id ?? factSetId;
+  const loadingFacts = await getPublishedLoadingFacts(loadingFactSetVersionId);
   return {
     releaseId: release.release_id,
     questionnaireVersionId: release.questionnaire_version_id,
@@ -148,9 +187,10 @@ export async function getPublicAssessmentConfig(): Promise<PublicAssessmentConfi
     assessmentToken: token?.token ?? null,
     assessmentTokenExpiresAt: token?.expiresAt ?? null,
     liveLeadSubmissions,
-    receivingCompany: release.receiving_company_en && release.receiving_company_th
-      ? { en: release.receiving_company_en, th: release.receiving_company_th }
-      : null,
+    receivingCompany: contact.recipient?.name ?? null,
+    contact,
+    loadingFactSetVersionId,
+    loadingFacts,
   };
 }
 

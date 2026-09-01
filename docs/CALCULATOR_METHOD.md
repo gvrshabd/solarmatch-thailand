@@ -112,3 +112,5 @@ The public “Save up to” value is the rounded-down conservative net value its
 Exact address/map, exact roof area, direction, slope, phase, future loads, and a comparable cash quotation are optional. Each applicable input immediately recalculates the same result and updates a visible status message. Address and coordinates remain in browser session storage and are not submitted.
 
 Material constants live in `config/solar-assumptions.ts` and `config/electricity-tariffs.ts`. Calculation code lives in `lib/calculator/residential-estimator.ts`. Lead qualification is separate and lives in `lib/qualification/scoring.ts`. Material changes require a source review, model-version update, and regression test.
+
+The 3–5 second result-preparation state and its published loading fact are presentation-only. Fact selection, contact-mode choice, and the presence or absence of a contact submission never alter calculation inputs or outputs.

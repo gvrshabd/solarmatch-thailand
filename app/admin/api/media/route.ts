@@ -69,6 +69,12 @@ export async function PATCH(request: Request) {
   const database = requireDatabase();
   const row = await database.prepare('SELECT object_key, publication_state FROM media_assets WHERE id = ? AND deleted_at IS NULL').bind(body.id).first<{ object_key: string; publication_state: string }>();
   if (!row) return NextResponse.json({ error: 'not_found' }, { status: 404 });
+  if (body.action === 'delete' || body.action === 'archive') {
+    const publishedReference = await database.prepare(`SELECT f.stable_fact_id FROM loading_facts f
+      JOIN loading_fact_set_versions v ON v.id = f.fact_set_version_id
+      WHERE f.media_asset_id = ? AND f.enabled = 1 AND v.state = 'published' LIMIT 1`).bind(body.id).first<{ stable_fact_id: string }>();
+    if (publishedReference) return NextResponse.json({ error: 'media_referenced_by_published_fact', factId: publishedReference.stable_fact_id }, { status: 409 });
+  }
   if (body.action === 'delete') {
     await getRuntimeEnv().MEDIA?.delete(row.object_key);
     await database.batch([

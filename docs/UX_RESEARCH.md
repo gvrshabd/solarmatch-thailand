@@ -6,7 +6,7 @@ Last reviewed: **2026-09-01**
 
 ### A lead-generation journey with a useful result first
 
-SolarMatch is positioned as a lead-generation and qualification business, not as a calculator company. The estimate earns trust and helps a visitor become an informed, better-qualified enquiry. Results appear before the optional contact decision. Contact collection remains fail-closed until a named recipient, accountable operator details, privacy channel, retention period, and reviewed legal version are published.
+SolarMatch is positioned as a lead-generation and qualification business, not as a calculator company. The estimate earns trust and helps a visitor become an informed, better-qualified enquiry. The calculation completes before the optional contact decision and the full result is guaranteed whether the visitor shares details, declines, skips, or encounters an error. Contact collection remains fail-closed under its mode-specific legal, privacy, consent, retention, and recipient requirements.
 
 ### One meaningful question at a time
 
@@ -61,4 +61,4 @@ The implementation applies relevant [WCAG 2.2 guidance](https://www.w3.org/WAI/s
 - Interview installers about price inclusions, phase constraints, roof material, structural work, service areas, and the qualification signals that make a lead valuable.
 - Run moderated Thai mobile sessions on the bill slider, answer wording, result comprehension, and the transition into the matching request.
 - Validate on physical iOS and Android devices; current automated coverage uses credible emulation where real devices are unavailable.
-- Do not activate lead collection until the named legal/recipient values are reviewed and published. Installer routing, address lookup, analytics, and advertising remain separate future decisions.
+- Do not activate lead collection until the chosen contact mode and its legal/privacy requirements are reviewed and published. Installer routing, address lookup, analytics, and advertising remain separate future decisions.

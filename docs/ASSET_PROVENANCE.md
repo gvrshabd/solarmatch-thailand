@@ -31,6 +31,18 @@ The homepage photograph is **â€œSolar Panel on Roof of House in California, USAâ
 | `components/home/home-page.tsx` sample bars | Example bill-comparison graphic | Original HTML/CSS data illustration | Local code | None required | Explicitly an interface example, not a household result |
 | Contact-page QR placeholder | Reserved LINE integration area | Original code-native placeholder; it is not a functioning or copied QR code | Local code | None required | No live LINE account is connected |
 
+### Result-preparation fact sketches
+
+The five monochrome sketches below are original project artwork created manually as code-native SVG during the 2026-09-01 implementation. No third-party visual reference, stock illustration, or copied artwork was used. They are stored and served locally, are decorative beside separate accessible text, and require no attribution. The cited academic sources support the subject matter of the accompanying fact; they did not provide these illustrations and do not endorse SolarMatch.
+
+| Path | Purpose | SHA-256 |
+| --- | --- | --- |
+| `public/images/loading-facts/home-value.svg` | House-value fact sketch | `0FC1965FFC93E1ED686372909105CE4B7F840CFAA9D2E37BEE84B4CEFD296D17` |
+| `public/images/loading-facts/carbon-trees.svg` | Lifecycle-carbon fact sketch | `6530F4B2BE0C41A8333EA381E1AE06BB3EDF065136F202C49268481A5EC90C6B` |
+| `public/images/loading-facts/neighbor-effect.svg` | Neighbour-adoption fact sketch | `AC70F566375798EEFCB10B3E3C40A55915F9D70A21D2F0D9E68C1FB65EE524F7` |
+| `public/images/loading-facts/patio-gardens.svg` | Rooftop/patio-garden wellbeing fact sketch | `3919A0F1A4ABFB944415476859B818D569038DC461E81FF08D6414B1DCB196A7` |
+| `public/images/loading-facts/water-use.svg` | Electricity-related water-use fact sketch | `A92B2FA89F4F2979113297E5708657EC5CB2155B3B9A7126FE900AD1E72822FF` |
+
 ## Open-source icons, charts, and fonts
 
 | Package or family | Use | Licence and source | Served | Attribution |

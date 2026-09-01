@@ -9,12 +9,13 @@ Last reviewed: **2026-09-01**
 - One residential assessment contract in `config/assessment.ts`; the published D1 questionnaire may change bilingual wording and ordering without changing answer semantics.
 - Ten required residential answers: province, bill, property type, ownership, roof area, daytime use, daytime appliances and AC count, roof material, shade, and installation timeframe.
 - The homepage and estimator share the same browser-session province and bill state, so those questions are not repeated on forward entry.
-- Results are calculated locally and shown before any contact decision. Optional roof direction, slope, phase, map position, and other precision inputs refine an already complete estimate.
-- Contact collection is fail-closed. `/api/assessment/config` returns no signed submission token and the UI renders no PII fields unless the current release has complete legal records, a named recipient, its privacy URL, a retention period, valid server secrets, and `live_lead_submissions = 1`.
+- Results are calculated locally before any contact decision. The visitor then either proceeds directly to a short result-preparation state or, only when a published contact mode is active, may optionally provide contact details before seeing the same full result. Contact is never required to unlock the result. Optional roof direction, slope, phase, map position, and other precision inputs refine an already complete estimate.
+- Contact collection has three fail-closed modes: disabled, SolarMatch-only validation follow-up, and named-installer handoff. `/api/assessment/config` returns no signed submission token and the UI renders no PII fields unless the selected mode passes its mode-specific legal, retention, secret, and release checks.
+- Result preparation lasts a randomized 3–5 seconds and shows one published bilingual solar fact with its matching original sketch and source citation. A viewed-result marker skips the delay on refresh; the fact is recalled below the result and is retained across Thai/English switching.
 
 ## Versioned configuration
 
-D1 is authoritative for published questionnaire documents, qualification/scoring rules, content releases, legal-version records, lead records, status and score histories, export state, media metadata, and audit events.
+D1 is authoritative for published questionnaire documents, qualification/scoring rules, contact configurations, loading-fact sets, content releases, legal-version records, lead records, consent-scoped export state, media metadata, and audit events.
 
 Public visitors receive only the current published release. Admin edits create a new draft; publishing creates a new immutable release and archives the superseded configuration version. Restoring an older version creates a new draft rather than rewriting history. Every stored contact submission retains the exact questionnaire, rules, release, score explanation, consent text, and recipient snapshot used at submission time.
 
@@ -27,7 +28,7 @@ Question IDs, input types, required status, conditional triggers, and option val
 - The server calculates hard eligibility and the deterministic 1–5 quality score from the current published rule version.
 - Every valid, consented contact request is stored, including renters, out-of-area requests, and non-sellable submissions.
 - Current hard eligibility is owner status **and** at least four installed AC units; the two requirements are centrally configurable and versioned.
-- Automatic operational selection requires hard eligibility plus the configured quality threshold. Manual selection is stored separately and never changes the quality score.
+- Automatic operational selection requires hard eligibility, the configured quality threshold, and compatibility with the selected consent scope. Manual selection is stored separately, never changes the quality score, and can never broaden a visitor's consent.
 - Permanent purge removes the lead and every PII-bearing export snapshot, while keeping only a non-PII tombstone and audit record.
 
 ## Administration and security
@@ -51,7 +52,7 @@ No code or configuration in this project targets Milly's.
 
 ## Intentionally deferred
 
-- Live contact activation until the legal operator, privacy contact, receiving solar company, recipient privacy URL, and retention period are supplied and reviewed.
+- Live contact activation. SolarMatch-only validation follow-up requires reviewed SolarMatch legal/privacy details and retention; named-installer handoff additionally requires the exact receiving company and its privacy URL.
 - Commercial solar, commercial property questions, and mixed residential/commercial scoring.
 - Custom domain and paid advertising.
 - Installer accounts, marketplace or bidding, buyer routing, automated LINE/email distribution, lead payments, customer accounts, checkout, subscriptions, CRM, OTP, and analytics/advertising integrations.

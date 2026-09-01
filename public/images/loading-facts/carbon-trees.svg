@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">Young trees solar sketch</title>
+  <desc id="desc">Two cheerful young tree saplings growing together.</desc>
+  <g fill="none" stroke="#174d3a" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <path d="M102 189v-74m0 23c-31-4-44-20-42-48 28-1 44 15 42 48Zm1-12c31-3 47-21 47-51-30 0-47 18-47 51ZM218 189v-61m0 18c-27-3-40-17-39-42 25-1 40 13 39 42Zm1-10c27-3 42-18 42-44-26 0-42 16-42 44Z" fill="#e5f1eb"/>
+    <path d="M74 190h172M83 158c13 7 26 7 39 0m76 3c12 7 24 7 36 0"/>
+    <circle cx="91" cy="150" r="2" fill="#174d3a" stroke="none"/><circle cx="113" cy="150" r="2" fill="#174d3a" stroke="none"/>
+    <circle cx="209" cy="153" r="2" fill="#174d3a" stroke="none"/><circle cx="228" cy="153" r="2" fill="#174d3a" stroke="none"/>
+  </g>
+</svg>

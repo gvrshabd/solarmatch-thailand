@@ -3168,3 +3168,146 @@ select { padding: 0 38px 0 13px; }
     transition: none !important;
   }
 }
+
+/* Optional-contact journey and result preparation */
+.contact-journey-page,
+.calculation-loading-page {
+  min-height: calc(100vh - 88px);
+  display: grid;
+  align-items: center;
+  padding-block: clamp(28px, 7vw, 78px);
+  background: linear-gradient(145deg, #f4f8f5 0%, #fff 58%, #f8f2e6 100%);
+}
+
+.contact-journey-card,
+.calculation-loading-card {
+  width: min(100% - 32px, 780px);
+  display: grid;
+  gap: 18px;
+  padding: clamp(24px, 5vw, 54px);
+  border: 1px solid #cad9d0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 25px 70px rgba(16, 48, 33, .1);
+}
+
+.contact-journey-card h1,
+.calculation-loading-card > h1 {
+  margin: 0;
+  color: var(--dark);
+  font-size: clamp(29px, 5vw, 48px);
+  line-height: 1.15;
+  letter-spacing: -.035em;
+}
+
+.contact-journey-card > p,
+.calculation-loading-card > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.lead-decision-actions .button,
+.contact-step-actions .button {
+  min-height: 48px;
+}
+
+.contact-optional-note { font-size: 12px; }
+.recipient-disclosure { padding: 13px 15px; border-left: 3px solid var(--gold); background: #fff9ec; }
+.contact-progress { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 12px; font-weight: 800; }
+.contact-single-field { display: grid; gap: 10px; }
+.contact-single-field > span { color: var(--muted); font-size: 13px; }
+.contact-single-field input { width: 100%; min-height: 54px; padding: 0 15px; border: 1px solid #b9c9bf; border-radius: 8px; font: inherit; font-size: 16px; }
+.contact-single-field input:focus { border-color: var(--forest); outline: 3px solid rgba(30, 100, 67, .14); }
+.contact-choice-field { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; padding: 0; border: 0; }
+.contact-choice-field legend { grid-column: 1 / -1; width: 100%; margin-bottom: 8px; color: var(--dark); font-size: clamp(27px, 4.5vw, 43px); font-weight: 800; line-height: 1.15; }
+.contact-choice-field label { min-height: 66px; display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #bdcbc2; border-radius: 9px; cursor: pointer; }
+.contact-choice-field label:has(input:checked) { border-color: var(--forest); background: var(--pale-green); box-shadow: inset 0 0 0 1px var(--forest); }
+.contact-choice-field input,
+.consent-check input { width: 22px; height: 22px; accent-color: var(--forest); }
+.contact-consent-review { display: grid; gap: 16px; }
+.contact-consent-review h1 { margin: 0; }
+.consent-check { display: grid; grid-template-columns: 24px 1fr; gap: 11px; align-items: start; padding: 16px; border: 1px solid #c8d5cd; border-radius: 9px; background: #f8fbf9; line-height: 1.65; }
+.contact-step-actions { display: flex; justify-content: space-between; gap: 10px; }
+.contact-skip { width: fit-content; min-height: 44px; padding: 8px 0; border: 0; background: transparent; cursor: pointer; }
+
+.calculation-loading-card { justify-items: center; text-align: center; }
+.calculation-pulse { width: 64px; height: 64px; display: grid; place-items: center; border: 1px solid #a9c1b3; border-radius: 50%; background: #edf6f0; }
+.calculation-pulse::before,
+.calculation-pulse span { content: ''; grid-area: 1 / 1; width: 22px; height: 22px; border-radius: 50%; background: var(--forest); }
+.calculation-pulse::before { animation: calculation-pulse 1.5s ease-out infinite; }
+@keyframes calculation-pulse { from { opacity: .42; transform: scale(.75); } to { opacity: 0; transform: scale(2.45); } }
+.solar-fact-card { width: 100%; padding: clamp(18px, 3.5vw, 28px); border: 1px solid #d2ddd6; border-radius: 12px; background: #fbfdfb; text-align: left; }
+.solar-fact-layout { display: grid; grid-template-columns: minmax(150px, .65fr) minmax(0, 1.35fr); gap: clamp(18px, 4vw, 36px); align-items: center; }
+.solar-fact-layout img { width: 100%; height: auto; max-height: 190px; object-fit: contain; }
+.solar-fact-layout h2 { margin: 0 0 10px; color: var(--dark); font-size: clamp(22px, 3vw, 31px); }
+.solar-fact-layout p { margin: 0 0 10px; color: var(--muted); line-height: 1.65; }
+.solar-fact-source { font-size: 12px; font-weight: 750; }
+.calculation-generic { min-height: 160px; display: flex; align-items: center; gap: 8px; }
+.calculation-generic span { width: 10px; height: 10px; border-radius: 50%; background: var(--forest); animation: calculation-dot 1.2s ease-in-out infinite; }
+.calculation-generic span:nth-child(2) { animation-delay: .15s; }
+.calculation-generic span:nth-child(3) { animation-delay: .3s; }
+@keyframes calculation-dot { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-7px); } }
+
+.result-fact-section { margin-block: clamp(42px, 7vw, 82px); }
+.solar-fact-recall { background: #f8fbf9; }
+.solar-fact-recall > .eyebrow { margin: 0 0 18px; }
+.result-reconsider-section { margin-bottom: 50px; }
+.result-reconsider-section > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border: 1px solid #d1ddd5; border-radius: 10px; background: #f8fbf9; }
+.result-reconsider-section p { margin: 0; color: var(--muted); }
+
+.solar-fact-resources { padding-block: 20px 100px; }
+.solar-fact-resources .section-heading { margin-bottom: 34px; }
+.solar-fact-resources .section-heading > p:last-child { color: var(--muted); line-height: 1.7; }
+.solar-fact-resource-list { display: grid; gap: 18px; }
+.solar-fact-resource-card { scroll-margin-top: 110px; display: grid; grid-template-columns: minmax(160px, .35fr) minmax(0, 1.65fr); gap: clamp(20px, 4vw, 44px); align-items: start; padding: clamp(20px, 4vw, 34px); border: 1px solid var(--border); border-radius: 12px; background: white; }
+.solar-fact-resource-card:target { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(30, 100, 67, .12); }
+.solar-fact-resource-card img { width: 100%; height: auto; }
+.solar-fact-resource-card h3 { margin: 0 0 10px; color: var(--dark); font-size: 24px; }
+.solar-fact-resource-card p { overflow-wrap: anywhere; color: var(--muted); line-height: 1.65; }
+.solar-fact-resource-card .fact-context { padding: 13px 15px; border-left: 3px solid var(--gold); background: #fffaf0; color: #564b37; }
+.solar-fact-resource-card .text-link { display: inline-flex; gap: 6px; align-items: center; }
+
+@media (max-width: 640px) {
+  .contact-journey-page,
+  .calculation-loading-page { min-height: calc(100vh - 72px); align-items: start; padding-block: 18px 36px; }
+  .contact-journey-card,
+  .calculation-loading-card { width: min(100% - 20px, 780px); padding: 21px; border-radius: 12px; }
+  .lead-decision-actions,
+  .contact-step-actions { display: grid; grid-template-columns: 1fr; }
+  .contact-step-actions .button { width: 100%; }
+  .contact-choice-field,
+  .solar-fact-layout,
+  .solar-fact-resource-card { grid-template-columns: 1fr; }
+  .solar-fact-layout img,
+  .solar-fact-resource-card img { max-width: 230px; margin-inline: auto; }
+  .result-reconsider-section > div { align-items: stretch; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calculation-pulse::before,
+  .calculation-generic span { animation: none !important; }
+}
+
+.admin-export-scope {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 15px;
+  border: 1px solid #d7e0da;
+  border-radius: 9px;
+  background: #f8fbf9;
+}
+.admin-export-scope label,
+.admin-contact-grid label { display: grid; gap: 6px; color: #42564a; font-size: 12px; font-weight: 800; }
+.admin-export-scope select,
+.admin-contact-grid select,
+.admin-editor-fields select { min-width: 0; min-height: 44px; padding: 8px 11px; border: 1px solid #bdcbc2; border-radius: 7px; background: white; color: #17261e; font: inherit; font-size: 14px; }
+.admin-contact-recipient { padding: 18px; border: 1px solid #d7e0da; border-radius: 10px; background: white; }
+.admin-field-wide { grid-column: 1 / -1; }
+
+@media (max-width: 720px) {
+  .admin-export-scope { grid-template-columns: 1fr; }
+  .admin-field-wide { grid-column: auto; }
+}

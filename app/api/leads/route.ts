@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateLeadAssessment } from '@/lib/qualification/scoring';
+import { consentSnapshot, publicContactConfiguration } from '@/lib/server/contact-mode';
 import { verifyAssessmentToken } from '@/lib/server/assessment-token';
 import { sha256 } from '@/lib/server/crypto';
 import { getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
@@ -51,7 +52,8 @@ export async function POST(request: NextRequest) {
   if (!await enforceRateLimit(request, database)) return jsonError('rate_limited', 429);
   const release = await getCurrentRelease(database);
   if (!release || !release.live_lead_submissions || !release.legal_complete) return jsonError('submissions_unavailable', 503);
-  if (!release.receiving_company_en || !release.receiving_company_th || !release.receiving_company_privacy_url || !release.retention_days) return jsonError('submissions_unavailable', 503);
+  const contact = publicContactConfiguration(release);
+  if (!contact.enabled || contact.mode === 'disabled') return jsonError('submissions_unavailable', 503);
   if (token.releaseId !== release.release_id || token.questionnaireVersionId !== release.questionnaire_version_id || token.ruleVersionId !== release.rule_version_id) return jsonError('assessment_version_expired', 409);
 
   const assessment = calculateLeadAssessment(parsed.data.answers, parseScoringConfiguration(release));
@@ -62,35 +64,45 @@ export async function POST(request: NextRequest) {
   const leadId = crypto.randomUUID();
   const consentedAt = new Date().toISOString();
   const requestFingerprint = await sha256(`${phoneE164}:${token.nonce}:${release.release_id}`);
-  const consentTextEn = `I consent to SolarMatch Thailand storing my request and sharing it with ${release.receiving_company_en} so that the company may contact me about a residential solar site assessment. I have read the Privacy Notice and understand that SolarMatch is not the installer and may be paid by the receiving company.`;
-  const consentTextTh = `ข้าพเจ้ายินยอมให้ SolarMatch Thailand จัดเก็บคำขอนี้และส่งต่อให้ ${release.receiving_company_th} เพื่อให้บริษัทดังกล่าวติดต่อเกี่ยวกับการประเมินหน้างานโซลาร์สำหรับที่พักอาศัย ข้าพเจ้าได้อ่านประกาศความเป็นส่วนตัวแล้ว และเข้าใจว่า SolarMatch ไม่ใช่ผู้ติดตั้งและอาจได้รับค่าตอบแทนจากบริษัทผู้รับข้อมูล`;
+  const consent = consentSnapshot(contact);
   const answers = parsed.data.answers;
   const explanation = JSON.stringify({ factors: assessment.factors, eligibilityReasons: assessment.eligibilityReasons });
+  const recipientSnapshot = consent.recipient ? JSON.stringify({
+    ...consent.recipient,
+    sharedFields: contact.sharedFields,
+    permittedContactMethods: contact.permittedContactMethods,
+  }) : null;
+  const leadColumns = [
+    'id', 'idempotency_key', 'request_fingerprint', 'legal_first_name', 'legal_last_name', 'phone_e164', 'phone_display',
+    'preferred_contact_method', 'line_id', 'province', 'custom_location', 'ownership_status', 'property_type', 'custom_property_type',
+    'daytime_loads_json', 'custom_daytime_load', 'air_conditioner_count', 'monthly_bill_thb', 'roof_material', 'custom_roof_material',
+    'roof_shade', 'roof_area', 'daytime_pattern', 'installation_timeframe', 'answers_json', 'questionnaire_version_id',
+    'rule_version_id', 'release_id', 'raw_score', 'quality_score', 'hard_eligible', 'high_quality', 'scoring_explanation_json',
+    'consent_version', 'consent_text_en', 'consent_text_th', 'consented_at', 'receiving_company_en', 'receiving_company_th',
+    'source_locale', 'user_agent_summary', 'contact_collection_mode', 'contact_configuration_version_id', 'content_version_id',
+    'privacy_version', 'consent_scope', 'solar_match_followup_authorized', 'third_party_disclosure_authorized',
+    'recipient_privacy_url', 'recipient_snapshot_json', 'retention_days_snapshot',
+  ];
+  const leadValues = [
+    leadId, parsed.data.idempotencyKey, requestFingerprint, parsed.data.legalFirstName, parsed.data.legalLastName,
+    phoneE164, parsed.data.phone, parsed.data.contactMethod, parsed.data.lineId ?? null, answers.province,
+    answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
+    JSON.stringify(answers.daytimeLoads), answers.customDaytimeLoad ?? null, answers.airConditionerCount ?? 0,
+    Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
+    answers.roofArea, answers.daytimePattern, answers.installationTimeframe, JSON.stringify(answers),
+    release.questionnaire_version_id, release.rule_version_id, release.release_id, assessment.rawPoints,
+    assessment.qualityScore, assessment.hardEligible ? 1 : 0, assessment.highQuality ? 1 : 0, explanation,
+    `privacy:${release.legal_document_version_id}`, consent.consentText.en, consent.consentText.th, consentedAt,
+    consent.recipient?.name.en ?? null, consent.recipient?.name.th ?? null, parsed.data.locale,
+    request.headers.get('user-agent')?.slice(0, 160) ?? null, consent.contactMode,
+    contact.contactConfigurationVersionId, contact.contentVersionId, contact.privacyVersion, consent.consentScope,
+    consent.solarMatchFollowupAuthorized ? 1 : 0, consent.thirdPartyDisclosureAuthorized ? 1 : 0,
+    consent.recipient?.privacyUrl ?? null, recipientSnapshot, contact.retentionDays,
+  ];
 
   try {
     await database.batch([
-      database.prepare(`INSERT INTO leads (
-        id, idempotency_key, request_fingerprint, legal_first_name, legal_last_name, phone_e164, phone_display,
-        preferred_contact_method, line_id, province, custom_location, ownership_status, property_type, custom_property_type,
-        daytime_loads_json, custom_daytime_load, air_conditioner_count, monthly_bill_thb, roof_material, custom_roof_material,
-        roof_shade, roof_area, daytime_pattern, installation_timeframe, answers_json, questionnaire_version_id,
-        rule_version_id, release_id, raw_score, quality_score, hard_eligible, high_quality, scoring_explanation_json,
-        consent_version, consent_text_en, consent_text_th, consented_at, receiving_company_en, receiving_company_th,
-        source_locale, user_agent_summary)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-        .bind(
-          leadId, parsed.data.idempotencyKey, requestFingerprint, parsed.data.legalFirstName, parsed.data.legalLastName,
-          phoneE164, parsed.data.phone, parsed.data.contactMethod, parsed.data.lineId ?? null, answers.province,
-          answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
-          JSON.stringify(answers.daytimeLoads), answers.customDaytimeLoad ?? null, answers.airConditionerCount ?? 0,
-          Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
-          answers.roofArea, answers.daytimePattern, answers.installationTimeframe, JSON.stringify(answers),
-          release.questionnaire_version_id, release.rule_version_id, release.release_id, assessment.rawPoints,
-          assessment.qualityScore, assessment.hardEligible ? 1 : 0, assessment.highQuality ? 1 : 0, explanation,
-          `privacy:${release.release_id}`, consentTextEn, consentTextTh, consentedAt,
-          release.receiving_company_en, release.receiving_company_th, parsed.data.locale,
-          request.headers.get('user-agent')?.slice(0, 160) ?? null,
-        ),
+      database.prepare(`INSERT INTO leads (${leadColumns.join(', ')}) VALUES (${leadColumns.map(() => '?').join(', ')})`).bind(...leadValues),
       database.prepare(`INSERT INTO lead_score_history
         (id, lead_id, rule_version_id, raw_score, quality_score, hard_eligible, explanation_json, reason, is_original, created_by)
         VALUES (?, ?, ?, ?, ?, ?, ?, 'original-submission', 1, 'system:lead-submission')`)

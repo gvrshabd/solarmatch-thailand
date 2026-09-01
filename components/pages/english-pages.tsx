@@ -4,13 +4,13 @@ import {
   ArrowRight,
   Calculator,
   ClipboardList,
-  ExternalLink,
   MessagesSquare,
   ShieldCheck,
 } from 'lucide-react';
 import { HomePage } from '@/components/home/home-page';
 import { AboutContent } from '@/components/pages/about-content';
 import { MethodologyContent } from '@/components/pages/methodology-content';
+import { ResourcesContent } from '@/components/pages/resources-content';
 import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
 import { PageHero } from '@/components/content/page-hero';
@@ -135,25 +135,8 @@ const resources = [
 ];
 
 function EnglishResources() {
-  return (
-    <main>
-      <PageHero eyebrow="Resources · checked 2026-08-28" title="Check the figures against their primary sources">
-        <p>Policy, tariffs, prices, and conditions can change. These are the sources used by the current model and should be rechecked before a real decision.</p>
-      </PageHero>
-      <section className="site-shell resource-list">
-        {resources.map((resource) => (
-          <a key={resource.name} href={resource.href} target="_blank" rel="noreferrer" aria-label={`${resource.name} (opens in a new tab)`}>
-            <div><h2>{resource.name}</h2><p>{resource.note}</p></div>
-            <ExternalLink size={20} aria-hidden="true" />
-          </a>
-        ))}
-        <div className="callout">
-          <strong>Reference status</strong>
-          <p>The base result values electricity used within the home first. Surplus-purchase income and tax treatment are not added because quota, approval, eligibility, and each household’s tax position require separate checks.</p>
-        </div>
-      </section>
-    </main>
-  );
+  void resources;
+  return <ResourcesContent locale="en" />;
 }
 
 function EnglishPrivacy() {

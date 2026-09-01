@@ -8,6 +8,7 @@ import { BrandMark } from './brand-mark';
 import { alternateLanguagePath, isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
 
 const nav = [
+  { href: '/', th: 'หน้าหลัก', en: 'Home' },
   { href: '/estimate', th: 'ประเมินโซลาร์', en: 'Solar estimate' },
   { href: '/how-it-works', th: 'วิธีการทำงาน', en: 'How it works' },
   { href: '/solar-guide', th: 'คู่มือโซลาร์', en: 'Solar guide' },

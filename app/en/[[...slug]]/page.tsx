@@ -3,6 +3,8 @@ import { HomePage } from '@/components/home/home-page';
 import { EnglishPage } from '@/components/pages/english-pages';
 import { siteConfig } from '@/config/site';
 
+export const dynamic = 'force-dynamic';
+
 const titles: Record<string, string> = {
   '': 'Rooftop solar estimates for homes',
   estimate: 'Rooftop solar estimate',
