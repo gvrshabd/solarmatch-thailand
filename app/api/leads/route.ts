@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateLeadAssessment } from '@/lib/qualification/scoring';
-import { consentSnapshot, publicContactConfiguration } from '@/lib/server/contact-mode';
+import { consentSnapshot, privatePreviewContactConfiguration, publicContactConfiguration } from '@/lib/server/contact-mode';
 import { verifyAssessmentToken } from '@/lib/server/assessment-token';
+import { auditStatement } from '@/lib/server/audit';
 import { sha256 } from '@/lib/server/crypto';
+import { authenticatePrivatePreview } from '@/lib/server/private-preview-auth';
 import { getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
 import { requireDatabase } from '@/lib/server/runtime';
 import { leadSchema, normalizeThaiPhone } from '@/lib/validation/lead';
@@ -51,8 +53,10 @@ export async function POST(request: NextRequest) {
   const database = requireDatabase();
   if (!await enforceRateLimit(request, database)) return jsonError('rate_limited', 429);
   const release = await getCurrentRelease(database);
-  if (!release || !release.live_lead_submissions || !release.legal_complete) return jsonError('submissions_unavailable', 503);
-  const contact = publicContactConfiguration(release);
+  const previewIdentity = await authenticatePrivatePreview(request.headers);
+  const privatePreview = Boolean(previewIdentity);
+  if (!release || (!privatePreview && (!release.live_lead_submissions || !release.legal_complete))) return jsonError('submissions_unavailable', 503);
+  const contact = privatePreview ? privatePreviewContactConfiguration(release) : publicContactConfiguration(release);
   if (!contact.enabled || contact.mode === 'disabled') return jsonError('submissions_unavailable', 503);
   if (token.releaseId !== release.release_id || token.questionnaireVersionId !== release.questionnaire_version_id || token.ruleVersionId !== release.rule_version_id) return jsonError('assessment_version_expired', 409);
 
@@ -63,7 +67,7 @@ export async function POST(request: NextRequest) {
 
   const leadId = crypto.randomUUID();
   const consentedAt = new Date().toISOString();
-  const distributionExpiresAt = contact.mode === 'shared_solar_company_handoff' && contact.distributionWindowDays
+  const distributionExpiresAt = !privatePreview && contact.mode === 'shared_solar_company_handoff' && contact.distributionWindowDays
     ? new Date(Date.now() + contact.distributionWindowDays * 86_400_000).toISOString()
     : null;
   const requestFingerprint = await sha256(`${phoneE164}:${token.nonce}:${release.release_id}`);
@@ -95,7 +99,8 @@ export async function POST(request: NextRequest) {
     'distribution_window_days_snapshot', 'distribution_expires_at', 'recipient_category_snapshot',
     'disclosed_fields_snapshot_json', 'adult_confirmation_version', 'adult_confirmation_text_en',
     'adult_confirmation_text_th', 'adult_confirmed_at', 'privacy_notice_version_id', 'terms_version_id',
-    'cookie_policy_version_id',
+    'cookie_policy_version_id', 'submission_environment', 'is_test_submission', 'distribution_allowed',
+    'suppressed', 'suppression_reason', 'suppressed_at',
   ];
   const leadValues = [
     leadId, parsed.data.idempotencyKey, requestFingerprint, parsed.data.legalFirstName, parsed.data.legalLastName,
@@ -117,17 +122,29 @@ export async function POST(request: NextRequest) {
     JSON.stringify(contact.sharedFields), contact.adultConfirmationVersionId,
     consent.adultConfirmationText?.en ?? '', consent.adultConfirmationText?.th ?? '', consentedAt,
     contact.privacyNoticeVersionId, contact.termsVersionId, contact.cookiePolicyVersionId,
+    privatePreview ? 'private_development_preview' : 'production', privatePreview ? 1 : 0, privatePreview ? 0 : 1,
+    privatePreview ? 1 : 0, privatePreview ? 'private_development_test' : null, privatePreview ? consentedAt : null,
   ];
 
   try {
-    await database.batch([
+    const statements: D1PreparedStatement[] = [
       database.prepare(`INSERT INTO leads (${leadColumns.join(', ')}) VALUES (${leadColumns.map(() => '?').join(', ')})`).bind(...leadValues),
       database.prepare(`INSERT INTO lead_score_history
         (id, lead_id, rule_version_id, raw_score, quality_score, hard_eligible, explanation_json, reason, is_original, created_by)
         VALUES (?, ?, ?, ?, ?, ?, ?, 'original-submission', 1, 'system:lead-submission')`)
         .bind(crypto.randomUUID(), leadId, release.rule_version_id, assessment.rawPoints, assessment.qualityScore,
           assessment.hardEligible ? 1 : 0, explanation),
-    ]);
+    ];
+    if (privatePreview && previewIdentity) {
+      statements.push(auditStatement(database, {
+        actorEmail: previewIdentity.email,
+        action: 'lead.private-preview-submitted',
+        entityType: 'lead',
+        entityId: leadId,
+        next: { submissionEnvironment: 'private_development_preview', distributionAllowed: false },
+      }));
+    }
+    await database.batch(statements);
   } catch (error) {
     if (error instanceof Error && error.message.includes('UNIQUE constraint failed: leads.idempotency_key')) {
       const duplicate = await database.prepare('SELECT id FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string }>();
@@ -136,5 +153,5 @@ export async function POST(request: NextRequest) {
     return jsonError('submission_failed', 500);
   }
 
-  return NextResponse.json({ ok: true, leadId }, { status: 201, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
+  return NextResponse.json({ ok: true, leadId, testSubmission: privatePreview }, { status: 201, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
 }

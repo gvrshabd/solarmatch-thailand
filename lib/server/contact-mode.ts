@@ -101,6 +101,8 @@ export function publicContactConfiguration(row: ContactConfigurationRow): Public
   const sharedFields = parseStringArray(row.shared_fields_json, ['legalFirstName', 'legalLastName', 'phone', 'preferredContactMethod', 'lineId', 'assessmentAnswers']);
   const disabled: PublicContactConfiguration = {
     enabled: false,
+    preview: false,
+    operationalDistributionEnabled: false,
     mode: readiness.mode,
     contactConfigurationVersionId: row.contact_configuration_version_id ?? 'contact-configuration-v1',
     contentVersionId: row.content_version_id,
@@ -120,17 +122,49 @@ export function publicContactConfiguration(row: ContactConfigurationRow): Public
   };
   if (!readiness.active) return disabled;
   if (readiness.mode === 'validation_interest') return { ...disabled, enabled: true, ...copy.validation_interest };
-  if (readiness.mode === 'shared_solar_company_handoff') return { ...disabled, enabled: true, ...copy.shared_solar_company_handoff };
+  if (readiness.mode === 'shared_solar_company_handoff') return { ...disabled, enabled: true, operationalDistributionEnabled: true, ...copy.shared_solar_company_handoff };
   const recipient = { en: row.receiving_company_en!, th: row.receiving_company_th! };
   return {
     ...disabled,
     enabled: true,
+    operationalDistributionEnabled: true,
     question: interpolate(copy.named_installer_handoff.question, recipient),
     help: interpolate(copy.named_installer_handoff.help, recipient),
     yesLabel: copy.named_installer_handoff.yesLabel,
     noLabel: copy.named_installer_handoff.noLabel,
     consent: interpolate(copy.named_installer_handoff.consent, recipient),
     recipient: { name: recipient, privacyUrl: row.receiving_company_privacy_url! },
+  };
+}
+
+/**
+ * Builds the owner-only development experience without changing the published
+ * legal-readiness state. The request must already have passed the separate
+ * whole-site Access assertion check before this function is used.
+ */
+export function privatePreviewContactConfiguration(row: ContactConfigurationRow): PublicContactConfiguration {
+  const baseline = publicContactConfiguration(row);
+  const copy = resolvedContent(row.content_json).contactModes;
+  return {
+    ...baseline,
+    enabled: true,
+    preview: true,
+    operationalDistributionEnabled: false,
+    mode: 'shared_solar_company_handoff',
+    retentionDays: null,
+    distributionWindowDays: null,
+    recipientCategory: 'participating_residential_solar_companies',
+    adultConfirmationVersionId: row.adult_confirmation_version_id ?? 'private-preview-adult-v1',
+    consentVersionId: row.consent_version_id ?? 'private-preview-consent-v1',
+    privacyNoticeVersionId: row.privacy_notice_version_id ?? row.legal_document_version_id,
+    termsVersionId: row.terms_version_id ?? null,
+    cookiePolicyVersionId: row.cookie_policy_version_id ?? null,
+    question: copy.shared_solar_company_handoff.question,
+    help: copy.shared_solar_company_handoff.help,
+    yesLabel: copy.shared_solar_company_handoff.yesLabel,
+    noLabel: copy.shared_solar_company_handoff.noLabel,
+    consent: copy.shared_solar_company_handoff.consent,
+    recipient: null,
   };
 }
 

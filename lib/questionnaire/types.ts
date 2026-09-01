@@ -57,6 +57,8 @@ export type ContactCollectionMode = 'disabled' | 'validation_interest' | 'named_
 
 export type PublicContactConfiguration = {
   enabled: boolean;
+  preview: boolean;
+  operationalDistributionEnabled: boolean;
   mode: ContactCollectionMode;
   contactConfigurationVersionId: string;
   contentVersionId: string;
@@ -90,6 +92,7 @@ export type PublicContactConfiguration = {
 };
 
 export type PublicAssessmentConfig = {
+  privatePreview: boolean;
   releaseId: string;
   questionnaireVersionId: string;
   ruleVersionId: string;

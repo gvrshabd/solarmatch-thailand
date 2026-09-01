@@ -5,7 +5,7 @@ import { initialLoadingFactSet } from '@/config/loading-facts';
 import type { LoadingFactReference, PublicLoadingFact } from '@/lib/loading-facts/types';
 import { initialScoringConfiguration, legacyScoringConfigurationV1, type ScoringConfiguration } from '@/lib/qualification/scoring';
 import type { PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questionnaire/types';
-import { publicContactConfiguration, type ContactConfigurationRow } from './contact-mode';
+import { privatePreviewContactConfiguration, publicContactConfiguration, type ContactConfigurationRow } from './contact-mode';
 import { createAssessmentToken } from './assessment-token';
 import { requireDatabase } from './runtime';
 
@@ -277,11 +277,12 @@ export async function getPublishedLoadingFacts(factSetVersionId: string, databas
   });
 }
 
-export async function getPublicAssessmentConfig(): Promise<PublicAssessmentConfig> {
+export async function getPublicAssessmentConfig(options: { privatePreview?: boolean } = {}): Promise<PublicAssessmentConfig> {
   const release = await getCurrentRelease();
   if (!release) throw new Error('No published SolarMatch release is available.');
-  const configuredContact = publicContactConfiguration(release);
-  const shouldIssueToken = configuredContact.enabled && Boolean(release.live_lead_submissions);
+  const privatePreview = Boolean(options.privatePreview);
+  const configuredContact = privatePreview ? privatePreviewContactConfiguration(release) : publicContactConfiguration(release);
+  const shouldIssueToken = privatePreview || (configuredContact.enabled && Boolean(release.live_lead_submissions));
   const token = shouldIssueToken
     ? await createAssessmentToken({
       releaseId: release.release_id,
@@ -294,6 +295,7 @@ export async function getPublicAssessmentConfig(): Promise<PublicAssessmentConfi
   const loadingFactSetVersionId = release.fact_set_version_id ?? factSetId;
   const loadingFacts = await getPublishedLoadingFacts(loadingFactSetVersionId);
   return {
+    privatePreview,
     releaseId: release.release_id,
     questionnaireVersionId: release.questionnaire_version_id,
     ruleVersionId: release.rule_version_id,

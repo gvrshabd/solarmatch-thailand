@@ -100,6 +100,7 @@ type DistributionLead = {
   privacy_notice_version_id: string | null; distribution_expires_at: string | null; recipient_category_snapshot: string | null;
   disclosed_fields_snapshot_json: string | null; contact_collection_mode: string; third_party_disclosure_authorized: number;
   suppressed: number; consent_withdrawn_at: string | null; contact_configuration_version_id: string;
+  is_test_submission: number; distribution_allowed: number;
 };
 
 type DistributionPartner = {
@@ -117,9 +118,10 @@ async function validatedDistribution(database: D1Database, leadId: string, partn
       recipient_category_snapshot, disclosed_fields_snapshot_json,
       COALESCE(contact_collection_mode_v2, contact_collection_mode) AS contact_collection_mode,
       COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
-      suppressed, consent_withdrawn_at, contact_configuration_version_id
+      suppressed, consent_withdrawn_at, contact_configuration_version_id, is_test_submission, distribution_allowed
     FROM leads WHERE id = ? AND status NOT IN ('deleted', 'archived') LIMIT 1`).bind(leadId).first<DistributionLead>();
   if (!lead) throw new Error('lead_not_found');
+  if (lead.is_test_submission || !lead.distribution_allowed) throw new Error('private_preview_distribution_blocked');
   if (lead.contact_collection_mode !== 'shared_solar_company_handoff' || !lead.third_party_disclosure_authorized) throw new Error('consent_scope_mismatch');
   if (!lead.hard_eligible) throw new Error('lead_not_commercially_eligible');
   if (lead.suppressed || lead.consent_withdrawn_at) throw new Error('lead_suppressed');
@@ -201,9 +203,9 @@ export async function GET(request: Request) {
       FROM lead_recipient_deliveries d JOIN solar_company_partners p ON p.id = d.partner_id
       ORDER BY d.delivered_at DESC LIMIT 500`).all(),
     database.prepare(`SELECT id, legal_first_name, legal_last_name, province, custom_location, created_at,
-      distribution_expires_at, suppressed, consent_withdrawn_at
+      distribution_expires_at, suppressed, consent_withdrawn_at, is_test_submission, distribution_allowed
       FROM leads WHERE COALESCE(contact_collection_mode_v2, contact_collection_mode)='shared_solar_company_handoff'
-      AND hard_eligible=1 AND status NOT IN ('deleted','archived')
+      AND hard_eligible=1 AND is_test_submission=0 AND distribution_allowed=1 AND status NOT IN ('deleted','archived')
       ORDER BY created_at DESC LIMIT 200`).all(),
   ]);
   return NextResponse.json({ legal: legal.results, partners: partners.results, contracts: contracts.results, privacyRequests: requests.results, deliveries: deliveries.results, sharedLeads: sharedLeads.results, defaultLegalDraft: legalLaunchDraft }, { headers: { 'Cache-Control': 'no-store' } });

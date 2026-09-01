@@ -39,17 +39,22 @@ type LeadRow = {
   selection_override: string | null;
   exported_at: string | null;
   archived_at: string | null;
-  contact_collection_mode: 'validation_interest' | 'named_installer_handoff';
+  contact_collection_mode: 'validation_interest' | 'named_installer_handoff' | 'shared_solar_company_handoff';
   contact_configuration_version_id: string;
-  consent_scope: 'solar_match_validation_followup' | 'named_installer_site_assessment';
+  consent_scope: 'solar_match_validation_followup' | 'named_installer_site_assessment' | 'shared_residential_solar_referral';
   solar_match_followup_authorized: number;
   third_party_disclosure_authorized: number;
   recipient_snapshot_json: string | null;
+  submission_environment: 'production' | 'private_development_preview';
+  is_test_submission: number;
+  distribution_allowed: number;
+  suppressed: number;
 };
 
 type ExportScope = 'solar_match_validation_followup' | 'named_installer_handoff';
 
 function compatibleWithScope(lead: LeadRow, exportScope: ExportScope, recipientKey: string) {
+  if (lead.is_test_submission || !lead.distribution_allowed || lead.suppressed) return false;
   if (exportScope === 'solar_match_validation_followup') return lead.contact_collection_mode === 'validation_interest' && Boolean(lead.solar_match_followup_authorized) && !lead.third_party_disclosure_authorized;
   return lead.contact_collection_mode === 'named_installer_handoff' && Boolean(lead.third_party_disclosure_authorized) && Boolean(recipientKey) && lead.contact_configuration_version_id === recipientKey;
 }
@@ -79,6 +84,9 @@ export async function GET(request: Request) {
   else if (status === 'deleted') clauses.push("status = 'deleted'");
   else if (status === 'exported') clauses.push('exported_at IS NOT NULL');
   else clauses.push("status NOT IN ('archived', 'deleted')");
+  const submissionType = url.searchParams.get('submissionType');
+  if (submissionType === 'test') clauses.push('is_test_submission = 1');
+  if (submissionType === 'production') clauses.push('is_test_submission = 0');
   const from = url.searchParams.get('from');
   if (from && /^\d{4}-\d{2}-\d{2}$/u.test(from)) { clauses.push('created_at >= ?'); values.push(`${from}T00:00:00.000Z`); }
   const to = url.searchParams.get('to');
@@ -94,9 +102,12 @@ export async function GET(request: Request) {
   const result = await database.prepare(`SELECT id, created_at, legal_first_name, legal_last_name, phone_display, phone_e164,
       preferred_contact_method, line_id, province, custom_location, ownership_status, air_conditioner_count,
       monthly_bill_thb, daytime_pattern, quality_score, raw_score, hard_eligible, high_quality,
-      scoring_explanation_json, status, selection_override, exported_at, archived_at, contact_collection_mode,
-      contact_configuration_version_id, consent_scope, solar_match_followup_authorized, third_party_disclosure_authorized,
-      recipient_snapshot_json
+      scoring_explanation_json, status, selection_override, exported_at, archived_at,
+      COALESCE(contact_collection_mode_v2, contact_collection_mode) AS contact_collection_mode,
+      contact_configuration_version_id, COALESCE(consent_scope_v2, consent_scope) AS consent_scope,
+      COALESCE(solar_match_followup_authorized_v2, solar_match_followup_authorized) AS solar_match_followup_authorized,
+      COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
+      recipient_snapshot_json, submission_environment, is_test_submission, distribution_allowed, suppressed
     FROM leads WHERE ${clauses.length ? clauses.join(' AND ') : '1 = 1'} ORDER BY ${order} LIMIT 200`).bind(...values).all<LeadRow>();
   const release = await getCurrentRelease(database);
   const threshold = release ? parseScoringConfiguration(release).automaticSelectionThreshold : 4;
@@ -114,7 +125,7 @@ export async function GET(request: Request) {
       explanation: JSON.parse(lead.scoring_explanation_json),
       selected: compatible && (selection === 'selected' || (selection !== 'deselected' && automatic)),
       selectionCompatible: compatible,
-      selectionReason: !compatible ? (exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export') : selection === 'selected' ? 'Manually selected for this consent scope' : selection === 'deselected' ? 'Manually deselected for this consent scope' : automatic ? `Automatic: consent-compatible, sellable and ${threshold}/5 or above` : 'Not automatically selected',
+       selectionReason: lead.is_test_submission ? 'Private-preview test record — partner export is permanently blocked' : !lead.distribution_allowed || lead.suppressed ? 'Distribution is suppressed' : !compatible ? (exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export') : selection === 'selected' ? 'Manually selected for this consent scope' : selection === 'deselected' ? 'Manually deselected for this consent scope' : automatic ? `Automatic: consent-compatible, sellable and ${threshold}/5 or above` : 'Not automatically selected',
     }); }),
     automaticSelectionThreshold: threshold,
     exportScope,
@@ -135,8 +146,12 @@ export async function POST(request: Request) {
   const requestId = crypto.randomUUID();
 
   if (parsedBody.action === 'set-selection') {
-    const lead = await database.prepare(`SELECT id, contact_collection_mode, contact_configuration_version_id, consent_scope,
-      solar_match_followup_authorized, third_party_disclosure_authorized FROM leads WHERE id = ? LIMIT 1`).bind(parsedBody.leadId).first<LeadRow>();
+    const lead = await database.prepare(`SELECT id, COALESCE(contact_collection_mode_v2, contact_collection_mode) AS contact_collection_mode,
+      contact_configuration_version_id, COALESCE(consent_scope_v2, consent_scope) AS consent_scope,
+      COALESCE(solar_match_followup_authorized_v2, solar_match_followup_authorized) AS solar_match_followup_authorized,
+      COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
+      submission_environment, is_test_submission, distribution_allowed, suppressed
+      FROM leads WHERE id = ? LIMIT 1`).bind(parsedBody.leadId).first<LeadRow>();
     if (!lead) return NextResponse.json({ error: 'lead_not_found' }, { status: 404 });
     if (!compatibleWithScope(lead, parsedBody.exportScope, parsedBody.recipientKey)) return NextResponse.json({ error: 'consent_scope_mismatch' }, { status: 409 });
     const selectionStatement = parsedBody.selection === 'automatic'
@@ -172,8 +187,12 @@ export async function POST(request: Request) {
   const placeholders = parsedBody.leadIds.map(() => '?').join(',');
   if (parsedBody.action === 'mark-exported') {
     const rows = await database.prepare(`SELECT id, legal_first_name, legal_last_name, phone_display, preferred_contact_method, line_id, province, custom_location, quality_score, ownership_status, air_conditioner_count,
-      contact_collection_mode, contact_configuration_version_id, consent_scope, solar_match_followup_authorized,
-      third_party_disclosure_authorized, recipient_snapshot_json FROM leads WHERE id IN (${placeholders}) AND status <> 'deleted'`).bind(...parsedBody.leadIds).all<LeadRow>();
+      COALESCE(contact_collection_mode_v2, contact_collection_mode) AS contact_collection_mode,
+      contact_configuration_version_id, COALESCE(consent_scope_v2, consent_scope) AS consent_scope,
+      COALESCE(solar_match_followup_authorized_v2, solar_match_followup_authorized) AS solar_match_followup_authorized,
+      COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
+      recipient_snapshot_json, submission_environment, is_test_submission, distribution_allowed, suppressed
+      FROM leads WHERE id IN (${placeholders}) AND status <> 'deleted'`).bind(...parsedBody.leadIds).all<LeadRow>();
     const incompatible = rows.results.filter((lead) => !compatibleWithScope(lead, parsedBody.exportScope, parsedBody.recipientKey));
     if (incompatible.length || rows.results.length !== parsedBody.leadIds.length) return NextResponse.json({ error: 'consent_scope_mismatch', incompatibleLeadIds: incompatible.map((lead) => lead.id) }, { status: 409 });
     const batchId = crypto.randomUUID();

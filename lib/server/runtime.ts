@@ -5,6 +5,8 @@ export type SolarMatchRuntimeEnv = {
   MEDIA?: R2Bucket;
   ACCESS_TEAM_DOMAIN?: string;
   ACCESS_AUD?: string;
+  PRIVATE_SITE_ACCESS_AUD?: string;
+  PRIVATE_CONTACT_PREVIEW_ENABLED?: string;
   ADMIN_EMAILS?: string;
   CSRF_SECRET?: string;
   ASSESSMENT_SIGNING_SECRET?: string;
