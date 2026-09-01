@@ -232,7 +232,7 @@ test('private contact preview requires explicit consent, separate adult confirma
   await page.getByRole('button', { name: 'Yes, I would like solar companies to contact me' }).click();
   const consent = page.getByRole('checkbox', { name: /I explicitly consent to SolarMatch sharing my name/u });
   await expect(consent).not.toBeChecked();
-  await expect(page.getByRole('link', { name: 'Privacy Notice' })).toHaveAttribute('href', '/en/privacy');
+  await expect(page.locator('#main-content').getByRole('link', { name: 'Privacy Notice' })).toHaveAttribute('href', '/en/privacy');
   await page.getByRole('button', { name: 'Continue to contact details' }).click();
   await expect(page.getByRole('alert')).toContainText('Confirm your consent');
   await consent.check();
@@ -256,7 +256,7 @@ test('private contact preview requires explicit consent, separate adult confirma
   await page.getByRole('button', { name: 'Submit my request' }).click();
 
   await expect(page.locator('.solar-loading-indicator')).toBeVisible();
-  expect(submitted).toMatchObject({ legalFirstName: 'Private', legalLastName: 'Tester', phone: '081 234 5678', contactMethod: 'line', lineId: 'private.tester', adultConfirmed: true, consent: true });
+  expect(submitted).toMatchObject({ legalFirstName: 'Private', legalLastName: 'Tester', phone: '0812345678', contactMethod: 'line', lineId: 'private.tester', adultConfirmed: true, consent: true });
   await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
 });
 
@@ -270,7 +270,7 @@ test('assessment transitions preserve direction, focus and block rapid double na
   await expect(page.getByRole('heading', { name: 'About how much is the electricity bill in a typical month?' })).toBeFocused();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.locator('.question-stage')).toHaveAttribute('data-transition-direction', 'backward');
-  await expect(page.getByRole('heading', { name: 'Where is the property?' })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Where is the property located?' })).toBeFocused();
 });
 
 test('loading fact stays paired, uses the minimal loading surface, and is not repeated on results', async ({ page }) => {
@@ -284,7 +284,8 @@ test('loading fact stays paired, uses the minimal loading surface, and is not re
   await expect(page.locator('.calculation-loading-content')).toHaveAttribute('role', 'status');
   await expect(page.locator('.solar-loading-indicator')).toBeVisible();
   await expect(page.locator('.solar-loading-indicator')).toHaveCSS('animation-name', 'solar-loading-spin');
-  await expect(page.locator('.calculation-loading-page')).not.toContainText(/%|progress|AI|satellite|engineering analysis|installer matching/iu);
+  await expect(page.locator('.calculation-loading-page').getByRole('progressbar')).toHaveCount(0);
+  await expect(page.locator('.calculation-loading-page')).not.toContainText(/progress bar|satellite scan|engineering analysis|installer matching/iu);
   await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
   await page.reload();

@@ -3192,6 +3192,7 @@ select { padding: 0 38px 0 13px; }
 }
 
 /* Optional-contact journey and result preparation */
+.screen-transition-boundary { width: 100%; min-width: 0; overflow-x: clip; }
 .journey-transition-surface { width: 100%; min-width: 0; }
 .contact-journey-page {
   min-height: calc(100vh - 88px);

@@ -23,20 +23,22 @@ export function ScreenTransition({
   const duration = reduceMotion ? 0.06 : pace === 'result' ? 0.38 : 0.24;
 
   return (
-    <AnimatePresence mode="wait" initial={false} custom={offset}>
-      <motion.div
-        key={transitionKey}
-        className={className}
-        data-transition-direction={direction}
-        data-transition-pace={pace}
-        custom={offset}
-        initial={{ opacity: 0, x: offset }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -offset }}
-        transition={{ duration, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div className="screen-transition-boundary">
+      <AnimatePresence mode="wait" initial={false} custom={offset}>
+        <motion.div
+          key={transitionKey}
+          className={className}
+          data-transition-direction={direction}
+          data-transition-pace={pace}
+          custom={offset}
+          initial={{ opacity: 0, x: offset }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -offset }}
+          transition={{ duration, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
