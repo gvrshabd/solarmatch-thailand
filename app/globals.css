@@ -2659,7 +2659,10 @@ select { padding: 0 38px 0 13px; }
 .admin-button:disabled, .admin-bulkbar button:disabled { opacity: .45; cursor: not-allowed; }
 .admin-alert { display: flex; justify-content: space-between; gap: 14px; margin: 18px clamp(18px, 4vw, 54px) 0; padding: 13px 16px; border: 1px solid #b7d6c4; border-radius: 8px; background: #e9f6ee; color: #174c35; }
 .admin-alert.error { border-color: #e1b5b5; background: #fff0f0; color: #812b2b; }
+.admin-alert.private-preview-admin { display: block; border-color: #d6c27c; background: #fff8df; color: #514722; }
 .admin-alert button { border: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; }
+.admin-test-lead-row { background: #fffbeb; }
+.admin-test-badge { width: fit-content; display: inline-flex; margin: 4px 0; padding: 3px 7px; border: 1px solid #d8c37b; border-radius: 999px; background: #fff6d2; color: #5a4d20; font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; }
 .admin-filters { display: grid; grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(120px, .7fr)) auto; gap: 10px; align-items: end; padding: 16px; border: 1px solid #d7e0da; border-radius: 10px; background: white; }
 .admin-filters label, .admin-editor-fields label, .admin-rule-grid label, .admin-weight-grid label, .admin-media-form label { display: grid; gap: 6px; color: #42564a; font-size: 12px; font-weight: 800; }
 .admin-filters label > div { display: flex; align-items: center; gap: 7px; padding-left: 10px; border: 1px solid #bdcbc2; border-radius: 7px; }
@@ -3189,6 +3192,7 @@ select { padding: 0 38px 0 13px; }
 }
 
 /* Optional-contact journey and result preparation */
+.journey-transition-surface { width: 100%; min-width: 0; }
 .contact-journey-page {
   min-height: calc(100vh - 88px);
   display: grid;
@@ -3196,6 +3200,7 @@ select { padding: 0 38px 0 13px; }
   padding-block: clamp(28px, 7vw, 78px);
   background: linear-gradient(145deg, #f4f8f5 0%, #fff 58%, #f8f2e6 100%);
 }
+.contact-transition-surface { width: 100%; display: grid; justify-items: center; }
 
 .contact-journey-card {
   width: min(100% - 32px, 780px);
@@ -3226,8 +3231,18 @@ select { padding: 0 38px 0 13px; }
 .contact-step-actions .button {
   min-height: 48px;
 }
+.lead-decision-actions .button.selected { background: #154d35; box-shadow: 0 0 0 3px rgba(30, 100, 67, .17); }
 
 .contact-optional-note { font-size: 12px; }
+.contact-decision-consent { display: grid; gap: 12px; padding-top: 4px; }
+.consent-check-compact { padding: 13px 14px; }
+.consent-check-compact small { color: #34483c; font-size: 11px; line-height: 1.55; }
+.consent-check a { color: var(--forest); text-underline-offset: 3px; }
+.contact-consent-continue { justify-self: start; }
+.private-preview-notice { padding: 12px 14px; border: 1px solid #d4c48f; border-radius: 8px; background: #fff9e8; color: #4f472e !important; font-size: 12px; }
+.private-preview-chip { width: fit-content; margin: 0; padding: 5px 9px; border-radius: 999px; background: #edf6ef; color: var(--forest) !important; font-size: 11px; font-weight: 800; }
+.contact-review-confirmation { display: flex; align-items: center; gap: 9px; color: var(--forest); font-weight: 800; }
+.contact-review-confirmation svg { flex: 0 0 auto; }
 .recipient-disclosure { padding: 13px 15px; border-left: 3px solid var(--gold); background: #fff9ec; }
 .contact-progress { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 12px; font-weight: 800; }
 .contact-single-field { display: grid; gap: 10px; }
@@ -3254,6 +3269,14 @@ select { padding: 0 38px 0 13px; }
 .calculation-loading-page { min-height: 100svh; display: grid; place-items: center; padding: clamp(24px, 7vw, 72px) 18px; background: #f5f2e8; }
 .calculation-loading-content { width: min(100%, 610px); border: 0; border-radius: 0; background: transparent; box-shadow: none; text-align: center; }
 .calculation-loading-sr-title { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.solar-loading-indicator { width: 54px; height: 54px; display: block; margin: 0 auto 16px; color: var(--forest); animation: solar-loading-spin .96s linear infinite; transform-origin: center; }
+.solar-loading-indicator svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.solar-loading-track,
+.solar-loading-arc { fill: none; stroke-width: 4; }
+.solar-loading-track { stroke: #cad9cf; }
+.solar-loading-arc { stroke: currentColor; stroke-linecap: round; stroke-dasharray: 74 126; }
+.solar-loading-core { fill: var(--gold); }
+@keyframes solar-loading-spin { to { transform: rotate(360deg); } }
 .calculation-fact { display: grid; justify-items: center; gap: 11px; }
 .calculation-fact img { width: min(68vw, 260px); height: auto; max-height: 210px; object-fit: contain; }
 .calculation-fact-label { margin: 4px 0 0; color: var(--forest); font-size: 12px; font-weight: 850; letter-spacing: .16em; }
@@ -3267,11 +3290,7 @@ select { padding: 0 38px 0 13px; }
 .solar-fact-layout h2 { margin: 0 0 10px; color: var(--dark); font-size: clamp(22px, 3vw, 31px); }
 .solar-fact-layout p { margin: 0 0 10px; color: var(--muted); line-height: 1.65; }
 .solar-fact-source { font-size: 12px; font-weight: 750; }
-.calculation-generic { min-height: 160px; display: flex; align-items: center; gap: 8px; }
-.calculation-generic span { width: 10px; height: 10px; border-radius: 50%; background: var(--forest); animation: calculation-dot 1.2s ease-in-out infinite; }
-.calculation-generic span:nth-child(2) { animation-delay: .15s; }
-.calculation-generic span:nth-child(3) { animation-delay: .3s; }
-@keyframes calculation-dot { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-7px); } }
+.calculation-generic-copy { min-height: 120px; display: grid; place-items: center; color: var(--muted); }
 
 .result-fact-section { margin-block: clamp(42px, 7vw, 82px); }
 .solar-fact-recall { background: #f8fbf9; }
@@ -3309,7 +3328,8 @@ select { padding: 0 38px 0 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .calculation-generic span { animation: none !important; }
+  .solar-loading-indicator { animation: none !important; }
+  .solar-loading-arc { stroke-dasharray: 42 126; }
 }
 
 .admin-export-scope {

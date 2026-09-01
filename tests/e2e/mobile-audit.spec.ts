@@ -87,4 +87,7 @@ test('landscape menu remains reachable and reduced motion is respected', async (
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/en/estimate');
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('auto');
+  await page.goto('/en/estimate/results');
+  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
+  await expect(page.locator('.solar-loading-indicator')).toHaveCSS('animation-name', 'none');
 });

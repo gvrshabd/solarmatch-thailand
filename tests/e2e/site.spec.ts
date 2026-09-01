@@ -6,6 +6,46 @@ const savedEstimate = {
   roofMaterial: 'concrete-tile', shade: 'almost-none', installationTimeframe: 'one-three-months', roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
 
+const exactSharedConsent = {
+  en: 'I explicitly consent to SolarMatch sharing my name, contact details, location and relevant assessment answers with participating residential solar companies that serve my area, so they may contact me about a residential solar site survey and quotation. I understand that more than one company may receive my information, the number may vary, and SolarMatch may receive payment for the introduction. I have read the Privacy Notice.',
+  th: 'ฉันยินยอมโดยชัดแจ้งให้ SolarMatch ส่งชื่อ ข้อมูลติดต่อ พื้นที่ และคำตอบที่เกี่ยวข้องจากแบบประเมินของฉันให้บริษัทติดตั้งโซลาร์สำหรับที่พักอาศัยที่เข้าร่วมและให้บริการในพื้นที่ของฉัน เพื่อให้บริษัทเหล่านั้นติดต่อเกี่ยวกับการสำรวจหน้างานและใบเสนอราคา ฉันเข้าใจว่าข้อมูลของฉันอาจถูกส่งให้มากกว่าหนึ่งบริษัท จำนวนบริษัทอาจแตกต่างกันไป และ SolarMatch อาจได้รับค่าตอบแทนสำหรับการแนะนำลูกค้า ฉันได้อ่านประกาศความเป็นส่วนตัวแล้ว',
+};
+
+function privatePreviewConfiguration() {
+  return {
+    privatePreview: true,
+    releaseId: 'residential-release-v2',
+    questionnaireVersionId: 'residential-questionnaire-v2',
+    ruleVersionId: 'residential-rules-v2',
+    questionnaire: { id: 'residential-questionnaire-v2', schemaVersion: 5, questions: [] },
+    assessmentToken: 'a'.repeat(96),
+    assessmentTokenExpiresAt: '2099-01-01T00:00:00.000Z',
+    liveLeadSubmissions: true,
+    receivingCompany: null,
+    contact: {
+      enabled: true, preview: true, operationalDistributionEnabled: false, mode: 'shared_solar_company_handoff',
+      contactConfigurationVersionId: 'private-preview-contact-v1', contentVersionId: 'residential-content-v1', privacyVersion: 'legal-placeholder-v1',
+      retentionDays: null, distributionWindowDays: null, recipientCategory: 'participating_residential_solar_companies',
+      adultConfirmationVersionId: 'private-preview-adult-v1', consentVersionId: 'private-preview-consent-v1', privacyNoticeVersionId: 'legal-placeholder-v1', termsVersionId: null, cookiePolicyVersionId: null,
+      question: { en: 'Would you like to be contacted by solar companies?', th: 'ต้องการให้บริษัทโซลาร์ติดต่อกลับไหม?' },
+      help: { en: 'If you choose Yes, SolarMatch may share your name, contact details, location and relevant assessment answers with participating residential solar companies that serve your area. More than one company may receive your information and contact you by phone or LINE, and the number may vary. SolarMatch may receive payment from these companies for the introduction. You will still receive your estimate if you choose No.', th: 'หากเลือก “ต้องการ” SolarMatch อาจส่งชื่อ ข้อมูลติดต่อ พื้นที่ และคำตอบที่เกี่ยวข้องจากแบบประเมินของคุณให้บริษัทติดตั้งโซลาร์สำหรับที่พักอาศัยที่เข้าร่วมและให้บริการในพื้นที่ของคุณ ข้อมูลของคุณอาจถูกส่งให้มากกว่าหนึ่งบริษัท และแต่ละบริษัทอาจติดต่อคุณทางโทรศัพท์หรือ LINE โดยจำนวนบริษัทอาจแตกต่างกันไป SolarMatch อาจได้รับค่าตอบแทนจากบริษัทเหล่านี้สำหรับการแนะนำลูกค้า คุณยังคงได้รับผลประเมินแม้เลือก “ไม่ต้องการ”' },
+      yesLabel: { en: 'Yes, I would like solar companies to contact me', th: 'ต้องการให้บริษัทโซลาร์ติดต่อกลับ' },
+      noLabel: { en: 'No, show me my estimate', th: 'ไม่ต้องการ ดูผลประเมินต่อ' },
+      consent: exactSharedConsent,
+      declineTitle: { en: 'Continue without contact details', th: 'ดูผลประเมินต่อโดยไม่ต้องให้ข้อมูลติดต่อ' },
+      declineBody: { en: 'Your estimate is still available. You can continue now without providing contact details.', th: 'คุณยังดูผลประเมินได้ตามปกติโดยไม่ต้องให้ข้อมูลติดต่อ' },
+      declineContinueLabel: { en: 'Continue to my result', th: 'ดูผลประเมินต่อ' },
+      skipLabel: { en: 'Continue to my results without submitting', th: 'ดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ' },
+      failureTitle: { en: 'We could not save your contact request', th: 'ยังบันทึกคำขอติดต่อไม่ได้' },
+      failureBody: { en: 'Your assessment and result are safe in this browser. You can try again or continue to your result without submitting contact details.', th: 'คำตอบและผลประเมินของคุณยังอยู่ในเบราว์เซอร์นี้ คุณสามารถลองอีกครั้งหรือดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ' },
+      adultConfirmation: { en: 'I confirm that I am at least 20 years old and that I am the property owner or am authorized by the property owner to request contact about this property.', th: 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และเป็นเจ้าของอสังหาริมทรัพย์หรือได้รับอนุญาตจากเจ้าของให้ขอรับการติดต่อเกี่ยวกับอสังหาริมทรัพย์นี้' },
+      recipient: null, permittedContactMethods: ['phone', 'line'], sharedFields: ['legalFirstName', 'legalLastName', 'phone', 'preferredContactMethod', 'lineId', 'assessmentAnswers'],
+    },
+    loadingFactSetVersionId: 'loading-facts-v1',
+    loadingFacts: [],
+  };
+}
+
 const thaiHeaderLinks = [['หน้าหลัก', '/'], ['ประเมินโซลาร์', '/estimate'], ['วิธีการทำงาน', '/how-it-works'], ['คู่มือโซลาร์', '/solar-guide'], ['วิธีคำนวณ', '/methodology'], ['เกี่ยวกับเรา', '/about']] as const;
 const englishHeaderLinks = [['Home', '/en'], ['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'], ['Methodology', '/en/methodology'], ['About', '/en/about']] as const;
 
@@ -157,6 +197,82 @@ test('disabled contact release requests no personal information', async ({ page 
   await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
 });
 
+test('private contact preview starts unselected and No reaches the full estimate without PII', async ({ page }) => {
+  let leadRequests = 0;
+  await page.route('**/api/assessment/config', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(privatePreviewConfiguration()) }));
+  await page.route('**/api/leads', (route) => { leadRequests += 1; return route.fulfill({ status: 500, contentType: 'application/json', body: '{}' }); });
+  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
+  await page.goto('/en/estimate/results');
+
+  const yes = page.getByRole('button', { name: 'Yes, I would like solar companies to contact me' });
+  const no = page.getByRole('button', { name: 'No, show me my estimate' });
+  await expect(page.getByRole('heading', { name: 'Would you like to be contacted by solar companies?' })).toBeVisible();
+  await expect(yes).toHaveAttribute('aria-pressed', 'false');
+  await expect(no).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByRole('checkbox', { name: /I explicitly consent/u })).toHaveCount(0);
+  await no.click();
+  await expect(page.getByRole('heading', { name: 'Continue without contact details' })).toBeFocused();
+  await page.getByRole('button', { name: 'Continue to my result' }).click();
+  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
+  await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
+  expect(leadRequests).toBe(0);
+  await expect(page.locator('input[autocomplete="given-name"]')).toHaveCount(0);
+});
+
+test('private contact preview requires explicit consent, separate adult confirmation, and stores a test request', async ({ page }) => {
+  let submitted: Record<string, unknown> | null = null;
+  await page.route('**/api/assessment/config', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(privatePreviewConfiguration()) }));
+  await page.route('**/api/leads', async (route) => {
+    submitted = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ ok: true, leadId: crypto.randomUUID(), testSubmission: true }) });
+  });
+  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
+  await page.goto('/en/estimate/results');
+
+  await page.getByRole('button', { name: 'Yes, I would like solar companies to contact me' }).click();
+  const consent = page.getByRole('checkbox', { name: /I explicitly consent to SolarMatch sharing my name/u });
+  await expect(consent).not.toBeChecked();
+  await expect(page.getByRole('link', { name: 'Privacy Notice' })).toHaveAttribute('href', '/en/privacy');
+  await page.getByRole('button', { name: 'Continue to contact details' }).click();
+  await expect(page.getByRole('alert')).toContainText('Confirm your consent');
+  await consent.check();
+  await page.getByRole('button', { name: 'Continue to contact details' }).click();
+
+  await page.locator('input[autocomplete="given-name"]').fill('Private');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.locator('input[autocomplete="family-name"]').fill('Tester');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.locator('input[autocomplete="tel"]').fill('081 234 5678');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('radio', { name: 'LINE' }).check();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.locator('input[autocomplete="off"]').fill('private.tester');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  const adult = page.getByRole('checkbox', { name: /I confirm that I am at least 20 years old/u });
+  await expect(adult).not.toBeChecked();
+  await adult.check();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Review your request' })).toBeFocused();
+  await page.getByRole('button', { name: 'Submit my request' }).click();
+
+  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
+  expect(submitted).toMatchObject({ legalFirstName: 'Private', legalLastName: 'Tester', phone: '081 234 5678', contactMethod: 'line', lineId: 'private.tester', adultConfirmed: true, consent: true });
+  await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
+});
+
+test('assessment transitions preserve direction, focus and block rapid double navigation', async ({ page }) => {
+  await page.goto('/en/estimate');
+  await page.locator('#estimate-province').selectOption('bangkok');
+  const next = page.getByRole('button', { name: 'Next', exact: true });
+  await next.evaluate((element) => { (element as HTMLButtonElement).click(); (element as HTMLButtonElement).click(); });
+  await expectHeading(page, 'About how much is the electricity bill in a typical month?');
+  await expect(page.locator('.question-stage')).toHaveAttribute('data-transition-direction', 'forward');
+  await expect(page.getByRole('heading', { name: 'About how much is the electricity bill in a typical month?' })).toBeFocused();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page.locator('.question-stage')).toHaveAttribute('data-transition-direction', 'backward');
+  await expect(page.getByRole('heading', { name: 'Where is the property?' })).toBeFocused();
+});
+
 test('loading fact stays paired, uses the minimal loading surface, and is not repeated on results', async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.goto('/en/estimate/results');
@@ -165,6 +281,10 @@ test('loading fact stays paired, uses the minimal loading surface, and is not re
   await expect(loadingFact.getByText('DID YOU KNOW?')).toBeVisible();
   await expect(loadingFact.getByRole('link', { name: 'View reference' })).toHaveAttribute('href', /^\/en\/resources#/u);
   await expect(page.locator('.calculation-loading-content')).not.toHaveCSS('border-style', 'solid');
+  await expect(page.locator('.calculation-loading-content')).toHaveAttribute('role', 'status');
+  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
+  await expect(page.locator('.solar-loading-indicator')).toHaveCSS('animation-name', 'solar-loading-spin');
+  await expect(page.locator('.calculation-loading-page')).not.toContainText(/%|progress|AI|satellite|engineering analysis|installer matching/iu);
   await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
   await page.reload();

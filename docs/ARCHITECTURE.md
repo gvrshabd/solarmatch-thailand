@@ -11,6 +11,7 @@ Last reviewed: **2026-09-01**
 - The homepage and estimator share the same browser-session province and bill state, so those questions are not repeated on forward entry.
 - Results are calculated locally before any contact decision. The visitor then either proceeds directly to a short result-preparation state or, only when a published contact mode is active, may optionally provide contact details before seeing the same full result. Contact is never required to unlock the result. Optional roof direction, slope, phase, map position, and other precision inputs refine an already complete estimate.
 - Contact collection has three current fail-closed modes: disabled, SolarMatch-only validation follow-up, and shared residential-solar-company handoff. Historic named-installer records remain readable. `/api/assessment/config` returns no signed submission token and the UI renders no PII fields unless the selected mode passes its legal, retention, consent-version, partner, secret, and release checks.
+- A temporary owner-only preview is a separate overlay, not a published contact mode. A valid whole-site Access assertion for the temporary AUD plus the exact application allowlist can reveal the full shared-contact journey. Preview submissions are permanently tagged as test records, suppressed, and blocked from every partner-distribution/export path. Turning off the runtime kill switch immediately restores normal fail-closed behavior without rewriting D1 publication state.
 - Result preparation lasts a fixed-per-journey randomized 3–5 seconds and shows one published bilingual solar fact with its matching original sketch and source citation. A viewed-result marker skips the delay on refresh; the same selected fact survives language switching and is not repeated on the result page.
 
 ## Versioned configuration
@@ -18,6 +19,8 @@ Last reviewed: **2026-09-01**
 D1 is authoritative for published questionnaire documents, qualification/scoring rules, contact configurations, loading-fact sets, content releases, legal-version records, lead records, consent-scoped export state, media metadata, and audit events.
 
 Migration `0003_shared_lead_legal_launch.sql` is additive. It retains migration 0002's constrained compatibility columns, adds authoritative `*_v2` contact/consent columns, and avoids rebuilding tables referenced by historic releases. Shared leads use the v2 values; all new reads resolve v2 first and fall back to the historic values.
+
+Migration `0004_private_contact_preview.sql` adds the structured submission environment, test-record marker, and distribution permission. Existing records default to production/distribution-allowed. Preview records are written with distribution disabled and are also suppressed, creating defense in depth across old and new export interfaces.
 
 Public visitors receive only the current published release. Admin edits create a new draft; publishing creates a new immutable release and archives the superseded configuration version. Restoring an older version creates a new draft rather than rewriting history. Every stored contact submission retains the exact questionnaire, rules, release, score explanation, consent text, and recipient snapshot used at submission time.
 

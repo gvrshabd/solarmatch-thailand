@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
+import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
 import { initialQuestionnaire } from '@/config/assessment';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { provinceOptions } from '@/config/provinces';
@@ -170,8 +171,12 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const [draft, setDraft] = useState<Draft>({});
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
+  const [direction, setDirection] = useState<ScreenDirection>('forward');
+  const [transitioning, setTransitioning] = useState(false);
   const initializedRef = useRef(false);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
+  const navigationLockRef = useRef(false);
+  const transitionTimerRef = useRef<number | null>(null);
   const questions = questionnaire.questions;
   const question = questions[Math.min(step, questions.length - 1)];
 
@@ -221,9 +226,26 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   useEffect(() => {
     if (!ready) return;
-    const frame = requestAnimationFrame(() => questionHeadingRef.current?.focus());
-    return () => cancelAnimationFrame(frame);
+    const timer = window.setTimeout(() => questionHeadingRef.current?.focus(), 255);
+    return () => window.clearTimeout(timer);
   }, [ready, step]);
+
+  useEffect(() => () => {
+    if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current);
+  }, []);
+
+  function moveStep(nextStep: number, nextDirection: ScreenDirection) {
+    if (navigationLockRef.current) return;
+    navigationLockRef.current = true;
+    setTransitioning(true);
+    setDirection(nextDirection);
+    setStep(Math.max(0, Math.min(nextStep, questions.length - 1)));
+    if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current);
+    transitionTimerRef.current = window.setTimeout(() => {
+      navigationLockRef.current = false;
+      setTransitioning(false);
+    }, 270);
+  }
 
   function setValue<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K] | undefined) {
     setDraft((current) => {
@@ -252,11 +274,12 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function next() {
+    if (navigationLockRef.current) return;
     const questionError = firstQuestionError(question, draft, english);
     if (questionError) { setError(questionError); return; }
     track('estimate_step_completed', { stepId: question.id, stepNumber: step + 1 });
     if (step < questions.length - 1) {
-      setStep((current) => current + 1);
+      moveStep(step + 1, 'forward');
       window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       return;
     }
@@ -264,7 +287,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0];
       const firstQuestion = questions.findIndex((item) => item.id === firstIssue.path[0] || item.conditionalFields?.some((field) => field.id === firstIssue.path[0]));
-      if (firstQuestion >= 0) setStep(firstQuestion);
+      if (firstQuestion >= 0) moveStep(firstQuestion, firstQuestion < step ? 'backward' : 'forward');
       setError(english ? 'One answer still needs attention.' : 'ยังมีคำตอบที่ต้องตรวจสอบอีกหนึ่งข้อ');
       return;
     }
@@ -275,14 +298,14 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function previous() {
-    setStep((current) => Math.max(0, current - 1));
+    moveStep(step - 1, 'backward');
     setError('');
     window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
 
   function restart() {
     [starterStorageKey, draftStorageKey, resultStorageKey, assessmentContextStorageKey].forEach(removeSessionValue);
-    setDraft({}); setStep(0); setError(''); window.scrollTo({ top: 0, behavior: 'auto' });
+    setDirection('backward'); setDraft({}); setStep(0); setError(''); window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   function toggleDaytimeLoad(value: DaytimeLoad) {
@@ -302,7 +325,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   return <main className="estimate-page"><div className="site-shell estimate-focus-layout"><section className="estimate-card focus-card" aria-labelledby="estimate-question">
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
-    <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><div className="question-stage" key={`${locale}-${question.id}`}>
+    <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage">
       <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1><p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p></div>
       {question.type === 'province' && <label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>}
       {question.type === 'bill' && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
@@ -310,8 +333,8 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {question.type === 'multichoice' && <div className="choice-grid multichoice-grid" aria-labelledby="estimate-question">{question.options?.map((option) => { const checked = draft.daytimeLoads?.includes(option.value as DaytimeLoad) ?? false; const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="checkbox" aria-checked={checked} className={`choice-card visual-choice ${checked ? 'selected' : ''}`} onClick={() => toggleDaytimeLoad(option.value as DaytimeLoad)}><Icon className="choice-icon" aria-hidden="true" /><strong>{option.label[locale]}</strong><span className="choice-indicator checkbox-indicator" aria-hidden="true">{checked && <Check />}</span></button>; })}</div>}
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
-      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready} onClick={next}>{step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
-    </div></fieldset>
+      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
+    </ScreenTransition></fieldset>
     <div className="estimate-privacy-line"><span>{english ? 'Assessment answers stay in this browser. If optional contact is available, you can choose it after finishing the assessment; your full result is never conditional on contact.' : 'คำตอบแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ หากมีตัวเลือกให้ติดต่อกลับ คุณจะเลือกได้หลังตอบแบบประเมินเสร็จ และยังดูผลประเมินฉบับเต็มได้เสมอไม่ว่าจะเลือกให้ติดต่อหรือไม่'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
   </section></div></main>;
 }

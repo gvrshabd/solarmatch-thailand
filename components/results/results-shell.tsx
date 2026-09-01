@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Link from '@/components/site/internal-link';
 import { LeadCapture } from '@/components/lead/lead-capture';
+import { ScreenTransition } from '@/components/ui/screen-transition';
 import { assessmentContextStorageKey } from '@/components/estimate/estimate-shell';
 import { CalculationLoading } from './calculation-loading';
 import { LifetimeCostChart } from './lifetime-cost-chart';
@@ -92,6 +93,23 @@ function readResultViewState(signature: string) {
   } catch { return null; }
 }
 
+function contactSafeFallback(configuration: PublicAssessmentConfig | null) {
+  if (!configuration) return null;
+  return {
+    ...configuration,
+    privatePreview: false,
+    assessmentToken: null,
+    assessmentTokenExpiresAt: null,
+    liveLeadSubmissions: false,
+    contact: {
+      ...configuration.contact,
+      enabled: false,
+      preview: false,
+      operationalDistributionEnabled: false,
+    },
+  } satisfies PublicAssessmentConfig;
+}
+
 export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   const english = locale === 'en';
   const [answers, setAnswers] = useState<EstimateAnswers | null>(null);
@@ -133,14 +151,10 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       else setJourney('preparing');
       setReady(true);
     };
-    if (storedConfiguration) {
-      queueMicrotask(() => finish(storedConfiguration));
-    } else {
-      fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
-        .then(async (response) => response.ok ? response.json() as Promise<PublicAssessmentConfig> : null)
-        .then(finish)
-        .catch(() => finish(null));
-    }
+    fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
+      .then(async (response) => response.ok ? response.json() as Promise<PublicAssessmentConfig> : contactSafeFallback(storedConfiguration))
+      .then(finish)
+      .catch(() => finish(contactSafeFallback(storedConfiguration)));
     return () => { active = false; };
   }, []);
 
@@ -151,8 +165,8 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     resultsViewedTrackedRef.current = true;
     track('estimate_result_viewed', { recommendation: result.recommendation, systemKw: result.planningSystemKw });
     track('results_viewed', { language: locale, recommendation: result.recommendation });
-    const frame = requestAnimationFrame(() => resultHeadingRef.current?.focus());
-    return () => cancelAnimationFrame(frame);
+    const timer = window.setTimeout(() => resultHeadingRef.current?.focus(), 390);
+    return () => window.clearTimeout(timer);
   }, [journey, locale, result, selectedFact?.id]);
 
   const persistResultView = useCallback((patch: Partial<ResultViewState>) => {
@@ -255,11 +269,11 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   if (!answers || !result) return <main className="results-page"><section className="site-shell empty-result"><Sun aria-hidden="true" /><h1>{english ? 'Start with your electricity bill' : 'เริ่มจากค่าไฟของคุณ'}</h1><p>{english ? 'Complete the short estimator to see a practical solar starting point.' : 'ตอบคำถามสั้น ๆ เพื่อดูจุดเริ่มต้นโซลาร์ที่เหมาะกับสถานที่ของคุณ'}</p><Link className="button" href={localizedPath('/estimate', locale)}>{english ? 'Start estimate' : 'เริ่มประเมิน'} <ArrowRight /></Link></section></main>;
 
   if (journey === 'contact' && configuration?.contact.enabled) {
-    return <main className="contact-journey-page"><LeadCapture locale={locale} answers={answers} configuration={configuration} onContinue={continueAfterContact} onConfigurationChanged={updateConfiguration} /></main>;
+    return <ScreenTransition transitionKey="journey-contact" direction="forward" pace="result" className="journey-transition-surface"><main className="contact-journey-page"><LeadCapture locale={locale} answers={answers} configuration={configuration} onContinue={continueAfterContact} onConfigurationChanged={updateConfiguration} /></main></ScreenTransition>;
   }
 
   if (journey === 'preparing' || journey === 'initializing') {
-    return <CalculationLoading
+    return <ScreenTransition transitionKey="journey-preparing" direction="forward" pace="result" className="journey-transition-surface"><CalculationLoading
       facts={configuration?.loadingFacts ?? []}
       locale={locale}
       initialFact={selectedFact}
@@ -267,7 +281,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       initialStartedAt={loadingStartedAt}
       onStarted={loadingStarted}
       onComplete={loadingCompleted}
-    />;
+    /></ScreenTransition>;
   }
 
   const afterSolarBill = Math.max(0, result.currentMonthlyBillThb - result.planningMonthlySavingsThb);
@@ -278,7 +292,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   }[result.recommendation];
 
   return (
-    <main className="results-page">
+    <ScreenTransition transitionKey="journey-result" direction="forward" pace="result" className="journey-transition-surface"><main className="results-page">
       <p className="sr-only" role="status" aria-live="polite">{english ? 'Your solar estimate is ready.' : 'ผลประเมินโซลาร์ของคุณพร้อมแล้ว'}</p>
       <section className="result-hero-v3">
         <div className="site-shell result-hero-grid">
@@ -353,6 +367,6 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       <section className="site-shell result-policy-note"><BadgeCheck aria-hidden="true" /><div><h2>{english ? 'You may be eligible for tax relief and surplus payments' : 'คุณอาจมีสิทธิ์ได้รับสิทธิลดหย่อนภาษีและรายได้จากไฟส่วนเกิน'}</h2><p>{english ? 'Qualifying residential installations may be eligible for a tax deduction on qualifying spend up to ฿200,000 through 31 December 2028. Separately, approved surplus may be purchased at ฿2.20/kWh for 10 years, subject to programme conditions, quota, utility approval and a 5 kW AC export limit. Neither benefit is included in the estimate above.' : 'การติดตั้งที่อยู่อาศัยซึ่งเข้าเงื่อนไขอาจใช้สิทธิลดหย่อนจากรายจ่ายที่เข้าเกณฑ์ได้สูงสุด 200,000 บาท ถึง 31 ธันวาคม 2571 และไฟส่วนเกินที่ได้รับอนุมัติอาจขายได้ 2.20 บาท/หน่วย เป็นเวลา 10 ปี ภายใต้เงื่อนไข โควตา การอนุมัติจากการไฟฟ้า และขีดจำกัดส่งออก AC 5 kW โดยยังไม่รวมสิทธิทั้งสองในผลด้านบน'}</p></div></section>
 
       <section className="site-shell result-methodology-summary"><div><p className="eyebrow">{english ? 'How the estimate works' : 'ค่าประเมินมาจากไหน'}</p><h2>{english ? 'Every displayed figure has a traceable basis' : 'ทุกตัวเลขที่แสดงมีที่มาที่ตรวจสอบได้'}</h2></div><div className="trace-list">{result.trace.map((item) => <article key={item.labelEn}><strong>{english ? item.labelEn : item.labelTh}</strong><span>{english ? item.value : item.valueTh ?? item.value}</span><small>{english ? item.basisEn : item.basisTh}</small></article>)}</div><p>{english ? `Tariff used: ${result.tariffLabelEn}.` : `อัตราค่าไฟที่ใช้: ${result.tariffLabelTh}`}</p><Link className="text-link" href={localizedPath('/methodology', locale)}>{english ? 'Read the public methodology' : 'อ่านวิธีคำนวณฉบับสาธารณะ'} <ArrowRight /></Link></section>
-    </main>
+    </main></ScreenTransition>
   );
 }

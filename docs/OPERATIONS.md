@@ -20,7 +20,7 @@ Never create replacement resources merely because a binding is unavailable in on
 3. Confirm the private R2 bucket and bindings.
 4. Apply migrations locally, run the complete test suite, and inspect the schema.
 5. Run `wrangler d1 migrations list solarmatch-thailand-admin --remote`.
-6. Apply only pending versioned migrations with `wrangler d1 migrations apply solarmatch-thailand-admin --remote`.
+6. Apply only pending versioned migrations with `wrangler d1 migrations apply solarmatch-thailand-admin --remote`. Migration `0004_private_contact_preview.sql` is additive and tags private-development test records without modifying older rows.
 7. Deploy the matching Git commit through the existing GitHub → Cloudflare pipeline.
 8. Request `/api/assessment/config` once to seed the immutable legal-launch release, then verify migration `0003_shared_lead_legal_launch.sql`, questionnaire/rules v2, five fact rows, disabled contact configuration, and current release references.
 
@@ -35,6 +35,14 @@ Configure these only as encrypted Worker secrets:
 - `ASSESSMENT_SIGNING_SECRET`
 
 The non-secret Access team URL and AUD remain in `wrangler.jsonc`. `.dev.vars.example` documents local names but contains no usable values. Rotate signing or CSRF secrets through Cloudflare, then verify the admin and public submission gates. Rotating the assessment secret invalidates outstanding short-lived assessment tokens and does not affect stored leads.
+
+## Owner-only private contact preview
+
+`PRIVATE_CONTACT_PREVIEW_ENABLED` is an explicit temporary kill switch. It has an effect only when the switch is `true`, `PRIVATE_SITE_ACCESS_AUD` names the separate Worker-wide Access application, a current `Cf-Access-Jwt-Assertion` validates against that exact AUD and the configured team issuer, and the asserted email is in the exact `ADMIN_EMAILS` allowlist. The admin `ACCESS_AUD` remains unchanged and continues to protect `/admin*`.
+
+While enabled, the authenticated owner can exercise the complete shared-contact UI even though the published public contact configuration remains legally incomplete and disabled. Every resulting row is marked `private_development_preview` and `is_test_submission = 1`, is suppressed at creation, has `distribution_allowed = 0`, and is rejected by selection, clipboard/export, and partner-delivery paths. The admin UI labels and filters these records. This preview does not activate a partner, invent an operator identity, alter published legal readiness, or allow anonymous access.
+
+To remove the preview later, first set `PRIVATE_CONTACT_PREVIEW_ENABLED` to `false` and deploy. Verify `/api/assessment/config` returns disabled contact for an authenticated owner and that old browser state cannot reopen it. Then remove the temporary Worker-wide Access policy when public access is intended. Keep `PRIVATE_SITE_ACCESS_AUD` harmlessly configured or remove it in a later reviewed code change. Never copy the temporary AUD into `ACCESS_AUD`, and never delete the `/admin*` application.
 
 ## Routine backup
 

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { initialLoadingFactSet } from '@/config/loading-facts';
 import { loadingDurationMs, nextFactHistory, selectLoadingFact } from '@/lib/loading-facts/selection';
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
-import { assessContactReadiness, consentSnapshot, publicContactConfiguration, type ContactConfigurationRow } from '@/lib/server/contact-mode';
+import { assessContactReadiness, consentSnapshot, privatePreviewContactConfiguration, publicContactConfiguration, type ContactConfigurationRow } from '@/lib/server/contact-mode';
 import { leadSchema, normalizeThaiPhone } from '@/lib/validation/lead';
 
 function row(overrides: Partial<ContactConfigurationRow> = {}): ContactConfigurationRow {
@@ -29,6 +29,7 @@ describe('contact-mode readiness and consent', () => {
     const ready = row({ contact_collection_mode: 'validation_interest', contact_collection_enabled: 1, legal_complete: 1, retention_days: 180, adult_confirmation_version_id: 'adult-v1', consent_version_id: 'consent-v1' });
     const publicConfig = publicContactConfiguration(ready);
     expect(publicConfig.enabled).toBe(true);
+    expect(publicConfig.operationalDistributionEnabled).toBe(false);
     expect(publicConfig.recipient).toBeNull();
     expect(publicConfig.consent?.en).toContain('will not be shared with a solar company without separate permission');
     expect(publicConfig.consent?.th).toContain('จะไม่ถูกส่งต่อให้บริษัทโซลาร์');
@@ -56,9 +57,27 @@ describe('contact-mode readiness and consent', () => {
     });
     const publicConfig = publicContactConfiguration(ready);
     expect(publicConfig.enabled).toBe(true);
+    expect(publicConfig.operationalDistributionEnabled).toBe(true);
     expect(publicConfig.recipient).toBeNull();
     expect(publicConfig.question?.en).toBe('Would you like to be contacted by solar companies?');
     expect(consentSnapshot(publicConfig)).toMatchObject({ consentScope: 'shared_residential_solar_referral', solarMatchFollowupAuthorized: false, thirdPartyDisclosureAuthorized: true });
+  });
+
+  it('shows the shared contact journey privately while permanently disabling partner distribution', () => {
+    const publicConfig = privatePreviewContactConfiguration(row());
+    expect(publicConfig).toMatchObject({
+      enabled: true,
+      preview: true,
+      operationalDistributionEnabled: false,
+      mode: 'shared_solar_company_handoff',
+      retentionDays: null,
+      distributionWindowDays: null,
+      recipient: null,
+    });
+    expect(publicConfig.question?.en).toBe('Would you like to be contacted by solar companies?');
+    expect(publicConfig.yesLabel?.en).toBe('Yes, I would like solar companies to contact me');
+    expect(publicConfig.noLabel?.en).toBe('No, show me my estimate');
+    expect(publicConfig.consent?.en).toContain('I explicitly consent');
   });
 });
 

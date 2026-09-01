@@ -56,10 +56,17 @@ export function CalculationLoading({
 
   return (
     <main className="calculation-loading-page">
-      <section className="calculation-loading-content" aria-labelledby="preparing-title" aria-busy="true">
+      <section className="calculation-loading-content" role="status" aria-live="polite" aria-labelledby="preparing-title" aria-busy="true">
         <h1 id="preparing-title" className="calculation-loading-sr-title" tabIndex={-1}>
           {english ? 'Preparing your solar estimate' : 'กำลังเตรียมผลประเมินโซลาร์ของคุณ'}
         </h1>
+        <span className="solar-loading-indicator" aria-hidden="true">
+          <svg viewBox="0 0 52 52" focusable="false">
+            <circle className="solar-loading-track" cx="26" cy="26" r="20" />
+            <circle className="solar-loading-arc" cx="26" cy="26" r="20" />
+            <circle className="solar-loading-core" cx="26" cy="26" r="5" />
+          </svg>
+        </span>
         {fact && <div className="calculation-fact">
           <Image src={fact.imageUrl} width={320} height={220} alt={fact.alt[locale]} priority />
           <p className="calculation-fact-label">{english ? 'DID YOU KNOW?' : 'รู้หรือไม่?'}</p>
@@ -72,8 +79,7 @@ export function CalculationLoading({
             </Link>
           </p>
         </div>}
-        {!fact && <div className="calculation-generic" aria-hidden="true"><span /><span /><span /></div>}
-        <p className="sr-only" aria-live="polite">{english ? 'Your result is being prepared.' : 'กำลังเตรียมผลประเมินของคุณ'}</p>
+        {!fact && <p className="calculation-generic-copy">{english ? 'Preparing your result…' : 'กำลังเตรียมผลประเมิน…'}</p>}
       </section>
     </main>
   );

@@ -8,6 +8,7 @@ import { questionnaireDocumentSchema, scoringConfigurationSchema } from '@/lib/q
 import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { assessContactReadiness, type ContactConfigurationRow } from '@/lib/server/contact-mode';
+import { privatePreviewAccessConfiguration } from '@/lib/server/private-preview-auth';
 import { ensureInitialRelease, ensureLegalLaunchRelease } from '@/lib/server/releases';
 import { requireDatabase } from '@/lib/server/runtime';
 
@@ -159,6 +160,7 @@ export async function GET(request: Request) {
     rules: rules.results.map((row) => ({ ...row, configuration: JSON.parse(String(row.configuration_json)) })),
     contacts: contacts.results.map((row) => ({ ...row, permittedContactMethods: JSON.parse(String(row.permitted_contact_methods_json)), sharedFields: JSON.parse(String(row.shared_fields_json)) })),
     facts, release, audit: audit.results,
+    privatePreview: { configured: Boolean(privatePreviewAccessConfiguration()) },
   }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
