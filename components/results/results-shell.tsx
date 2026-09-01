@@ -22,7 +22,6 @@ import { assessmentContextStorageKey } from '@/components/estimate/estimate-shel
 import { CalculationLoading } from './calculation-loading';
 import { LifetimeCostChart } from './lifetime-cost-chart';
 import { SavingsChart } from './savings-chart';
-import { SolarFactCard } from './solar-fact-card';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { mapProvinces, makeInitialLocation, provinceCenter } from '@/lib/maps/provider';
 import { calculateEstimate } from '@/lib/calculator';
@@ -300,14 +299,16 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
         </div>
       </section>
 
+      <section className="site-shell result-service-disclaimer" aria-label={english ? 'Service and estimate disclaimer' : 'ข้อจำกัดของบริการและผลประเมิน'}>
+        <p><strong>{english ? 'SolarMatch is an information and referral service, not a solar installer.' : 'SolarMatch เป็นบริการให้ข้อมูลและแนะนำผู้ให้บริการ ไม่ใช่บริษัทติดตั้งโซลาร์'}</strong> {english ? 'This estimate is preliminary and is not an engineering design, official quotation or guarantee of savings. Site surveys, quotations and installation agreements are provided directly by independent solar companies. SolarMatch may receive payment for qualified introductions.' : 'ผลประเมินนี้เป็นข้อมูลเบื้องต้น ไม่ใช่การออกแบบทางวิศวกรรม ใบเสนอราคาอย่างเป็นทางการ หรือการรับประกันผลประหยัด การสำรวจหน้างาน ใบเสนอราคา และสัญญาติดตั้งจะดำเนินการโดยบริษัทโซลาร์อิสระโดยตรง และ SolarMatch อาจได้รับค่าตอบแทนจากการแนะนำลูกค้าที่ผ่านเกณฑ์'}</p>
+      </section>
+
       <section className="site-shell result-metrics-v3" aria-label={english ? 'Key estimate figures' : 'ตัวเลขสำคัญ'}>
         <article><Banknote aria-hidden="true" /><span>{english ? 'Planning cash price' : 'ราคาเงินสดเพื่อวางแผน'}</span><strong>{money(result.planningInstalledCostThb, locale)}</strong><small>{english ? 'Current package evidence; not a quote' : 'อิงแพ็กเกจปัจจุบัน ไม่ใช่ใบเสนอราคา'}</small></article>
         <article><TrendingUp aria-hidden="true" /><span>{english ? 'Simple cash payback' : 'คืนทุนเงินสดอย่างง่าย'}</span><strong>{result.planningPaybackYears === null ? (english ? 'Not reached' : 'ยังไม่คืนทุน') : `${number(result.planningPaybackYears, 1)} ${english ? 'years' : 'ปี'}`}</strong><small>{result.planningPaybackYears === null ? (english ? 'Annual value does not exceed the maintenance/component reserve' : 'มูลค่าต่อปียังไม่สูงกว่าเงินสำรองค่าดูแลและอุปกรณ์') : (english ? 'After annual maintenance/component reserve' : 'หลังเงินสำรองค่าดูแลและอุปกรณ์')}</small></article>
         <article><Sun aria-hidden="true" /><span>{english ? 'First-year production' : 'ผลผลิตปีแรก'}</span><strong>{number(result.planningAnnualProductionKwh)} kWh</strong><small>{english ? 'Long-run solar data; not a clear-sky assumption' : 'ใช้ข้อมูลแดดระยะยาว ไม่ได้สมมติว่าฟ้าใสทุกวัน'}</small></article>
         <article><Gauge aria-hidden="true" /><span>{english ? 'Estimated monthly use' : 'การใช้ไฟต่อเดือนโดยประมาณ'}</span><strong>{number(result.estimatedMonthlyConsumptionKwh)} kWh</strong><small>{english ? 'Reverse-calculated from your bill' : 'คำนวณย้อนกลับจากยอดค่าไฟ'}</small></article>
       </section>
-
-      {selectedFact && <section className="site-shell result-fact-section"><SolarFactCard fact={selectedFact} locale={locale} recall /></section>}
 
       {configuration?.contact.enabled && (contactOutcome === 'declined' || contactOutcome === 'skipped') && <section className="site-shell result-reconsider-section">
         {!reconsiderContact ? <div><p>{english ? 'Changed your mind about contact?' : 'หากเปลี่ยนใจและต้องการให้ติดต่อกลับ'}</p><button type="button" className="button button-secondary" onClick={() => setReconsiderContact(true)}>{english ? 'Review the optional contact step' : 'ดูขั้นตอนติดต่อกลับอีกครั้ง'}</button></div>

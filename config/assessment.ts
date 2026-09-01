@@ -158,23 +158,33 @@ const questions: AssessmentQuestion[] = [
     ],
     relevance: { calculation: true, qualification: false, scoring: true },
   },
-  {
-    id: 'installationTimeframe', type: 'choice', required: true,
-    title: { en: 'When are you considering installing solar?', th: 'คุณกำลังวางแผนติดตั้งโซลาร์เมื่อไร?' },
-    help: { en: 'A rough timeframe is enough.', th: 'เลือกช่วงเวลาโดยประมาณได้' },
-    options: [
-      { value: 'asap', label: { en: 'As soon as practical', th: 'ต้องการเริ่มโดยเร็วเมื่อพร้อม' } },
-      { value: 'one-three-months', label: { en: 'Within 1–3 months', th: 'ภายใน 1–3 เดือน' } },
-      { value: 'three-six-months', label: { en: 'Within 3–6 months', th: 'ภายใน 3–6 เดือน' } },
-      { value: 'over-six-months', label: { en: 'More than 6 months', th: 'อีกมากกว่า 6 เดือน' } },
-      { value: 'researching', label: { en: 'Researching for now', th: 'กำลังศึกษาข้อมูลอยู่' } },
-    ],
-    relevance: { calculation: false, qualification: false, scoring: true },
-  },
 ];
 
 export const initialQuestionnaire: QuestionnaireDocument = {
+  id: 'residential-questionnaire-v2',
+  schemaVersion: 5,
+  questions,
+};
+
+// Immutable compatibility document for historic releases and migration tests.
+// New public releases use `initialQuestionnaire` above.
+export const legacyQuestionnaireV1: QuestionnaireDocument = {
   id: 'residential-questionnaire-v1',
   schemaVersion: 4,
-  questions,
+  questions: [
+    ...questions,
+    {
+      id: 'installationTimeframe', type: 'choice', required: true,
+      title: { en: 'When are you considering installing solar?', th: 'คุณกำลังวางแผนติดตั้งโซลาร์เมื่อไร?' },
+      help: { en: 'A rough timeframe is enough.', th: 'เลือกช่วงเวลาโดยประมาณได้' },
+      options: [
+        { value: 'asap', label: { en: 'As soon as practical', th: 'ต้องการเริ่มโดยเร็วเมื่อพร้อม' } },
+        { value: 'one-three-months', label: { en: 'Within 1–3 months', th: 'ภายใน 1–3 เดือน' } },
+        { value: 'three-six-months', label: { en: 'Within 3–6 months', th: 'ภายใน 3–6 เดือน' } },
+        { value: 'over-six-months', label: { en: 'More than 6 months', th: 'อีกมากกว่า 6 เดือน' } },
+        { value: 'researching', label: { en: 'Researching for now', th: 'กำลังศึกษาข้อมูลอยู่' } },
+      ],
+      relevance: { calculation: false, qualification: false, scoring: true },
+    },
+  ],
 };

@@ -71,7 +71,7 @@ const copy: Record<Locale, HomeCopy> = {
     steps: [
       { title: 'ตอบจากสิ่งที่รู้', body: 'จังหวัด ค่าไฟ และรูปแบบการใช้ไฟช่วงกลางวัน โดยไม่ต้องอัปโหลดเอกสาร' },
       { title: 'เห็นตัวเลขที่ใช้วางแผนได้', body: 'ดูขนาดระบบ ผลผลิต ราคา และเงินประหยัดเป็นค่ากลางที่อธิบายที่มา' },
-      { title: 'เลือกขั้นตอนถัดไปด้วยตัวเอง', body: 'เห็นผลก่อนกรอกเบอร์ แล้วค่อยตัดสินใจว่าต้องการให้บริษัทโซลาร์ที่ระบุติดต่อเพื่อนัดประเมินหน้างานหรือไม่' },
+      { title: 'เลือกขั้นตอนถัดไปด้วยตัวเอง', body: 'เห็นผลก่อนกรอกเบอร์ แล้วค่อยตัดสินใจว่าต้องการให้บริษัทโซลาร์สำหรับที่พักอาศัยที่เข้าร่วมติดต่อหรือไม่' },
     ],
     previewEyebrow: 'ตัวอย่างการแสดงผล',
     previewTitle: 'เห็นความต่าง—พร้อมเห็นสมมติฐาน',
@@ -86,7 +86,7 @@ const copy: Record<Locale, HomeCopy> = {
     evidence: [
       { title: 'ผลมาก่อนข้อมูลติดต่อ', body: 'เห็นข้อมูลประมาณการก่อนตัดสินใจว่าจะกรอกเบอร์หรือไม่' },
       { title: 'สมมติฐานเปิดเผย', body: 'อัตรา ค่าใช้จ่าย และข้อจำกัดอยู่ใกล้กับผล ไม่ซ่อนในข้อความเล็ก' },
-      { title: 'ติดต่อกลับเฉพาะเมื่อพร้อมและยินยอม', body: 'แบบฟอร์มจะเปิดรับข้อมูลเมื่อระบุบริษัทผู้รับ นโยบาย และระยะเวลาเก็บข้อมูลครบถ้วนเท่านั้น' },
+      { title: 'ติดต่อกลับเฉพาะเมื่อพร้อมและยินยอม', body: 'แบบฟอร์มจะเปิดรับข้อมูลเมื่อระบุผู้ดำเนินการ นโยบาย กลุ่มผู้รับ และระยะเวลาเก็บกับส่งต่อข้อมูลครบถ้วนเท่านั้น' },
       { title: 'ไม่มีความเร่งด่วนปลอม', body: 'ไม่มีนาฬิกานับถอยหลัง โควตาปลอม หรือข้อความกดดัน' },
     ],
     faqEyebrow: 'คำถามที่พบบ่อย',
@@ -94,7 +94,7 @@ const copy: Record<Locale, HomeCopy> = {
     faq: [
       { question: 'ผลประเมินนี้แม่นแค่ไหน?', answer: 'เป็นการคัดกรองเบื้องต้นจากค่าไฟและพฤติกรรมการใช้ไฟ ความแม่นยำจะเพิ่มขึ้นเมื่อมีข้อมูลหลังคา โหลดไฟ และการสำรวจหน้างานจริง' },
       { question: 'ต้องกรอกเบอร์ก่อนดูผลไหม?', answer: 'ไม่ต้อง คุณจะเห็นผลประมาณการก่อนเสมอ และแบบฟอร์มติดต่อจะแสดงภายหลังเฉพาะเมื่อเปิดรับคำขอจริง' },
-      { question: 'SolarMatch เป็นผู้ติดตั้งหรือไม่?', answer: 'ไม่ใช่ SolarMatch เป็นธุรกิจสร้างและคัดกรองลูกค้าเป้าหมาย ช่วยให้เจ้าของบ้านเข้าใจข้อมูลก่อนเลือกขอให้บริษัทโซลาร์ติดต่อ และ SolarMatch อาจได้รับค่าตอบแทนจากบริษัทผู้รับข้อมูลเมื่อมีการส่งต่อที่ได้รับความยินยอม' },
+      { question: 'SolarMatch เป็นผู้ติดตั้งหรือไม่?', answer: 'ไม่ใช่ SolarMatch เป็นบริการให้ข้อมูลและแนะนำผู้ให้บริการ หากผู้ใช้ขอให้ติดต่อและยินยอม คำขออาจส่งให้บริษัทโซลาร์สำหรับที่พักอาศัยที่เข้าร่วมมากกว่าหนึ่งบริษัท และ SolarMatch อาจได้รับค่าตอบแทนสำหรับการแนะนำลูกค้า' },
       { question: 'ตัวเลขระยะคืนทุนมาจากไหน?', answer: 'แบบจำลองใช้ไฟที่ผลิตและใช้เอง ราคาติดตั้งปัจจุบัน ค่าเสื่อมประสิทธิภาพ และเงินสำรองค่าดูแล โดยไม่นับรายได้ขายไฟ สิทธิภาษี เงินกู้ หรือค่าไฟที่เพิ่มขึ้น ตัวเลขจริงยังต้องยืนยันจากผู้ติดตั้งและข้อมูลบ้าน' },
     ],
     finalTitle: 'เริ่มเข้าใจว่าบ้านคุณอาจต้องการระบบแบบไหน',
@@ -105,7 +105,7 @@ const copy: Record<Locale, HomeCopy> = {
     eyebrow: 'Rooftop solar estimates for homes in Thailand',
     titleLead: 'Is rooftop solar',
     titleEmphasis: 'a good fit for your home?',
-    lede: 'See a clear starting estimate, then decide whether you would like a named solar company to contact you about a site assessment.',
+    lede: 'See a clear starting estimate, then decide whether you would like participating residential solar companies to contact you about a site assessment.',
     photoAlt: 'Solar panels on a tiled residential roof with palm trees in the background',
     photoCaption: 'Photo by Kindel Media via Pexels · used under the Pexels licence',
     example: 'Example planning result',
@@ -121,7 +121,7 @@ const copy: Record<Locale, HomeCopy> = {
     steps: [
       { title: 'Answer from what you know', body: 'Province, electricity bill, and daytime use—without uploading documents.' },
       { title: 'See one planning figure', body: 'View a starting system, production, price, and savings figure with a traceable basis.' },
-      { title: 'Choose the next step yourself', body: 'See the result before entering a phone number, then decide whether you want the named solar company to contact you.' },
+      { title: 'Choose the next step yourself', body: 'See the result before entering a phone number, then decide whether you want participating residential solar companies to contact you.' },
     ],
     previewEyebrow: 'Example result',
     previewTitle: 'See the difference—and the assumptions behind it',
@@ -136,7 +136,7 @@ const copy: Record<Locale, HomeCopy> = {
     evidence: [
       { title: 'Results before contact details', body: 'Review useful preliminary information before deciding whether to enter a phone number.' },
       { title: 'Assumptions are visible', body: 'Rates, costs, and limitations sit close to the result instead of hiding in fine print.' },
-      { title: 'Contact only with consent', body: 'The form accepts details only after the recipient, notice, and retention period are published and the user actively consents.' },
+      { title: 'Contact only with consent', body: 'The form accepts details only after the operator, recipient category, legal notices, retention and distribution periods are published and the user actively consents.' },
       { title: 'No manufactured urgency', body: 'No countdown timers, invented availability, or pressure messages.' },
     ],
     faqEyebrow: 'Frequently asked questions',
@@ -144,7 +144,7 @@ const copy: Record<Locale, HomeCopy> = {
     faq: [
       { question: 'How accurate is this estimate?', answer: 'It is an initial screen based on electricity cost and usage patterns. Accuracy improves with roof, load, and site-survey information.' },
       { question: 'Do I need to enter a phone number first?', answer: 'No. You always see the estimate first. A contact form appears afterwards only when real requests are open.' },
-      { question: 'Is SolarMatch an installer?', answer: 'No. SolarMatch is a lead-generation and qualification business. It helps homeowners understand the basics before optionally requesting contact from a named solar company, and SolarMatch may be paid by that company for a consented referral.' },
+      { question: 'Is SolarMatch an installer?', answer: 'No. SolarMatch is an information and referral service. With an explicit contact request and consent, one enquiry may be shared with more than one participating residential solar company, and SolarMatch may receive payment for the introduction.' },
       { question: 'Where does the payback figure come from?', answer: 'The model values electricity produced and used on site, then includes current installation-price references, degradation, and a maintenance/component reserve. Export income, tax relief, finance, and tariff escalation stay outside the planning figure.' },
     ],
     finalTitle: 'Start understanding what kind of system your home may need',

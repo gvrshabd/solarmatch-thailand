@@ -50,7 +50,8 @@ export type EstimateAnswers = {
   roofMaterial: string;
   customRoofMaterial?: string;
   shade: RoofShade;
-  installationTimeframe: InstallationTimeframe;
+  // Kept only for reading historic v1 assessment records.
+  installationTimeframe?: InstallationTimeframe;
 
   // Optional precision inputs. These are never needed to unlock a complete result.
   location?: EstimateLocation;

@@ -16,6 +16,7 @@ export const leadSchema = z.object({
   phone: z.string().trim().transform((value) => value.replace(/[\s()-]/gu, '')).refine((value) => thaiPhonePattern.test(value), 'invalid_thai_phone'),
   contactMethod: z.enum(['phone', 'line']),
   lineId: z.string().trim().min(2).max(80).optional(),
+  adultConfirmed: z.literal(true),
   consent: z.literal(true),
   locale: z.enum(['en', 'th']),
   assessmentToken: z.string().min(40).max(4096),

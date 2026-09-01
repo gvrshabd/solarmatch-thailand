@@ -27,7 +27,7 @@ export type ScoringConfiguration = {
     roofMaterial: number;
     propertyType: number;
     location: number;
-    timeframe: number;
+    timeframe?: number;
   };
   billThresholdsThb: [number, number, number, number, number];
   targetProvinces: string[];
@@ -44,12 +44,38 @@ export type LeadAssessment = {
 };
 
 export const initialScoringConfiguration: ScoringConfiguration = {
-  id: 'residential-rules-v1',
+  id: 'residential-rules-v2',
   maximumPoints: 100,
   ownerRequired: true,
   minimumAirConditioners: 4,
   highQualityThreshold: 4,
   automaticSelectionThreshold: 4,
+  weights: {
+    ownership: 10,
+    airConditioners: 18,
+    monthlyBill: 17,
+    daytimeUse: 13,
+    daytimeLoads: 5,
+    roofArea: 11,
+    shade: 11,
+    roofMaterial: 5,
+    propertyType: 5,
+    location: 5,
+  },
+  billThresholdsThb: [1500, 3000, 5000, 8000, 12000],
+  targetProvinces: ['bangkok', 'nonthaburi', 'pathum-thani', 'samut-prakan', 'samut-sakhon', 'nakhon-pathom'],
+  bands: [
+    { min: 0, max: 24, score: 1 },
+    { min: 25, max: 44, score: 2 },
+    { min: 45, max: 64, score: 3 },
+    { min: 65, max: 79, score: 4 },
+    { min: 80, max: 100, score: 5 },
+  ],
+};
+
+export const legacyScoringConfigurationV1: ScoringConfiguration = {
+  ...initialScoringConfiguration,
+  id: 'residential-rules-v1',
   weights: {
     ownership: 10,
     airConditioners: 18,
@@ -63,15 +89,6 @@ export const initialScoringConfiguration: ScoringConfiguration = {
     location: 5,
     timeframe: 5,
   },
-  billThresholdsThb: [1500, 3000, 5000, 8000, 12000],
-  targetProvinces: ['bangkok', 'nonthaburi', 'pathum-thani', 'samut-prakan', 'samut-sakhon', 'nakhon-pathom'],
-  bands: [
-    { min: 0, max: 24, score: 1 },
-    { min: 25, max: 44, score: 2 },
-    { min: 45, max: 64, score: 3 },
-    { min: 65, max: 79, score: 4 },
-    { min: 80, max: 100, score: 5 },
-  ],
 };
 
 function bracket<T extends string>(value: T, points: Record<T, number>) {
@@ -105,7 +122,10 @@ export function calculateLeadAssessment(
   const propertyPoints = weighted(bracket(answers.propertyType, { 'detached-home': 5, 'large-home': 5, 'semi-detached-home': 4, townhouse: 3, 'other-residential': 2 }), 5, configuration.weights.propertyType);
   const targetProvinces = new Set(configuration.targetProvinces);
   const locationPoints = weighted(targetProvinces.has(answers.province) ? 5 : 1, 5, configuration.weights.location);
-  const timeframePoints = weighted(bracket(answers.installationTimeframe, { asap: 5, 'one-three-months': 5, 'three-six-months': 4, 'over-six-months': 2, researching: 1 }), 5, configuration.weights.timeframe);
+  const timeframeMaximum = configuration.weights.timeframe ?? 0;
+  const timeframePoints = answers.installationTimeframe && timeframeMaximum > 0
+    ? weighted(bracket(answers.installationTimeframe, { asap: 5, 'one-three-months': 5, 'three-six-months': 4, 'over-six-months': 2, researching: 1 }), 5, timeframeMaximum)
+    : 0;
 
   const factors: ScoringFactor[] = [
     { key: 'ownership', points: ownershipPoints, maximum: configuration.weights.ownership, value: answers.ownershipStatus, explanationEn: `${answers.ownershipStatus} ownership status`, explanationTh: `สถานะต่อทรัพย์สิน: ${answers.ownershipStatus}` },
@@ -118,7 +138,7 @@ export function calculateLeadAssessment(
     { key: 'roof-material', points: roofMaterialPoints, maximum: configuration.weights.roofMaterial, value: answers.roofMaterial, explanationEn: 'Roof-material information', explanationTh: 'ข้อมูลวัสดุหลังคา' },
     { key: 'property-type', points: propertyPoints, maximum: configuration.weights.propertyType, value: answers.propertyType, explanationEn: 'Residential property type', explanationTh: 'ประเภทที่พักอาศัย' },
     { key: 'location', points: locationPoints, maximum: configuration.weights.location, value: answers.province, explanationEn: targetProvinces.has(answers.province) ? 'Within Greater Bangkok' : 'Outside the initial target area', explanationTh: targetProvinces.has(answers.province) ? 'อยู่ในกรุงเทพฯ และปริมณฑล' : 'อยู่นอกพื้นที่เป้าหมายเริ่มต้น' },
-    { key: 'timeframe', points: timeframePoints, maximum: configuration.weights.timeframe, value: answers.installationTimeframe, explanationEn: 'Installation timeframe', explanationTh: 'ช่วงเวลาที่วางแผนติดตั้ง' },
+    ...(timeframeMaximum > 0 ? [{ key: 'timeframe', points: timeframePoints, maximum: timeframeMaximum, value: answers.installationTimeframe, explanationEn: 'Installation timeframe', explanationTh: 'ช่วงเวลาที่วางแผนติดตั้ง' }] : []),
   ];
   const rawPoints = Math.max(0, Math.min(configuration.maximumPoints, factors.reduce((sum, factor) => sum + factor.points, 0)));
   const qualityScore = configuration.bands.find((band) => rawPoints >= band.min && rawPoints <= band.max)?.score ?? 1;

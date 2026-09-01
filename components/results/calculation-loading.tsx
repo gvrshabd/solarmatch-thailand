@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import Link from '@/components/site/internal-link';
 import type { Locale } from '@/config/i18n';
+import { localizedPath } from '@/config/i18n';
 import { track } from '@/lib/analytics/track';
 import { loadingDurationMs, loadingFactHistoryKey, nextFactHistory, selectLoadingFact } from '@/lib/loading-facts/selection';
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
-import { SolarFactCard } from './solar-fact-card';
 
 function readHistory() {
   try {
@@ -54,13 +56,24 @@ export function CalculationLoading({
 
   return (
     <main className="calculation-loading-page">
-      <section className="site-shell calculation-loading-card" aria-labelledby="preparing-title" aria-busy="true">
-        <div className="calculation-pulse" aria-hidden="true"><span /></div>
-        <p className="eyebrow">SolarMatch Thailand</p>
-        <h1 id="preparing-title" tabIndex={-1}>{english ? 'Preparing your solar estimate' : 'กำลังเตรียมผลประเมินโซลาร์ของคุณ'}</h1>
-        <p aria-live="polite">{english ? 'While we prepare your result, here’s a quick solar fact.' : 'ระหว่างเตรียมผลประเมิน ลองดูเกร็ดน่ารู้เกี่ยวกับพลังงานแสงอาทิตย์'}</p>
-        {fact && <SolarFactCard fact={fact} locale={locale} />}
+      <section className="calculation-loading-content" aria-labelledby="preparing-title" aria-busy="true">
+        <h1 id="preparing-title" className="calculation-loading-sr-title" tabIndex={-1}>
+          {english ? 'Preparing your solar estimate' : 'กำลังเตรียมผลประเมินโซลาร์ของคุณ'}
+        </h1>
+        {fact && <div className="calculation-fact">
+          <Image src={fact.imageUrl} width={320} height={220} alt={fact.alt[locale]} priority />
+          <p className="calculation-fact-label">{english ? 'DID YOU KNOW?' : 'รู้หรือไม่?'}</p>
+          <h2>{fact.title[locale]}</h2>
+          <p className="calculation-fact-copy">{fact.copy[locale]}</p>
+          <p className="calculation-fact-source">
+            {english ? 'Source:' : 'แหล่งข้อมูล:'} {fact.reference.citation} <span aria-hidden="true">—</span>{' '}
+            <Link href={`${localizedPath('/resources', locale)}#${fact.resourcesAnchor}`}>
+              {english ? 'View reference' : 'ดูเอกสารอ้างอิง'}
+            </Link>
+          </p>
+        </div>}
         {!fact && <div className="calculation-generic" aria-hidden="true"><span /><span /><span /></div>}
+        <p className="sr-only" aria-live="polite">{english ? 'Your result is being prepared.' : 'กำลังเตรียมผลประเมินของคุณ'}</p>
       </section>
     </main>
   );

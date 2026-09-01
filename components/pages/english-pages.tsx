@@ -14,7 +14,8 @@ import { ResourcesContent } from '@/components/pages/resources-content';
 import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
 import { PageHero } from '@/components/content/page-hero';
-import { LegalShell } from '@/components/content/legal-shell';
+import { PublishedLegalDocument } from '@/components/content/published-legal-document';
+import { OperatorDisclosure } from '@/components/content/operator-disclosure';
 import { solarAssumptions } from '@/config/solar-assumptions';
 
 const en = (path = '') => `/en${path}`;
@@ -27,8 +28,8 @@ function EnglishHowItWorks() {
   return <main><PageHero eyebrow="How it works" title="Understand your home before requesting quotes"><p>SolarMatch breaks complicated information into three stages, showing what is known, what still needs checking, and what to ask an installer.</p></PageHero>
     <section className="site-shell numbered-sections">
       <article><span>01</span><ClipboardList /><div><h2>Start with available information</h2><p>Answer what you know about province, bills, usage, and the roof. There is no need to guess or upload documents.</p></div></article>
-      <article><span>02</span><Calculator /><div><h2>View a practical planning figure</h2><p>Get a starting system size, production, price, savings, and payback from ten simple answers, with a method and source trail you can inspect.</p></div></article>
-      <article><span>03</span><MessagesSquare /><div><h2>Choose whether to request contact</h2><p>See the result before entering a phone number, then decide whether you want a named solar company to contact you about a site assessment.</p></div></article>
+      <article><span>02</span><Calculator /><div><h2>View a practical planning figure</h2><p>Get a starting system size, production, price, savings, and payback from nine simple answers, with a method and source trail you can inspect.</p></div></article>
+      <article><span>03</span><MessagesSquare /><div><h2>Choose whether to request contact</h2><p>See the result before entering a phone number, then decide whether you want participating residential solar companies to contact you about a site assessment.</p></div></article>
     </section>
     <section className="content-cta"><div className="site-shell"><h2>Ready to try it with your electricity bill?</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
   </main>;
@@ -110,7 +111,7 @@ function EnglishMethodology() {
 }
 
 function EnglishContact() {
-  return <main><PageHero eyebrow="Contact" title="Contact channels will open after accountable details are complete"><p>SolarMatch will not display or activate LINE, phone, or email until the legal operator, privacy channel, and data recipient have been correctly confirmed.</p></PageHero><section className="site-shell contact-status-card"><ShieldCheck /><div><h2>The assessment remains available</h2><p>You can see results without providing personal information. When contact requests open, the receiving solar company will be named clearly before consent is requested.</p><Link className="text-link" href={en('/privacy')}>Read the Privacy Notice <ArrowRight /></Link></div></section></main>;
+  return <main><PageHero eyebrow="Contact" title="Contact channels will open after accountable details are complete"><p>SolarMatch will not display or activate LINE, phone, or email until the legal operator, privacy channel, recipient category, and distribution terms have been correctly confirmed.</p></PageHero><section className="site-shell contact-status-card"><ShieldCheck /><div><h2>The assessment remains available</h2><p>You can see results without providing personal information. When contact requests open, the site will clearly explain that more than one participating residential solar company may receive the enquiry, then request separate explicit consent.</p><Link className="text-link" href={en('/privacy')}>Read the Privacy Notice <ArrowRight /></Link><OperatorDisclosure locale="en" /></div></section></main>;
 }
 
 const resources = [
@@ -140,15 +141,15 @@ function EnglishResources() {
 }
 
 function EnglishPrivacy() {
-  return <LegalShell locale="en" title="Privacy Notice" summary="Assessment answers remain in the browser session. Contact requests activate only after the operator, recipient, purpose, and retention period have been completely published."><h2>1. Assessment information</h2><p>Province, bill, home type, ownership, appliances, AC count, and roof answers are kept in browser session storage so the assessment survives refresh and language switching. They are not sent to SolarMatch unless you see your result, choose contact, and submit the form yourself.</p><h2>2. Optional address and map</h2><p>Optional address and coordinates stay in the browser and are never put in the URL. OpenStreetMap receives ordinary tile-request data for the viewed area, including IP address, user agent, referrer, and tile coordinates. SolarMatch does not send typed address text to a geocoder.</p><h2>3. Contact requests</h2><p>When requests open, the form will name the receiving solar company before asking for consent. Stored data may include legal name, phone, optional LINE ID, assessment answers, version references, and consent evidence. SolarMatch is not the installer and may be paid by the receiving company.</p><h2>4. Current status</h2><p>Contact requests are currently disabled because the legal operator, privacy contact, receiving company, and retention period have not all been published. The system therefore refuses personal-information submissions.</p><h2>5. Local deletion and rights</h2><p>Use “Clear and start over” to remove browser data. The access, correction, withdrawal, and deletion channel will be published before contact collection opens; if it is absent, the form must remain disabled.</p></LegalShell>;
+  return <PublishedLegalDocument type="privacy" locale="en" />;
 }
 
 function EnglishTerms() {
-  return <LegalShell locale="en" title="Terms of use" summary="SolarMatch provides a preliminary residential solar assessment, not an engineering design, quotation, or guarantee."><h2>1. Nature of the service</h2><p>SolarMatch is a residential solar lead-generation and qualification service. It helps homeowners understand initial information before optionally asking a solar company to contact them. SolarMatch is not the installer, an engineering adviser, a financial provider, or a licensed broker, and may be paid by the receiving company for a consented referral.</p><h2>2. Preliminary results</h2><p>Results come from user-provided information and disclosed assumptions. They do not guarantee system size, production, savings, income, payback, or suitability. Actual outcomes depend on usage, roof conditions, equipment, design, price, and tariffs.</p><h2>3. Checks before deciding</h2><p>Users should obtain a site survey and check structure, electrical systems, permissions, contracts, warranties, and current policy with qualified professionals before installation or payment.</p><h2>4. Optional contact</h2><p>Contact is not required to see results. The form will name the recipient before consent. Pricing, contracting, and installation are between the user and the solar company.</p><h2>5. Service status</h2><p>Contact collection remains disabled until legal and recipient details are complete. There are no payments, customer accounts, multi-installer bidding, or automatic lead sales.</p></LegalShell>;
+  return <PublishedLegalDocument type="terms" locale="en" />;
 }
 
 function EnglishCookies() {
-  return <LegalShell locale="en" title="Cookies and browser storage" summary="The site uses session storage for estimator continuity and does not currently activate advertising or behaviour-analytics cookies."><h2>1. What is kept locally</h2><p>The estimator keeps answers, results, and a short-lived secure session token in browser session storage so refresh and language switching do not restart the assessment.</p><h2>2. What is not active</h2><p>There are no advertising cookies, analytics pixels, heatmaps, cross-site trackers, or CRM integrations. Any future non-essential technology must follow an appropriate consent architecture before activation.</p><h2>3. Third-party map requests</h2><p>Opening the optional map requests OpenStreetMap tiles for the visible area under the OpenStreetMap Foundation’s terms and privacy policy; typed address text is not included.</p><h2>4. Removing local information</h2><p>Use “Clear and start over” or end the browser session to remove estimator storage.</p></LegalShell>;
+  return <PublishedLegalDocument type="cookies" locale="en" />;
 }
 
 export function EnglishPage({ slug }: { slug: string }) {

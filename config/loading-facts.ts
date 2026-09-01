@@ -6,10 +6,10 @@ export const initialLoadingFactSet: LoadingFactSet = {
   facts: [
     {
       id: 'home-value',
-      title: { en: 'Boosting Home Value', th: 'เพิ่มมูลค่าให้บ้าน' },
+      title: { en: 'Boosting Home Value', th: 'ช่วยเพิ่มมูลค่าบ้าน' },
       copy: {
         en: "Adding rooftop solar panels boosts a home's resale value by roughly 4% on average compared to homes without them (Hoen et al., 2015).",
-        th: 'การติดตั้งแผงโซลาร์บนหลังคาช่วยเพิ่มมูลค่าขายต่อของบ้านโดยเฉลี่ยประมาณ 4% เมื่อเทียบกับบ้านที่ไม่ได้ติดตั้ง (Hoen et al., 2015)',
+        th: 'โดยเฉลี่ยแล้ว การติดตั้งแผงโซลาร์บนหลังคาช่วยเพิ่มมูลค่าขายต่อของบ้านได้ราว 4% เมื่อเทียบกับบ้านที่ไม่ได้ติดตั้ง (Hoen et al., 2015)',
       },
       alt: {
         en: 'Monochrome line drawing of a cozy house wearing a small solar-panel hat beside an upward arrow.',
@@ -32,7 +32,7 @@ export const initialLoadingFactSet: LoadingFactSet = {
       title: { en: 'Mini Rooftop Forest', th: 'ป่าเล็ก ๆ บนหลังคา' },
       copy: {
         en: 'Powering a home with solar clears as much carbon each year as growing dozens of baby trees for a decade (U.S. Environmental Protection Agency, 2023).',
-        th: 'การใช้โซลาร์จ่ายไฟให้บ้านช่วยลดคาร์บอนในแต่ละปีได้พอ ๆ กับการปลูกกล้าไม้หลายสิบต้นให้เติบโตนาน 10 ปี (U.S. Environmental Protection Agency, 2023)',
+        th: 'การใช้โซลาร์จ่ายไฟให้บ้านช่วยลดคาร์บอนในแต่ละปีได้เทียบเท่ากับการปลูกต้นกล้าหลายสิบต้นให้เติบโตเป็นเวลาสิบปี (U.S. Environmental Protection Agency, 2023)',
       },
       alt: {
         en: 'Monochrome line drawing of two smiling young tree saplings growing side by side.',
@@ -55,7 +55,7 @@ export const initialLoadingFactSet: LoadingFactSet = {
       title: { en: 'Friendly Green Ripple', th: 'พลังสีเขียวส่งต่อถึงเพื่อนบ้าน' },
       copy: {
         en: 'Putting solar on your roof inspires your street, making nearby neighbors up to 40% more likely to go solar too (Graziano & Gillingham, 2015).',
-        th: 'การติดโซลาร์บนหลังคาของคุณช่วยสร้างแรงบันดาลใจให้คนในละแวกเดียวกัน ทำให้เพื่อนบ้านใกล้เคียงมีแนวโน้มติดโซลาร์เพิ่มขึ้นได้สูงสุด 40% (Graziano & Gillingham, 2015)',
+        th: 'การติดโซลาร์บนหลังคาอาจสร้างแรงบันดาลใจให้คนในละแวกเดียวกัน จนเพื่อนบ้านมีแนวโน้มติดโซลาร์เพิ่มขึ้นได้ถึง 40% (Graziano & Gillingham, 2015)',
       },
       alt: {
         en: 'Monochrome line drawing of two neighboring houses smiling and giving each other a high-five across their fences.',
@@ -75,10 +75,10 @@ export const initialLoadingFactSet: LoadingFactSet = {
     },
     {
       id: 'patio-gardens',
-      title: { en: 'Happy Patio Gardens', th: 'สวนกระถางแสนสุข' },
+      title: { en: 'Happy Patio Gardens', th: 'สวนระเบียงแสนสุข' },
       copy: {
         en: 'The gentle shade from residential panels helps potted herbs and greens thrive in the summer heat using less water (Barron-Gafford et al., 2019).',
-        th: 'ร่มเงาอ่อน ๆ จากแผงโซลาร์สำหรับบ้านช่วยให้สมุนไพรและผักสวนครัวในกระถางเติบโตได้ดีท่ามกลางอากาศร้อนในฤดูร้อน โดยใช้น้ำน้อยลง (Barron-Gafford et al., 2019)',
+        th: 'ร่มเงาอ่อน ๆ จากแผงโซลาร์ช่วยให้สมุนไพรและผักกระถางเติบโตได้ดีท่ามกลางอากาศร้อน โดยใช้น้ำน้อยลง (Barron-Gafford et al., 2019)',
       },
       alt: {
         en: 'Monochrome line drawing of a potted basil plant wearing sunglasses beneath a small parasol.',
@@ -101,7 +101,7 @@ export const initialLoadingFactSet: LoadingFactSet = {
       title: { en: 'Saving River Water', th: 'ช่วยรักษาสายน้ำ' },
       copy: {
         en: 'Home solar makes clean electricity using almost no water, keeping local rivers and freshwater wildlife happy and thriving (Macknick et al., 2012).',
-        th: 'โซลาร์สำหรับบ้านผลิตไฟฟ้าสะอาดโดยแทบไม่ใช้น้ำ ช่วยให้แม่น้ำในท้องถิ่นและสัตว์น้ำจืดยังคงดำรงชีวิตและเติบโตได้อย่างอุดมสมบูรณ์ (Macknick et al., 2012)',
+        th: 'โซลาร์สำหรับบ้านผลิตไฟฟ้าสะอาดโดยแทบไม่ใช้น้ำ ช่วยลดแรงกดดันต่อแม่น้ำและระบบนิเวศน้ำจืด (Macknick et al., 2012)',
       },
       alt: {
         en: 'Monochrome line drawing of a cheerful small fish jumping from a sparkling water ripple.',

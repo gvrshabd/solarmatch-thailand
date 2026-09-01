@@ -24,7 +24,7 @@ export const estimateAnswersSchema = z.object({
   roofMaterial: z.string().min(1),
   customRoofMaterial: z.string().trim().min(2).max(100).optional(),
   shade: z.enum(['almost-none', 'little', 'some', 'a-lot', 'unsure']),
-  installationTimeframe: z.enum(['asap', 'one-three-months', 'three-six-months', 'over-six-months', 'researching']),
+  installationTimeframe: z.enum(['asap', 'one-three-months', 'three-six-months', 'over-six-months', 'researching']).optional(),
   location: locationSchema.optional(),
   exactRoofAreaSqm: z.number().positive().max(100000).optional(),
   roofDirection: z.enum(['south-group', 'east', 'west', 'north', 'flat', 'several', 'unsure']).optional(),
@@ -60,7 +60,7 @@ export const estimateAnswersSchema = z.object({
 });
 
 export const estimateDraftSchema = z.object({
-  version: z.literal(4),
+  version: z.union([z.literal(4), z.literal(5)]),
   answers: z.record(z.string(), z.unknown()),
   step: z.number().int().nonnegative(),
   questionnaireVersionId: z.string().optional(),

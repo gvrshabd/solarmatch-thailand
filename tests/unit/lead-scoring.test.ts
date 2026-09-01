@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { calculateLeadAssessment, initialScoringConfiguration, validateScoringConfiguration } from '@/lib/qualification/scoring';
+import { calculateLeadAssessment, initialScoringConfiguration, legacyScoringConfigurationV1, validateScoringConfiguration } from '@/lib/qualification/scoring';
+import { initialQuestionnaire, legacyQuestionnaireV1 } from '@/config/assessment';
 import { estimateAnswersSchema } from '@/lib/validation/estimate';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 
@@ -15,7 +16,6 @@ const strong: EstimateAnswers = {
   airConditionerCount: 8,
   roofMaterial: 'concrete-tile',
   shade: 'almost-none',
-  installationTimeframe: 'one-three-months',
 };
 
 describe('residential lead qualification and scoring', () => {
@@ -47,7 +47,6 @@ describe('residential lead qualification and scoring', () => {
       daytimeLoads: ['air-conditioning'],
       airConditionerCount: 2,
       shade: 'a-lot',
-      installationTimeframe: 'researching',
     });
     expect(assessment.qualityScore).toBeLessThanOrEqual(2);
     expect(assessment.hardEligible).toBe(false);
@@ -73,6 +72,21 @@ describe('residential lead qualification and scoring', () => {
     const invalid = structuredClone(initialScoringConfiguration);
     invalid.weights.location = 6;
     expect(validateScoringConfiguration(invalid)).toContain('Scoring weights must total exactly 100.');
+  });
+
+  it('publishes a nine-question schema-v5 questionnaire while preserving the ten-question v1 document', () => {
+    expect(initialQuestionnaire).toMatchObject({ id: 'residential-questionnaire-v2', schemaVersion: 5 });
+    expect(initialQuestionnaire.questions).toHaveLength(9);
+    expect(initialQuestionnaire.questions.some((question) => question.id === 'installationTimeframe')).toBe(false);
+    expect(legacyQuestionnaireV1.questions).toHaveLength(10);
+    expect(legacyQuestionnaireV1.questions.at(-1)?.id).toBe('installationTimeframe');
+  });
+
+  it('keeps exact v2 weights at 100 and preserves the historic timeframe-weighted rules', () => {
+    expect(Object.values(initialScoringConfiguration.weights).reduce((sum, value) => sum + value, 0)).toBe(100);
+    expect(initialScoringConfiguration.weights).toEqual({ ownership: 10, airConditioners: 18, monthlyBill: 17, daytimeUse: 13, daytimeLoads: 5, roofArea: 11, shade: 11, roofMaterial: 5, propertyType: 5, location: 5 });
+    expect(legacyScoringConfigurationV1.weights.timeframe).toBe(5);
+    expect(Object.values(legacyScoringConfigurationV1.weights).reduce((sum, value) => sum + value, 0)).toBe(100);
   });
 
   it('rejects overlapping score bands and unsafe automatic-selection thresholds', () => {

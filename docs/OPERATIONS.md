@@ -8,7 +8,7 @@ Last reviewed: **2026-09-01**
 - Production branch: `main`
 - D1 database: `solarmatch-thailand-admin` (`DB`)
 - Private R2 bucket: `solarmatch-thailand-storage` (`MEDIA`)
-- Cloudflare Access application: existing `/admin*` application
+- Cloudflare Access: durable `/admin*` application plus the owner's temporary Worker-wide development gate
 - Initial application allowlist: `deluxejahseh@gmail.com`
 
 Never create replacement resources merely because a binding is unavailable in one local shell. Confirm the existing account resource and Worker binding first. Never broaden Access to public routes and never modify Milly's.
@@ -22,7 +22,7 @@ Never create replacement resources merely because a binding is unavailable in on
 5. Run `wrangler d1 migrations list solarmatch-thailand-admin --remote`.
 6. Apply only pending versioned migrations with `wrangler d1 migrations apply solarmatch-thailand-admin --remote`.
 7. Deploy the matching Git commit through the existing GitHub → Cloudflare pipeline.
-8. Request `/api/assessment/config` once to seed the immutable initial release, then verify migration `0002_contact_modes_and_loading_facts.sql`, the five fact rows, disabled contact configuration, and current release references.
+8. Request `/api/assessment/config` once to seed the immutable legal-launch release, then verify migration `0003_shared_lead_legal_launch.sql`, questionnaire/rules v2, five fact rows, disabled contact configuration, and current release references.
 
 The seed release has `live_lead_submissions = 0` and an incomplete legal record. Applying the migration or deploying code cannot silently activate lead collection.
 
@@ -64,14 +64,14 @@ For SolarMatch-only validation follow-up:
 - retention period in days; and
 - consent wording limited to SolarMatch validation follow-up.
 
-For named-installer handoff, also require:
-
-- receiving solar company legal name in Thai and English;
-- receiving company's privacy notice URL; and
-- consent wording naming that recipient and the shared fields.
+For shared residential-solar-company handoff, also require published adult/consent/Privacy/Terms/Cookie versions, a positive distribution window, recipient category and allowed fields, and at least one active partner with legal identity, privacy URL, matching service area, and a currently valid recorded contract.
 
 Then complete and review the Thai and English Privacy Notice and Terms, preview and publish the configuration, run successful/failed/duplicate/withdrawal/deletion and consent-scoped export tests, inspect logs for PII, and only then enable the release. Do not activate ads in the same change.
 
 ## Post-deployment smoke test
 
-Verify Thai and English home, assessment, results, methodology, privacy, terms, robots, and llms routes. Verify `/admin/` redirects or denies anonymous visitors, accepts only the allowlisted Access identity, and keeps public pages unauthenticated. Confirm the public config reports contact collection disabled until the activation checklist is complete. Recheck the independent Milly's URL with a read-only request; do not mutate its repository, Worker, bindings, storage, or Access settings.
+Verify Thai and English home, assessment, results, methodology, privacy, terms, cookies, robots, and llms routes through the temporary owner gate. Verify `/admin/` continues to use the more-specific admin application, accepts only the allowlisted Access identity, and rejects forged identity. Confirm the public config reports contact collection disabled until the activation checklist is complete. Recheck the independent Milly's URL with a read-only request; do not mutate its repository, Worker, bindings, storage, or Access settings.
+
+## Removing the temporary whole-site gate
+
+In Cloudflare, open Workers & Pages → `solarmatch-thailand` → Access and remove or disable only the Worker-wide temporary development policy. Do not delete or edit the hostname policy whose target is `/admin*`, do not change `ACCESS_AUD` in `wrangler.jsonc`, and do not change account-wide Access protection. Then verify anonymous `/` and `/en` return the public site, anonymous `/admin/` is still challenged, an approved admin can sign in, and Milly's remains reachable.

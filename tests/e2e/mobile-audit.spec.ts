@@ -73,7 +73,7 @@ test('mobile results keep metrics, charts, tables, and lead fields readable', as
   await expect(page.locator('.result-metrics-v3 article')).toHaveCount(4, { timeout: 10_000 });
   await expect(page.locator('.result-metrics-v3')).not.toContainText(/Needs more information/);
   await expect(page.getByRole('table', { name: 'Key lifetime cost points' })).toBeVisible();
-  await expect(page.locator('.result-fact-section .solar-fact-card')).toBeVisible();
+  await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
   const layout = await page.evaluate(() => ({ clientWidth: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
 });

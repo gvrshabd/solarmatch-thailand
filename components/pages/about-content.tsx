@@ -11,6 +11,7 @@ import { PageHero } from '@/components/content/page-hero';
 import Link from '@/components/site/internal-link';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { initialLaunchProvinces } from '@/config/provinces';
+import { OperatorDisclosure } from '@/components/content/operator-disclosure';
 
 const copy = {
   th: {
@@ -24,7 +25,7 @@ const copy = {
     ],
     todayEyebrow: 'สิ่งที่ทำได้วันนี้',
     todayTitle: 'ธุรกิจลูกค้าเป้าหมายที่เริ่มจากประโยชน์ต่อผู้ใช้',
-    todayBody: 'ค่าประเมินช่วยให้ลูกค้าเห็นขนาดระบบ ผลผลิต ราคา เงินประหยัด และระยะคืนทุนก่อนกรอกเบอร์ จากนั้นจึงเลือกได้ว่าต้องการให้บริษัทโซลาร์ที่ระบุติดต่อเพื่อนัดประเมินหน้างานหรือไม่',
+    todayBody: 'SolarMatch ช่วยให้เจ้าของบ้านเข้าใจทางเลือกด้านโซลาร์ในเบื้องต้น หากเจ้าของบ้านขอให้ติดต่อและให้ความยินยอมโดยชัดแจ้ง SolarMatch อาจส่งคำขอที่เกี่ยวข้องให้บริษัทติดตั้งโซลาร์สำหรับที่พักอาศัยที่เข้าร่วมและให้บริการในพื้นที่นั้น คำขอเดียวกันอาจถูกส่งให้มากกว่าหนึ่งบริษัท และ SolarMatch อาจได้รับค่าตอบแทนสำหรับการแนะนำลูกค้า เจ้าของบ้านเป็นผู้ตัดสินใจว่าจะพูดคุย ขอใบเสนอราคา หรือเลือกใช้บริการจากบริษัทใด',
     notYetTitle: 'สิ่งที่ยังไม่เปิดใช้งาน',
     notYetItems: ['ยังไม่จัดอันดับหรือเปรียบเทียบผู้ติดตั้งหลายราย', 'คำขอติดต่อจะเปิดเมื่อข้อมูลผู้ดำเนินการและบริษัทผู้รับครบถ้วน', 'ไม่มีการออกแบบระบบ รับชำระเงิน หรือรับรองผลประหยัด'],
     evidenceTitle: 'สิ่งที่ใช้สร้างความน่าเชื่อถือ',
@@ -35,7 +36,7 @@ const copy = {
     other: 'จังหวัดอื่น',
     statusEyebrow: 'สถานะและการติดต่อ',
     statusTitle: 'ระบบคัดกรองพร้อมแยกจากการเปิดรับคำขอจริง',
-    statusBody: 'แบบประเมินและระบบบริหารใช้กฎที่มีเวอร์ชัน แต่การรับข้อมูลส่วนบุคคลจะปิดไว้จนกว่าจะเผยแพร่ผู้ดำเนินการ บริษัทผู้รับ ช่องทางความเป็นส่วนตัว และระยะเวลาเก็บครบถ้วน',
+    statusBody: 'แบบประเมินและระบบบริหารใช้กฎที่มีเวอร์ชัน แต่การรับข้อมูลส่วนบุคคลจะปิดไว้จนกว่าจะเผยแพร่ผู้ดำเนินการ กลุ่มผู้รับ ช่องทางความเป็นส่วนตัว และระยะเวลาเก็บกับส่งต่อข้อมูลครบถ้วน',
     contact: 'ดูสถานะช่องทางติดต่อ',
     methodology: 'อ่านวิธีคำนวณและแหล่งข้อมูล',
   },
@@ -50,7 +51,7 @@ const copy = {
     ],
     todayEyebrow: 'What works today',
     todayTitle: 'A lead-generation business that starts with customer value',
-    todayBody: 'The estimate gives customers a system size, production, price, savings, and payback before asking for a phone number. They can then decide whether a named solar company should contact them about a site assessment.',
+    todayBody: 'SolarMatch helps homeowners understand their preliminary solar options. If a homeowner asks to be contacted and explicitly consents, SolarMatch may share the relevant enquiry with participating residential solar companies serving that area. More than one company may receive the same enquiry, and SolarMatch may receive payment for the introduction. The homeowner decides whether to speak with, request a quotation from or hire any company.',
     notYetTitle: 'What is not active',
     notYetItems: ['No multi-installer comparison or ranking', 'Contact requests stay closed until operator and recipient details are complete', 'No system design, payment, or savings guarantee'],
     evidenceTitle: 'How credibility is earned',
@@ -61,7 +62,7 @@ const copy = {
     other: 'Another province',
     statusEyebrow: 'Status and contact',
     statusTitle: 'Qualification is separated from public activation',
-    statusBody: 'The assessment and administration system use versioned rules, while personal-information submission stays disabled until the operator, receiving company, privacy channel, and retention period are fully published.',
+    statusBody: 'The assessment and administration system use versioned rules, while personal-information submission stays disabled until the operator, recipient category, privacy channel, and retention and distribution periods are fully published.',
     contact: 'See contact-channel status',
     methodology: 'Read the methodology and sources',
   },
@@ -124,6 +125,7 @@ export function AboutContent({ locale = 'th' }: { locale?: Locale }) {
         <h2>{text.statusTitle}</h2>
         <p>{text.statusBody}</p>
         <Link className="text-link" href={link('/contact')}>{text.contact} <ArrowRight size={18} aria-hidden="true" /></Link>
+        <OperatorDisclosure locale={locale} />
       </div></section>
     </main>
   );

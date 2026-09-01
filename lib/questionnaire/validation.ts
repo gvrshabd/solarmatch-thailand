@@ -21,7 +21,7 @@ const optionSchema = z.object({
 
 export const questionnaireDocumentSchema = z.object({
   id: z.string().min(1).max(100),
-  schemaVersion: z.literal(4),
+  schemaVersion: z.union([z.literal(4), z.literal(5)]),
   questions: z.array(z.object({
     id: z.enum(['province', 'monthlyBillThb', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'installationTimeframe']),
     type: z.enum(['province', 'bill', 'choice', 'multichoice']),
@@ -31,12 +31,14 @@ export const questionnaireDocumentSchema = z.object({
     options: z.array(optionSchema).max(30).optional(),
     conditionalFields: z.array(conditionalFieldSchema).max(5).optional(),
     relevance: z.object({ calculation: z.boolean(), qualification: z.boolean(), scoring: z.boolean() }),
-  })).length(10),
+  })).min(9).max(10),
 }).superRefine((document, context) => {
   const ids = document.questions.map((question) => question.id);
   if (new Set(ids).size !== ids.length) context.addIssue({ code: 'custom', path: ['questions'], message: 'Question IDs must be unique.' });
-  const requiredIds = ['province', 'monthlyBillThb', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'installationTimeframe'];
+  const requiredIds = ['province', 'monthlyBillThb', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade'];
   requiredIds.forEach((id) => { if (!ids.includes(id as never)) context.addIssue({ code: 'custom', path: ['questions'], message: `Missing required question: ${id}` }); });
+  if (document.schemaVersion === 4 && !ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 4 requires installationTimeframe.' });
+  if (document.schemaVersion === 5 && ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 5 must not include installationTimeframe.' });
   document.questions.forEach((question, questionIndex) => {
     const values = question.options?.map((option) => option.value) ?? [];
     if (new Set(values).size !== values.length) context.addIssue({ code: 'custom', path: ['questions', questionIndex, 'options'], message: 'Option values must be unique.' });
@@ -64,7 +66,7 @@ export const scoringConfigurationSchema = z.object({
     roofMaterial: z.number().int().min(0).max(100),
     propertyType: z.number().int().min(0).max(100),
     location: z.number().int().min(0).max(100),
-    timeframe: z.number().int().min(0).max(100),
+    timeframe: z.number().int().min(0).max(100).optional(),
   }),
   billThresholdsThb: z.tuple([z.number().positive(), z.number().positive(), z.number().positive(), z.number().positive(), z.number().positive()]),
   targetProvinces: z.array(z.string().min(1).max(100)).min(1).max(77),

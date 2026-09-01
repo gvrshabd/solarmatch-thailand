@@ -4,6 +4,7 @@ import Link from '@/components/site/internal-link';
 import { usePathname } from 'next/navigation';
 import { BrandMark } from './brand-mark';
 import { isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
+import { OperatorDisclosure } from '@/components/content/operator-disclosure';
 
 export function SiteFooter() {
   const pathname = usePathname();
@@ -42,7 +43,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="site-shell footer-bottom">
-        <span>{english ? 'All figures are preliminary estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา'}</span>
+        <div><span>{english ? 'All figures are preliminary estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา'}</span><OperatorDisclosure locale={locale} variant="footer" /></div>
       </div>
     </footer>
   );

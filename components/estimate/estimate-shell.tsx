@@ -17,7 +17,7 @@ import type { AssessmentQuestion, ConditionalField, PublicAssessmentConfig, Ques
 
 type Draft = Partial<EstimateAnswers>;
 type SavedDraft = {
-  version: 4;
+  version: 4 | 5;
   answers: Draft;
   step: number;
   questionnaireVersionId?: string;

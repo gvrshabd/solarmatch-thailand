@@ -6,11 +6,20 @@ export type ContactConfigurationRow = {
   contact_collection_mode: ContactCollectionMode | null;
   contact_collection_enabled: number | null;
   retention_days: number | null;
+  distribution_window_days?: number | null;
+  recipient_category?: string | null;
   receiving_company_en: string | null;
   receiving_company_th: string | null;
   receiving_company_privacy_url: string | null;
   permitted_contact_methods_json: string | null;
   shared_fields_json: string | null;
+  adult_confirmation_version_id?: string | null;
+  consent_version_id?: string | null;
+  privacy_notice_version_id?: string | null;
+  terms_version_id?: string | null;
+  cookie_policy_version_id?: string | null;
+  readiness_state?: 'incomplete' | 'ready' | 'active' | null;
+  active_partner_count?: number | null;
   legal_complete: number;
   content_version_id: string;
   legal_document_version_id: string;
@@ -38,8 +47,9 @@ function resolvedContent(value: string): ContactContent {
     const named = modes.named_installer_handoff;
     const common = modes.common;
     const modeKeys = ['question', 'help', 'yesLabel', 'noLabel', 'consent'] as const;
-    const commonKeys = ['declineTitle', 'declineBody', 'declineContinueLabel', 'skipLabel', 'failureTitle', 'failureBody'] as const;
-    if (!modeKeys.every((key) => isLocalizedText(validation?.[key])) || !modeKeys.every((key) => isLocalizedText(named?.[key])) || !commonKeys.every((key) => isLocalizedText(common?.[key]))) return contactContent;
+    const shared = modes.shared_solar_company_handoff;
+    const commonKeys = ['declineTitle', 'declineBody', 'declineContinueLabel', 'skipLabel', 'failureTitle', 'failureBody', 'adultConfirmation'] as const;
+    if (!modeKeys.every((key) => isLocalizedText(validation?.[key])) || !modeKeys.every((key) => isLocalizedText(named?.[key])) || !modeKeys.every((key) => isLocalizedText(shared?.[key])) || !commonKeys.every((key) => isLocalizedText(common?.[key]))) return contactContent;
     return { ...contactContent, ...parsed, contactModes: modes } as ContactContent;
   } catch { return contactContent; }
 }
@@ -66,12 +76,20 @@ export function assessContactReadiness(row: ContactConfigurationRow): ContactRea
   if (!row.contact_collection_enabled) issues.push('contact configuration is not explicitly enabled');
   if (!row.legal_complete) issues.push('legal operator and privacy information is incomplete');
   if (!row.retention_days) issues.push('retention period is missing');
+  if (!row.adult_confirmation_version_id) issues.push('adult confirmation version is missing');
+  if (!row.consent_version_id) issues.push('consent version is missing');
   if (mode === 'validation_interest') {
     if (row.receiving_company_en || row.receiving_company_th || row.receiving_company_privacy_url) issues.push('validation mode cannot name an installer recipient');
   }
   if (mode === 'named_installer_handoff') {
     if (!row.receiving_company_en || !row.receiving_company_th) issues.push('installer legal name is incomplete');
     if (!row.receiving_company_privacy_url) issues.push('installer privacy notice is missing');
+  }
+  if (mode === 'shared_solar_company_handoff') {
+    if (!row.distribution_window_days) issues.push('distribution period is missing');
+    if (row.recipient_category !== 'participating_residential_solar_companies') issues.push('recipient category must be participating residential solar companies');
+    if (!row.privacy_notice_version_id || !row.terms_version_id || !row.cookie_policy_version_id) issues.push('published legal-document versions are incomplete');
+    if (!row.active_partner_count) issues.push('no active contracted solar company is available');
   }
   return { active: issues.length === 0, mode, issues };
 }
@@ -88,6 +106,13 @@ export function publicContactConfiguration(row: ContactConfigurationRow): Public
     contentVersionId: row.content_version_id,
     privacyVersion: row.legal_document_version_id,
     retentionDays: row.retention_days,
+    distributionWindowDays: row.distribution_window_days ?? null,
+    recipientCategory: row.recipient_category ?? null,
+    adultConfirmationVersionId: row.adult_confirmation_version_id ?? null,
+    consentVersionId: row.consent_version_id ?? null,
+    privacyNoticeVersionId: row.privacy_notice_version_id ?? null,
+    termsVersionId: row.terms_version_id ?? null,
+    cookiePolicyVersionId: row.cookie_policy_version_id ?? null,
     question: null, help: null, yesLabel: null, noLabel: null, consent: null, recipient: null,
     ...copy.common,
     permittedContactMethods: methods,
@@ -95,6 +120,7 @@ export function publicContactConfiguration(row: ContactConfigurationRow): Public
   };
   if (!readiness.active) return disabled;
   if (readiness.mode === 'validation_interest') return { ...disabled, enabled: true, ...copy.validation_interest };
+  if (readiness.mode === 'shared_solar_company_handoff') return { ...disabled, enabled: true, ...copy.shared_solar_company_handoff };
   const recipient = { en: row.receiving_company_en!, th: row.receiving_company_th! };
   return {
     ...disabled,
@@ -112,10 +138,12 @@ export function consentSnapshot(configuration: PublicContactConfiguration) {
   if (!configuration.enabled || configuration.mode === 'disabled' || !configuration.consent) throw new Error('Contact collection is unavailable.');
   return {
     contactMode: configuration.mode,
-    consentScope: configuration.mode === 'validation_interest' ? 'solar_match_validation_followup' : 'named_installer_site_assessment',
+    consentScope: configuration.mode === 'validation_interest' ? 'solar_match_validation_followup' : configuration.mode === 'shared_solar_company_handoff' ? 'shared_residential_solar_referral' : 'named_installer_site_assessment',
     solarMatchFollowupAuthorized: configuration.mode === 'validation_interest',
-    thirdPartyDisclosureAuthorized: configuration.mode === 'named_installer_handoff',
+    thirdPartyDisclosureAuthorized: configuration.mode !== 'validation_interest',
     recipient: configuration.recipient,
+    recipientCategory: configuration.recipientCategory,
     consentText: configuration.consent,
+    adultConfirmationText: configuration.adultConfirmation,
   } as const;
 }

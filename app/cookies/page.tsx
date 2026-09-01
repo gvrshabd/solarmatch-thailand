@@ -1,12 +1,7 @@
-import { LegalShell } from '@/components/content/legal-shell';
+import { PublishedLegalDocument } from '@/components/content/published-legal-document';
 import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
 export const metadata = thaiMetadata('คุกกี้และการจัดเก็บในเบราว์เซอร์', '/cookies');
 export default function CookiesPage() {
-  return <LegalShell title="คุกกี้และการจัดเก็บในเบราว์เซอร์" summary="เว็บไซต์ใช้ session storage เพื่อให้ทำแบบประเมินต่อเนื่องได้ และยังไม่เปิดใช้คุกกี้โฆษณาหรือระบบวิเคราะห์พฤติกรรม">
-    <h2>1. สิ่งที่เก็บในเบราว์เซอร์</h2><p>แบบประเมินเก็บคำตอบ ผลลัพธ์ และโทเค็นเซสชันอายุสั้นใน session storage เพื่อให้รีเฟรชและเปลี่ยนภาษาได้โดยไม่เริ่มใหม่ ข้อมูลนี้อยู่ในอุปกรณ์จนกว่าคุณจะล้างข้อมูลหรือเซสชันสิ้นสุด</p>
-    <h2>2. สิ่งที่ยังไม่เปิดใช้</h2><p>ไม่มีคุกกี้โฆษณา analytics pixel heatmap ตัวติดตามข้ามเว็บไซต์ หรือ CRM หากเพิ่มเทคโนโลยีที่ไม่จำเป็นในอนาคต จะต้องใช้สถาปัตยกรรมความยินยอมที่เหมาะสมก่อนเปิดใช้งาน</p>
-    <h2>3. คำขอแผนที่จากบุคคลที่สาม</h2><p>เมื่อเปิดแผนที่ เบราว์เซอร์จะขอแผ่นภาพของบริเวณที่มองเห็นจาก OpenStreetMap ตามเงื่อนไขและนโยบายความเป็นส่วนตัวของ OpenStreetMap Foundation โดยไม่มีข้อความที่อยู่ที่พิมพ์อยู่ในคำขอ</p>
-    <h2>4. การลบข้อมูล</h2><p>กด “ล้างข้อมูลและเริ่มใหม่” เพื่อลบข้อมูลแบบประเมินทันที หรือปิดเซสชันตามพฤติกรรมของเบราว์เซอร์</p>
-  </LegalShell>;
+  return <PublishedLegalDocument type="cookies" />;
 }

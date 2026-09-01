@@ -10,7 +10,7 @@ import type { PublicAssessmentConfig } from '@/lib/questionnaire/types';
 import { leadSchema, thaiPhonePattern } from '@/lib/validation/lead';
 
 type ContactOutcome = 'declined' | 'submitted' | 'skipped';
-type ContactField = 'firstName' | 'lastName' | 'phone' | 'method' | 'lineId' | 'consent';
+type ContactField = 'firstName' | 'lastName' | 'phone' | 'method' | 'lineId' | 'adult' | 'consent';
 
 type Fields = {
   legalFirstName: string;
@@ -18,12 +18,13 @@ type Fields = {
   phone: string;
   contactMethod: '' | 'phone' | 'line';
   lineId: string;
+  adultConfirmed: boolean;
   consent: boolean;
   website: string;
 };
 
 const initialFields: Fields = {
-  legalFirstName: '', legalLastName: '', phone: '', contactMethod: '', lineId: '', consent: false, website: '',
+  legalFirstName: '', legalLastName: '', phone: '', contactMethod: '', lineId: '', adultConfirmed: false, consent: false, website: '',
 };
 
 function nextIdempotencyKey() {
@@ -55,8 +56,8 @@ export function LeadCapture({
   const viewedRef = useRef(false);
 
   const fieldOrder = useMemo<ContactField[]>(() => fields.contactMethod === 'line'
-    ? ['firstName', 'lastName', 'phone', 'method', 'lineId', 'consent']
-    : ['firstName', 'lastName', 'phone', 'method', 'consent'], [fields.contactMethod]);
+    ? ['firstName', 'lastName', 'phone', 'method', 'lineId', 'adult', 'consent']
+    : ['firstName', 'lastName', 'phone', 'method', 'adult', 'consent'], [fields.contactMethod]);
   const currentField = fieldOrder[Math.min(fieldIndex, fieldOrder.length - 1)];
 
   useEffect(() => {
@@ -72,17 +73,17 @@ export function LeadCapture({
     setDecision('yes');
     setFieldIndex(0);
     setError('');
-    track('contact_interest_yes', { mode: contact.mode as 'validation_interest' | 'named_installer_handoff', language: locale });
-    track('contact_form_started', { mode: contact.mode as 'validation_interest' | 'named_installer_handoff', language: locale });
+    track('contact_interest_yes', { mode: contact.mode as Exclude<typeof contact.mode, 'disabled'>, language: locale });
+    track('contact_form_started', { mode: contact.mode as Exclude<typeof contact.mode, 'disabled'>, language: locale });
   }
 
   function chooseNo() {
-    track('contact_interest_no', { mode: contact.mode as 'validation_interest' | 'named_installer_handoff', language: locale });
+    track('contact_interest_no', { mode: contact.mode as Exclude<typeof contact.mode, 'disabled'>, language: locale });
     setDecision('declined');
   }
 
   function skip() {
-    track('contact_form_skipped', { mode: contact.mode as 'validation_interest' | 'named_installer_handoff', language: locale });
+    track('contact_form_skipped', { mode: contact.mode as Exclude<typeof contact.mode, 'disabled'>, language: locale });
     onContinue('skipped');
   }
 
@@ -100,6 +101,7 @@ export function LeadCapture({
     }
     if (currentField === 'method' && !fields.contactMethod) return english ? 'Choose phone or LINE.' : 'เลือกช่องทางติดต่อทางโทรศัพท์หรือ LINE';
     if (currentField === 'lineId' && fields.lineId.trim().length < 2) return english ? 'Enter your LINE ID or choose phone instead.' : 'กรอก LINE ID หรือเลือกให้ติดต่อทางโทรศัพท์';
+    if (currentField === 'adult' && !fields.adultConfirmed) return english ? 'Confirm your age and authority to request contact.' : 'กรุณายืนยันอายุและอำนาจในการขอรับการติดต่อ';
     if (currentField === 'consent' && !fields.consent) return english ? 'Confirm your consent before submitting.' : 'กรุณายืนยันความยินยอมก่อนส่งคำขอ';
     return '';
   }
@@ -123,6 +125,7 @@ export function LeadCapture({
       phone: fields.phone,
       contactMethod: fields.contactMethod,
       lineId: fields.contactMethod === 'line' ? fields.lineId : undefined,
+      adultConfirmed: fields.adultConfirmed,
       consent: fields.consent,
       website: fields.website,
       locale,
@@ -163,7 +166,7 @@ export function LeadCapture({
         setSending(false);
         return;
       }
-      track('contact_form_completed', { mode: contact.mode as 'validation_interest' | 'named_installer_handoff', language: locale, contactMethod: fields.contactMethod });
+      track('contact_form_completed', { mode: contact.mode as Exclude<typeof contact.mode, 'disabled'>, language: locale, contactMethod: fields.contactMethod });
       setIdempotencyKey(nextIdempotencyKey());
       onContinue('submitted');
     } catch {
@@ -207,13 +210,14 @@ export function LeadCapture({
         {currentField === 'lastName' && <label className="contact-single-field"><h1 id="contact-field-title" ref={headingRef} tabIndex={-1}>{english ? 'What is your legal last name?' : 'นามสกุลของคุณคืออะไร?'}</h1><span>{english ? 'Enter your family name as it appears on official documents.' : 'กรอกนามสกุลตามเอกสารทางการ'}</span><input autoFocus autoComplete="family-name" maxLength={80} value={fields.legalLastName} onChange={(event) => setValue('legalLastName', event.target.value)} /></label>}
         {currentField === 'phone' && <label className="contact-single-field"><h1 id="contact-field-title" ref={headingRef} tabIndex={-1}>{english ? 'What Thai mobile number should be used?' : 'ต้องการให้ติดต่อที่หมายเลขโทรศัพท์มือถือใด?'}</h1><span>{english ? 'Use a Thai mobile number, such as 081 234 5678.' : 'กรอกหมายเลขโทรศัพท์มือถือไทย เช่น 081 234 5678'}</span><input autoFocus inputMode="tel" autoComplete="tel" placeholder="081 234 5678" value={fields.phone} onChange={(event) => setValue('phone', event.target.value)} /></label>}
         {currentField === 'method' && <fieldset className="contact-choice-field"><legend><span id="contact-field-title" ref={methodHeadingRef} tabIndex={-1}>{english ? 'How would you prefer to be contacted?' : 'สะดวกให้ติดต่อผ่านช่องทางใด?'}</span></legend>{contact.permittedContactMethods.map((method) => <label key={method}><input type="radio" name="contact-method" checked={fields.contactMethod === method} onChange={() => { setFields((current) => ({ ...current, contactMethod: method, lineId: method === 'line' ? current.lineId : '' })); setError(''); }} /><span>{method === 'phone' ? (english ? 'Phone' : 'โทรศัพท์') : 'LINE'}</span></label>)}</fieldset>}
-        {currentField === 'lineId' && <label className="contact-single-field"><h1 id="contact-field-title" ref={headingRef} tabIndex={-1}>LINE ID</h1><span>{english ? 'Enter the LINE ID you would like us to use.' : 'กรอก LINE ID ที่ต้องการให้ใช้ติดต่อ'}</span><input autoFocus autoComplete="off" maxLength={80} value={fields.lineId} onChange={(event) => setValue('lineId', event.target.value)} /></label>}
-        {currentField === 'consent' && <div className="contact-consent-review"><h1 id="contact-field-title" ref={headingRef} tabIndex={-1}>{english ? 'Review and confirm' : 'ตรวจสอบและยืนยัน'}</h1>{contact.mode === 'named_installer_handoff' && <div><strong>{english ? 'Information shared' : 'ข้อมูลที่จะส่งต่อ'}</strong><ul>{contact.sharedFields.map((field) => <li key={field}>{field}</li>)}</ul></div>}<label className="consent-check"><input type="checkbox" checked={fields.consent} onChange={(event) => setValue('consent', event.target.checked)} /><span>{contact.consent?.[locale]}</span></label>{contact.recipient && <a href={contact.recipient.privacyUrl} target="_blank" rel="noopener noreferrer">{english ? `Read ${contact.recipient.name.en}’s Privacy Notice` : `อ่านประกาศความเป็นส่วนตัวของ ${contact.recipient.name.th}`}</a>}<div className="privacy-inline"><LockKeyhole size={17} aria-hidden="true" /><span>{english ? 'Read the ' : 'อ่าน '}<Link href={localizedPath('/privacy', locale)}>{english ? 'SolarMatch Privacy Notice' : 'ประกาศความเป็นส่วนตัวของ SolarMatch'}</Link></span></div></div>}
+        {currentField === 'lineId' && <label className="contact-single-field"><h1 id="contact-field-title" ref={headingRef} tabIndex={-1}>LINE ID</h1><span>{contact.mode === 'shared_solar_company_handoff' ? (english ? 'Enter the LINE ID you would like the solar companies to use.' : 'กรอก LINE ID ที่ต้องการให้บริษัทโซลาร์ใช้ติดต่อ') : (english ? 'Enter the LINE ID you would like us to use.' : 'กรอก LINE ID ที่ต้องการให้ใช้ติดต่อ')}</span><input autoFocus autoComplete="off" maxLength={80} value={fields.lineId} onChange={(event) => setValue('lineId', event.target.value)} /></label>}
+        {currentField === 'adult' && <div className="contact-consent-review"><h1 id="contact-field-title" ref={headingRef} tabIndex={-1}>{english ? 'Confirm your age and authority' : 'ยืนยันอายุและอำนาจ'}</h1><label className="consent-check"><input type="checkbox" checked={fields.adultConfirmed} onChange={(event) => setValue('adultConfirmed', event.target.checked)} /><span>{contact.adultConfirmation?.[locale]}</span></label></div>}
+        {currentField === 'consent' && <div className="contact-consent-review"><h1 id="contact-field-title" ref={headingRef} tabIndex={-1}>{english ? 'Review and consent' : 'ตรวจสอบและให้ความยินยอม'}</h1>{(contact.mode === 'named_installer_handoff' || contact.mode === 'shared_solar_company_handoff') && <div><strong>{english ? 'Information covered by this consent' : 'ข้อมูลที่อยู่ภายใต้ความยินยอมนี้'}</strong><ul>{contact.sharedFields.map((field) => <li key={field}>{field}</li>)}</ul></div>}<label className="consent-check"><input type="checkbox" checked={fields.consent} onChange={(event) => setValue('consent', event.target.checked)} /><span><strong>{contact.consent?.[locale]}</strong></span></label>{contact.recipient && <a href={contact.recipient.privacyUrl} target="_blank" rel="noopener noreferrer">{english ? `Read ${contact.recipient.name.en}’s Privacy Notice` : `อ่านประกาศความเป็นส่วนตัวของ ${contact.recipient.name.th}`}</a>}<div className="privacy-inline"><LockKeyhole size={17} aria-hidden="true" /><span>{english ? 'Read the ' : 'อ่าน '}<Link href={localizedPath('/privacy', locale)}>{english ? 'SolarMatch Privacy Notice' : 'ประกาศความเป็นส่วนตัวของ SolarMatch'}</Link></span></div></div>}
         {error && <p className="field-error" role="alert">{error}</p>}
         {submissionError && <div className="form-error form-error-summary" role="alert"><strong>{contact.failureTitle[locale]}</strong><p>{submissionError}</p></div>}
         <div className="contact-step-actions">
           <button type="button" className="button button-secondary" onClick={() => fieldIndex > 0 ? setFieldIndex((value) => value - 1) : setDecision(null)}><ArrowLeft size={18} />{english ? 'Back' : 'ย้อนกลับ'}</button>
-          {currentField === 'consent' ? <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : (english ? 'Submit contact request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button> : <button type="button" className="button" onClick={advance}>{english ? 'Continue' : 'ถัดไป'}<ArrowRight size={18} /></button>}
+          {currentField === 'consent' ? <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button> : <button type="button" className="button" onClick={advance}>{english ? 'Continue' : 'ถัดไป'}<ArrowRight size={18} /></button>}
         </div>
         <button type="button" className="text-link contact-skip" onClick={skip}>{contact.skipLabel[locale]}</button>
       </section>

@@ -39,8 +39,7 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await page.getByLabel(en ? 'How many air-conditioning units are installed at this property?' : 'บ้านหรือที่พักอาศัยนี้ติดตั้งเครื่องปรับอากาศทั้งหมดกี่เครื่อง?').selectOption('5');
   await page.getByRole('button', { name: next, exact: true }).click();
   await choose(page, en ? 'Concrete roof tiles' : 'กระเบื้องคอนกรีต', next);
-  await choose(page, en ? 'Almost none' : 'แทบไม่มี', next);
-  await page.getByRole('radio', { name: en ? 'Within 1–3 months' : 'ภายใน 1–3 เดือน' }).click();
+  await page.getByRole('radio', { name: en ? 'Almost none' : 'แทบไม่มี', exact: true }).click();
   await page.getByRole('button', { name: en ? 'See my estimate' : 'ดูผลประเมิน', exact: true }).click();
   await expectPath(page, en ? '/en/estimate/results' : '/estimate/results');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -97,9 +96,9 @@ test('all desktop navigation anchors work in Thai and English', async ({ page },
   }
 });
 
-test('required estimator uses ten concise residential questions and focused chrome', async ({ page }) => {
+test('required estimator uses nine concise residential questions and focused chrome', async ({ page }) => {
   await page.goto('/en/estimate');
-  await expect(page.getByRole('progressbar').locator(':scope > span')).toHaveCount(10);
+  await expect(page.getByRole('progressbar').locator(':scope > span')).toHaveCount(9);
   await expect(page.locator('header').getByRole('link', { name: 'Exit estimate' })).toBeVisible();
   await expect(page.locator('footer')).toHaveCount(0);
   await expect(page.locator('main')).not.toContainText(/kWh figure|TOU|On Peak|Off Peak|What period/);
@@ -155,19 +154,19 @@ test('disabled contact release requests no personal information', async ({ page 
   await expect(page.getByRole('heading', { name: 'Preparing your solar estimate' })).toBeVisible();
   await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByLabel(/Thai mobile number|legal first name/i)).toHaveCount(0);
-  await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(1);
+  await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
 });
 
-test('loading fact stays paired and is recalled on results', async ({ page }) => {
+test('loading fact stays paired, uses the minimal loading surface, and is not repeated on results', async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.goto('/en/estimate/results');
-  const loadingFact = page.locator('.calculation-loading-card .solar-fact-card');
+  const loadingFact = page.locator('.calculation-fact');
   await expect(loadingFact).toBeVisible();
-  const title = await loadingFact.getByRole('heading', { level: 2 }).textContent();
-  const href = await loadingFact.getByRole('link').getAttribute('href');
-  await expect(page.locator('.result-fact-section .solar-fact-card')).toBeVisible({ timeout: 10_000 });
-  await expect(page.locator('.result-fact-section .solar-fact-card').getByRole('heading', { level: 2 })).toHaveText(title ?? '');
-  await expect(page.locator('.result-fact-section .solar-fact-card').getByRole('link')).toHaveAttribute('href', href ?? '');
+  await expect(loadingFact.getByText('DID YOU KNOW?')).toBeVisible();
+  await expect(loadingFact.getByRole('link', { name: 'View reference' })).toHaveAttribute('href', /^\/en\/resources#/u);
+  await expect(page.locator('.calculation-loading-content')).not.toHaveCSS('border-style', 'solid');
+  await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
   await page.reload();
   await expect(page.getByText('Simple cash payback')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Preparing your solar estimate' })).toHaveCount(0);
@@ -183,5 +182,15 @@ test('bilingual Resources pages expose all five fact anchors and references', as
       await expect(card.getByRole('link')).toHaveAttribute('href', /^https:\/\//u);
       await expect(card.locator('img')).toHaveAttribute('alt', /.+/u);
     }
+  }
+});
+
+test('incomplete operator facts fail closed and never expose placeholder tokens', async ({ page, request }) => {
+  const operator = await request.get('/api/public/operator');
+  expect(operator.ok()).toBeTruthy();
+  await expect(operator.json()).resolves.toEqual({ operator: null });
+  for (const route of ['/privacy', '/terms', '/cookies', '/en/privacy', '/en/terms', '/en/cookies']) {
+    await page.goto(route);
+    await expect(page.locator('body')).not.toContainText(/\[(?:LEGAL|BUSINESS|REGISTERED|PUBLIC|PRIVACY|LEAD|DATA|OPERATOR|TERMS|COOKIE)[A-Z _-]*\]/u);
   }
 });

@@ -63,6 +63,9 @@ export async function POST(request: NextRequest) {
 
   const leadId = crypto.randomUUID();
   const consentedAt = new Date().toISOString();
+  const distributionExpiresAt = contact.mode === 'shared_solar_company_handoff' && contact.distributionWindowDays
+    ? new Date(Date.now() + contact.distributionWindowDays * 86_400_000).toISOString()
+    : null;
   const requestFingerprint = await sha256(`${phoneE164}:${token.nonce}:${release.release_id}`);
   const consent = consentSnapshot(contact);
   const answers = parsed.data.answers;
@@ -72,6 +75,11 @@ export async function POST(request: NextRequest) {
     sharedFields: contact.sharedFields,
     permittedContactMethods: contact.permittedContactMethods,
   }) : null;
+  const sharedMode = consent.contactMode === 'shared_solar_company_handoff';
+  const legacyMode = sharedMode ? 'validation_interest' : consent.contactMode;
+  const legacyScope = sharedMode ? 'solar_match_validation_followup' : consent.consentScope;
+  const legacySolarMatchAuthorization = sharedMode ? 1 : consent.solarMatchFollowupAuthorized ? 1 : 0;
+  const legacyThirdPartyAuthorization = sharedMode ? 0 : consent.thirdPartyDisclosureAuthorized ? 1 : 0;
   const leadColumns = [
     'id', 'idempotency_key', 'request_fingerprint', 'legal_first_name', 'legal_last_name', 'phone_e164', 'phone_display',
     'preferred_contact_method', 'line_id', 'province', 'custom_location', 'ownership_status', 'property_type', 'custom_property_type',
@@ -79,9 +87,15 @@ export async function POST(request: NextRequest) {
     'roof_shade', 'roof_area', 'daytime_pattern', 'installation_timeframe', 'answers_json', 'questionnaire_version_id',
     'rule_version_id', 'release_id', 'raw_score', 'quality_score', 'hard_eligible', 'high_quality', 'scoring_explanation_json',
     'consent_version', 'consent_text_en', 'consent_text_th', 'consented_at', 'receiving_company_en', 'receiving_company_th',
-    'source_locale', 'user_agent_summary', 'contact_collection_mode', 'contact_configuration_version_id', 'content_version_id',
-    'privacy_version', 'consent_scope', 'solar_match_followup_authorized', 'third_party_disclosure_authorized',
+    'source_locale', 'user_agent_summary', 'contact_collection_mode', 'contact_collection_mode_v2',
+    'contact_configuration_version_id', 'content_version_id',
+    'privacy_version', 'consent_scope', 'consent_scope_v2', 'solar_match_followup_authorized',
+    'solar_match_followup_authorized_v2', 'third_party_disclosure_authorized', 'third_party_disclosure_authorized_v2',
     'recipient_privacy_url', 'recipient_snapshot_json', 'retention_days_snapshot',
+    'distribution_window_days_snapshot', 'distribution_expires_at', 'recipient_category_snapshot',
+    'disclosed_fields_snapshot_json', 'adult_confirmation_version', 'adult_confirmation_text_en',
+    'adult_confirmation_text_th', 'adult_confirmed_at', 'privacy_notice_version_id', 'terms_version_id',
+    'cookie_policy_version_id',
   ];
   const leadValues = [
     leadId, parsed.data.idempotencyKey, requestFingerprint, parsed.data.legalFirstName, parsed.data.legalLastName,
@@ -89,15 +103,20 @@ export async function POST(request: NextRequest) {
     answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
     JSON.stringify(answers.daytimeLoads), answers.customDaytimeLoad ?? null, answers.airConditionerCount ?? 0,
     Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
-    answers.roofArea, answers.daytimePattern, answers.installationTimeframe, JSON.stringify(answers),
+    answers.roofArea, answers.daytimePattern, answers.installationTimeframe ?? 'not-collected-v2', JSON.stringify(answers),
     release.questionnaire_version_id, release.rule_version_id, release.release_id, assessment.rawPoints,
     assessment.qualityScore, assessment.hardEligible ? 1 : 0, assessment.highQuality ? 1 : 0, explanation,
-    `privacy:${release.legal_document_version_id}`, consent.consentText.en, consent.consentText.th, consentedAt,
+    contact.consentVersionId ?? `content:${contact.contentVersionId}`, consent.consentText.en, consent.consentText.th, consentedAt,
     consent.recipient?.name.en ?? null, consent.recipient?.name.th ?? null, parsed.data.locale,
-    request.headers.get('user-agent')?.slice(0, 160) ?? null, consent.contactMode,
-    contact.contactConfigurationVersionId, contact.contentVersionId, contact.privacyVersion, consent.consentScope,
-    consent.solarMatchFollowupAuthorized ? 1 : 0, consent.thirdPartyDisclosureAuthorized ? 1 : 0,
-    consent.recipient?.privacyUrl ?? null, recipientSnapshot, contact.retentionDays,
+    request.headers.get('user-agent')?.slice(0, 160) ?? null, legacyMode, consent.contactMode,
+    contact.contactConfigurationVersionId, contact.contentVersionId, contact.privacyVersion, legacyScope,
+    consent.consentScope, legacySolarMatchAuthorization, consent.solarMatchFollowupAuthorized ? 1 : 0,
+    legacyThirdPartyAuthorization, consent.thirdPartyDisclosureAuthorized ? 1 : 0,
+    sharedMode ? null : consent.recipient?.privacyUrl ?? null, sharedMode ? null : recipientSnapshot, contact.retentionDays,
+    contact.distributionWindowDays, distributionExpiresAt, contact.recipientCategory,
+    JSON.stringify(contact.sharedFields), contact.adultConfirmationVersionId,
+    consent.adultConfirmationText?.en ?? '', consent.adultConfirmationText?.th ?? '', consentedAt,
+    contact.privacyNoticeVersionId, contact.termsVersionId, contact.cookiePolicyVersionId,
   ];
 
   try {

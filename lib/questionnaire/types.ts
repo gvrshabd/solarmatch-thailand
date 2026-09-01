@@ -49,11 +49,11 @@ export type AssessmentQuestion = {
 
 export type QuestionnaireDocument = {
   id: string;
-  schemaVersion: 4;
+  schemaVersion: 4 | 5;
   questions: AssessmentQuestion[];
 };
 
-export type ContactCollectionMode = 'disabled' | 'validation_interest' | 'named_installer_handoff';
+export type ContactCollectionMode = 'disabled' | 'validation_interest' | 'named_installer_handoff' | 'shared_solar_company_handoff';
 
 export type PublicContactConfiguration = {
   enabled: boolean;
@@ -62,6 +62,14 @@ export type PublicContactConfiguration = {
   contentVersionId: string;
   privacyVersion: string;
   retentionDays: number | null;
+  distributionWindowDays: number | null;
+  recipientCategory: string | null;
+  adultConfirmation: LocalizedText | null;
+  adultConfirmationVersionId: string | null;
+  consentVersionId: string | null;
+  privacyNoticeVersionId: string | null;
+  termsVersionId: string | null;
+  cookiePolicyVersionId: string | null;
   question: LocalizedText | null;
   help: LocalizedText | null;
   yesLabel: LocalizedText | null;

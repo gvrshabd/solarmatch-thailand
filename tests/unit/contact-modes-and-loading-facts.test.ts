@@ -26,7 +26,7 @@ describe('contact-mode readiness and consent', () => {
   it('activates validation mode only with legal completeness and retention', () => {
     const incomplete = row({ contact_collection_mode: 'validation_interest', contact_collection_enabled: 1 });
     expect(assessContactReadiness(incomplete).issues).toEqual(expect.arrayContaining(['legal operator and privacy information is incomplete', 'retention period is missing']));
-    const ready = row({ contact_collection_mode: 'validation_interest', contact_collection_enabled: 1, legal_complete: 1, retention_days: 180 });
+    const ready = row({ contact_collection_mode: 'validation_interest', contact_collection_enabled: 1, legal_complete: 1, retention_days: 180, adult_confirmation_version_id: 'adult-v1', consent_version_id: 'consent-v1' });
     const publicConfig = publicContactConfiguration(ready);
     expect(publicConfig.enabled).toBe(true);
     expect(publicConfig.recipient).toBeNull();
@@ -38,10 +38,27 @@ describe('contact-mode readiness and consent', () => {
   it('requires a named recipient and privacy URL for installer handoff', () => {
     const incomplete = row({ contact_collection_mode: 'named_installer_handoff', contact_collection_enabled: 1, legal_complete: 1, retention_days: 180 });
     expect(assessContactReadiness(incomplete).active).toBe(false);
-    const ready = row({ contact_collection_mode: 'named_installer_handoff', contact_collection_enabled: 1, legal_complete: 1, retention_days: 180, receiving_company_en: 'Example Solar Co., Ltd.', receiving_company_th: 'บริษัท เอ็กแซมเพิล โซลาร์ จำกัด', receiving_company_privacy_url: 'https://example.com/privacy' });
+    const ready = row({ contact_collection_mode: 'named_installer_handoff', contact_collection_enabled: 1, legal_complete: 1, retention_days: 180, adult_confirmation_version_id: 'adult-v1', consent_version_id: 'consent-v1', receiving_company_en: 'Example Solar Co., Ltd.', receiving_company_th: 'บริษัท เอ็กแซมเพิล โซลาร์ จำกัด', receiving_company_privacy_url: 'https://example.com/privacy' });
     const publicConfig = publicContactConfiguration(ready);
     expect(publicConfig.question?.en).toContain('Example Solar Co., Ltd.');
     expect(consentSnapshot(publicConfig)).toMatchObject({ consentScope: 'named_installer_site_assessment', solarMatchFollowupAuthorized: false, thirdPartyDisclosureAuthorized: true });
+  });
+
+  it('keeps shared handoff disabled until legal versions, distribution settings, and a contracted partner are ready', () => {
+    const incomplete = row({ contact_collection_mode: 'shared_solar_company_handoff', contact_collection_enabled: 1, legal_complete: 1, retention_days: 180 });
+    expect(assessContactReadiness(incomplete).active).toBe(false);
+    const ready = row({
+      contact_collection_mode: 'shared_solar_company_handoff', contact_collection_enabled: 1,
+      legal_complete: 1, retention_days: 180, distribution_window_days: 14,
+      recipient_category: 'participating_residential_solar_companies', active_partner_count: 1,
+      adult_confirmation_version_id: 'adult-v1', consent_version_id: 'consent-v1',
+      privacy_notice_version_id: 'privacy-v1', terms_version_id: 'terms-v1', cookie_policy_version_id: 'cookies-v1',
+    });
+    const publicConfig = publicContactConfiguration(ready);
+    expect(publicConfig.enabled).toBe(true);
+    expect(publicConfig.recipient).toBeNull();
+    expect(publicConfig.question?.en).toBe('Would you like to be contacted by solar companies?');
+    expect(consentSnapshot(publicConfig)).toMatchObject({ consentScope: 'shared_residential_solar_referral', solarMatchFollowupAuthorized: false, thirdPartyDisclosureAuthorized: true });
   });
 });
 
@@ -80,13 +97,13 @@ describe('loading-fact selection', () => {
 describe('public lead input boundaries', () => {
   it('normalizes Thai mobile numbers and requires LINE ID conditionally', () => {
     expect(normalizeThaiPhone('081 234 5678')).toBe('+66812345678');
-    const base = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', phone: '081 234 5678', contactMethod: 'line', consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', ownershipStatus: 'owner', roofArea: '60-100', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little', installationTimeframe: 'one-three-months' } };
+    const base = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', phone: '081 234 5678', contactMethod: 'line', adultConfirmed: true, consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', ownershipStatus: 'owner', roofArea: '60-100', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little' } };
     expect(leadSchema.safeParse(base).success).toBe(false);
     expect(leadSchema.safeParse({ ...base, lineId: 'somchai' }).success).toBe(true);
   });
 
   it('rejects client-supplied mode, recipient, and score fields', () => {
-    const input = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', phone: '0812345678', contactMethod: 'phone', consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', ownershipStatus: 'owner', roofArea: '60-100', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little', installationTimeframe: 'one-three-months' }, mode: 'named_installer_handoff', recipient: 'attacker', score: 5 };
+    const input = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', phone: '0812345678', contactMethod: 'phone', adultConfirmed: true, consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', monthlyBillThb: 6000, propertyType: 'detached-home', ownershipStatus: 'owner', roofArea: '60-100', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little' }, mode: 'shared_solar_company_handoff', recipient: 'attacker', score: 5 };
     expect(leadSchema.safeParse(input).success).toBe(false);
   });
 });
