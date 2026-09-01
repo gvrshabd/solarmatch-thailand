@@ -3267,6 +3267,9 @@ select { padding: 0 38px 0 13px; }
 .operator-disclosure a { color: inherit; overflow-wrap: anywhere; text-underline-offset: 3px; }
 .operator-disclosure-footer { margin-top: 4px; font-size: 12px; }
 
+body.calculation-loading-active { overflow: hidden; background: #f5f2e8; }
+body.calculation-loading-active .site-header,
+body.calculation-loading-active .site-footer { display: none; }
 .calculation-loading-page { min-height: 100svh; display: grid; place-items: center; padding: clamp(24px, 7vw, 72px) 18px; background: #f5f2e8; }
 .calculation-loading-content { width: min(100%, 610px); border: 0; border-radius: 0; background: transparent; box-shadow: none; text-align: center; }
 .calculation-loading-sr-title { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

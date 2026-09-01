@@ -284,9 +284,15 @@ test('loading fact stays paired, uses the minimal loading surface, and is not re
   await expect(page.locator('.calculation-loading-content')).toHaveAttribute('role', 'status');
   await expect(page.locator('.solar-loading-indicator')).toBeVisible();
   await expect(page.locator('.solar-loading-indicator')).toHaveCSS('animation-name', 'solar-loading-spin');
+  await expect(page.locator('body')).toHaveClass(/calculation-loading-active/u);
+  await expect(page.locator('.site-header')).toBeHidden();
+  await expect(page.locator('.site-footer')).toBeHidden();
   await expect(page.locator('.calculation-loading-page').getByRole('progressbar')).toHaveCount(0);
   await expect(page.locator('.calculation-loading-page')).not.toContainText(/progress bar|satellite scan|engineering analysis|installer matching/iu);
   await expect(page.getByText('Simple cash payback')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('body')).not.toHaveClass(/calculation-loading-active/u);
+  await expect(page.locator('.site-header')).toBeVisible();
+  await expect(page.locator('.site-footer')).toBeVisible();
   await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
   await page.reload();
   await expect(page.getByText('Simple cash payback')).toBeVisible();

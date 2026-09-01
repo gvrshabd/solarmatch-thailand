@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from '@/components/site/internal-link';
 import type { Locale } from '@/config/i18n';
@@ -33,6 +33,11 @@ export function CalculationLoading({
   const [startedAt] = useState(() => initialStartedAt ?? Date.now());
   const [fact] = useState<PublicLoadingFact | null>(() => initialFact ?? selectLoadingFact(facts, readHistory()));
   const startedRef = useRef(false);
+
+  useLayoutEffect(() => {
+    document.body.classList.add('calculation-loading-active');
+    return () => document.body.classList.remove('calculation-loading-active');
+  }, []);
 
   useEffect(() => {
     if (startedRef.current) return;
