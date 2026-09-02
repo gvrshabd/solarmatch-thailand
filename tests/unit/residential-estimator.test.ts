@@ -114,8 +114,7 @@ describe('Thailand bill-led planning estimator', () => {
     expect(result.planningInstalledCostThb).toBe(130000);
     expect(result.planningMonthlySavingsThb).toBeGreaterThanOrEqual(980);
     expect(result.planningMonthlySavingsThb).toBeLessThanOrEqual(990);
-    expect(result.planningBillReductionPct).toBeGreaterThanOrEqual(20);
-    expect(result.planningBillReductionPct).toBeLessThanOrEqual(21);
+    expect(result.planningBillReductionPct).toBe(20.5);
     expect(result.planningAnnualMaintenanceReserveThb).toBe(1326);
     expect(result.planningPaybackYears).toBe(12.4);
     expect(result.lifetimeCostSeries[25]?.withoutSolarThb).toBe(1440000);

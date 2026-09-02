@@ -286,7 +286,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
             </div>
           </div>
           <div className="result-primary-metrics">
-            <article><CircleDollarSign aria-hidden="true" /><span>{english ? 'Estimated first-year bill reduction' : 'ค่าไฟปีแรกที่คาดว่าจะลดได้'}</span><strong>{english ? 'About ' : 'ประมาณ '}{money(result.planningMonthlySavingsThb, locale)}<small>/{english ? 'month' : 'เดือน'}</small></strong><p>{english ? 'About ' : 'ประมาณ '}{number(result.planningBillReductionPct, 0)}% {english ? 'of your current bill' : 'ของค่าไฟปัจจุบัน'}</p></article>
+            <article><CircleDollarSign aria-hidden="true" /><span>{english ? 'Estimated first-year bill reduction' : 'ค่าไฟปีแรกที่คาดว่าจะลดได้'}</span><strong>{english ? 'About ' : 'ประมาณ '}{money(result.planningMonthlySavingsThb, locale)}<small>/{english ? 'month' : 'เดือน'}</small></strong><p>{english ? 'About ' : 'ประมาณ '}{number(result.planningBillReductionPct, 1)}% {english ? 'of your current bill' : 'ของค่าไฟปัจจุบัน'}</p></article>
             <article><Zap aria-hidden="true" /><span>{english ? 'Estimated starting system size' : 'ขนาดระบบเริ่มต้นโดยประมาณ'}</span><strong>{number(result.planningSystemKw, 1)} kWp</strong><p>{english ? 'Before installer design' : 'ก่อนผู้ติดตั้งออกแบบจริง'}</p></article>
           </div>
         </div>

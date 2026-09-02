@@ -127,7 +127,7 @@ export const residentialEstimator: Estimator = {
     const monthlySavings = round(annualAvoidedBill / 12);
     const annualSavings = round(annualAvoidedBill);
     const afterSolarMonthlyBill = round(Math.max(0, answers.monthlyBillThb - monthlySavings));
-    const billReductionPct = round((annualAvoidedBill / Math.max(1, modeledAnnualBill)) * 100, 1);
+    const billReductionPct = round((annualAvoidedBill / Math.max(1, modeledAnnualBill)) * 100, 0.1);
     const selectedRoofLimited = capacity !== null && capacity + 0.01 < billLedSystemKw;
     const roofFeasibility = capacity === null ? 'unconfirmed' : selectedRoofLimited ? 'limited' : 'likely';
     const recommendation = answers.shade === 'a-lot' || (selectedRoofLimited && systemKw < billLedSystemKw * 0.6)

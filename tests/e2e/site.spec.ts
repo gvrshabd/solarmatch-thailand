@@ -262,6 +262,7 @@ test('the ฿4,800 Bangkok result reconciles its shared cards, table, and MEA ta
   await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('.result-saving-headline')).toContainText('About ฿115,000');
   await expect(page.getByText('Estimated first-year bill reduction').locator('..')).toContainText(/About ฿98\d\/month/u);
+  await expect(page.getByText('Estimated first-year bill reduction').locator('..')).toContainText('About 20.5% of your current bill');
   await expect(page.locator('.result-metrics-v3 article').filter({ hasText: 'Annual maintenance/component reserve' })).toContainText('฿1,326');
   await expect(page.getByText('Simple payback (first-year basis)').locator('..')).toContainText('12.4 years');
   await expect(page.getByRole('table', { name: 'Key lifetime cost points' }).getByRole('row').last()).toContainText('฿1,440,000');
