@@ -79,7 +79,7 @@ describe('contact-mode readiness and consent', () => {
     });
     expect(publicConfig.question?.en).toBe('Want real quotes from local installers?');
     expect(publicConfig.yesLabel?.en).toBe('Yes, I would like solar companies to contact me');
-    expect(publicConfig.noLabel?.en).toBe('No');
+    expect(publicConfig.noLabel?.en).toBe('No, show my estimate without installer contact');
     expect(publicConfig.consent).toEqual(lockedSharedConsentCopy);
   });
 });
@@ -119,13 +119,13 @@ describe('loading-fact selection', () => {
 describe('public lead input boundaries', () => {
   it('normalizes Thai mobile numbers and requires LINE ID conditionally', () => {
     expect(normalizeThaiPhone('081 234 5678')).toBe('+66812345678');
-    const base = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', contactMethod: 'line', adultConfirmed: true, consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', monthlyBillThb: 6000, activelyPlanningSolar: true, propertyType: 'detached-home', ownershipStatus: 'owner', roofArea: '60-100', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little', quoteContactRequested: true, quoteConsentAccepted: true } };
+    const base = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', contactMethod: 'line', adultConfirmed: true, consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', district: 'sathon', monthlyBillThb: 6000, activelyPlanningSolar: true, planningTimeframe: 'within-3-months', projectType: 'new-rooftop', propertyType: 'detached-home', ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little', quoteContactRequested: true, quoteConsentAccepted: true } };
     expect(leadSchema.safeParse(base).success).toBe(false);
     expect(leadSchema.safeParse({ ...base, lineId: 'somchai' }).success).toBe(true);
   });
 
   it('rejects client-supplied mode, recipient, and score fields', () => {
-    const input = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', phone: '0812345678', contactMethod: 'phone', adultConfirmed: true, consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', monthlyBillThb: 6000, activelyPlanningSolar: true, propertyType: 'detached-home', ownershipStatus: 'owner', roofArea: '60-100', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little', quoteContactRequested: true, quoteConsentAccepted: true }, mode: 'shared_solar_company_handoff', recipient: 'attacker', score: 5 };
+    const input = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', phone: '0812345678', contactMethod: 'phone', adultConfirmed: true, consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', district: 'sathon', monthlyBillThb: 6000, activelyPlanningSolar: true, planningTimeframe: 'within-3-months', projectType: 'new-rooftop', propertyType: 'detached-home', ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little', quoteContactRequested: true, quoteConsentAccepted: true }, mode: 'shared_solar_company_handoff', recipient: 'attacker', score: 5 };
     expect(leadSchema.safeParse(input).success).toBe(false);
   });
 });

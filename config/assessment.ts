@@ -160,7 +160,7 @@ const residentialCoreQuestions: AssessmentQuestion[] = [
   },
 ];
 
-const activePlanningQuestion: AssessmentQuestion = {
+const legacyActivePlanningQuestion: AssessmentQuestion = {
   id: 'activelyPlanningSolar', type: 'choice', required: true,
   title: { en: 'Are you actively planning to install solar?', th: 'คุณกำลังวางแผนติดตั้งโซลาร์อยู่หรือไม่?' },
   help: {
@@ -174,7 +174,7 @@ const activePlanningQuestion: AssessmentQuestion = {
   relevance: { calculation: false, qualification: false, scoring: true },
 };
 
-const quoteContactQuestion: AssessmentQuestion = {
+const legacyQuoteContactQuestion: AssessmentQuestion = {
   id: 'quoteContactRequested', type: 'choice', required: true,
   title: { en: 'Want real quotes from local installers?', th: 'อยากได้ใบเสนอราคาจริงจากผู้ติดตั้งในพื้นที่ไหม?' },
   help: { en: 'Choose one option to continue.', th: 'เลือกหนึ่งตัวเลือกเพื่อดำเนินการต่อ' },
@@ -187,15 +187,86 @@ const quoteContactQuestion: AssessmentQuestion = {
 
 const questionsV3: AssessmentQuestion[] = [
   ...residentialCoreQuestions.slice(0, 2),
-  activePlanningQuestion,
+  legacyActivePlanningQuestion,
   ...residentialCoreQuestions.slice(2),
-  quoteContactQuestion,
+  legacyQuoteContactQuestion,
 ];
 
-export const initialQuestionnaire: QuestionnaireDocument = {
+export const legacyQuestionnaireV3: QuestionnaireDocument = {
   id: 'residential-questionnaire-v3',
   schemaVersion: 6,
   questions: questionsV3,
+};
+
+const currentCoreQuestions = residentialCoreQuestions.map((question): AssessmentQuestion => {
+  if (question.id === 'province') return {
+    ...question,
+    help: {
+      en: 'Choose the province and district where the property is located. You do not need to enter a full street address.',
+      th: 'เลือกจังหวัดและเขตหรืออำเภอที่อสังหาริมทรัพย์ตั้งอยู่ โดยไม่ต้องกรอกที่อยู่เต็ม',
+    },
+    conditionalFields: undefined,
+  };
+  if (question.id === 'propertyType') return {
+    ...question,
+    options: question.options?.map((option) => option.value === 'large-home'
+      ? { ...option, label: { en: 'Large detached house', th: 'บ้านเดี่ยวขนาดใหญ่' } }
+      : option),
+  };
+  if (question.id === 'ownershipStatus') return {
+    ...question,
+    help: {
+      en: 'Solar installation requires the property owner’s permission.',
+      th: 'การติดตั้งโซลาร์ต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์',
+    },
+  };
+  return question;
+});
+
+const activePlanningQuestion: AssessmentQuestion = {
+  ...legacyActivePlanningQuestion,
+  options: [
+    { value: 'within-3-months', label: { en: 'Yes — within 3 months', th: 'ใช่ — ภายใน 3 เดือน' } },
+    { value: 'three-six-months', label: { en: 'Yes — within 3–6 months', th: 'ใช่ — ภายใน 3–6 เดือน' } },
+    { value: 'six-twelve-months', label: { en: 'Yes — within 6–12 months', th: 'ใช่ — ภายใน 6–12 เดือน' } },
+    { value: 'over-twelve-months', label: { en: 'Yes — more than 12 months from now', th: 'ใช่ — อีกมากกว่า 12 เดือน' } },
+    { value: 'researching', label: { en: 'No — I am researching and do not have a timeframe yet', th: 'ยังไม่ใช่ — กำลังศึกษาข้อมูลและยังไม่มีกำหนดเวลา' } },
+  ],
+};
+
+const quoteContactQuestion: AssessmentQuestion = {
+  ...legacyQuoteContactQuestion,
+  help: {
+    en: 'Choose Yes only if you want solar companies to contact you about this request. If you choose No, you will go directly to your estimate without being asked for contact details.',
+    th: 'เลือก “ใช่” เฉพาะเมื่อคุณต้องการให้บริษัทโซลาร์ติดต่อเกี่ยวกับคำขอนี้ หากเลือก “ไม่ใช่” คุณจะไปดูผลประเมินได้ทันทีโดยไม่ต้องให้ข้อมูลติดต่อ',
+  },
+  options: [
+    { value: 'yes', label: { en: 'Yes, I would like solar companies to contact me', th: 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ' } },
+    { value: 'no', label: { en: 'No, show my estimate without installer contact', th: 'ไม่ใช่ ดูผลประเมินโดยไม่ให้ผู้ติดตั้งติดต่อ' } },
+  ],
+};
+
+function currentQuestion(id: AssessmentQuestion['id']) {
+  const question = currentCoreQuestions.find((item) => item.id === id);
+  if (!question) throw new Error(`Missing assessment question: ${id}`);
+  return question;
+}
+
+export const initialQuestionnaire: QuestionnaireDocument = {
+  id: 'residential-questionnaire-v4',
+  schemaVersion: 7,
+  questions: [
+    currentQuestion('province'),
+    currentQuestion('monthlyBillThb'),
+    activePlanningQuestion,
+    currentQuestion('propertyType'),
+    currentQuestion('ownershipStatus'),
+    currentQuestion('daytimePattern'),
+    currentQuestion('daytimeLoads'),
+    currentQuestion('shade'),
+    currentQuestion('roofMaterial'),
+    quoteContactQuestion,
+  ],
 };
 
 export const legacyQuestionnaireV2: QuestionnaireDocument = {

@@ -14,10 +14,6 @@ function round(value: number, step = 1) {
   return Math.round(value / step) * step;
 }
 
-function roundDown(value: number, step = 1) {
-  return Math.floor(value / step) * step;
-}
-
 function point(value: number): Range {
   return { min: value, max: value };
 }
@@ -51,12 +47,13 @@ function classifyLoad(answers: EstimateAnswers): EstimateResult['loadProfile'] {
 
 function roofCapacity(answers: EstimateAnswers) {
   if (answers.exactRoofAreaSqm) return Math.max(1, Math.floor((answers.exactRoofAreaSqm / solarAssumptions.squareMetresPerKwp) * 2) / 2);
+  if (!answers.roofArea) return null;
   return solarAssumptions.roofAreaCapacityKwp[answers.roofArea];
 }
 
 export const residentialEstimator: Estimator = {
   calculate(answers: EstimateAnswers): EstimateResult {
-    const tariff = selectResidentialTariff();
+    const tariff = selectResidentialTariff(answers.province);
     const monthlyConsumptionKwh = estimateKwhFromBill(answers.monthlyBillThb, tariff);
     const annualLoadKwh = monthlyConsumptionKwh * 12;
     const loadProfile = classifyLoad(answers);
@@ -99,24 +96,24 @@ export const residentialEstimator: Estimator = {
       const after = calculateResidentialBill(Math.max(0, monthlyConsumptionKwh - selfConsumedKwh), tariff);
       return sum + before - after;
     }, 0);
-    const modeledAnnualBill = calculateResidentialBill(monthlyConsumptionKwh, tariff) * 12;
+    const modeledAnnualBill = answers.monthlyBillThb * 12;
 
     const assumedPhase = answers.electricityPhase === 'three' ? 'three' : 'single';
     const marketPlanningCost = planningPrice(systemKw, assumedPhase);
     const comparableQuote = Boolean(answers.quoteCashPriceThb && answers.quoteSystemKw && !answers.quoteBatteryIncluded);
     const planningCost = round(comparableQuote ? answers.quoteCashPriceThb! : marketPlanningCost, 5000);
-    const annualReserve = round(planningCost * solarAssumptions.annualMaintenanceAndComponentReserveRate, 100);
+    const annualReserve = planningCost * solarAssumptions.annualMaintenanceAndComponentReserveRate;
     const firstYearNetValue = annualAvoidedBill - annualReserve;
     const payback = firstYearNetValue > 0 ? planningCost / firstYearNetValue : null;
 
     const lifetimeCostSeries: LifetimeCostPoint[] = [{ year: 0, withoutSolarThb: 0, withSolarThb: planningCost }];
-    let withoutSolar = 0;
-    let withSolar = planningCost;
+    let cumulativeAvoidedBill = 0;
     for (let year = 1; year <= solarAssumptions.analysisYears; year += 1) {
       const degradation = (1 - solarAssumptions.annualPanelDegradationRate) ** (year - 1);
       const avoided = annualAvoidedBill * degradation;
-      withoutSolar += modeledAnnualBill;
-      withSolar += Math.max(0, modeledAnnualBill - avoided) + annualReserve;
+      cumulativeAvoidedBill += avoided;
+      const withoutSolar = modeledAnnualBill * year;
+      const withSolar = planningCost + withoutSolar - cumulativeAvoidedBill + annualReserve * year;
       lifetimeCostSeries.push({
         year,
         withoutSolarThb: round(withoutSolar, 100),
@@ -124,9 +121,12 @@ export const residentialEstimator: Estimator = {
       });
     }
 
-    const lifetimeNet = roundDown(withoutSolar - withSolar, 1000);
-    const monthlySavings = roundDown(annualAvoidedBill / 12, 50);
-    const annualSavings = roundDown(annualAvoidedBill, 100);
+    const finalWithoutSolar = modeledAnnualBill * solarAssumptions.analysisYears;
+    const finalWithSolar = planningCost + finalWithoutSolar - cumulativeAvoidedBill + annualReserve * solarAssumptions.analysisYears;
+    const lifetimeNet = round(finalWithoutSolar - finalWithSolar, 1000);
+    const monthlySavings = round(annualAvoidedBill / 12);
+    const annualSavings = round(annualAvoidedBill);
+    const afterSolarMonthlyBill = round(Math.max(0, answers.monthlyBillThb - monthlySavings));
     const billReductionPct = round((annualAvoidedBill / Math.max(1, modeledAnnualBill)) * 100, 1);
     const selectedRoofLimited = capacity !== null && capacity + 0.01 < billLedSystemKw;
     const roofFeasibility = capacity === null ? 'unconfirmed' : selectedRoofLimited ? 'limited' : 'likely';
@@ -137,9 +137,9 @@ export const residentialEstimator: Estimator = {
         : 'worth-comparing';
 
     const roundedSystem = round(systemKw, 0.1);
-    const roundedProduction = roundDown(annualProduction, 100);
-    const roundedSelfConsumed = roundDown(annualSelfConsumed, 100);
-    const roundedExported = roundDown(annualExported, 100);
+    const roundedProduction = round(annualProduction, 100);
+    const roundedSelfConsumed = round(annualSelfConsumed, 100);
+    const roundedExported = round(annualExported, 100);
     const roundedCost = round(planningCost, 1000);
     const roundedPayback = payback === null ? null : round(payback, 0.1);
 
@@ -150,7 +150,9 @@ export const residentialEstimator: Estimator = {
       planningAnnualProductionKwh: roundedProduction,
       planningMonthlySavingsThb: monthlySavings,
       planningAnnualSavingsThb: annualSavings,
+      planningAfterSolarMonthlyBillThb: afterSolarMonthlyBill,
       planningInstalledCostThb: roundedCost,
+      planningAnnualMaintenanceReserveThb: round(annualReserve),
       planningPaybackYears: roundedPayback,
       planningAnnualSelfConsumedKwh: roundedSelfConsumed,
       planningAnnualExportedKwh: roundedExported,
@@ -160,25 +162,25 @@ export const residentialEstimator: Estimator = {
       recommendation,
       loadProfile,
       tariffVersion: tariff.id,
-      tariffLabelEn: tariff.labelEn,
-      tariffLabelTh: tariff.labelTh,
+      tariffLabelEn: `${tariff.authorityLabelEn} · ${tariff.labelEn}`,
+      tariffLabelTh: `${tariff.authorityLabelTh} · ${tariff.labelTh}`,
       assumptionVersion: solarAssumptions.version,
       calculatedAt: new Date().toISOString(),
       assumptionsUsed: [
-        'Monthly consumption is reverse-calculated from the entered bill using the selected current PEA/MEA tariff schedule.',
-        'System sizing is led by the bill and the stated daytime-use band, then constrained by the stated usable roof area when known.',
+        `Monthly consumption is reverse-calculated from the entered bill using the applicable ${tariff.authority} residential tariff schedule.`,
+        'System sizing is led by the bill, property type, and stated daytime-use band, then constrained by optional usable roof-area information when supplied.',
         'Production uses province-level solar yield and the stated shade, direction and slope information; no clear-sky assumption is used.',
         'The base result values self-consumed electricity only and excludes export payments, tax relief, finance and tariff escalation.',
         'The 25-year figure subtracts installation cost and a 1.02% annual maintenance/component reserve, including inverter-related risk, and applies 0.5% annual module degradation.',
       ],
       trace: [
         { labelEn: 'Monthly bill', labelTh: 'ค่าไฟต่อเดือน', value: `฿${round(answers.monthlyBillThb).toLocaleString('en-US')}`, basisEn: 'Your answer', basisTh: 'คำตอบของคุณ' },
-        { labelEn: 'Tariff', labelTh: 'อัตราค่าไฟ', value: tariff.labelEn, valueTh: tariff.labelTh, basisEn: tariff.source, basisTh: tariff.source },
-        { labelEn: 'Estimated monthly use', labelTh: 'การใช้ไฟต่อเดือนโดยประมาณ', value: `${round(monthlyConsumptionKwh).toLocaleString('en-US')} kWh`, basisEn: 'Reverse-calculated from the current tariff', basisTh: 'คำนวณย้อนกลับจากอัตราค่าไฟปัจจุบัน' },
-        { labelEn: 'Starting size', labelTh: 'ขนาดระบบเริ่มต้น', value: `${roundedSystem} kWp`, basisEn: 'Bill, daytime use and available roof area', basisTh: 'ค่าไฟ การใช้ไฟช่วงกลางวัน และพื้นที่หลังคา' },
-        { labelEn: 'Annual production', labelTh: 'ผลผลิตต่อปี', value: `${roundedProduction.toLocaleString('en-US')} kWh`, basisEn: 'Province yield, shade and optional roof details', basisTh: 'ผลผลิตอ้างอิงรายจังหวัด เงาบัง และข้อมูลหลังคาเสริม' },
-        { labelEn: 'Planning price', labelTh: 'ราคาเพื่อวางแผน', value: `฿${roundedCost.toLocaleString('en-US')}`, basisEn: comparableQuote ? 'Your comparable cash quote' : 'Current PEA and Thai market package evidence', basisTh: comparableQuote ? 'ใบเสนอราคาเงินสดที่เปรียบเทียบได้ของคุณ' : 'ข้อมูลแพ็กเกจปัจจุบันของ PEA และตลาดไทย' },
-        { labelEn: 'Lifetime reserve', labelTh: 'เงินสำรองค่าดูแล', value: `฿${annualReserve.toLocaleString('en-US')}/year`, basisEn: 'NREL 1.02% of CAPEX fixed O&M benchmark', basisTh: 'ค่าอ้างอิง NREL สำหรับการดูแลคงที่ 1.02% ของเงินลงทุน' },
+        { labelEn: 'Tariff', labelTh: 'อัตราค่าไฟ', value: `${tariff.authority} · ${tariff.effectiveFrom}–${tariff.effectiveTo}`, basisEn: `${tariff.authorityLabelEn}, including the applicable residential tiers, Ft and VAT.`, basisTh: `${tariff.authorityLabelTh} รวมอัตราขั้นบันได ค่า Ft และ VAT ที่ใช้บังคับ`, sourceUrl: tariff.source, sourceLabelEn: `${tariff.authority} residential tariff source`, sourceLabelTh: `แหล่งอัตราค่าไฟบ้านของ ${tariff.authority}` },
+        { labelEn: 'Estimated monthly use', labelTh: 'การใช้ไฟต่อเดือนโดยประมาณ', value: `${round(monthlyConsumptionKwh).toLocaleString('en-US')} kWh`, basisEn: 'Reverse-calculated from your bill using the stated residential tariff.', basisTh: 'คำนวณย้อนกลับจากยอดค่าไฟของคุณด้วยอัตราค่าไฟบ้านที่ระบุ' },
+        { labelEn: 'Estimated starting system size', labelTh: 'ขนาดระบบเริ่มต้นโดยประมาณ', value: `${roundedSystem} kWp`, basisEn: 'Monthly bill, daytime use, property type and any optional roof-area details.', basisTh: 'ค่าไฟต่อเดือน การใช้ไฟช่วงกลางวัน ประเภทบ้าน และข้อมูลพื้นที่หลังคาเสริม (ถ้ามี)' },
+        { labelEn: 'Estimated first-year solar generation', labelTh: 'การผลิตไฟโซลาร์ปีแรกโดยประมาณ', value: `${roundedProduction.toLocaleString('en-US')} kWh`, basisEn: 'Province, solar resource, visible shade and any optional roof details.', basisTh: 'จังหวัด ข้อมูลพลังงานแสงอาทิตย์ เงาบังที่มองเห็น และข้อมูลหลังคาเสริม (ถ้ามี)' },
+        { labelEn: 'Planning price', labelTh: 'ราคาเพื่อวางแผน', value: `฿${roundedCost.toLocaleString('en-US')}`, basisEn: comparableQuote ? 'Your comparable cash quote.' : 'Current Thai planning-price evidence; not a quotation.', basisTh: comparableQuote ? 'ใบเสนอราคาเงินสดที่เปรียบเทียบได้ของคุณ' : 'หลักฐานราคาเพื่อวางแผนในไทยปัจจุบัน ไม่ใช่ใบเสนอราคา' },
+        { labelEn: 'Annual maintenance/component reserve', labelTh: 'เงินสำรองค่าบำรุงรักษา/อุปกรณ์ต่อปี', value: `฿${round(annualReserve).toLocaleString('en-US')}/year`, basisEn: '1.02% of the planning price each year.', basisTh: '1.02% ของราคาเพื่อวางแผนในแต่ละปี' },
       ],
       lifetimeCostSeries,
       recommendedSystemKw: point(roundedSystem),

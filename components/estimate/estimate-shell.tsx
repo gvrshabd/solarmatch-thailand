@@ -12,6 +12,7 @@ import Link from '@/components/site/internal-link';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
 import { initialQuestionnaire } from '@/config/assessment';
 import { lockedSharedConsentCopy } from '@/config/contact-content';
+import { localizedDistrictOptions } from '@/config/districts';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { provinceOptions } from '@/config/provinces';
 import { track } from '@/lib/analytics/track';
@@ -29,7 +30,7 @@ function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
 }
 
 type SavedDraft = {
-  version: 4 | 5 | 6;
+  version: 4 | 5 | 6 | 7;
   answers: Draft;
   step: number;
   questionnaireVersionId?: string;
@@ -77,6 +78,13 @@ const optionIcons: Record<string, LucideIcon> = {
   other: CircleHelp,
 };
 
+const projectTypeOptions = [
+  { value: 'new-rooftop', en: 'A new rooftop solar system', th: 'ระบบโซลาร์รูฟท็อปใหม่' },
+  { value: 'solar-with-battery', en: 'Solar panels with battery storage', th: 'แผงโซลาร์พร้อมระบบกักเก็บพลังงาน' },
+  { value: 'expand-existing', en: 'Expanding or upgrading an existing solar system', th: 'ขยายหรือปรับปรุงระบบโซลาร์เดิม' },
+  { value: 'unsure', en: 'I’m not sure yet', th: 'ยังไม่แน่ใจ' },
+] as const;
+
 function parseJson(value: string | null): unknown {
   if (!value) return null;
   try { return JSON.parse(value) as unknown; } catch { return null; }
@@ -122,12 +130,25 @@ function conditionalActive(field: ConditionalField, question: AssessmentQuestion
 
 function firstQuestionError(question: AssessmentQuestion, draft: Draft, english: boolean) {
   const value = draft[question.id as keyof Draft];
+  if (question.id === 'province') {
+    if (!draft.province) return english ? 'Choose a province or area before continuing.' : 'กรุณาเลือกจังหวัดหรือพื้นที่ก่อนดำเนินการต่อ';
+    if (draft.province === 'other' && !draft.customProvince?.trim()) return english ? 'Enter the province or area.' : 'กรุณาระบุจังหวัดหรือพื้นที่';
+    if (!draft.district?.trim()) return english ? 'Choose or enter the district before continuing.' : 'กรุณาเลือกหรือระบุเขตหรืออำเภอก่อนดำเนินการต่อ';
+    if (draft.postcode && !/^\d{5}$/u.test(draft.postcode)) return english ? 'Enter a five-digit postcode or leave it blank.' : 'กรอกรหัสไปรษณีย์ 5 หลัก หรือเว้นว่างไว้';
+  }
   if (question.id === 'monthlyBillThb' && (!draft.monthlyBillThb || draft.monthlyBillThb <= 0)) {
     return english ? 'Enter a typical bill amount greater than zero.' : 'กรอกค่าไฟของเดือนปกติที่มากกว่าศูนย์';
   }
   if (question.id === 'daytimeLoads' && (!draft.daytimeLoads?.length)) {
     return english ? 'Select at least one answer.' : 'เลือกอย่างน้อยหนึ่งข้อ';
   }
+  if (question.id === 'activelyPlanningSolar' && (!draft.planningTimeframe || !draft.projectType)) {
+    return english ? 'Choose a timeframe and project type before continuing.' : 'กรุณาเลือกช่วงเวลาและประเภทโครงการก่อนดำเนินการต่อ';
+  }
+  if (question.id === 'ownershipStatus' && draft.ownershipStatus !== 'owner' && !draft.ownerPermission) {
+    return english ? 'Tell us whether you have the property owner’s permission.' : 'กรุณาระบุว่าคุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์แล้วหรือไม่';
+  }
+  if (question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet') return '';
   if (question.id === 'quoteContactRequested' && draft.quoteContactRequested && draft.quoteConsentAccepted !== true) {
     return english ? 'Tick the consent box before continuing to the contact form.' : 'กรุณาทำเครื่องหมายในช่องความยินยอมก่อนกรอกข้อมูลติดต่อ';
   }
@@ -232,7 +253,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   useEffect(() => {
     if (!ready) return;
     const saved: SavedDraft = {
-      version: 6, answers: draft, step,
+      version: 7, answers: draft, step,
       questionnaireVersionId: assessmentConfig?.questionnaireVersionId,
       releaseId: assessmentConfig?.releaseId,
       assessmentToken: assessmentConfig?.assessmentToken ?? undefined,
@@ -267,8 +288,13 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   function setValue<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K] | undefined) {
     setDraft((current) => {
       const next = { ...current, [key]: value };
-      if (key === 'province' && value !== 'other') delete next.customLocation;
+      if (key === 'province') {
+        delete next.district;
+        delete next.postcode;
+        if (value !== 'other') { delete next.customLocation; delete next.customProvince; }
+      }
       if (key === 'propertyType' && value !== 'other-residential') delete next.customPropertyType;
+      if (key === 'ownershipStatus' && value === 'owner') delete next.ownerPermission;
       if (key === 'roofMaterial' && value !== 'other') delete next.customRoofMaterial;
       return next;
     });
@@ -277,13 +303,19 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   function selected(id: string, value: string) {
     const current = draft[id as keyof Draft];
-    if (id === 'activelyPlanningSolar' || id === 'quoteContactRequested') return current === (value === 'yes');
+    if (id === 'activelyPlanningSolar') return draft.planningTimeframe === value;
+    if (id === 'quoteContactRequested') return current === (value === 'yes');
     return current === value;
   }
 
   function chooseOption(id: string, value: string) {
     if (id === 'activelyPlanningSolar') {
-      setValue('activelyPlanningSolar', value === 'yes');
+      setDraft((current) => ({
+        ...current,
+        planningTimeframe: value as EstimateAnswers['planningTimeframe'],
+        activelyPlanningSolar: value !== 'researching',
+      }));
+      setError('');
       return;
     }
     if (id === 'quoteContactRequested') {
@@ -324,7 +356,9 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       return;
     }
-    const parsed = estimateAnswersSchema.safeParse(draft);
+    const permissionUnavailable = question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet';
+    const candidate = permissionUnavailable ? { ...draft, quoteContactRequested: false, quoteConsentAccepted: undefined } : draft;
+    const parsed = estimateAnswersSchema.safeParse(candidate);
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0];
       const firstQuestion = questions.findIndex((item) => item.id === firstIssue.path[0] || item.conditionalFields?.some((field) => field.id === firstIssue.path[0]));
@@ -378,22 +412,33 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   if (!question) return null;
 
   const completedAnswers = estimateAnswersSchema.safeParse(draft);
+  const contactPermissionUnavailable = question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet';
+  const districtOptions = localizedDistrictOptions(draft.province ?? '', locale);
 
   return <main className="estimate-page"><div className="site-shell estimate-focus-layout"><section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
     <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage">
       <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1><p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p></div>
-      {question.type === 'province' && <label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>}
+      {question.type === 'province' && <div className="location-fields">
+        <label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>
+        {draft.province === 'other' && <label htmlFor="estimate-custom-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><input id="estimate-custom-province" maxLength={100} value={draft.customProvince ?? ''} placeholder={english ? 'e.g. Chonburi' : 'เช่น ชลบุรี'} onChange={(event) => setValue('customProvince', event.target.value)} /></label>}
+        {draft.province && draft.province !== 'other' && <label htmlFor="estimate-district"><span>{english ? 'District (Khet / Amphoe)' : 'เขต / อำเภอ'}</span><select id="estimate-district" value={draft.district ?? ''} onChange={(event) => setValue('district', event.target.value)}><option value="" disabled>{english ? 'Select a district' : 'เลือกเขตหรืออำเภอ'}</option>{districtOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>}
+        {draft.province === 'other' && <label htmlFor="estimate-district"><span>{english ? 'District or local area' : 'อำเภอ เขต หรือพื้นที่'}</span><input id="estimate-district" maxLength={100} value={draft.district ?? ''} placeholder={english ? 'e.g. Bang Lamung' : 'เช่น บางละมุง'} onChange={(event) => setValue('district', event.target.value)} /></label>}
+        {draft.province && <label htmlFor="estimate-postcode"><span>{english ? 'Postcode (optional)' : 'รหัสไปรษณีย์ (ไม่บังคับ)'}</span><input id="estimate-postcode" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={draft.postcode ?? ''} onChange={(event) => setValue('postcode', event.target.value.replace(/\D/gu, '').slice(0, 5) || undefined)} /></label>}
+      </div>}
       {question.type === 'bill' && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
-      {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{question.options?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
-      {question.id === 'quoteContactRequested' && <div className="quote-consent-block">
-        <label className="quote-consent-check"><input type="checkbox" disabled={draft.quoteContactRequested === false} checked={draft.quoteConsentAccepted ?? false} onChange={(event) => setValue('quoteConsentAccepted', event.target.checked ? true : undefined)} /><span><ConsentCopy copy={assessmentConfig?.contact.consent?.[locale] ?? lockedSharedConsentCopy[locale]} locale={locale} /></span></label>
+      {question.type === 'choice' && !contactPermissionUnavailable && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{question.options?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
+      {question.id === 'activelyPlanningSolar' && <fieldset className="inline-followup"><legend id="project-type-title">{english ? 'What kind of solar project are you considering?' : 'คุณกำลังพิจารณาโครงการโซลาร์แบบใด?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="project-type-title" onKeyDown={handleRadioKeys}>{projectTypeOptions.map((option, index) => <button key={option.value} type="button" role="radio" aria-checked={draft.projectType === option.value} tabIndex={draft.projectType === option.value || (!draft.projectType && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.projectType === option.value ? 'selected' : ''}`} onClick={() => setValue('projectType', option.value)}><SunMedium className="choice-icon" aria-hidden="true" /><strong>{option[locale]}</strong><span className="choice-indicator" aria-hidden="true">{draft.projectType === option.value && <Check />}</span></button>)}</div></fieldset>}
+      {question.id === 'ownershipStatus' && draft.ownershipStatus !== undefined && draft.ownershipStatus !== 'owner' && <fieldset className="inline-followup"><legend id="owner-permission-title">{english ? 'Do you have the property owner’s permission to request contact from solar installers?' : 'คุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อจากผู้ติดตั้งโซลาร์แล้วหรือไม่?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="owner-permission-title" onKeyDown={handleRadioKeys}>{([['yes', english ? 'Yes' : 'ได้รับอนุญาตแล้ว'], ['not-yet', english ? 'Not yet' : 'ยังไม่ได้รับอนุญาต']] as const).map(([value, label], index) => <button key={value} type="button" role="radio" aria-checked={draft.ownerPermission === value} tabIndex={draft.ownerPermission === value || (!draft.ownerPermission && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.ownerPermission === value ? 'selected' : ''}`} onClick={() => setValue('ownerPermission', value)}><Home className="choice-icon" aria-hidden="true" /><strong>{label}</strong><span className="choice-indicator" aria-hidden="true">{draft.ownerPermission === value && <Check />}</span></button>)}</div></fieldset>}
+      {contactPermissionUnavailable && <div className="permission-result-notice"><p>{english ? 'You can still view your estimate. To request installer contact, you will first need the property owner’s permission.' : 'คุณยังดูผลประเมินได้ตามปกติ หากต้องการให้ผู้ติดตั้งติดต่อ คุณต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ก่อน'}</p></div>}
+      {question.id === 'quoteContactRequested' && draft.quoteContactRequested === true && <div className="quote-consent-block">
+        <label className="quote-consent-check"><input type="checkbox" checked={draft.quoteConsentAccepted ?? false} onChange={(event) => setValue('quoteConsentAccepted', event.target.checked ? true : undefined)} /><span><ConsentCopy copy={assessmentConfig?.contact.consent?.[locale] ?? lockedSharedConsentCopy[locale]} locale={locale} /></span></label>
       </div>}
       {question.type === 'multichoice' && <div className="choice-grid multichoice-grid" aria-labelledby="estimate-question">{question.options?.map((option) => { const checked = draft.daytimeLoads?.includes(option.value as DaytimeLoad) ?? false; const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="checkbox" aria-checked={checked} className={`choice-card visual-choice ${checked ? 'selected' : ''}`} onClick={() => toggleDaytimeLoad(option.value as DaytimeLoad)}><Icon className="choice-icon" aria-hidden="true" /><strong>{option.label[locale]}</strong><span className="choice-indicator checkbox-indicator" aria-hidden="true">{checked && <Check />}</span></button>; })}</div>}
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
-      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
+      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{contactPermissionUnavailable ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
     </ScreenTransition></fieldset>
     <div className="estimate-privacy-line"><span>{english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
   </section>

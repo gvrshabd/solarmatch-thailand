@@ -45,7 +45,7 @@ export type LeadAssessment = {
 };
 
 export const initialScoringConfiguration: ScoringConfiguration = {
-  id: 'residential-rules-v3',
+  id: 'residential-rules-v4',
   maximumPoints: 100,
   ownerRequired: true,
   minimumAirConditioners: 4,
@@ -75,8 +75,13 @@ export const initialScoringConfiguration: ScoringConfiguration = {
   ],
 };
 
-export const legacyScoringConfigurationV2: ScoringConfiguration = {
+export const legacyScoringConfigurationV3: ScoringConfiguration = {
   ...initialScoringConfiguration,
+  id: 'residential-rules-v3',
+};
+
+export const legacyScoringConfigurationV2: ScoringConfiguration = {
+  ...legacyScoringConfigurationV3,
   id: 'residential-rules-v2',
   weights: {
     ownership: 10,
@@ -123,10 +128,21 @@ export function calculateLeadAssessment(
   configuration: ScoringConfiguration = initialScoringConfiguration,
 ): LeadAssessment {
   const acCount = answers.airConditionerCount ?? 0;
-  const legacyRules = configuration.id !== 'residential-rules-v3';
+  const planningTimeframe = answers.planningTimeframe ?? (answers.activelyPlanningSolar ? 'within-3-months' : 'researching');
+  const legacyRules = ['residential-rules-v1', 'residential-rules-v2'].includes(configuration.id);
   const ownershipPoints = weighted(bracket(answers.ownershipStatus, { owner: 10, other: 2, renter: 0 }), 10, configuration.weights.ownership);
   const activePlanningMaximum = configuration.weights.activePlanning ?? 0;
-  const activePlanningPoints = answers.activelyPlanningSolar && activePlanningMaximum > 0 ? activePlanningMaximum : 0;
+  const activePlanningPoints = activePlanningMaximum > 0
+    ? configuration.id === 'residential-rules-v4'
+      ? weighted(bracket(planningTimeframe, {
+        'within-3-months': 10,
+        'three-six-months': 8,
+        'six-twelve-months': 6,
+        'over-twelve-months': 3,
+        researching: 0,
+      }), 10, activePlanningMaximum)
+      : answers.activelyPlanningSolar ? activePlanningMaximum : 0
+    : 0;
   const acBaseMaximum = legacyRules ? 18 : 16;
   const acBasePoints = legacyRules
     ? (acCount >= 9 ? 18 : acCount >= 7 ? 16 : acCount >= 5 ? 13 : acCount >= 4 ? 10 : acCount === 3 ? 6 : acCount >= 1 ? 3 : 0)
@@ -142,7 +158,8 @@ export function calculateLeadAssessment(
     + (answers.daytimeLoads.includes('other-high-use') ? 2 : 0)
     + (answers.daytimeLoads.includes('home-office-equipment') ? 1 : 0)
     + (answers.daytimeLoads.includes('laundry-cooking') ? 1 : 0)), 5, configuration.weights.daytimeLoads);
-  const roofAreaPoints = weighted(bracket(answers.roofArea, { 'under-30': 1, '30-60': 5, '60-100': 8, '100-200': 10, 'over-200': 10, unsure: 3 }), 10, configuration.weights.roofArea);
+  const roofArea = answers.roofArea ?? 'unsure';
+  const roofAreaPoints = weighted(bracket(roofArea, { 'under-30': 1, '30-60': 5, '60-100': 8, '100-200': 10, 'over-200': 10, unsure: 3 }), 10, configuration.weights.roofArea);
   const shadePoints = weighted(bracket(answers.shade, { 'almost-none': 10, little: 8, some: 5, 'a-lot': 0, unsure: legacyRules ? 4 : 3 }), 10, configuration.weights.shade);
   const roofMaterialBaseMaximum = legacyRules ? 5 : 4;
   const roofMaterialPoints = weighted(answers.roofMaterial === 'unsure' ? (legacyRules ? 2 : 1) : answers.roofMaterial === 'other' ? 3 : roofMaterialBaseMaximum, roofMaterialBaseMaximum, configuration.weights.roofMaterial);
@@ -160,12 +177,12 @@ export function calculateLeadAssessment(
 
   const factors: ScoringFactor[] = [
     { key: 'ownership', points: ownershipPoints, maximum: configuration.weights.ownership, value: answers.ownershipStatus, explanationEn: `${answers.ownershipStatus} ownership status`, explanationTh: `สถานะต่อทรัพย์สิน: ${answers.ownershipStatus}` },
-    ...(activePlanningMaximum > 0 ? [{ key: 'active-planning', points: activePlanningPoints, maximum: activePlanningMaximum, value: answers.activelyPlanningSolar, explanationEn: answers.activelyPlanningSolar ? 'Actively planning an installation' : 'Not actively planning yet', explanationTh: answers.activelyPlanningSolar ? 'กำลังวางแผนติดตั้ง' : 'ยังไม่ได้วางแผนติดตั้งอย่างจริงจัง' }] : []),
+    ...(activePlanningMaximum > 0 ? [{ key: 'active-planning', points: activePlanningPoints, maximum: activePlanningMaximum, value: planningTimeframe, explanationEn: answers.activelyPlanningSolar ? `Planning timeframe: ${planningTimeframe}` : 'Researching without a timeframe', explanationTh: answers.activelyPlanningSolar ? `ช่วงเวลาที่วางแผน: ${planningTimeframe}` : 'กำลังศึกษาโดยยังไม่มีกำหนดเวลา' }] : []),
     { key: 'air-conditioners', points: acPoints, maximum: configuration.weights.airConditioners, value: acCount, explanationEn: `${acCount} installed AC units`, explanationTh: `ติดตั้งเครื่องปรับอากาศ ${acCount} เครื่อง` },
     { key: 'monthly-bill', points: billPoints, maximum: configuration.weights.monthlyBill, value: bill, explanationEn: `Typical bill ฿${Math.round(bill).toLocaleString('en-US')}`, explanationTh: `ค่าไฟเดือนปกติประมาณ ${Math.round(bill).toLocaleString('th-TH')} บาท` },
     { key: 'daytime-use', points: daytimePoints, maximum: configuration.weights.daytimeUse, value: answers.daytimePattern, explanationEn: `${answers.daytimePattern} daytime use`, explanationTh: `การใช้ไฟช่วงกลางวัน: ${answers.daytimePattern}` },
     { key: 'daytime-loads', points: loadPoints, maximum: configuration.weights.daytimeLoads, value: answers.daytimeLoads, explanationEn: 'Residential daytime appliances', explanationTh: 'อุปกรณ์ที่ใช้ไฟช่วงกลางวัน' },
-    { key: 'roof-area', points: roofAreaPoints, maximum: configuration.weights.roofArea, value: answers.roofArea, explanationEn: `${answers.roofArea} roof-area band`, explanationTh: `ช่วงพื้นที่หลังคา ${answers.roofArea}` },
+    { key: 'roof-area', points: roofAreaPoints, maximum: configuration.weights.roofArea, value: roofArea, explanationEn: `${roofArea} roof-area band`, explanationTh: `ช่วงพื้นที่หลังคา ${roofArea}` },
     { key: 'shade', points: shadePoints, maximum: configuration.weights.shade, value: answers.shade, explanationEn: `${answers.shade} shade`, explanationTh: `เงาบัง: ${answers.shade}` },
     { key: 'roof-material', points: roofMaterialPoints, maximum: configuration.weights.roofMaterial, value: answers.roofMaterial, explanationEn: 'Roof-material information', explanationTh: 'ข้อมูลวัสดุหลังคา' },
     { key: 'property-type', points: propertyPoints, maximum: configuration.weights.propertyType, value: answers.propertyType, explanationEn: 'Residential property type', explanationTh: 'ประเภทที่พักอาศัย' },

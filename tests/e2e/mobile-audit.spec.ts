@@ -8,7 +8,7 @@ const routes = [
 ];
 
 const savedEstimate = {
-  province: 'bangkok', monthlyBillThb: 6000, activelyPlanningSolar: true, propertyType: 'detached-home', roofArea: '60-100',
+  province: 'bangkok', district: 'sathon', monthlyBillThb: 6000, activelyPlanningSolar: true, planningTimeframe: 'within-3-months', projectType: 'new-rooftop', propertyType: 'detached-home', roofArea: '60-100',
   ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'home-office-equipment'], airConditionerCount: 5,
   roofMaterial: 'concrete-tile', shade: 'almost-none', quoteContactRequested: false, roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
@@ -70,7 +70,7 @@ test('mobile homepage image, credit, message, and estimator do not collide', asy
 test('mobile results keep metrics, charts, tables, and lead fields readable', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.goto('/en/estimate/results');
-  await expect(page.locator('.result-metrics-v3 article')).toHaveCount(4, { timeout: 10_000 });
+  await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 10_000 });
   await expect(page.locator('.result-metrics-v3')).not.toContainText(/Needs more information/);
   await expect(page.getByRole('table', { name: 'Key lifetime cost points' })).toBeVisible();
   await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);

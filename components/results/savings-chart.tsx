@@ -10,7 +10,8 @@ export function SavingsChart({ currentBill, estimatedBill, locale = 'th' }: { cu
   const after = english ? 'After solar (planning)' : 'หลังติดโซลาร์ (เพื่อวางแผน)';
   const data = [{ name: english ? 'Monthly bill' : 'ค่าไฟต่อเดือน', [before]: currentBill, [after]: estimatedBill }];
   return (
-    <div className="chart-wrap" aria-hidden="true">
+    <div className="chart-wrap">
+      <div aria-hidden="true">
       <ResponsiveContainer width="100%" height={270}>
         <BarChart accessibilityLayer={false} data={data} margin={{ top: 12, right: 12, left: 4, bottom: 0 }}>
           <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#d8e2dc" />
@@ -22,6 +23,11 @@ export function SavingsChart({ currentBill, estimatedBill, locale = 'th' }: { cu
           <Bar dataKey={after} fill="#137a50" radius={[6, 6, 0, 0]} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
+      </div>
+      <div className="chart-value-summary">
+        <span><strong>{before}:</strong> {formatMoney(currentBill, locale)}/{english ? 'month' : 'เดือน'}</span>
+        <span><strong>{english ? 'After solar' : 'หลังติดโซลาร์'}:</strong> {formatMoney(estimatedBill, locale)}/{english ? 'month' : 'เดือน'}</span>
+      </div>
     </div>
   );
 }

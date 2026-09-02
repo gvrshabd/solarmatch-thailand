@@ -74,11 +74,11 @@ export const contactContent: ContactContent = {
         th: 'อยากได้ใบเสนอราคาจริงจากผู้ติดตั้งในพื้นที่ไหม?',
       },
       help: {
-        en: 'Choose Yes or No to continue.',
-        th: 'เลือกใช่หรือไม่ใช่เพื่อดำเนินการต่อ',
+        en: 'Choose Yes only if you want solar companies to contact you about this request. If you choose No, you will go directly to your estimate without being asked for contact details.',
+        th: 'เลือก “ใช่” เฉพาะเมื่อคุณต้องการให้บริษัทโซลาร์ติดต่อเกี่ยวกับคำขอนี้ หากเลือก “ไม่ใช่” คุณจะไปดูผลประเมินได้ทันทีโดยไม่ต้องให้ข้อมูลติดต่อ',
       },
       yesLabel: { en: 'Yes, I would like solar companies to contact me', th: 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ' },
-      noLabel: { en: 'No', th: 'ไม่ใช่' },
+      noLabel: { en: 'No, show my estimate without installer contact', th: 'ไม่ใช่ ดูผลประเมินโดยไม่ให้ผู้ติดตั้งติดต่อ' },
       consent: lockedSharedConsentCopy,
     },
     common: {
@@ -91,8 +91,8 @@ export const contactContent: ContactContent = {
       skipLabel: { en: 'Continue to my results without submitting', th: 'ดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ' },
       failureTitle: { en: 'We could not save your contact request', th: 'ยังบันทึกคำขอติดต่อไม่ได้' },
       failureBody: {
-        en: 'Your assessment and result are safe in this browser. You can try again or continue to your result without submitting contact details.',
-        th: 'คำตอบและผลประเมินของคุณยังอยู่ในเบราว์เซอร์นี้ คุณสามารถลองอีกครั้งหรือดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ',
+        en: 'Your assessment and estimate are still available. You can try again or continue to your estimate without submitting contact details.',
+        th: 'คำตอบและผลประเมินของคุณยังอยู่ คุณสามารถลองอีกครั้งหรือดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ',
       },
       adultConfirmation: {
         en: 'I confirm that I am at least 20 years old and that I am the property owner or am authorized by the property owner to request contact about this property.',

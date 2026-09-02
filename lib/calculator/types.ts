@@ -9,6 +9,9 @@ export type PropertyType =
 
 export type OwnershipStatus = 'owner' | 'renter' | 'other';
 export type InstallationTimeframe = 'asap' | 'one-three-months' | 'three-six-months' | 'over-six-months' | 'researching';
+export type PlanningTimeframe = 'within-3-months' | 'three-six-months' | 'six-twelve-months' | 'over-twelve-months' | 'researching';
+export type SolarProjectType = 'new-rooftop' | 'solar-with-battery' | 'expand-existing' | 'unsure';
+export type OwnerPermission = 'yes' | 'not-yet';
 
 export type DaytimePattern = 'very-low' | 'low' | 'moderate' | 'high' | 'very-high';
 export type DaytimeLoad =
@@ -38,12 +41,18 @@ export type EstimateLocation = {
 export type EstimateAnswers = {
   province: string;
   customLocation?: string;
+  customProvince?: string;
+  district?: string;
+  postcode?: string;
   monthlyBillThb: number;
   activelyPlanningSolar: boolean;
+  planningTimeframe?: PlanningTimeframe;
+  projectType?: SolarProjectType;
   propertyType: PropertyType;
   customPropertyType?: string;
   ownershipStatus: OwnershipStatus;
-  roofArea: RoofArea;
+  ownerPermission?: OwnerPermission;
+  roofArea?: RoofArea;
   daytimePattern: DaytimePattern;
   daytimeLoads: DaytimeLoad[];
   customDaytimeLoad?: string;
@@ -76,6 +85,9 @@ export type CalculationTrace = {
   valueTh?: string;
   basisEn: string;
   basisTh: string;
+  sourceUrl?: string;
+  sourceLabelEn?: string;
+  sourceLabelTh?: string;
 };
 
 export type EstimateResult = {
@@ -85,7 +97,9 @@ export type EstimateResult = {
   planningAnnualProductionKwh: number;
   planningMonthlySavingsThb: number;
   planningAnnualSavingsThb: number;
+  planningAfterSolarMonthlyBillThb: number;
   planningInstalledCostThb: number;
+  planningAnnualMaintenanceReserveThb: number;
   planningPaybackYears: number | null;
   planningAnnualSelfConsumedKwh: number;
   planningAnnualExportedKwh: number;

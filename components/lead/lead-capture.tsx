@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, LockKeyhole } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LockKeyhole } from 'lucide-react';
 import Link from '@/components/site/internal-link';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { track } from '@/lib/analytics/track';
@@ -47,7 +47,6 @@ export function LeadCapture({
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submissionError, setSubmissionError] = useState('');
   const [sending, setSending] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [idempotencyKey, setIdempotencyKey] = useState(nextIdempotencyKey);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousResetKey = useRef(resetKey);
@@ -58,7 +57,6 @@ export function LeadCapture({
     setFields(initialFields);
     setErrors({});
     setSubmissionError('');
-    setSubmitted(false);
     setIdempotencyKey(nextIdempotencyKey());
   }, [resetKey]);
 
@@ -67,12 +65,6 @@ export function LeadCapture({
     const timer = window.setTimeout(() => headingRef.current?.focus(), 300);
     return () => window.clearTimeout(timer);
   }, [active]);
-
-  useEffect(() => {
-    if (!submitted) return;
-    const timer = window.setTimeout(() => onContinue('submitted'), 700);
-    return () => window.clearTimeout(timer);
-  }, [onContinue, submitted]);
 
   function setValue<K extends keyof Fields>(key: K, value: Fields[K]) {
     setFields((current) => ({ ...current, [key]: value }));
@@ -88,8 +80,8 @@ export function LeadCapture({
 
   function validate() {
     const next: FieldErrors = {};
-    if (!fields.legalFirstName.trim()) next.legalFirstName = english ? 'Enter your legal first name.' : 'กรุณากรอกชื่อจริงตามเอกสาร';
-    if (!fields.legalLastName.trim()) next.legalLastName = english ? 'Enter your legal last name.' : 'กรุณากรอกนามสกุลตามเอกสาร';
+    if (!fields.legalFirstName.trim()) next.legalFirstName = english ? 'Enter your first name.' : 'กรุณากรอกชื่อ';
+    if (!fields.legalLastName.trim()) next.legalLastName = english ? 'Enter your last name.' : 'กรุณากรอกนามสกุล';
     if (!fields.contactMethod) next.contactMethod = english ? 'Choose phone or LINE.' : 'เลือกช่องทางติดต่อทางโทรศัพท์หรือ LINE';
     if (fields.contactMethod === 'phone' && !thaiPhonePattern.test(fields.phone.replace(/[\s()-]/gu, ''))) {
       next.phone = english ? 'Enter a valid Thai mobile number, such as 081 234 5678.' : 'กรอกหมายเลขโทรศัพท์มือถือไทยที่ถูกต้อง เช่น 081 234 5678';
@@ -103,7 +95,7 @@ export function LeadCapture({
   }
 
   async function submit() {
-    if (sending || submitted || !validate()) return;
+    if (sending || !validate()) return;
     if (!configuration.assessmentToken || !configuration.liveLeadSubmissions || !fields.contactMethod) {
       setSubmissionError(english ? 'Contact requests are temporarily unavailable. You can still continue to your estimate.' : 'ขณะนี้ยังไม่สามารถส่งคำขอติดต่อได้ คุณยังดูผลประเมินต่อได้');
       return;
@@ -153,7 +145,7 @@ export function LeadCapture({
       }
       track('contact_form_completed', { mode: contact.mode as Exclude<typeof contact.mode, 'disabled'>, language: locale, contactMethod: fields.contactMethod });
       setIdempotencyKey(nextIdempotencyKey());
-      setSubmitted(true);
+      onContinue('submitted');
     } catch {
       setSubmissionError(contact.failureBody[locale]);
       setSending(false);
@@ -162,24 +154,28 @@ export function LeadCapture({
 
   if (!contact.enabled || contact.mode === 'disabled') return null;
 
+  const adultConfirmation = answers.ownershipStatus === 'owner'
+    ? (english
+      ? 'I confirm that I am at least 20 years old and that I own this property.'
+      : 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และเป็นเจ้าของอสังหาริมทรัพย์นี้')
+    : (english
+      ? 'I confirm that I am at least 20 years old and have the property owner’s permission to request contact about solar for this property.'
+      : 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อเกี่ยวกับโซลาร์สำหรับอสังหาริมทรัพย์นี้');
+
   return <section hidden={!active} className="contact-form-step" aria-labelledby="contact-form-title" aria-hidden={!active}>
     <div className="contact-form-panel">
-      {submitted ? <div className="contact-submit-success" role="status">
-        <CheckCircle2 aria-hidden="true" />
-        <h1 id="contact-form-title" ref={headingRef} tabIndex={-1}>{english ? 'Your request has been saved' : 'บันทึกคำขอติดต่อแล้ว'}</h1>
-        <p>{english ? 'We are preparing your solar estimate now.' : 'กำลังเตรียมผลประเมินโซลาร์ของคุณ'}</p>
-      </div> : <>
+      <>
         <div className="contact-form-heading">
           <p className="eyebrow">{english ? 'Contact details' : 'ข้อมูลติดต่อ'}</p>
           <h1 id="contact-form-title" ref={headingRef} tabIndex={-1}>{english ? 'Where should installers contact you?' : 'ต้องการให้ผู้ติดตั้งติดต่อคุณผ่านช่องทางใด?'}</h1>
           <p>{english ? 'Complete the details below in one step. Your estimate is already calculated.' : 'กรอกข้อมูลด้านล่างในขั้นตอนเดียว ผลประเมินของคุณคำนวณไว้แล้ว'}</p>
         </div>
         <div className="contact-form-grid">
-          <label><span>{english ? 'Legal first name' : 'ชื่อจริงตามเอกสาร'}</span>
+          <label><span>{english ? 'First name' : 'ชื่อ'}</span>
             <input autoComplete="given-name" maxLength={80} value={fields.legalFirstName} aria-invalid={Boolean(errors.legalFirstName)} aria-describedby={errors.legalFirstName ? 'contact-first-error' : undefined} onChange={(event) => setValue('legalFirstName', event.target.value)} />
             {errors.legalFirstName && <small id="contact-first-error" className="field-error" role="alert">{errors.legalFirstName}</small>}
           </label>
-          <label><span>{english ? 'Legal last name' : 'นามสกุลตามเอกสาร'}</span>
+          <label><span>{english ? 'Last name' : 'นามสกุล'}</span>
             <input autoComplete="family-name" maxLength={80} value={fields.legalLastName} aria-invalid={Boolean(errors.legalLastName)} aria-describedby={errors.legalLastName ? 'contact-last-error' : undefined} onChange={(event) => setValue('legalLastName', event.target.value)} />
             {errors.legalLastName && <small id="contact-last-error" className="field-error" role="alert">{errors.legalLastName}</small>}
           </label>
@@ -193,11 +189,13 @@ export function LeadCapture({
           </fieldset>
           <div className="contact-conditional-field">
             {!fields.contactMethod && <p>{english ? 'Choose a contact method to continue.' : 'เลือกช่องทางที่สะดวกให้ติดต่อ'}</p>}
-            {fields.contactMethod === 'phone' && <label><span>{english ? 'Thai mobile number' : 'หมายเลขโทรศัพท์มือถือ'}</span>
+            {fields.contactMethod === 'phone' && <label><span>{english ? 'Mobile phone number' : 'หมายเลขโทรศัพท์มือถือ'}</span>
+              <small>{english ? 'Enter a number solar companies can use to contact you.' : 'กรอกหมายเลขที่บริษัทโซลาร์สามารถใช้ติดต่อคุณได้'}</small>
               <input type="tel" inputMode="tel" autoComplete="tel" placeholder="081 234 5678" value={fields.phone} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'contact-phone-error' : undefined} onChange={(event) => setValue('phone', event.target.value)} />
               {errors.phone && <small id="contact-phone-error" className="field-error" role="alert">{errors.phone}</small>}
             </label>}
             {fields.contactMethod === 'line' && <label><span>LINE ID</span>
+              <small>{english ? 'Enter your LINE ID, not your display name. Make sure people can add you by ID.' : 'กรอก LINE ID ไม่ใช่ชื่อที่แสดง และตรวจสอบว่าเปิดให้ผู้อื่นเพิ่มเพื่อนด้วย ID ได้'}</small>
               <input autoComplete="off" maxLength={80} value={fields.lineId} aria-invalid={Boolean(errors.lineId)} aria-describedby={errors.lineId ? 'contact-line-error' : undefined} onChange={(event) => setValue('lineId', event.target.value)} />
               {errors.lineId && <small id="contact-line-error" className="field-error" role="alert">{errors.lineId}</small>}
             </label>}
@@ -205,7 +203,7 @@ export function LeadCapture({
         </div>
         <label className="contact-adult-confirmation">
           <input type="checkbox" checked={fields.adultConfirmed} onChange={(event) => setValue('adultConfirmed', event.target.checked)} />
-          <span>{contact.adultConfirmation?.[locale]}</span>
+          <span>{adultConfirmation}</span>
         </label>
         {errors.adultConfirmed && <p className="field-error" role="alert">{errors.adultConfirmed}</p>}
         <div className="privacy-inline"><LockKeyhole size={17} aria-hidden="true" /><span>{english ? 'Your request is stored securely under the ' : 'คำขอของคุณจะจัดเก็บอย่างปลอดภัยตาม '}<Link href={localizedPath('/privacy', locale)} target="_blank" rel="noopener">{english ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว'}</Link></span></div>
@@ -213,10 +211,10 @@ export function LeadCapture({
         {submissionError && <div className="form-error form-error-summary" role="alert"><strong>{contact.failureTitle[locale]}</strong><p>{submissionError}</p></div>}
         <div className="contact-form-actions">
           <button type="button" className="button button-secondary" disabled={sending} onClick={onBack}><ArrowLeft size={18} />{english ? 'Back' : 'ย้อนกลับ'}</button>
-          <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button>
+          <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : submissionError ? (english ? 'Try again' : 'ลองอีกครั้ง') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button>
         </div>
         {submissionError && <button type="button" className="text-link contact-skip" disabled={sending} onClick={() => onContinue('skipped')}>{english ? 'Continue to my estimate without submitting' : 'ดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ'}</button>}
-      </>}
+      </>
     </div>
   </section>;
 }

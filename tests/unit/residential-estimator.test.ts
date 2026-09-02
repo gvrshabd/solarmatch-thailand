@@ -4,8 +4,11 @@ import type { EstimateAnswers } from '@/lib/calculator/types';
 
 const base: EstimateAnswers = {
   province: 'bangkok',
+  district: 'sathon',
   monthlyBillThb: 6000,
   activelyPlanningSolar: true,
+  planningTimeframe: 'within-3-months',
+  projectType: 'new-rooftop',
   propertyType: 'detached-home',
   ownershipStatus: 'owner',
   roofArea: '60-100',
@@ -95,5 +98,29 @@ describe('Thailand bill-led planning estimator', () => {
     const unsure = residentialEstimator.calculate({ ...base, electricityPhase: 'unsure' });
     const single = residentialEstimator.calculate({ ...base, electricityPhase: 'single' });
     expect(unsure.planningInstalledCostThb).toBe(single.planningInstalledCostThb);
+  });
+
+  it('keeps the visible ฿4,800 Bangkok example internally reconciled', () => {
+    const result = residentialEstimator.calculate({
+      ...base,
+      monthlyBillThb: 4800,
+      roofArea: undefined,
+      daytimePattern: 'moderate',
+      daytimeLoads: ['air-conditioning'],
+      airConditionerCount: 4,
+    });
+    expect(result.tariffVersion).toContain('mea');
+    expect(result.planningSystemKw).toBe(3);
+    expect(result.planningInstalledCostThb).toBe(130000);
+    expect(result.planningMonthlySavingsThb).toBeGreaterThanOrEqual(980);
+    expect(result.planningMonthlySavingsThb).toBeLessThanOrEqual(990);
+    expect(result.planningBillReductionPct).toBeGreaterThanOrEqual(20);
+    expect(result.planningBillReductionPct).toBeLessThanOrEqual(21);
+    expect(result.planningAnnualMaintenanceReserveThb).toBe(1326);
+    expect(result.planningPaybackYears).toBe(12.4);
+    expect(result.lifetimeCostSeries[25]?.withoutSolarThb).toBe(1440000);
+    expect(result.lifetimeCostSeries[25]?.withSolarThb).toBeGreaterThanOrEqual(1324000);
+    expect(result.lifetimeCostSeries[25]?.withSolarThb).toBeLessThanOrEqual(1326000);
+    expect(result.planningTwentyFiveYearNetBenefitThb).toBe(115000);
   });
 });

@@ -79,6 +79,15 @@ export async function POST(request: NextRequest) {
   const requestFingerprint = await sha256(`${phoneE164 ?? lineId}:${token.nonce}:${release.release_id}`);
   const consent = consentSnapshot(contact);
   const answers = parsed.data.answers;
+  const adultConfirmationText = answers.ownershipStatus === 'owner'
+    ? {
+      en: 'I confirm that I am at least 20 years old and that I own this property.',
+      th: 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และเป็นเจ้าของอสังหาริมทรัพย์นี้',
+    }
+    : {
+      en: 'I confirm that I am at least 20 years old and have the property owner’s permission to request contact about solar for this property.',
+      th: 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อเกี่ยวกับโซลาร์สำหรับอสังหาริมทรัพย์นี้',
+    };
   const explanation = JSON.stringify({ factors: assessment.factors, eligibilityReasons: assessment.eligibilityReasons });
   const recipientSnapshot = consent.recipient ? JSON.stringify({
     ...consent.recipient,
@@ -113,10 +122,10 @@ export async function POST(request: NextRequest) {
   const leadValues = [
     leadId, parsed.data.idempotencyKey, requestFingerprint, parsed.data.legalFirstName, parsed.data.legalLastName,
     phoneE164, phoneDisplay, parsed.data.contactMethod, lineId, answers.province,
-    answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
+    answers.customProvince ?? answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
     JSON.stringify(answers.daytimeLoads), answers.customDaytimeLoad ?? null, answers.airConditionerCount ?? 0,
     Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
-    answers.roofArea, answers.daytimePattern, answers.installationTimeframe ?? 'not-collected-v3',
+    answers.roofArea ?? 'unsure', answers.daytimePattern, answers.planningTimeframe ?? (answers.activelyPlanningSolar ? 'within-3-months' : 'researching'),
     answers.activelyPlanningSolar ? 1 : 0, answers.quoteContactRequested ? 1 : 0, JSON.stringify(answers),
     release.questionnaire_version_id, release.rule_version_id, release.release_id, assessment.rawPoints,
     assessment.qualityScore, assessment.hardEligible ? 1 : 0, assessment.highQuality ? 1 : 0, explanation,
@@ -129,7 +138,7 @@ export async function POST(request: NextRequest) {
     sharedMode ? null : consent.recipient?.privacyUrl ?? null, sharedMode ? null : recipientSnapshot, contact.retentionDays,
     contact.distributionWindowDays, distributionExpiresAt, contact.recipientCategory,
     JSON.stringify(contact.sharedFields), contact.adultConfirmationVersionId,
-    consent.adultConfirmationText?.en ?? '', consent.adultConfirmationText?.th ?? '', consentedAt,
+    adultConfirmationText.en, adultConfirmationText.th, consentedAt,
     contact.privacyNoticeVersionId, contact.termsVersionId, contact.cookiePolicyVersionId,
     restrictedAccess ? 'restricted_site_operational' : 'production', 0, 1, restrictedAccess ? 1 : 0,
     0, null, null,

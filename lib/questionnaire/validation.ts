@@ -21,7 +21,7 @@ const optionSchema = z.object({
 
 export const questionnaireDocumentSchema = z.object({
   id: z.string().min(1).max(100),
-  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6)]),
+  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7)]),
   questions: z.array(z.object({
     id: z.enum(['province', 'monthlyBillThb', 'activelyPlanningSolar', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'quoteContactRequested', 'installationTimeframe']),
     type: z.enum(['province', 'bill', 'choice', 'multichoice']),
@@ -35,8 +35,9 @@ export const questionnaireDocumentSchema = z.object({
 }).superRefine((document, context) => {
   const ids = document.questions.map((question) => question.id);
   if (new Set(ids).size !== ids.length) context.addIssue({ code: 'custom', path: ['questions'], message: 'Question IDs must be unique.' });
-  const requiredIds = ['province', 'monthlyBillThb', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade'];
+  const requiredIds = ['province', 'monthlyBillThb', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade'];
   requiredIds.forEach((id) => { if (!ids.includes(id as never)) context.addIssue({ code: 'custom', path: ['questions'], message: `Missing required question: ${id}` }); });
+  if (document.schemaVersion <= 6 && !ids.includes('roofArea')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Historic questionnaire versions require roofArea.' });
   if (document.schemaVersion === 4 && !ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 4 requires installationTimeframe.' });
   if (document.schemaVersion === 5 && ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 5 must not include installationTimeframe.' });
   if (document.schemaVersion === 6) {
@@ -45,6 +46,11 @@ export const questionnaireDocumentSchema = z.object({
     if (!ids.includes('quoteContactRequested')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 6 requires quoteContactRequested.' });
     if (ids.indexOf('activelyPlanningSolar') !== ids.indexOf('monthlyBillThb') + 1) context.addIssue({ code: 'custom', path: ['questions'], message: 'Active planning must follow the monthly bill.' });
     if (ids.at(-1) !== 'quoteContactRequested') context.addIssue({ code: 'custom', path: ['questions'], message: 'The quote decision must be the final assessment question.' });
+  }
+  if (document.schemaVersion === 7) {
+    const expected = ['province', 'monthlyBillThb', 'activelyPlanningSolar', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'shade', 'roofMaterial', 'quoteContactRequested'];
+    if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 7 must use the published ten-step public-funnel order.' });
+    if (ids.includes('roofArea') || ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 7 keeps roof area optional and removes the legacy timeframe question.' });
   }
   document.questions.forEach((question, questionIndex) => {
     const values = question.options?.map((option) => option.value) ?? [];
