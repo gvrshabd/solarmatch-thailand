@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import {
   AirVent, ArrowLeft, ArrowRight, Building2, CarFront, Check, CircleHelp,
   CookingPot, Home, House, Layers3, Laptop, SunMedium, Trees, Waves,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
 import { LeadCapture } from '@/components/lead/lead-capture';
+import { CalculationLoading } from '@/components/results/calculation-loading';
 import Link from '@/components/site/internal-link';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
 import { initialQuestionnaire } from '@/config/assessment';
@@ -16,8 +17,10 @@ import { localizedDistrictOptions } from '@/config/districts';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { provinceOptions } from '@/config/provinces';
 import { track } from '@/lib/analytics/track';
+import { calculateEstimate } from '@/lib/calculator';
 import { estimateAnswersSchema, estimateDraftSchema } from '@/lib/validation/estimate';
-import type { DaytimeLoad, EstimateAnswers } from '@/lib/calculator/types';
+import type { DaytimeLoad, EstimateAnswers, EstimateResult } from '@/lib/calculator/types';
+import type { PublicLoadingFact } from '@/lib/loading-facts/types';
 import type { AssessmentQuestion, ConditionalField, PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questionnaire/types';
 
 type Draft = Partial<EstimateAnswers>;
@@ -30,7 +33,7 @@ function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
 }
 
 type SavedDraft = {
-  version: 4 | 5 | 6 | 7;
+  version: 4 | 5 | 6 | 7 | 8;
   answers: Draft;
   step: number;
   questionnaireVersionId?: string;
@@ -74,16 +77,35 @@ const optionIcons: Record<string, LucideIcon> = {
   little: SunMedium,
   some: Trees,
   'a-lot': Trees,
+  'new-rooftop': SunMedium,
+  'solar-with-battery': Layers3,
+  'expand-existing': Building2,
   unsure: CircleHelp,
   other: CircleHelp,
 };
 
-const projectTypeOptions = [
-  { value: 'new-rooftop', en: 'A new rooftop solar system', th: 'ระบบโซลาร์รูฟท็อปใหม่' },
-  { value: 'solar-with-battery', en: 'Solar panels with battery storage', th: 'แผงโซลาร์พร้อมระบบกักเก็บพลังงาน' },
-  { value: 'expand-existing', en: 'Expanding or upgrading an existing solar system', th: 'ขยายหรือปรับปรุงระบบโซลาร์เดิม' },
-  { value: 'unsure', en: 'I’m not sure yet', th: 'ยังไม่แน่ใจ' },
-] as const;
+type ContactOutcome = 'declined' | 'submitted' | 'skipped';
+type CompletionJourney = { answers: EstimateAnswers; outcome: ContactOutcome; waitsForSubmission: boolean };
+type ResultViewState = {
+  signature: string;
+  factSetVersionId: string;
+  fact: PublicLoadingFact | null;
+  contactOutcome: ContactOutcome;
+  viewed: boolean;
+  loadingDurationMs?: number;
+  loadingStartedAt?: number;
+  resultSnapshot?: EstimateResult;
+};
+
+function answerSignature(answers: EstimateAnswers) {
+  const source = JSON.stringify(answers);
+  let hash = 2166136261;
+  for (let index = 0; index < source.length; index += 1) {
+    hash ^= source.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
 
 function parseJson(value: string | null): unknown {
   if (!value) return null;
@@ -141,9 +163,6 @@ function firstQuestionError(question: AssessmentQuestion, draft: Draft, english:
   }
   if (question.id === 'daytimeLoads' && (!draft.daytimeLoads?.length)) {
     return english ? 'Select at least one answer.' : 'เลือกอย่างน้อยหนึ่งข้อ';
-  }
-  if (question.id === 'activelyPlanningSolar' && (!draft.planningTimeframe || !draft.projectType)) {
-    return english ? 'Choose a timeframe and project type before continuing.' : 'กรุณาเลือกช่วงเวลาและประเภทโครงการก่อนดำเนินการต่อ';
   }
   if (question.id === 'ownershipStatus' && draft.ownershipStatus !== 'owner' && !draft.ownerPermission) {
     return english ? 'Tell us whether you have the property owner’s permission.' : 'กรุณาระบุว่าคุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์แล้วหรือไม่';
@@ -211,9 +230,14 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const [transitioning, setTransitioning] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactResetKey, setContactResetKey] = useState(0);
+  const [completionJourney, setCompletionJourney] = useState<CompletionJourney | null>(null);
+  const [calculationComplete, setCalculationComplete] = useState(false);
+  const [submissionComplete, setSubmissionComplete] = useState(false);
+  const [minimumLoadingElapsed, setMinimumLoadingElapsed] = useState(false);
   const initializedRef = useRef(false);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const navigationLockRef = useRef(false);
+  const completionRoutedRef = useRef(false);
   const transitionTimerRef = useRef<number | null>(null);
   const questions = questionnaire.questions;
   const question = questions[Math.min(step, questions.length - 1)];
@@ -253,7 +277,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   useEffect(() => {
     if (!ready) return;
     const saved: SavedDraft = {
-      version: 7, answers: draft, step,
+      version: 8, answers: draft, step,
       questionnaireVersionId: assessmentConfig?.questionnaireVersionId,
       releaseId: assessmentConfig?.releaseId,
       assessmentToken: assessmentConfig?.assessmentToken ?? undefined,
@@ -261,6 +285,41 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     };
     writeSessionValue(draftStorageKey, saved);
   }, [assessmentConfig, draft, ready, step]);
+
+  const persistCompletionView = useCallback((journey: CompletionJourney, patch: Partial<ResultViewState>) => {
+    const signature = answerSignature(journey.answers);
+    const raw = parseJson(readSessionValue(resultViewStorageKey));
+    const current = raw && typeof raw === 'object' && (raw as ResultViewState).signature === signature ? raw as ResultViewState : null;
+    const next: ResultViewState = {
+      signature,
+      factSetVersionId: assessmentConfig?.loadingFactSetVersionId ?? current?.factSetVersionId ?? 'unavailable',
+      fact: current?.fact ?? null,
+      contactOutcome: journey.outcome,
+      viewed: current?.viewed ?? false,
+      ...patch,
+    };
+    writeSessionValue(resultViewStorageKey, next);
+  }, [assessmentConfig?.loadingFactSetVersionId]);
+
+  useEffect(() => {
+    if (!completionJourney) return;
+    const frame = window.requestAnimationFrame(() => {
+      const result = calculateEstimate(completionJourney.answers);
+      writeSessionValue(resultStorageKey, completionJourney.answers);
+      if (assessmentConfig) writeSessionValue(assessmentContextStorageKey, assessmentConfig);
+      removeSessionValue(draftStorageKey);
+      persistCompletionView(completionJourney, { resultSnapshot: result, viewed: false });
+      setCalculationComplete(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [assessmentConfig, completionJourney, persistCompletionView]);
+
+  useEffect(() => {
+    if (!completionJourney || !calculationComplete || !submissionComplete || !minimumLoadingElapsed || completionRoutedRef.current) return;
+    completionRoutedRef.current = true;
+    persistCompletionView(completionJourney, { viewed: true });
+    window.location.assign(localizedPath('/estimate/results', locale));
+  }, [calculationComplete, completionJourney, locale, minimumLoadingElapsed, persistCompletionView, submissionComplete]);
 
   useEffect(() => {
     if (!ready) return;
@@ -375,15 +434,25 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       return;
     }
-    completeJourney(parsed.data);
+    beginCompletion(parsed.data, 'declined', false);
   }
 
-  function completeJourney(answers: EstimateAnswers) {
-    writeSessionValue(resultStorageKey, answers);
-    if (assessmentConfig) writeSessionValue(assessmentContextStorageKey, assessmentConfig);
-    removeSessionValue(draftStorageKey);
+  function beginCompletion(answers: EstimateAnswers, outcome: ContactOutcome, waitsForSubmission: boolean) {
     removeSessionValue(resultViewStorageKey);
-    window.location.assign(localizedPath('/estimate/results', locale));
+    completionRoutedRef.current = false;
+    setCalculationComplete(false);
+    setSubmissionComplete(!waitsForSubmission);
+    setMinimumLoadingElapsed(false);
+    setCompletionJourney({ answers, outcome, waitsForSubmission });
+  }
+
+  function cancelCompletion() {
+    setCompletionJourney(null);
+    setCalculationComplete(false);
+    setSubmissionComplete(false);
+    setMinimumLoadingElapsed(false);
+    completionRoutedRef.current = false;
+    removeSessionValue(resultViewStorageKey);
   }
 
   function previous() {
@@ -415,11 +484,16 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const contactPermissionUnavailable = question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet';
   const districtOptions = localizedDistrictOptions(draft.province ?? '', locale);
 
-  return <main className="estimate-page"><div className="site-shell estimate-focus-layout"><section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
+  return <>{completionJourney && <ScreenTransition transitionKey="journey-preparing" direction="forward" pace="result" className="journey-transition-surface"><CalculationLoading
+    facts={assessmentConfig?.loadingFacts ?? []}
+    locale={locale}
+    onStarted={(fact, durationMs, startedAt) => persistCompletionView(completionJourney, { fact, loadingDurationMs: durationMs, loadingStartedAt: startedAt, viewed: false })}
+    onComplete={() => setMinimumLoadingElapsed(true)}
+  /></ScreenTransition>}<main hidden={Boolean(completionJourney)} className="estimate-page" aria-hidden={Boolean(completionJourney)}><div className="site-shell estimate-focus-layout"><section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
     <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage">
-      <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1><p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p></div>
+      <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1>{question.help[locale] && <p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p>}</div>
       {question.type === 'province' && <div className="location-fields">
         <label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>
         {draft.province === 'other' && <label htmlFor="estimate-custom-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><input id="estimate-custom-province" maxLength={100} value={draft.customProvince ?? ''} placeholder={english ? 'e.g. Chonburi' : 'เช่น ชลบุรี'} onChange={(event) => setValue('customProvince', event.target.value)} /></label>}
@@ -429,7 +503,6 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       </div>}
       {question.type === 'bill' && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
       {question.type === 'choice' && !contactPermissionUnavailable && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{question.options?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
-      {question.id === 'activelyPlanningSolar' && <fieldset className="inline-followup"><legend id="project-type-title">{english ? 'What kind of solar project are you considering?' : 'คุณกำลังพิจารณาโครงการโซลาร์แบบใด?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="project-type-title" onKeyDown={handleRadioKeys}>{projectTypeOptions.map((option, index) => <button key={option.value} type="button" role="radio" aria-checked={draft.projectType === option.value} tabIndex={draft.projectType === option.value || (!draft.projectType && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.projectType === option.value ? 'selected' : ''}`} onClick={() => setValue('projectType', option.value)}><SunMedium className="choice-icon" aria-hidden="true" /><strong>{option[locale]}</strong><span className="choice-indicator" aria-hidden="true">{draft.projectType === option.value && <Check />}</span></button>)}</div></fieldset>}
       {question.id === 'ownershipStatus' && draft.ownershipStatus !== undefined && draft.ownershipStatus !== 'owner' && <fieldset className="inline-followup"><legend id="owner-permission-title">{english ? 'Do you have the property owner’s permission to request contact from solar installers?' : 'คุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อจากผู้ติดตั้งโซลาร์แล้วหรือไม่?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="owner-permission-title" onKeyDown={handleRadioKeys}>{([['yes', english ? 'Yes' : 'ได้รับอนุญาตแล้ว'], ['not-yet', english ? 'Not yet' : 'ยังไม่ได้รับอนุญาต']] as const).map(([value, label], index) => <button key={value} type="button" role="radio" aria-checked={draft.ownerPermission === value} tabIndex={draft.ownerPermission === value || (!draft.ownerPermission && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.ownerPermission === value ? 'selected' : ''}`} onClick={() => setValue('ownerPermission', value)}><Home className="choice-icon" aria-hidden="true" /><strong>{label}</strong><span className="choice-indicator" aria-hidden="true">{draft.ownerPermission === value && <Check />}</span></button>)}</div></fieldset>}
       {contactPermissionUnavailable && <div className="permission-result-notice"><p>{english ? 'You can still view your estimate. To request installer contact, you will first need the property owner’s permission.' : 'คุณยังดูผลประเมินได้ตามปกติ หากต้องการให้ผู้ติดตั้งติดต่อ คุณต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ก่อน'}</p></div>}
       {question.id === 'quoteContactRequested' && draft.quoteContactRequested === true && <div className="quote-consent-block">
@@ -450,7 +523,9 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     resetKey={contactResetKey}
     onBack={() => { setShowContactForm(false); setDirection('backward'); setError(''); }}
     onConfigurationChanged={(configuration) => { setAssessmentConfig(configuration); writeSessionValue(assessmentContextStorageKey, configuration); }}
-    onContinue={() => completeJourney(completedAnswers.data)}
+    onProcessingStart={() => beginCompletion(completedAnswers.data, 'submitted', true)}
+    onProcessingFailed={cancelCompletion}
+    onContinue={(outcome) => outcome === 'submitted' ? setSubmissionComplete(true) : beginCompletion(completedAnswers.data, 'skipped', false)}
   />}
-  </div></main>;
+  </div></main></>;
 }

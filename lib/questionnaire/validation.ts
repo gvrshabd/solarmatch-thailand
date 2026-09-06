@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const localizedTextSchema = z.object({ en: z.string().trim().min(1).max(500), th: z.string().trim().min(1).max(500) });
+const questionHelpSchema = z.object({ en: z.string().trim().max(500), th: z.string().trim().max(500) });
 const conditionalFieldSchema = z.object({
   id: z.enum(['customLocation', 'customPropertyType', 'customDaytimeLoad', 'airConditionerCount', 'customRoofMaterial']),
   whenOption: z.string().min(1).max(80),
@@ -21,12 +22,12 @@ const optionSchema = z.object({
 
 export const questionnaireDocumentSchema = z.object({
   id: z.string().min(1).max(100),
-  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7)]),
+  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]),
   questions: z.array(z.object({
-    id: z.enum(['province', 'monthlyBillThb', 'activelyPlanningSolar', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'quoteContactRequested', 'installationTimeframe']),
+    id: z.enum(['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'quoteContactRequested', 'installationTimeframe']),
     type: z.enum(['province', 'bill', 'choice', 'multichoice']),
     title: localizedTextSchema,
-    help: localizedTextSchema,
+    help: questionHelpSchema,
     required: z.boolean(),
     options: z.array(optionSchema).max(30).optional(),
     conditionalFields: z.array(conditionalFieldSchema).max(5).optional(),
@@ -51,6 +52,11 @@ export const questionnaireDocumentSchema = z.object({
     const expected = ['province', 'monthlyBillThb', 'activelyPlanningSolar', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'shade', 'roofMaterial', 'quoteContactRequested'];
     if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 7 must use the published ten-step public-funnel order.' });
     if (ids.includes('roofArea') || ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 7 keeps roof area optional and removes the legacy timeframe question.' });
+  }
+  if (document.schemaVersion === 8) {
+    const expected = ['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'shade', 'roofMaterial', 'quoteContactRequested'];
+    if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 8 must use the published eleven-step standalone-project order.' });
+    if (ids.includes('roofArea') || ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 8 keeps roof area optional and excludes the legacy timeframe question.' });
   }
   document.questions.forEach((question, questionIndex) => {
     const values = question.options?.map((option) => option.value) ?? [];

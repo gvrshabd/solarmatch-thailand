@@ -1,4 +1,4 @@
-import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3 } from '@/config/assessment';
+import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4 } from '@/config/assessment';
 import { contactContent } from '@/config/contact-content';
 import { legalLaunchDraft } from '@/config/legal-content';
 import { initialLoadingFactSet } from '@/config/loading-facts';
@@ -418,7 +418,7 @@ export async function ensurePublicFunnelRelease(database = requireDatabase()) {
     database.prepare(`INSERT INTO questionnaire_versions
       (id, version_number, state, schema_version, document_json, created_by, published_by, published_at)
       VALUES (?, ?, 'published', 7, ?, ?, ?, CURRENT_TIMESTAMP)`)
-      .bind(initialQuestionnaire.id, questionnaireVersion?.value ?? 4, JSON.stringify(initialQuestionnaire), actor, actor),
+      .bind(legacyQuestionnaireV4.id, questionnaireVersion?.value ?? 4, JSON.stringify(legacyQuestionnaireV4), actor, actor),
     database.prepare(`INSERT INTO rule_versions
       (id, version_number, state, configuration_json, created_by, published_by, published_at)
       VALUES (?, ?, 'published', ?, ?, ?, CURRENT_TIMESTAMP)`)
@@ -429,12 +429,12 @@ export async function ensurePublicFunnelRelease(database = requireDatabase()) {
       .bind(contentVersionId, contentVersion?.value ?? 5, JSON.stringify(contactContent), actor, actor),
   ];
 
-  initialQuestionnaire.questions.forEach((question, questionIndex) => {
-    const questionRowId = `${initialQuestionnaire.id}:${question.id}`;
+  legacyQuestionnaireV4.questions.forEach((question, questionIndex) => {
+    const questionRowId = `${legacyQuestionnaireV4.id}:${question.id}`;
     statements.push(database.prepare(`INSERT INTO assessment_questions
       (id, questionnaire_version_id, question_key, display_order, question_type, required, title_en, title_th, help_en, help_th, conditional_json, relevance_json)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .bind(questionRowId, initialQuestionnaire.id, question.id, questionIndex, question.type, question.required ? 1 : 0,
+      .bind(questionRowId, legacyQuestionnaireV4.id, question.id, questionIndex, question.type, question.required ? 1 : 0,
         question.title.en, question.title.th, question.help.en, question.help.th,
         question.conditionalFields ? JSON.stringify(question.conditionalFields) : null, JSON.stringify(question.relevance)));
     question.options?.forEach((option, optionIndex) => statements.push(database.prepare(`INSERT INTO assessment_options
@@ -466,7 +466,7 @@ export async function ensurePublicFunnelRelease(database = requireDatabase()) {
        legal_document_version_id, live_lead_submissions, is_current, contact_configuration_version_id,
        fact_set_version_id, created_by, published_by, published_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
-      .bind(nextReleaseId, releaseVersion?.value ?? 5, initialQuestionnaire.id, initialScoringConfiguration.id,
+      .bind(nextReleaseId, releaseVersion?.value ?? 5, legacyQuestionnaireV4.id, initialScoringConfiguration.id,
         contentVersionId, source.legal_document_version_id, source.live_lead_submissions,
         source.contact_configuration_version_id, source.fact_set_version_id, actor, actor),
   );
@@ -476,7 +476,78 @@ export async function ensurePublicFunnelRelease(database = requireDatabase()) {
   } catch (error) {
     const createdByAnotherRequest = await database.prepare(`SELECT id FROM public_releases
       WHERE id = ? AND is_current = 1 AND questionnaire_version_id = ? AND rule_version_id = ? LIMIT 1`)
-      .bind(nextReleaseId, initialQuestionnaire.id, initialScoringConfiguration.id).first<{ id: string }>();
+      .bind(nextReleaseId, legacyQuestionnaireV4.id, initialScoringConfiguration.id).first<{ id: string }>();
+    if (createdByAnotherRequest) return;
+    throw error;
+  }
+}
+
+/**
+ * Publishes the mobile-cleanup questionnaire with project type on its own step.
+ * The prior questionnaire and every historic release remain immutable.
+ */
+export async function ensureStandaloneProjectRelease(database = requireDatabase()) {
+  await ensurePublicFunnelRelease(database);
+  const nextReleaseId = 'residential-release-v6';
+  const existing = await database.prepare('SELECT id FROM public_releases WHERE id = ? LIMIT 1')
+    .bind(nextReleaseId).first<{ id: string }>();
+  if (existing) return;
+
+  const source = await database.prepare(`SELECT rule_version_id, content_version_id, legal_document_version_id,
+      live_lead_submissions, contact_configuration_version_id, fact_set_version_id
+    FROM public_releases WHERE is_current = 1 LIMIT 1`).first<{
+      rule_version_id: string;
+      content_version_id: string;
+      legal_document_version_id: string;
+      live_lead_submissions: number;
+      contact_configuration_version_id: string;
+      fact_set_version_id: string | null;
+    }>();
+  if (!source) throw new Error('The current SolarMatch release is unavailable.');
+
+  const actor = 'system:standalone-project-v6';
+  const questionnaireVersion = await database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM questionnaire_versions').first<{ value: number }>();
+  const releaseVersion = await database.prepare('SELECT COALESCE(MAX(release_number), 0) + 1 AS value FROM public_releases').first<{ value: number }>();
+  const statements: D1PreparedStatement[] = [
+    database.prepare(`INSERT INTO questionnaire_versions
+      (id, version_number, state, schema_version, document_json, created_by, published_by, published_at)
+      VALUES (?, ?, 'published', 8, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(initialQuestionnaire.id, questionnaireVersion?.value ?? 5, JSON.stringify(initialQuestionnaire), actor, actor),
+  ];
+
+  initialQuestionnaire.questions.forEach((question, questionIndex) => {
+    const questionRowId = `${initialQuestionnaire.id}:${question.id}`;
+    statements.push(database.prepare(`INSERT INTO assessment_questions
+      (id, questionnaire_version_id, question_key, display_order, question_type, required, title_en, title_th, help_en, help_th, conditional_json, relevance_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(questionRowId, initialQuestionnaire.id, question.id, questionIndex, question.type, question.required ? 1 : 0,
+        question.title.en, question.title.th, question.help.en, question.help.th,
+        question.conditionalFields ? JSON.stringify(question.conditionalFields) : null, JSON.stringify(question.relevance)));
+    question.options?.forEach((option, optionIndex) => statements.push(database.prepare(`INSERT INTO assessment_options
+      (id, question_id, option_value, display_order, label_en, label_th, description_en, description_th, exclusive)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(`${questionRowId}:${option.value}`, questionRowId, option.value, optionIndex,
+        option.label.en, option.label.th, option.description?.en ?? null, option.description?.th ?? null, option.exclusive ? 1 : 0)));
+  });
+
+  statements.push(
+    database.prepare('UPDATE public_releases SET is_current = 0 WHERE is_current = 1'),
+    database.prepare(`INSERT INTO public_releases
+      (id, release_number, questionnaire_version_id, rule_version_id, content_version_id,
+       legal_document_version_id, live_lead_submissions, is_current, contact_configuration_version_id,
+       fact_set_version_id, created_by, published_by, published_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(nextReleaseId, releaseVersion?.value ?? 6, initialQuestionnaire.id, source.rule_version_id,
+        source.content_version_id, source.legal_document_version_id, source.live_lead_submissions,
+        source.contact_configuration_version_id, source.fact_set_version_id, actor, actor),
+  );
+
+  try {
+    await database.batch(statements);
+  } catch (error) {
+    const createdByAnotherRequest = await database.prepare(`SELECT id FROM public_releases
+      WHERE id = ? AND is_current = 1 AND questionnaire_version_id = ? LIMIT 1`)
+      .bind(nextReleaseId, initialQuestionnaire.id).first<{ id: string }>();
     if (createdByAnotherRequest) return;
     throw error;
   }
@@ -486,6 +557,7 @@ export async function getCurrentRelease(database = requireDatabase()) {
   await ensureInitialRelease(database);
   await ensureLegalLaunchRelease(database);
   await ensurePublicFunnelRelease(database);
+  await ensureStandaloneProjectRelease(database);
   return database.prepare(`SELECT
       r.id AS release_id, r.questionnaire_version_id, r.rule_version_id,
       q.document_json AS questionnaire_json, rv.configuration_json AS rules_json,

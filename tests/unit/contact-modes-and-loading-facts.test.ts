@@ -106,11 +106,11 @@ describe('loading-fact selection', () => {
     expect(selectLoadingFact(facts.map((fact) => ({ ...fact, enabled: false })), [])).toBeNull();
   });
 
-  it('bounds a duration selected from secure randomness to 3–5 seconds', () => {
+  it('bounds a fresh duration selected from secure randomness to 3.5–5 seconds', () => {
     const spy = vi.spyOn(globalThis.crypto, 'getRandomValues');
     spy.mockImplementationOnce((array) => { (array as Uint32Array)[0] = 0; return array; });
-    expect(loadingDurationMs()).toBe(3000);
-    spy.mockImplementationOnce((array) => { (array as Uint32Array)[0] = 2000; return array; });
+    expect(loadingDurationMs()).toBe(3500);
+    spy.mockImplementationOnce((array) => { (array as Uint32Array)[0] = 1500; return array; });
     expect(loadingDurationMs()).toBe(5000);
     spy.mockRestore();
   });

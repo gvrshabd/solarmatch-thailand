@@ -27,6 +27,7 @@ export type AssessmentQuestion = {
     | 'province'
     | 'monthlyBillThb'
     | 'activelyPlanningSolar'
+    | 'projectType'
     | 'propertyType'
     | 'ownershipStatus'
     | 'roofArea'
@@ -51,7 +52,7 @@ export type AssessmentQuestion = {
 
 export type QuestionnaireDocument = {
   id: string;
-  schemaVersion: 4 | 5 | 6 | 7;
+  schemaVersion: 4 | 5 | 6 | 7 | 8;
   questions: AssessmentQuestion[];
 };
 

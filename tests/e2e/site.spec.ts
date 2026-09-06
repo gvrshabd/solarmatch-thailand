@@ -18,8 +18,8 @@ function operationalConfiguration() {
     accessRestrictedSession: true,
     restrictedSiteCollectionEnabled: true,
     publicCollectionEnabled: false,
-    releaseId: 'residential-release-v5',
-    questionnaireVersionId: 'residential-questionnaire-v4',
+    releaseId: 'residential-release-v6',
+    questionnaireVersionId: 'residential-questionnaire-v5',
     ruleVersionId: 'residential-rules-v4',
     questionnaire: initialQuestionnaire,
     assessmentToken: 'a'.repeat(96),
@@ -54,7 +54,7 @@ function operationalConfiguration() {
 async function primeQuoteStep(page: Page, answerOverrides: Record<string, unknown> = {}) {
   await page.addInitScript(({ answers, configuration }) => {
     sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({
-      version: 7, answers, step: 9, questionnaireVersionId: configuration.questionnaireVersionId,
+      version: 8, answers, step: 10, questionnaireVersionId: configuration.questionnaireVersionId,
       releaseId: configuration.releaseId, assessmentToken: configuration.assessmentToken,
       assessmentTokenExpiresAt: configuration.assessmentTokenExpiresAt,
     }));
@@ -65,7 +65,9 @@ const thaiHeaderLinks = [['หน้าหลัก', '/'], ['ประเมิ
 const englishHeaderLinks = [['Home', '/en'], ['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'], ['Methodology', '/en/methodology'], ['About', '/en/about']] as const;
 
 function desktopOnly(testInfo: TestInfo) { test.skip(testInfo.project.name !== 'desktop-chromium', 'Desktop-only coverage.'); }
-async function expectPath(page: Page, path: string) { await expect.poll(() => new URL(page.url()).pathname).toBe(path); }
+async function expectPath(page: Page, path: string) {
+  await expect.poll(() => new URL(page.url()).pathname, { timeout: 10_000 }).toBe(path);
+}
 
 async function expectHeading(page: Page, name: string) {
   await expect(page.getByRole('heading', { name })).toBeVisible({ timeout: 15_000 });
@@ -89,8 +91,8 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await expect(page.locator('#monthly-bill')).toHaveValue(bill);
   await page.getByRole('button', { name: next, exact: true }).click();
   await page.getByRole('radio', { name: en ? 'Yes — within 3 months' : 'ใช่ — ภายใน 3 เดือน', exact: true }).click();
-  await page.getByRole('radio', { name: en ? 'A new rooftop solar system' : 'ระบบโซลาร์รูฟท็อปใหม่', exact: true }).click();
   await page.getByRole('button', { name: next, exact: true }).click();
+  await choose(page, en ? 'A new rooftop solar system' : 'ระบบโซลาร์รูฟท็อปใหม่', next);
   await choose(page, en ? 'Detached house' : 'บ้านเดี่ยว', next);
   await choose(page, en ? 'I own the property' : 'เป็นเจ้าของกรรมสิทธิ์', next);
   await choose(page, en ? /High Several appliances/ : /มาก มีเครื่องใช้ไฟฟ้าหลายอย่าง/, next);
@@ -161,12 +163,27 @@ test('all desktop navigation anchors work in Thai and English', async ({ page },
   }
 });
 
-test('required estimator uses ten concise residential questions and focused chrome', async ({ page }) => {
+test('required estimator uses eleven concise residential questions and focused chrome', async ({ page }) => {
   await page.goto('/en/estimate');
-  await expect(page.getByRole('progressbar').locator(':scope > span')).toHaveCount(10);
+  await expect(page.getByRole('progressbar').locator(':scope > span')).toHaveCount(11);
   await expect(page.locator('header').getByRole('link', { name: 'Exit estimate' })).toBeVisible();
   await expect(page.locator('footer')).toHaveCount(0);
   await expect(page.locator('main')).not.toContainText(/kWh figure|TOU|On Peak|Off Peak|What period/);
+  await expect(page.locator('.question-heading > p')).toHaveCount(0);
+});
+
+test('planning and project type are separate consecutive questions', async ({ page }) => {
+  await page.goto('/en/estimate');
+  await page.locator('#estimate-province').selectOption('bangkok');
+  await page.locator('#estimate-district').selectOption('sathon');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.locator('#monthly-bill').fill('6000');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expectHeading(page, 'Are you actively planning to install solar?');
+  await expect(page.getByRole('radio', { name: 'A new rooftop solar system' })).toHaveCount(0);
+  await choose(page, 'Yes — within 3 months', 'Next');
+  await expectHeading(page, 'What kind of solar project are you considering?');
+  await expect(page.getByRole('radio', { name: 'A new rooftop solar system' })).toBeVisible();
 });
 
 test('refresh and language switching preserve estimator progress', async ({ page }) => {
@@ -240,9 +257,12 @@ test('integrated quote question starts unselected and No reaches the full estima
   await expect(consent).toHaveCount(0);
   await no.click();
   await expect(consent).toHaveCount(0);
+  const loadingStartedAt = Date.now();
   await page.getByRole('button', { name: 'See my estimate' }).click();
   await expect(page.locator('.solar-loading-indicator')).toBeVisible();
   await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
+  expect(Date.now() - loadingStartedAt).toBeGreaterThanOrEqual(3400);
+  expect(Date.now() - loadingStartedAt).toBeLessThan(6500);
   expect(leadRequests).toBe(0);
   await expect(page.locator('input[autocomplete="given-name"]')).toHaveCount(0);
 });
@@ -269,6 +289,12 @@ test('the ฿4,800 Bangkok result reconciles its shared cards, table, and MEA ta
   await expect(page.getByRole('table', { name: 'Key lifetime cost points' }).getByRole('row').last()).toContainText(/฿1,325,\d00/u);
   await expect(page.locator('.trace-list article').filter({ hasText: /^TariffMEA/u })).toContainText('MEA');
   await expect(page.getByRole('link', { name: 'MEA residential tariff source' })).toHaveAttribute('href', /^https:\/\//u);
+  const hierarchy = await page.locator('.results-page').evaluate((element) => {
+    const metrics = element.querySelector('.result-metrics-v3');
+    const disclaimer = element.querySelector('.result-service-disclaimer');
+    return metrics && disclaimer ? Boolean(metrics.compareDocumentPosition(disclaimer) & Node.DOCUMENT_POSITION_FOLLOWING) : false;
+  });
+  expect(hierarchy).toBe(true);
 });
 
 test('Thai contact consent is verbatim, unselected, and links its Privacy Notice phrase', async ({ page }) => {

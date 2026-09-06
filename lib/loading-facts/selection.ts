@@ -10,7 +10,7 @@ function secureIndex(maximum: number) {
 }
 
 export function loadingDurationMs() {
-  return 3_000 + secureIndex(2_001);
+  return 3_500 + secureIndex(1_501);
 }
 
 export function selectLoadingFact(facts: PublicLoadingFact[], recentIds: string[]) {

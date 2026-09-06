@@ -50,6 +50,27 @@ test('320px header and estimator controls remain touch-friendly', async ({ page 
   expect(estimatorTargets.filter((target) => target.width < 44 || target.height < 44)).toEqual([]);
 });
 
+test('mobile bill slider remains fully above the navigation controls', async ({ page }) => {
+  for (const width of [320, 360, 375, 390, 414, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/en/estimate');
+    await page.getByRole('button', { name: 'Clear and start over' }).click();
+    await expect(page.getByRole('heading', { name: 'Where is the property located?' })).toBeVisible();
+    await page.locator('#estimate-province').selectOption('bangkok');
+    await page.locator('#estimate-district').selectOption('sathon');
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'About how much is the electricity bill in a typical month?' })).toBeVisible();
+    const positions = await page.evaluate(() => {
+      const slider = document.querySelector('.bill-slider')?.getBoundingClientRect();
+      const actions = document.querySelector('.estimate-actions')?.getBoundingClientRect();
+      return slider && actions ? { sliderBottom: slider.bottom, actionsTop: actions.top, position: getComputedStyle(document.querySelector('.estimate-actions')!).position } : null;
+    });
+    expect(positions, `${width}px should render bill and navigation`).not.toBeNull();
+    expect(positions!.sliderBottom, `${width}px slider must not overlap navigation`).toBeLessThanOrEqual(positions!.actionsTop);
+    expect(positions!.position, `${width}px navigation must participate in layout`).toBe('static');
+  }
+});
+
 test('mobile homepage image, credit, message, and estimator do not collide', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   for (const route of ['/', '/en']) {

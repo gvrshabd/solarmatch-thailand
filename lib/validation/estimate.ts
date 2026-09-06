@@ -87,7 +87,7 @@ export const estimateAnswersSchema = z.object({
 });
 
 export const estimateDraftSchema = z.object({
-  version: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7)]),
+  version: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]),
   answers: z.record(z.string(), z.unknown()),
   step: z.number().int().nonnegative(),
   questionnaireVersionId: z.string().optional(),

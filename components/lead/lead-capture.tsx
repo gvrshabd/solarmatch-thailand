@@ -30,7 +30,7 @@ function nextIdempotencyKey() {
 }
 
 export function LeadCapture({
-  locale = 'th', answers, configuration, active, resetKey, onBack, onContinue, onConfigurationChanged,
+  locale = 'th', answers, configuration, active, resetKey, onBack, onContinue, onConfigurationChanged, onProcessingStart, onProcessingFailed,
 }: {
   locale?: Locale;
   answers: EstimateAnswers;
@@ -40,6 +40,8 @@ export function LeadCapture({
   onBack: () => void;
   onContinue: (outcome: ContactOutcome) => void;
   onConfigurationChanged: (configuration: PublicAssessmentConfig) => void;
+  onProcessingStart: () => void;
+  onProcessingFailed: () => void;
 }) {
   const english = locale === 'en';
   const contact = configuration.contact;
@@ -119,6 +121,7 @@ export function LeadCapture({
       setSubmissionError(english ? 'Check the highlighted information and try again.' : 'กรุณาตรวจสอบข้อมูลที่ระบุแล้วลองอีกครั้ง');
       return;
     }
+    onProcessingStart();
     setSending(true);
     setSubmissionError('');
     try {
@@ -126,6 +129,7 @@ export function LeadCapture({
         method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(parsed.data),
       });
       if (!response.ok) {
+        onProcessingFailed();
         const body = await response.json().catch(() => null) as { code?: string } | null;
         if (body?.code === 'assessment_version_expired') {
           const latest = await fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' });
@@ -147,6 +151,7 @@ export function LeadCapture({
       setIdempotencyKey(nextIdempotencyKey());
       onContinue('submitted');
     } catch {
+      onProcessingFailed();
       setSubmissionError(contact.failureBody[locale]);
       setSending(false);
     }

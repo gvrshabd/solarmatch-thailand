@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calculateLeadAssessment, initialScoringConfiguration, legacyScoringConfigurationV1, validateScoringConfiguration } from '@/lib/qualification/scoring';
-import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3 } from '@/config/assessment';
+import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4 } from '@/config/assessment';
 import { estimateAnswersSchema } from '@/lib/validation/estimate';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 
@@ -81,13 +81,17 @@ describe('residential lead qualification and scoring', () => {
     expect(validateScoringConfiguration(invalid)).toContain('Scoring weights must total exactly 100.');
   });
 
-  it('publishes the ten-question schema-v7 flow while preserving historic versions', () => {
-    expect(initialQuestionnaire).toMatchObject({ id: 'residential-questionnaire-v4', schemaVersion: 7 });
-    expect(initialQuestionnaire.questions).toHaveLength(10);
+  it('publishes the eleven-question schema-v8 flow while preserving historic versions', () => {
+    expect(initialQuestionnaire).toMatchObject({ id: 'residential-questionnaire-v5', schemaVersion: 8 });
+    expect(initialQuestionnaire.questions).toHaveLength(11);
     expect(initialQuestionnaire.questions[2]?.id).toBe('activelyPlanningSolar');
+    expect(initialQuestionnaire.questions[3]?.id).toBe('projectType');
     expect(initialQuestionnaire.questions.at(-1)?.id).toBe('quoteContactRequested');
+    expect(initialQuestionnaire.questions.every((question) => question.help.en === '' && question.help.th === '')).toBe(true);
     expect(initialQuestionnaire.questions.some((question) => question.id === 'installationTimeframe')).toBe(false);
     expect(initialQuestionnaire.questions.some((question) => question.id === 'roofArea')).toBe(false);
+    expect(legacyQuestionnaireV4).toMatchObject({ id: 'residential-questionnaire-v4', schemaVersion: 7 });
+    expect(legacyQuestionnaireV4.questions).toHaveLength(10);
     expect(legacyQuestionnaireV3.questions).toHaveLength(11);
     expect(legacyQuestionnaireV2.questions).toHaveLength(9);
     expect(legacyQuestionnaireV1.questions).toHaveLength(10);

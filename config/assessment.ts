@@ -234,6 +234,19 @@ const activePlanningQuestion: AssessmentQuestion = {
   ],
 };
 
+const projectTypeQuestion: AssessmentQuestion = {
+  id: 'projectType', type: 'choice', required: true,
+  title: { en: 'What kind of solar project are you considering?', th: 'คุณกำลังพิจารณาโครงการโซลาร์แบบใด?' },
+  help: { en: '', th: '' },
+  options: [
+    { value: 'new-rooftop', label: { en: 'A new rooftop solar system', th: 'ระบบโซลาร์รูฟท็อปใหม่' } },
+    { value: 'solar-with-battery', label: { en: 'Solar panels with battery storage', th: 'แผงโซลาร์พร้อมระบบกักเก็บพลังงาน' } },
+    { value: 'expand-existing', label: { en: 'Expanding or upgrading an existing solar system', th: 'ขยายหรือปรับปรุงระบบโซลาร์เดิม' } },
+    { value: 'unsure', label: { en: 'I’m not sure yet', th: 'ยังไม่แน่ใจ' } },
+  ],
+  relevance: { calculation: false, qualification: false, scoring: true },
+};
+
 const quoteContactQuestion: AssessmentQuestion = {
   ...legacyQuoteContactQuestion,
   help: {
@@ -252,7 +265,7 @@ function currentQuestion(id: AssessmentQuestion['id']) {
   return question;
 }
 
-export const initialQuestionnaire: QuestionnaireDocument = {
+export const legacyQuestionnaireV4: QuestionnaireDocument = {
   id: 'residential-questionnaire-v4',
   schemaVersion: 7,
   questions: [
@@ -266,6 +279,28 @@ export const initialQuestionnaire: QuestionnaireDocument = {
     currentQuestion('shade'),
     currentQuestion('roofMaterial'),
     quoteContactQuestion,
+  ],
+};
+
+function withoutQuestionHelp(question: AssessmentQuestion): AssessmentQuestion {
+  return { ...question, help: { en: '', th: '' } };
+}
+
+export const initialQuestionnaire: QuestionnaireDocument = {
+  id: 'residential-questionnaire-v5',
+  schemaVersion: 8,
+  questions: [
+    withoutQuestionHelp(currentQuestion('province')),
+    withoutQuestionHelp(currentQuestion('monthlyBillThb')),
+    withoutQuestionHelp(activePlanningQuestion),
+    withoutQuestionHelp(projectTypeQuestion),
+    withoutQuestionHelp(currentQuestion('propertyType')),
+    withoutQuestionHelp(currentQuestion('ownershipStatus')),
+    withoutQuestionHelp(currentQuestion('daytimePattern')),
+    withoutQuestionHelp(currentQuestion('daytimeLoads')),
+    withoutQuestionHelp(currentQuestion('shade')),
+    withoutQuestionHelp(currentQuestion('roofMaterial')),
+    withoutQuestionHelp(quoteContactQuestion),
   ],
 };
 
