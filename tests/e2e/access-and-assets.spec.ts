@@ -100,6 +100,8 @@ test('SSR metadata, language boundaries, and images are safe', async ({ request 
   expect(english).toContain('A useful ballpark without pretending it is a quote');
 
   const home = await (await request.get('/')).text();
+  expect(home).toMatch(/<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/i);
+  expect(home).not.toMatch(/user-scalable=no|maximum-scale=1/i);
   expect(home).toContain('/images/solar-home-real-768.webp 768w');
   expect(home).not.toContain('solar-home-hero.jpg');
   expect(home).not.toContain('solar-home-ai-');

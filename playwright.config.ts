@@ -9,6 +9,7 @@ export default defineConfig({
   projects: [
     { name: 'desktop-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
     { name: 'mobile-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], channel: 'chrome' } },
-    { name: 'mobile-ios-style', testMatch: /mobile-audit\.spec\.ts/, use: { ...devices['iPhone 13'], browserName: 'chromium', channel: 'chrome' } },
+    { name: 'mobile-chromium-audit', testMatch: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', channel: 'chrome' } },
+    { name: 'mobile-webkit-audit', testMatch: /mobile-audit\.spec\.ts/, use: { ...devices['iPhone 13'], browserName: 'webkit' } },
   ],
 });

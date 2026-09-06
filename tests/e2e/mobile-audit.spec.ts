@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
-const widths = [320, 360, 375, 390, 414, 430, 768];
+const widths = [320, 360, 375, 384, 390, 393, 402, 412, 414, 430, 432, 768];
+const sliderWidths = [320, 360, 375, 390, 393, 402, 414, 430];
 const routes = [
   '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide', '/methodology', '/about', '/contact', '/resources', '/privacy', '/terms', '/cookies',
   '/en', '/en/estimate', '/en/estimate/results', '/en/how-it-works', '/en/solar-guide', '/en/methodology', '/en/about', '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
@@ -17,6 +18,46 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.route('https://tile.openstreetmap.org/**', (route) => route.abort());
 });
+
+async function primeQuestion(page: Page, route: '/estimate' | '/en/estimate', step: number, overrides: Record<string, unknown> = {}) {
+  await page.addInitScript(({ answers, currentStep }) => {
+    sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ version: 8, answers, step: currentStep }));
+  }, { answers: { ...savedEstimate, ...overrides }, currentStep: step });
+  await page.goto(route);
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(step + 1));
+  // The question surface uses an exit-before-enter transition. Wait for the
+  // requested step's content, rather than measuring the outgoing first step.
+  await page.waitForTimeout(320);
+}
+
+function answerSignature(answers: Record<string, unknown>) {
+  const source = JSON.stringify(answers);
+  let hash = 2166136261;
+  for (let index = 0; index < source.length; index += 1) {
+    hash ^= source.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+async function expectSequentialGeometry(page: Page, selectors: string[], label: string) {
+  const result = await page.evaluate((orderedSelectors) => {
+    const elements = orderedSelectors.map((selector) => document.querySelector<HTMLElement>(selector));
+    if (elements.some((element) => !element)) return null;
+    const rectangles = elements.map((element) => {
+      const rect = element!.getBoundingClientRect();
+      return { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left, width: rect.width, height: rect.height };
+    });
+    const intersections = rectangles.slice(0, -1).map((rect, index) => {
+      const next = rectangles[index + 1];
+      return rect.left < next.right && rect.right > next.left && rect.top < next.bottom && rect.bottom > next.top;
+    });
+    return { rectangles, intersections };
+  }, selectors);
+  expect(result, `${label}: every geometry target should exist`).not.toBeNull();
+  expect(result!.rectangles.every((rect) => rect.width > 0 && rect.height > 0), `${label}: every geometry target should have dimensions`).toBe(true);
+  expect(result!.intersections, `${label}: sequential controls must not intersect`).not.toContain(true);
+}
 
 for (const width of widths) {
   test(`important Thai and English routes avoid document overflow at ${width}px`, async ({ page }) => {
@@ -50,24 +91,165 @@ test('320px header and estimator controls remain touch-friendly', async ({ page 
   expect(estimatorTargets.filter((target) => target.width < 44 || target.height < 44)).toEqual([]);
 });
 
-test('mobile bill slider remains fully above the navigation controls', async ({ page }) => {
-  for (const width of [320, 360, 375, 390, 414, 430]) {
+test('mobile bill slider occupies real document space and remains fully above navigation', async ({ context }) => {
+  test.setTimeout(180_000);
+  for (const width of sliderWidths) {
+    const page = await context.newPage();
     await page.setViewportSize({ width, height: 844 });
-    await page.goto('/en/estimate');
-    await page.getByRole('button', { name: 'Clear and start over' }).click();
-    await expect(page.getByRole('heading', { name: 'Where is the property located?' })).toBeVisible();
-    await page.locator('#estimate-province').selectOption('bangkok');
-    await page.locator('#estimate-district').selectOption('sathon');
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await primeQuestion(page, '/en/estimate', 1);
     await expect(page.getByRole('heading', { name: 'About how much is the electricity bill in a typical month?' })).toBeVisible();
     const positions = await page.evaluate(() => {
-      const slider = document.querySelector('.bill-slider')?.getBoundingClientRect();
-      const actions = document.querySelector('.estimate-actions')?.getBoundingClientRect();
-      return slider && actions ? { sliderBottom: slider.bottom, actionsTop: actions.top, position: getComputedStyle(document.querySelector('.estimate-actions')!).position } : null;
+      const wrapperElement = document.querySelector<HTMLElement>('[data-testid="bill-slider"]');
+      const rangeElement = document.querySelector<HTMLInputElement>('.bill-range');
+      const labelsElement = document.querySelector<HTMLElement>('.bill-range-labels');
+      const actionsElement = document.querySelector<HTMLElement>('.estimate-actions');
+      const buttons = Array.from(document.querySelectorAll<HTMLElement>('.estimate-actions .button'));
+      if (!wrapperElement || !rangeElement || !labelsElement || !actionsElement || buttons.length !== 2) return null;
+
+      const rect = (element: Element) => {
+        const value = element.getBoundingClientRect();
+        return { top: value.top, right: value.right, bottom: value.bottom, left: value.left, width: value.width, height: value.height };
+      };
+      const intersects = (a: DOMRect, b: DOMRect) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+      const rangeRect = rangeElement.getBoundingClientRect();
+      const centreElement = document.elementFromPoint(rangeRect.left + (rangeRect.width / 2), rangeRect.top + (rangeRect.height / 2));
+      const clippingAncestors: string[] = [];
+      let ancestor = rangeElement.parentElement;
+      while (ancestor && ancestor !== document.body) {
+        const style = getComputedStyle(ancestor);
+        if ([style.overflow, style.overflowX, style.overflowY].some((value) => value === 'hidden' || value === 'clip')) {
+          const ancestorRect = ancestor.getBoundingClientRect();
+          if (rangeRect.left < ancestorRect.left || rangeRect.right > ancestorRect.right || rangeRect.top < ancestorRect.top || rangeRect.bottom > ancestorRect.bottom) {
+            clippingAncestors.push(ancestor.className || ancestor.tagName);
+          }
+        }
+        ancestor = ancestor.parentElement;
+      }
+
+      const wrapper = wrapperElement.getBoundingClientRect();
+      const labels = labelsElement.getBoundingClientRect();
+      const actions = actionsElement.getBoundingClientRect();
+      const back = buttons[0].getBoundingClientRect();
+      const next = buttons[1].getBoundingClientRect();
+      return {
+        wrapper: rect(wrapperElement), range: rect(rangeElement), labels: rect(labelsElement), actions: rect(actionsElement),
+        position: getComputedStyle(actionsElement).position,
+        centreReceivesInput: centreElement === rangeElement || Boolean(centreElement && rangeElement.contains(centreElement)),
+        clippingAncestors,
+        wrapperContainsRenderedControl: wrapper.top <= rangeRect.top && wrapper.bottom >= labels.bottom,
+        rangeIntersectsActions: intersects(rangeRect, actions),
+        labelsIntersectActions: intersects(labels, actions),
+        buttonsIntersect: intersects(back, next),
+      };
     });
     expect(positions, `${width}px should render bill and navigation`).not.toBeNull();
-    expect(positions!.sliderBottom, `${width}px slider must not overlap navigation`).toBeLessThanOrEqual(positions!.actionsTop);
+    expect(positions!.wrapper.width).toBeGreaterThan(0);
+    expect(positions!.wrapper.height).toBeGreaterThan(100);
+    expect(positions!.range.width).toBeGreaterThan(0);
+    expect(positions!.range.height).toBeGreaterThanOrEqual(43.5);
+    expect(positions!.wrapperContainsRenderedControl, `${width}px wrapper must reserve space for the track and labels`).toBe(true);
+    expect(positions!.clippingAncestors, `${width}px slider must not be clipped by an ancestor`).toEqual([]);
+    expect(positions!.centreReceivesInput, `${width}px slider centre must receive input`).toBe(true);
+    expect(positions!.rangeIntersectsActions, `${width}px range must not intersect navigation`).toBe(false);
+    expect(positions!.labelsIntersectActions, `${width}px labels must not intersect navigation`).toBe(false);
+    expect(positions!.buttonsIntersect, `${width}px Back and Next must not intersect`).toBe(false);
+    expect(positions!.wrapper.bottom + 24, `${width}px complete control wrapper must retain spacing before navigation`).toBeLessThanOrEqual(positions!.actions.top);
+    expect(positions!.labels.bottom + 24, `${width}px control must retain spacing before navigation`).toBeLessThanOrEqual(positions!.actions.top);
     expect(positions!.position, `${width}px navigation must participate in layout`).toBe('static');
+
+    const range = page.locator('.bill-range');
+    await expect(range).toBeVisible();
+    const rangeBox = await range.boundingBox();
+    expect(rangeBox).not.toBeNull();
+    await page.mouse.click(rangeBox!.x + rangeBox!.width * .18, rangeBox!.y + rangeBox!.height / 2);
+    const tappedLowValue = Number(await range.inputValue());
+    await page.mouse.click(rangeBox!.x + rangeBox!.width * .72, rangeBox!.y + rangeBox!.height / 2);
+    const tappedHighValue = Number(await range.inputValue());
+    expect(tappedHighValue, `${width}px tap-to-position must work across the track`).toBeGreaterThan(tappedLowValue);
+    await page.mouse.move(rangeBox!.x + rangeBox!.width * .2, rangeBox!.y + rangeBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(rangeBox!.x + rangeBox!.width * .82, rangeBox!.y + rangeBox!.height / 2, { steps: 8 });
+    await page.mouse.up();
+    expect(Number(await range.inputValue()), `${width}px slider drag must change its value`).toBeGreaterThan(tappedLowValue);
+    await page.close();
+  }
+});
+
+test('question headings, conditional controls, consent, and navigation remain sequential', async ({ context }) => {
+  test.setTimeout(120_000);
+  for (const route of ['/estimate', '/en/estimate'] as const) {
+    const cases = [
+      { step: 5, overrides: { ownershipStatus: 'renter', ownerPermission: 'yes' }, visible: '.inline-followup', selectors: ['.question-heading', '.question-stage .choice-grid:not(.compact-choice-grid)', '.inline-followup', '.estimate-actions'], label: 'ownership' },
+      { step: 7, overrides: { daytimeLoads: ['air-conditioning'], airConditionerCount: 10 }, visible: '.ac-count-followup', selectors: ['.question-heading', '.multichoice-grid', '.ac-count-followup', '.estimate-actions'], label: 'AC count' },
+      { step: 9, overrides: { roofMaterial: 'other', customRoofMaterial: 'Standing seam' }, visible: '.conditional-followup', selectors: ['.question-heading', '.question-stage .choice-grid', '.conditional-followup', '.estimate-actions'], label: 'roof material' },
+      { step: 10, overrides: { quoteContactRequested: true, quoteConsentAccepted: undefined }, visible: '.quote-consent-block', selectors: ['.question-heading', '.question-stage .choice-grid', '.quote-consent-block', '.estimate-actions'], label: 'quote consent' },
+    ];
+    for (const probeCase of cases) {
+      const page = await context.newPage();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await primeQuestion(page, route, probeCase.step, probeCase.overrides);
+      await expect(page.locator(probeCase.visible)).toBeVisible();
+      await expectSequentialGeometry(page, probeCase.selectors, `${route} ${probeCase.label}`);
+      await page.close();
+    }
+  }
+});
+
+test('mobile contact fields stay readable, focusable, and separated from confirmation and actions', async ({ page }) => {
+  await page.route('**/api/assessment/config', async (route) => {
+    const response = await route.fetch();
+    const configuration = await response.json() as Record<string, unknown> & { contact: Record<string, unknown> };
+    configuration.accessRestrictedSession = true;
+    configuration.liveLeadSubmissions = true;
+    configuration.contact = {
+      ...configuration.contact,
+      enabled: true,
+      restrictedSiteCollectionEnabled: true,
+      mode: 'shared_solar_company_handoff',
+    };
+    await route.fulfill({ response, json: configuration });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await primeQuestion(page, '/en/estimate', 10, { quoteContactRequested: undefined, quoteConsentAccepted: undefined });
+  await page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' }).click();
+  await page.locator('.quote-consent-check input').check();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Where should installers contact you?' })).toBeVisible();
+
+  await page.getByLabel('First name').fill('Mobile');
+  await page.getByLabel('Last name').fill('Tester');
+  await page.getByRole('radio', { name: 'Phone', exact: true }).check();
+  await page.getByLabel('Mobile phone number').fill('081 234 5678');
+  await page.getByLabel('Mobile phone number').click();
+  await expect(page.getByLabel('Mobile phone number')).toBeFocused();
+  await page.getByRole('radio', { name: 'LINE', exact: true }).check();
+  await expect(page.getByLabel('Mobile phone number')).toHaveCount(0);
+  await page.getByLabel('LINE ID').fill('mobile.tester');
+  await page.getByLabel('LINE ID').click();
+  await expect(page.getByLabel('LINE ID')).toBeFocused();
+
+  const inputGeometry = await page.locator('.contact-form-grid input[type="text"]:visible, .contact-form-grid input[type="tel"]:visible, .contact-form-grid input:not([type]):visible').evaluateAll((elements) => elements.map((element) => {
+    const rect = element.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, fontSize: Number.parseFloat(getComputedStyle(element).fontSize) };
+  }));
+  expect(inputGeometry.every((item) => item.width > 0 && item.height >= 44 && item.fontSize >= 16)).toBe(true);
+  await expectSequentialGeometry(page, ['.contact-form-grid', '.contact-adult-confirmation', '.privacy-inline', '.contact-form-actions'], 'contact form');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+  expect(overflow).toBe(true);
+});
+
+test('bill control remains in flow after portrait-landscape rotation and scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await primeQuestion(page, '/en/estimate', 1);
+  for (const viewport of [{ width: 844, height: 390 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.locator('.bill-range-labels').scrollIntoViewIfNeeded();
+    const separated = await page.evaluate(() => {
+      const labels = document.querySelector('.bill-range-labels')?.getBoundingClientRect();
+      const actions = document.querySelector('.estimate-actions')?.getBoundingClientRect();
+      return Boolean(labels && actions && labels.bottom + 24 <= actions.top && document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+    });
+    expect(separated, `${viewport.width}x${viewport.height} should retain control/navigation separation`).toBe(true);
   }
 });
 
@@ -108,6 +290,18 @@ test('landscape menu remains reachable and reduced motion is respected', async (
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/en/estimate');
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('auto');
+  await page.addInitScript(({ signature, estimate }) => {
+    sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate));
+    sessionStorage.setItem('solarmatch:result-view-state', JSON.stringify({
+      signature,
+      factSetVersionId: 'loading-facts-v1',
+      fact: null,
+      contactOutcome: 'declined',
+      viewed: false,
+      loadingDurationMs: 5000,
+      loadingStartedAt: Date.now(),
+    }));
+  }, { signature: answerSignature(savedEstimate), estimate: savedEstimate });
   await page.goto('/en/estimate/results');
   await expect(page.locator('.solar-loading-indicator')).toBeVisible();
   await expect(page.locator('.solar-loading-indicator')).toHaveCSS('animation-name', 'none');
