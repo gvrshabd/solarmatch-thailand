@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import type { Locale } from '@/config/i18n';
 
 function sliderMaximum(value: number) {
-  if (value <= 10000) return 10000;
+  if (value <= 25000) return 25000;
   if (value <= 50000) return Math.ceil(value / 10000) * 10000;
   if (value <= 250000) return Math.ceil(value / 25000) * 25000;
   return Math.ceil(value / 100000) * 100000;
@@ -28,7 +28,7 @@ export function BillSlider({
 
   const numericValue = Number(textValue) || 0;
   const maximum = useMemo(() => sliderMaximum(numericValue), [numericValue]);
-  const step = maximum <= 10000 ? 100 : maximum <= 50000 ? 500 : 1000;
+  const step = maximum <= 25000 ? 100 : maximum <= 50000 ? 500 : 1000;
 
   function updateText(next: string) {
     if (next !== '' && !/^\d+$/.test(next)) return;

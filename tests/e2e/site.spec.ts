@@ -126,12 +126,15 @@ test('homepage reflects the lead-first brief and language spacing', async ({ pag
 test('bill field can be emptied and supports large values without a 50,000 cap', async ({ page }) => {
   await page.goto('/en');
   const input = page.locator('#hero-monthly-bill');
+  const range = page.locator('#hero-estimator input[type="range"]');
+  await expect(range).toHaveAttribute('max', '25000');
   await input.fill('0');
   await input.press('Backspace');
   await expect(input).toHaveValue('');
+  await expect(range).toHaveAttribute('max', '25000');
   await input.fill('250000');
   await expect(input).toHaveValue('250000');
-  await expect(page.locator('#hero-estimator input[type="range"]')).toHaveAttribute('max', '250000');
+  await expect(range).toHaveAttribute('max', '250000');
 });
 
 test('homepage values hand off while the assessment still collects a district', async ({ page }) => {
