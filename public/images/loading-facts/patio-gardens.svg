@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">Patio garden solar sketch</title>
+  <desc id="desc">A potted herb plant wearing sunglasses beneath a small parasol.</desc>
+  <g fill="none" stroke="#174d3a" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <path d="M76 78c22-39 79-51 120-30 18 9 32 24 40 43H76c-5-3-6-8 0-13Z" fill="#e5f1eb"/>
+    <path d="M159 50v116M105 91c13-18 25-28 54-41m53 41c-13-18-25-28-53-41M159 166c0 21-14 27-25 19"/>
+    <path d="M115 143h88l-10 56h-68l-10-56Z" fill="#e5f1eb"/>
+    <path d="M159 143c-2-36-22-52-39-58 0 27 13 46 39 58Zm2 0c2-36 22-52 39-58 0 27-13 46-39 58Zm-2-4c0-22-11-38-26-49m28 49c0-22 11-38 26-49"/>
+    <path d="M134 126h21m11 0h21m-11 9c-9 8-25 8-34 0" stroke-width="4"/>
+  </g>
+</svg>

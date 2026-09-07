@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">Neighbor solar sketch</title>
+  <desc id="desc">Two neighboring houses high-five over a fence.</desc>
+  <g fill="none" stroke="#174d3a" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <path d="m31 110 68-54 68 54v76H43v-76m110 0 68-54 68 54v76H165v-76"/>
+    <path d="M62 88h72l16 26H47l15-26Zm126 0h72l15 26H173l15-26Z" fill="#e5f1eb"/>
+    <path d="M92 186v-40h28v40m76 0v-40h28v40M130 158h60m-55 0v28m18-28v28m18-28v28m18-28v28" stroke-width="4"/>
+    <path d="M131 129c14-1 21-8 29-22m29 22c-14-1-21-8-29-22m-5 0 5-14 5 14"/>
+    <path d="M77 132c7 6 19 6 26 0m114 0c7 6 19 6 26 0" stroke-width="4"/>
+  </g>
+</svg>

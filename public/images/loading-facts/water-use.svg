@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">River water solar sketch</title>
+  <desc id="desc">A cheerful small fish jumping over sparkling water.</desc>
+  <g fill="none" stroke="#174d3a" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <path d="M84 119c31-38 75-46 112-17-8 34-49 54-92 39L75 159l9-40Z" fill="#e5f1eb"/>
+    <path d="M196 102c19-18 40-15 51-7-3 17-14 30-34 34 17 6 28 20 28 36-18 4-38-2-49-23"/>
+    <circle cx="127" cy="116" r="4" fill="#174d3a" stroke="none"/>
+    <path d="M139 132c10 5 21 2 28-6M38 183c39-15 74-15 113 0s78 15 131 0M56 198c32-9 62-8 94 2m64-4c23 5 43 3 63-5"/>
+    <path d="m70 55 5 14 14 5-14 5-5 14-5-14-14-5 14-5 5-14Zm158-22 3 9 9 3-9 3-3 9-3-9-9-3 9-3 3-9Z" stroke-width="4"/>
+  </g>
+</svg>

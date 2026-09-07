@@ -1,0 +1,15 @@
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: false,
+  workers: 1,
+  reporter: 'line',
+  use: { baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000', trace: 'retain-on-failure' },
+  projects: [
+    { name: 'desktop-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
+    { name: 'mobile-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], channel: 'chrome' } },
+    { name: 'mobile-chromium-audit', testMatch: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', channel: 'chrome' } },
+    { name: 'mobile-webkit-audit', testMatch: /mobile-audit\.spec\.ts/, use: { ...devices['iPhone 13'], browserName: 'webkit' } },
+  ],
+});
