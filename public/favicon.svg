@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+<title id="title">SolarMatch Thailand</title>
+<circle cx="16" cy="10" r="6" fill="none" stroke="#e2a62b" stroke-width="2.5"/>
+<path d="M4 23 16 15l12 8" fill="none" stroke="#137a50" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+<path d="M8 23h16" fill="none" stroke="#10251b" stroke-linecap="round" stroke-width="2.5"/>
+</svg>

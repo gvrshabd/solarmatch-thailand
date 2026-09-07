@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">Home value solar sketch</title>
+  <desc id="desc">A small house with rooftop solar beside an upward arrow.</desc>
+  <g fill="none" stroke="#174d3a" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <path d="M48 112 139 45l91 67v75H66v-75"/>
+    <path d="M91 90h94l22 34H70l21-34Z" fill="#e5f1eb"/>
+    <path d="M95 92v31m30-31v31m31-31v31m-78-16h116" stroke-width="3"/>
+    <path d="M119 187v-43h41v43M223 166c33-10 46-40 47-72"/>
+    <path d="m249 109 22-18 17 24"/>
+    <path d="M113 162c8 7 24 7 32 0" stroke-width="4"/>
+  </g>
+</svg>
