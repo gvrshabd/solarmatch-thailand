@@ -90,7 +90,7 @@ export function assessContactReadiness(row: ContactConfigurationRow): ContactRea
   }
   if (mode === 'shared_solar_company_handoff') {
     if (!row.distribution_window_days) issues.push('distribution period is missing');
-    if (row.recipient_category !== 'participating_residential_solar_companies') issues.push('recipient category must be participating residential solar companies');
+    if (row.recipient_category !== 'solar_service_recipients') issues.push('recipient category must match the published solar-service consent scope');
     if (!row.privacy_notice_version_id || !row.terms_version_id || !row.cookie_policy_version_id) issues.push('published legal-document versions are incomplete');
     if (!row.active_partner_count) issues.push('no active contracted solar company is available');
   }
@@ -162,7 +162,7 @@ export function restrictedOperationalContactConfiguration(row: ContactConfigurat
     mode: 'shared_solar_company_handoff',
     retentionDays: row.retention_days,
     distributionWindowDays: row.distribution_window_days ?? null,
-    recipientCategory: 'participating_residential_solar_companies',
+    recipientCategory: 'solar_service_recipients',
     adultConfirmationVersionId: row.adult_confirmation_version_id ?? 'restricted-operational-adult-v1',
     consentVersionId: row.consent_version_id ?? 'restricted-operational-consent-v2',
     privacyNoticeVersionId: row.privacy_notice_version_id ?? row.legal_document_version_id,

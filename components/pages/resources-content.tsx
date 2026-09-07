@@ -51,7 +51,7 @@ export async function ResourcesContent({ locale }: { locale: Locale }) {
   const facts = await publishedFacts();
   return (
     <main>
-      <PageHero eyebrow={english ? 'Resources · checked 2026-09-01' : 'แหล่งข้อมูล · ตรวจสอบล่าสุด 1 กันยายน 2569'} title={english ? 'Check the figures against their primary sources' : 'ตรวจสอบตัวเลขจากเอกสารต้นทาง'}>
+      <PageHero eyebrow={english ? 'Resources · checked 2026-09-08' : 'แหล่งข้อมูล · ตรวจสอบล่าสุด 8 กันยายน 2569'} title={english ? 'Check the figures against their primary sources' : 'ตรวจสอบตัวเลขจากเอกสารต้นทาง'}>
         <p>{english ? 'Policy, tariffs, prices, and conditions can change. These are the sources used by the current model and should be rechecked before a real decision.' : 'นโยบาย อัตราค่าไฟ ราคา และเงื่อนไขเปลี่ยนได้ ลิงก์เหล่านี้คือแหล่งที่ใช้กับแบบจำลองปัจจุบัน และควรตรวจสอบอีกครั้งก่อนตัดสินใจจริง'}</p>
       </PageHero>
       <section className="site-shell resource-list">

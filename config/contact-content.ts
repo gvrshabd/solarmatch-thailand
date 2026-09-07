@@ -42,8 +42,8 @@ export const contactContent: ContactContent = {
         th: 'ต้องการให้ SolarMatch ติดต่อกลับเพื่อแนะนำขั้นตอนถัดไปในการนัดสำรวจหน้างานไหม?',
       },
       help: {
-        en: 'We can confirm your interest and explain what normally happens next. During this validation stage, your details will remain with SolarMatch and will not be sent to a solar company without asking you first.',
-        th: 'เราจะติดต่อเพื่อยืนยันความสนใจและอธิบายขั้นตอนถัดไป ในช่วงทดสอบนี้ข้อมูลของคุณจะเก็บไว้กับ SolarMatch และจะไม่ถูกส่งต่อให้บริษัทโซลาร์ เว้นแต่เราจะขอและได้รับความยินยอมจากคุณอีกครั้ง',
+        en: 'SolarMatch can confirm your interest and explain the next steps. Your details will remain with SolarMatch and will not be sent to another business without separate permission.',
+        th: 'SolarMatch สามารถติดต่อเพื่อยืนยันความสนใจและอธิบายขั้นตอนถัดไป โดยจะเก็บข้อมูลของคุณไว้กับ SolarMatch และไม่ส่งต่อให้ธุรกิจอื่นหากยังไม่ได้รับอนุญาตแยกต่างหาก',
       },
       yesLabel: { en: 'Yes, SolarMatch may contact me', th: 'ต้องการให้ SolarMatch ติดต่อกลับ' },
       noLabel: { en: 'Not right now', th: 'ยังไม่ต้องการตอนนี้' },

@@ -16,7 +16,7 @@ const titles: Record<string, string> = {
   contact: 'Contact',
   resources: 'Official resources',
   privacy: 'Privacy Notice',
-  terms: 'Draft terms of use',
+  terms: 'Terms of Use',
   cookies: 'Cookies and browser storage',
 };
 

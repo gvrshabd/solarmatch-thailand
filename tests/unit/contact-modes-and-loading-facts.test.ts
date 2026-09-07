@@ -20,6 +20,11 @@ function row(overrides: Partial<ContactConfigurationRow> = {}): ContactConfigura
 const facts: PublicLoadingFact[] = initialLoadingFactSet.facts.map((fact) => ({ ...fact, imageUrl: `/images/loading-facts/${fact.sketchId}.svg` }));
 
 describe('contact-mode readiness and consent', () => {
+  it('preserves the locked English and Thai consent copy verbatim', () => {
+    expect(lockedSharedConsentCopy.en).toBe('I explicitly consent to SolarMatch storing my request and information, and I give SolarMatch permission to share my name, contact details, location and relevant assessment answers with solar service providers, installers, their authorized representatives, or other businesses involved in providing solar services, so they may contact me with relevant solar information and/or offers for solar-related services. I understand that SolarMatch may be paid for the connection and that choosing Yes does not guarantee that I will be contacted or receive a quotation. I have read the Privacy Notice.');
+    expect(lockedSharedConsentCopy.th).toBe('ข้าพเจ้ายินยอมโดยชัดแจ้งให้ SolarMatch จัดเก็บคำขอและข้อมูลของข้าพเจ้า และอนุญาตให้ SolarMatch ส่งต่อหรือเปิดเผยชื่อ ข้อมูลติดต่อ สถานที่ตั้ง และคำตอบที่เกี่ยวข้องจากแบบประเมินของข้าพเจ้าแก่ผู้ให้บริการด้านโซลาร์ ผู้ติดตั้ง ตัวแทนที่ได้รับอนุญาตของผู้ให้บริการหรือผู้ติดตั้งดังกล่าว หรือธุรกิจอื่นที่เกี่ยวข้องกับการให้บริการด้านโซลาร์ เพื่อให้บุคคลหรือธุรกิจเหล่านั้นสามารถติดต่อข้าพเจ้าพร้อมข้อมูลที่เกี่ยวข้องกับโซลาร์ และ/หรือข้อเสนอเกี่ยวกับบริการที่เกี่ยวข้องกับโซลาร์ ข้าพเจ้าเข้าใจว่า SolarMatch อาจได้รับค่าตอบแทนจากการเชื่อมโยงดังกล่าว และการเลือก “ใช่” ไม่ได้รับประกันว่าจะมีผู้ใดติดต่อข้าพเจ้า หรือว่าข้าพเจ้าจะได้รับใบเสนอราคา ข้าพเจ้าได้อ่านประกาศความเป็นส่วนตัวแล้ว');
+  });
+
   it('keeps disabled mode fail-closed without readiness requirements', () => {
     expect(assessContactReadiness(row())).toEqual({ active: false, mode: 'disabled', issues: [] });
     expect(publicContactConfiguration(row()).enabled).toBe(false);
@@ -53,7 +58,7 @@ describe('contact-mode readiness and consent', () => {
     const ready = row({
       contact_collection_mode: 'shared_solar_company_handoff', contact_collection_enabled: 1, public_collection_enabled: 1,
       legal_complete: 1, retention_days: 180, distribution_window_days: 14,
-      recipient_category: 'participating_residential_solar_companies', active_partner_count: 1,
+      recipient_category: 'solar_service_recipients', active_partner_count: 1,
       adult_confirmation_version_id: 'adult-v1', consent_version_id: 'consent-v1',
       privacy_notice_version_id: 'privacy-v1', terms_version_id: 'terms-v1', cookie_policy_version_id: 'cookies-v1',
     });
@@ -90,7 +95,7 @@ describe('loading-fact selection', () => {
       expect(fact.imageUrl).toBe(`/images/loading-facts/${fact.id}.svg`);
       expect(fact.resourcesAnchor).toBe(fact.id);
       expect(fact.reference.citation.length).toBeGreaterThan(3);
-      expect(fact.copy.en).toMatch(/\([^)]*20\d{2}\)\.$/u);
+      expect(fact.copy.en.length).toBeGreaterThan(40);
     }
   });
 

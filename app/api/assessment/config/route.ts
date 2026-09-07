@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
         Vary: 'Cf-Access-Jwt-Assertion',
       },
     });
-  } catch {
+  } catch (error) {
+    console.error('Assessment configuration unavailable:', error instanceof Error ? error.message : 'unknown error');
     return NextResponse.json({ error: 'assessment_configuration_unavailable' }, { status: 503 });
   }
 }

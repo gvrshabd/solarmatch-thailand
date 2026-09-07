@@ -8,15 +8,15 @@ export const initialLoadingFactSet: LoadingFactSet = {
       id: 'home-value',
       title: { en: 'Boosting Home Value', th: 'ช่วยเพิ่มมูลค่าบ้าน' },
       copy: {
-        en: "Adding rooftop solar panels boosts a home's resale value by roughly 4% on average compared to homes without them (Hoen et al., 2015).",
-        th: 'โดยเฉลี่ยแล้ว การติดตั้งแผงโซลาร์บนหลังคาช่วยเพิ่มมูลค่าขายต่อของบ้านได้ราว 4% เมื่อเทียบกับบ้านที่ไม่ได้ติดตั้ง (Hoen et al., 2015)',
+        en: 'A large U.S. study found that homes with owner-owned rooftop solar sold for a premium averaging about 4% relative to comparable homes without solar (Hoen et al., 2015). This is not a guarantee of a resale premium for an individual property or a Thailand-specific result.',
+        th: 'งานวิจัยขนาดใหญ่ในสหรัฐอเมริกาพบว่า บ้านที่เจ้าของเป็นเจ้าของระบบโซลาร์บนหลังคาขายได้ในราคาสูงกว่าบ้านเปรียบเทียบที่ไม่มีโซลาร์โดยเฉลี่ยประมาณ 4% (Hoen et al., 2015) ผลดังกล่าวไม่ใช่การรับประกันว่าบ้านแต่ละหลังจะมีมูลค่าขายต่อเพิ่มขึ้น และไม่ใช่ผลการศึกษาที่วัดจากตลาดประเทศไทยโดยตรง',
       },
       alt: {
         en: 'Monochrome line drawing of a cozy house wearing a small solar-panel hat beside an upward arrow.',
         th: 'ภาพลายเส้นสีเดียวของบ้านแสนอบอุ่นที่สวมแผงโซลาร์เหมือนหมวก พร้อมลูกศรชี้ขึ้นด้านข้าง',
       },
       sketchSource: 'built-in', sketchId: 'home-value', mediaId: null,
-      resourcesAnchor: 'home-value', enabled: true, weight: 1, reviewedOn: '2026-09-01',
+      resourcesAnchor: 'home-value', enabled: true, weight: 1, reviewedOn: '2026-09-08',
       reference: {
         citation: 'Hoen et al. (2015)',
         fullReference: 'Hoen, B., Adomatis, S., Jackson, T., Graff-Zivin, J., Thayer, M. A., Klise, G. T., & Wiser, R. H. (2015). Selling Into the Sun: Price Premium Analysis of a Multi-State Dataset of Solar Homes (Report LBNL-6942E). Lawrence Berkeley National Laboratory.',
@@ -31,15 +31,15 @@ export const initialLoadingFactSet: LoadingFactSet = {
       id: 'carbon-trees',
       title: { en: 'Mini Rooftop Forest', th: 'ป่าเล็ก ๆ บนหลังคา' },
       copy: {
-        en: 'Powering a home with solar clears as much carbon each year as growing dozens of baby trees for a decade (U.S. Environmental Protection Agency, 2023).',
-        th: 'การใช้โซลาร์จ่ายไฟให้บ้านช่วยลดคาร์บอนในแต่ละปีได้เทียบเท่ากับการปลูกต้นกล้าหลายสิบต้นให้เติบโตเป็นเวลาสิบปี (U.S. Environmental Protection Agency, 2023)',
+        en: 'Solar electricity can reduce greenhouse-gas emissions associated with grid electricity. The U.S. EPA’s equivalency calculator can express avoided emissions as an equivalent number of tree seedlings grown for ten years, but the exact number depends on the electricity generated and the grid electricity displaced.',
+        th: 'ไฟฟ้าจากโซลาร์สามารถช่วยลดการปล่อยก๊าซเรือนกระจกที่เกี่ยวข้องกับไฟฟ้าจากโครงข่ายได้ เครื่องคำนวณของ U.S. EPA สามารถแปลงปริมาณการปล่อยที่หลีกเลี่ยงได้เป็นจำนวนต้นกล้าเทียบเท่าที่เติบโตเป็นเวลา 10 ปี แต่จำนวนจริงขึ้นอยู่กับปริมาณไฟฟ้าที่ผลิตและไฟฟ้าจากโครงข่ายที่ถูกทดแทน',
       },
       alt: {
         en: 'Monochrome line drawing of two smiling young tree saplings growing side by side.',
         th: 'ภาพลายเส้นสีเดียวของต้นกล้าเล็ก ๆ สองต้นยิ้มและเติบโตอยู่เคียงข้างกัน',
       },
       sketchSource: 'built-in', sketchId: 'carbon-trees', mediaId: null,
-      resourcesAnchor: 'carbon-trees', enabled: true, weight: 1, reviewedOn: '2026-09-01',
+      resourcesAnchor: 'carbon-trees', enabled: true, weight: 1, reviewedOn: '2026-09-08',
       reference: {
         citation: 'U.S. Environmental Protection Agency (2023)',
         fullReference: 'U.S. Environmental Protection Agency. (2023). Greenhouse gas equivalencies calculator. EPA.',
@@ -54,15 +54,15 @@ export const initialLoadingFactSet: LoadingFactSet = {
       id: 'neighbor-effect',
       title: { en: 'Friendly Green Ripple', th: 'พลังสีเขียวส่งต่อถึงเพื่อนบ้าน' },
       copy: {
-        en: 'Putting solar on your roof inspires your street, making nearby neighbors up to 40% more likely to go solar too (Graziano & Gillingham, 2015).',
-        th: 'การติดโซลาร์บนหลังคาอาจสร้างแรงบันดาลใจให้คนในละแวกเดียวกัน จนเพื่อนบ้านมีแนวโน้มติดโซลาร์เพิ่มขึ้นได้ถึง 40% (Graziano & Gillingham, 2015)',
+        en: 'A U.S. study found that nearby existing solar installations were associated with higher local adoption of residential solar, showing a measurable neighbor effect (Graziano & Gillingham, 2015). The size of that effect should not be treated as a guaranteed result for another neighborhood or for Thailand.',
+        th: 'งานวิจัยในสหรัฐอเมริกาพบว่าการมีระบบโซลาร์อยู่ใกล้เคียงสัมพันธ์กับการติดตั้งโซลาร์ที่สูงขึ้นในพื้นที่ ซึ่งแสดงให้เห็นถึงผลจากเพื่อนบ้านที่สามารถวัดได้ (Graziano & Gillingham, 2015) ขนาดของผลดังกล่าวไม่ควรถูกมองว่าเป็นผลที่รับประกันสำหรับทุกชุมชนหรือสำหรับประเทศไทย',
       },
       alt: {
         en: 'Monochrome line drawing of two neighboring houses smiling and giving each other a high-five across their fences.',
         th: 'ภาพลายเส้นสีเดียวของบ้านเพื่อนบ้านสองหลังยิ้มและแตะมือกันเหนือรั้ว',
       },
       sketchSource: 'built-in', sketchId: 'neighbor-effect', mediaId: null,
-      resourcesAnchor: 'neighbor-effect', enabled: true, weight: 1, reviewedOn: '2026-09-01',
+      resourcesAnchor: 'neighbor-effect', enabled: true, weight: 1, reviewedOn: '2026-09-08',
       reference: {
         citation: 'Graziano & Gillingham (2015)',
         fullReference: 'Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar photovoltaic system adoption: The influence of neighbors and the built environment. Journal of Economic Geography, 15(4), 815–839.',
@@ -77,15 +77,15 @@ export const initialLoadingFactSet: LoadingFactSet = {
       id: 'patio-gardens',
       title: { en: 'Happy Patio Gardens', th: 'สวนระเบียงแสนสุข' },
       copy: {
-        en: 'The gentle shade from residential panels helps potted herbs and greens thrive in the summer heat using less water (Barron-Gafford et al., 2019).',
-        th: 'ร่มเงาอ่อน ๆ จากแผงโซลาร์ช่วยให้สมุนไพรและผักกระถางเติบโตได้ดีท่ามกลางอากาศร้อน โดยใช้น้ำน้อยลง (Barron-Gafford et al., 2019)',
+        en: 'Agrivoltaic research has found that, in some conditions, partial shade from elevated solar panels can reduce heat and water stress for certain crops (Barron-Gafford et al., 2019). The study did not test ordinary residential rooftop panels shading patio plants.',
+        th: 'งานวิจัยด้าน agrivoltaics พบว่า ในบางสภาพแวดล้อม ร่มเงาบางส่วนจากแผงโซลาร์ที่ยกสูงสามารถช่วยลดความร้อนและความเครียดจากการขาดน้ำของพืชบางชนิดได้ (Barron-Gafford et al., 2019) งานวิจัยนี้ไม่ได้ศึกษาการใช้แผงโซลาร์บนหลังคาบ้านทั่วไปเพื่อให้ร่มเงาแก่ต้นไม้บนลานบ้านโดยตรง',
       },
       alt: {
         en: 'Monochrome line drawing of a potted basil plant wearing sunglasses beneath a small parasol.',
         th: 'ภาพลายเส้นสีเดียวของต้นโหระพาในกระถางสวมแว่นกันแดดและพักอยู่ใต้ร่มคันเล็ก',
       },
       sketchSource: 'built-in', sketchId: 'patio-gardens', mediaId: null,
-      resourcesAnchor: 'patio-gardens', enabled: true, weight: 1, reviewedOn: '2026-09-01',
+      resourcesAnchor: 'patio-gardens', enabled: true, weight: 1, reviewedOn: '2026-09-08',
       reference: {
         citation: 'Barron-Gafford et al. (2019)',
         fullReference: 'Barron-Gafford, G. A., Pavao-Zuckerman, M. A., Minor, R. L., Sutter, L. F., Barnett-Moreno, I., Blackett, D. T., Thompson, M., Dimond, K., Gerlak, A. K., Nabhan, G. P., & Macknick, J. E. (2019). Agrivoltaics provide mutual benefits across the food–energy–water nexus in drylands. Nature Sustainability, 2(9), 848–855.',
@@ -100,15 +100,15 @@ export const initialLoadingFactSet: LoadingFactSet = {
       id: 'water-use',
       title: { en: 'Saving River Water', th: 'ช่วยรักษาสายน้ำ' },
       copy: {
-        en: 'Home solar makes clean electricity using almost no water, keeping local rivers and freshwater wildlife happy and thriving (Macknick et al., 2012).',
-        th: 'โซลาร์สำหรับบ้านผลิตไฟฟ้าสะอาดโดยแทบไม่ใช้น้ำ ช่วยลดแรงกดดันต่อแม่น้ำและระบบนิเวศน้ำจืด (Macknick et al., 2012)',
+        en: 'Photovoltaic electricity uses very little water during operation compared with many conventional electricity-generation technologies (Macknick et al., 2012).',
+        th: 'ระบบผลิตไฟฟ้าจากแสงอาทิตย์ใช้น้ำน้อยมากในช่วงการผลิตไฟฟ้า เมื่อเทียบกับเทคโนโลยีผลิตไฟฟ้าแบบดั้งเดิมหลายประเภท (Macknick et al., 2012)',
       },
       alt: {
         en: 'Monochrome line drawing of a cheerful small fish jumping from a sparkling water ripple.',
         th: 'ภาพลายเส้นสีเดียวของปลาตัวเล็กแสนร่าเริงกระโดดขึ้นจากระลอกน้ำเป็นประกาย',
       },
       sketchSource: 'built-in', sketchId: 'water-use', mediaId: null,
-      resourcesAnchor: 'water-use', enabled: true, weight: 1, reviewedOn: '2026-09-01',
+      resourcesAnchor: 'water-use', enabled: true, weight: 1, reviewedOn: '2026-09-08',
       reference: {
         citation: 'Macknick et al. (2012)',
         fullReference: 'Macknick, J., Newmark, R., Heath, G., & Hallett, K. C. (2012). Operational water consumption and withdrawal factors for electricity generating technologies: A review of existing literature. Environmental Research Letters, 7(4), Article 045802.',

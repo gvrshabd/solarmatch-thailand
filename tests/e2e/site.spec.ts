@@ -30,7 +30,7 @@ function operationalConfiguration() {
       enabled: true, preview: false, restrictedSiteCollectionEnabled: true, publicCollectionEnabled: false,
       operationalDistributionEnabled: false, mode: 'shared_solar_company_handoff',
       contactConfigurationVersionId: 'contact-configuration-consent-v2', contentVersionId: 'residential-content-consent-v2', privacyVersion: 'legal-placeholder-v1',
-      retentionDays: null, distributionWindowDays: null, recipientCategory: 'participating_residential_solar_companies',
+      retentionDays: null, distributionWindowDays: null, recipientCategory: 'solar_service_recipients',
       adultConfirmationVersionId: 'restricted-operational-adult-v1', consentVersionId: 'restricted-operational-consent-v2', privacyNoticeVersionId: 'legal-placeholder-v1', termsVersionId: null, cookiePolicyVersionId: null,
       question: { en: 'Want real quotes from local installers?', th: 'อยากได้ใบเสนอราคาจริงจากผู้ติดตั้งในพื้นที่ไหม?' },
       help: { en: 'Choose Yes only if you want solar companies to contact you about this request. If you choose No, you will go directly to your estimate without being asked for contact details.', th: 'เลือก “ใช่” เฉพาะเมื่อคุณต้องการให้บริษัทโซลาร์ติดต่อเกี่ยวกับคำขอนี้ หากเลือก “ไม่ใช่” คุณจะไปดูผลประเมินได้ทันทีโดยไม่ต้องให้ข้อมูลติดต่อ' },
@@ -416,12 +416,13 @@ test('bilingual Resources pages expose all five fact anchors and references', as
   }
 });
 
-test('incomplete operator facts fail closed and never expose placeholder tokens', async ({ page, request }) => {
+test('incomplete operator facts fail closed and use explicit review placeholders without development prose', async ({ page, request }) => {
   const operator = await request.get('/api/public/operator');
   expect(operator.ok()).toBeTruthy();
   await expect(operator.json()).resolves.toEqual({ operator: null });
   for (const route of ['/privacy', '/terms', '/cookies', '/en/privacy', '/en/terms', '/en/cookies']) {
     await page.goto(route);
-    await expect(page.locator('body')).not.toContainText(/\[(?:LEGAL|BUSINESS|REGISTERED|PUBLIC|PRIVACY|LEAD|DATA|OPERATOR|TERMS|COOKIE)[A-Z _-]*\]/u);
+    await expect(page.locator('body')).toContainText(/\[(?:EFFECTIVE|LEGAL|BUSINESS|REGISTERED|PUBLIC|PRIVACY|LEAD|DATA|OPERATOR|TERMS|COOKIE)[A-Z _-]*\]/u);
+    await expect(page.locator('body')).not.toContainText(/will be published|will open later|legal review (?:is )?(?:still )?required|contact collection remains disabled/iu);
   }
 });

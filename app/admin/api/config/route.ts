@@ -69,7 +69,7 @@ const contactDraftSchema = z.object({
   if (value.mode === 'disabled' && value.enabled) context.addIssue({ code: 'custom', path: ['enabled'], message: 'Disabled mode cannot be enabled.' });
   if (!value.enabled && (value.restrictedSiteCollectionEnabled || value.publicCollectionEnabled)) context.addIssue({ code: 'custom', path: ['enabled'], message: 'Collection switches require the contact configuration to be enabled.' });
   if (value.mode === 'validation_interest' && (value.receivingCompanyEn || value.receivingCompanyTh || value.receivingCompanyPrivacyUrl)) context.addIssue({ code: 'custom', path: ['mode'], message: 'Validation mode cannot name an installer.' });
-  if (value.mode === 'shared_solar_company_handoff' && value.recipientCategory !== 'participating_residential_solar_companies') context.addIssue({ code: 'custom', path: ['recipientCategory'], message: 'Shared mode must use the disclosed participating residential solar-company category.' });
+  if (value.mode === 'shared_solar_company_handoff' && value.recipientCategory !== 'solar_service_recipients') context.addIssue({ code: 'custom', path: ['recipientCategory'], message: 'Shared mode must use the disclosed solar-service recipient category.' });
 });
 
 const versionKindSchema = z.enum(['questionnaire', 'rules', 'contact', 'facts']);

@@ -427,7 +427,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     }
     if (parsed.data.quoteContactRequested) {
       if (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions) {
-        setError(english ? 'Contact requests are temporarily unavailable. Choose No to continue to your estimate.' : 'ขณะนี้ยังไม่สามารถส่งคำขอติดต่อได้ กรุณาเลือก “ไม่ใช่” เพื่อดูผลประเมิน');
+        setError(english ? 'We cannot accept this contact request right now. Choose No to continue to your estimate.' : 'ขณะนี้ไม่สามารถรับคำขอติดต่อนี้ได้ กรุณาเลือก “ไม่ใช่” เพื่อดูผลประเมินต่อ');
         return;
       }
       setShowContactForm(true);

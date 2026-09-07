@@ -5,17 +5,16 @@ import {
   Calculator,
   ClipboardList,
   MessagesSquare,
-  ShieldCheck,
 } from 'lucide-react';
 import { HomePage } from '@/components/home/home-page';
 import { AboutContent } from '@/components/pages/about-content';
 import { MethodologyContent } from '@/components/pages/methodology-content';
 import { ResourcesContent } from '@/components/pages/resources-content';
+import { ContactContent } from '@/components/pages/contact-content';
 import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
 import { PageHero } from '@/components/content/page-hero';
 import { PublishedLegalDocument } from '@/components/content/published-legal-document';
-import { OperatorDisclosure } from '@/components/content/operator-disclosure';
 import { solarAssumptions } from '@/config/solar-assumptions';
 
 const en = (path = '') => `/en${path}`;
@@ -111,7 +110,7 @@ function EnglishMethodology() {
 }
 
 function EnglishContact() {
-  return <main><PageHero eyebrow="Contact" title="Contact channels will open after accountable details are complete"><p>SolarMatch will not display or activate LINE, phone, or email until the legal operator, privacy channel, recipient category, and distribution terms have been correctly confirmed.</p></PageHero><section className="site-shell contact-status-card"><ShieldCheck /><div><h2>The assessment remains available</h2><p>You can see results without providing personal information. When contact requests open, the site will clearly explain that more than one participating residential solar company may receive the enquiry, then request separate explicit consent.</p><Link className="text-link" href={en('/privacy')}>Read the Privacy Notice <ArrowRight /></Link><OperatorDisclosure locale="en" /></div></section></main>;
+  return <ContactContent locale="en" />;
 }
 
 const resources = [

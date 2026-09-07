@@ -553,11 +553,113 @@ export async function ensureStandaloneProjectRelease(database = requireDatabase(
   }
 }
 
+/**
+ * Publishes final customer-facing production copy as a new immutable release.
+ * Operator fields remain deliberately incomplete until real business details
+ * are supplied, so anonymous contact collection continues to fail closed.
+ */
+export async function ensureProductionCopyRelease(database = requireDatabase()) {
+  await ensureStandaloneProjectRelease(database);
+  const nextReleaseId = 'residential-release-v7';
+  const existing = await database.prepare('SELECT id FROM public_releases WHERE id = ? LIMIT 1')
+    .bind(nextReleaseId).first<{ id: string }>();
+  if (existing) return;
+
+  const source = await database.prepare(`SELECT questionnaire_version_id, rule_version_id, live_lead_submissions,
+      contact_configuration_version_id
+    FROM public_releases WHERE is_current = 1 LIMIT 1`).first<{
+      questionnaire_version_id: string; rule_version_id: string; live_lead_submissions: number;
+      contact_configuration_version_id: string;
+    }>();
+  if (!source) throw new Error('The current SolarMatch release is unavailable.');
+
+  const actor = 'system:production-copy-v7';
+  const contentVersionId = 'residential-content-production-v7';
+  const legalVersionId = 'legal-production-copy-v3';
+  const contactVersionId = 'contact-configuration-production-v7';
+  const factSetVersionId = 'solar-facts-v3';
+  const [releaseVersion, contentVersion, legalVersion, contactVersion, factVersion] = await Promise.all([
+    database.prepare('SELECT COALESCE(MAX(release_number), 0) + 1 AS value FROM public_releases').first<{ value: number }>(),
+    database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM content_versions').first<{ value: number }>(),
+    database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM legal_document_versions').first<{ value: number }>(),
+    database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM contact_configuration_versions').first<{ value: number }>(),
+    database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM loading_fact_set_versions').first<{ value: number }>(),
+  ]);
+
+  const statements: D1PreparedStatement[] = [
+    database.prepare(`INSERT INTO content_versions
+      (id, version_number, state, content_json, created_by, published_by, published_at)
+      VALUES (?, ?, 'published', ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(contentVersionId, contentVersion?.value ?? 7, JSON.stringify(contactContent), actor, actor),
+    database.prepare(`INSERT INTO legal_document_versions
+      (id, version_number, state, documents_json, is_complete, created_by, published_by, published_at,
+       schema_version, operator_profile_json, review_status, updated_by, updated_at)
+      VALUES (?, ?, 'published', ?, 0, ?, ?, CURRENT_TIMESTAMP, 3, ?, 'pending-legal-review', ?, CURRENT_TIMESTAMP)`)
+      .bind(legalVersionId, legalVersion?.value ?? 3, JSON.stringify(legalLaunchDraft), actor, actor,
+        JSON.stringify(legalLaunchDraft.operator), actor),
+    database.prepare(`INSERT INTO contact_configuration_versions
+      (id, version_number, state, contact_collection_mode, contact_collection_enabled, retention_days,
+       receiving_company_en, receiving_company_th, receiving_company_privacy_url,
+       permitted_contact_methods_json, shared_fields_json, created_by, published_by, published_at,
+       restored_from_id, contact_collection_mode_v2, distribution_window_days, recipient_category,
+       adult_confirmation_version_id, consent_version_id, privacy_notice_version_id, terms_version_id,
+       cookie_policy_version_id, operator_profile_version_id, internal_recipient_cap, readiness_state,
+       readiness_issues_json, restricted_site_collection_enabled, public_collection_enabled)
+      SELECT ?, ?, 'published', contact_collection_mode, contact_collection_enabled, retention_days,
+       receiving_company_en, receiving_company_th, receiving_company_privacy_url,
+       permitted_contact_methods_json, shared_fields_json, ?, ?, CURRENT_TIMESTAMP,
+       id, contact_collection_mode_v2, distribution_window_days, 'solar_service_recipients',
+       adult_confirmation_version_id, 'production-consent-v3', ?, ?, ?, ?, internal_recipient_cap, 'incomplete',
+       '["legal operator details remain incomplete","public collection is disabled","no eligible contracted recipient is configured"]',
+       restricted_site_collection_enabled, public_collection_enabled
+      FROM contact_configuration_versions WHERE id = ?`)
+      .bind(contactVersionId, contactVersion?.value ?? 7, actor, actor, legalVersionId, legalVersionId,
+        legalVersionId, legalVersionId, source.contact_configuration_version_id),
+    database.prepare(`INSERT INTO loading_fact_set_versions
+      (id, version_number, state, schema_version, document_json, created_by, published_by, published_at)
+      VALUES (?, ?, 'published', 1, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(factSetVersionId, factVersion?.value ?? 3,
+        JSON.stringify({ ...initialLoadingFactSet, id: factSetVersionId }), actor, actor),
+  ];
+
+  initialLoadingFactSet.facts.forEach((fact, factIndex) => statements.push(database.prepare(`INSERT INTO loading_facts
+    (id, fact_set_version_id, stable_fact_id, display_order, title_en, title_th, fact_copy_en, fact_copy_th,
+     alt_en, alt_th, sketch_source_type, built_in_sketch_id, media_asset_id, short_citation, reference_json,
+     resources_anchor, enabled, weight, source_reviewed_on)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(`${factSetVersionId}:${fact.id}`, factSetVersionId, fact.id, factIndex, fact.title.en, fact.title.th,
+      fact.copy.en, fact.copy.th, fact.alt.en, fact.alt.th, fact.sketchSource === 'media' ? 'r2-media' : 'built-in',
+      fact.sketchId, fact.mediaId, fact.reference.citation, JSON.stringify(fact.reference), fact.resourcesAnchor,
+      fact.enabled ? 1 : 0, fact.weight, fact.reviewedOn)));
+
+  statements.push(
+    database.prepare('UPDATE public_releases SET is_current = 0 WHERE is_current = 1'),
+    database.prepare(`INSERT INTO public_releases
+      (id, release_number, questionnaire_version_id, rule_version_id, content_version_id,
+       legal_document_version_id, live_lead_submissions, is_current, contact_configuration_version_id,
+       fact_set_version_id, created_by, published_by, published_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(nextReleaseId, releaseVersion?.value ?? 7, source.questionnaire_version_id, source.rule_version_id,
+        contentVersionId, legalVersionId, source.live_lead_submissions, contactVersionId, factSetVersionId, actor, actor),
+  );
+
+  try {
+    await database.batch(statements);
+  } catch (error) {
+    const createdByAnotherRequest = await database.prepare(`SELECT id FROM public_releases
+      WHERE id = ? AND is_current = 1 AND content_version_id = ? AND legal_document_version_id = ? LIMIT 1`)
+      .bind(nextReleaseId, contentVersionId, legalVersionId).first<{ id: string }>();
+    if (createdByAnotherRequest) return;
+    throw error;
+  }
+}
+
 export async function getCurrentRelease(database = requireDatabase()) {
   await ensureInitialRelease(database);
   await ensureLegalLaunchRelease(database);
   await ensurePublicFunnelRelease(database);
   await ensureStandaloneProjectRelease(database);
+  await ensureProductionCopyRelease(database);
   return database.prepare(`SELECT
       r.id AS release_id, r.questionnaire_version_id, r.rule_version_id,
       q.document_json AS questionnaire_json, rv.configuration_json AS rules_json,

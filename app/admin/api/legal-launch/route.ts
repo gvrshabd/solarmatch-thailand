@@ -125,7 +125,7 @@ async function validatedDistribution(database: D1Database, leadId: string, partn
   if (lead.contact_collection_mode !== 'shared_solar_company_handoff' || !lead.third_party_disclosure_authorized) throw new Error('consent_scope_mismatch');
   if (!lead.hard_eligible) throw new Error('lead_not_commercially_eligible');
   if (lead.suppressed || lead.consent_withdrawn_at) throw new Error('lead_suppressed');
-  if (lead.recipient_category_snapshot !== 'participating_residential_solar_companies') throw new Error('recipient_category_mismatch');
+  if (!['solar_service_recipients', 'participating_residential_solar_companies'].includes(lead.recipient_category_snapshot ?? '')) throw new Error('recipient_category_mismatch');
   if (!lead.distribution_expires_at || Date.parse(lead.distribution_expires_at) <= Date.now()) throw new Error('distribution_window_expired');
   const configuration = await database.prepare('SELECT internal_recipient_cap FROM contact_configuration_versions WHERE id = ?')
     .bind(lead.contact_configuration_version_id).first<{ internal_recipient_cap: number | null }>();
@@ -228,7 +228,7 @@ export async function POST(request: Request) {
     const complete = operatorProfileComplete(body.operator) && body.reviewStatus !== 'pending-legal-review';
     const resolvedDocuments = interpolateLegalDocuments(body.documents, body.operator);
     const completeWithoutTokens = complete && !/\[[A-Z][A-Z _-]+\]/u.test(JSON.stringify(resolvedDocuments));
-    const document = { schemaVersion: 2, operator: body.operator, documents: resolvedDocuments, pendingLegalReview: body.reviewStatus === 'pending-legal-review' };
+    const document = { schemaVersion: 3, operator: body.operator, documents: resolvedDocuments, pendingLegalReview: body.reviewStatus === 'pending-legal-review' };
     await database.batch([
       database.prepare("UPDATE legal_document_versions SET state = 'archived', archived_at = CURRENT_TIMESTAMP WHERE state = 'draft'"),
       database.prepare(`INSERT INTO legal_document_versions
