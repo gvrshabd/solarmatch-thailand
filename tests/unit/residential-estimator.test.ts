@@ -67,6 +67,18 @@ describe('Thailand bill-led planning estimator', () => {
     expect(small.roofFeasibility).toBe('limited');
   });
 
+  it('uses the daytime-use answer to moderate installed-appliance effects', () => {
+    const veryLowWithoutHighUse = residentialEstimator.calculate({ ...base, daytimePattern: 'very-low', daytimeLoads: ['none'], airConditionerCount: undefined });
+    const veryLowWithInstalledHighUse = residentialEstimator.calculate({ ...base, daytimePattern: 'very-low', daytimeLoads: ['ev', 'other-high-use'], airConditionerCount: undefined });
+    const veryHighWithoutHighUse = residentialEstimator.calculate({ ...base, daytimePattern: 'very-high', daytimeLoads: ['none'], airConditionerCount: undefined });
+    const veryHighWithInstalledHighUse = residentialEstimator.calculate({ ...base, daytimePattern: 'very-high', daytimeLoads: ['ev', 'other-high-use'], airConditionerCount: undefined });
+
+    expect(veryLowWithInstalledHighUse.loadProfile).toBe('low');
+    expect(veryLowWithInstalledHighUse.planningMonthlySavingsThb).toBe(veryLowWithoutHighUse.planningMonthlySavingsThb);
+    expect(veryHighWithInstalledHighUse.loadProfile).toBe('high');
+    expect(veryHighWithInstalledHighUse.planningMonthlySavingsThb).toBeGreaterThan(veryHighWithoutHighUse.planningMonthlySavingsThb);
+  });
+
   it('lets exact roof area and future loads update the result', () => {
     const limited = residentialEstimator.calculate({ ...base, monthlyBillThb: 15000, exactRoofAreaSqm: 22 });
     const future = residentialEstimator.calculate({ ...base, monthlyBillThb: 15000, roofArea: 'over-200', futureLoads: ['ev'] });

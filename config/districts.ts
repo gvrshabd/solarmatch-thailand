@@ -1,6 +1,7 @@
 import type { Locale } from './i18n';
 
 type DistrictOption = { value: string; en: string; th: string };
+export type LocalizedDistrictOption = { value: string; label: string; searchText: string };
 
 export const districtsByProvince: Record<string, DistrictOption[]> = {
   bangkok: [
@@ -49,5 +50,12 @@ export const districtsByProvince: Record<string, DistrictOption[]> = {
 };
 
 export function localizedDistrictOptions(province: string, locale: Locale) {
-  return (districtsByProvince[province] ?? []).map((district) => ({ value: district.value, label: district[locale] }));
+  const collator = new Intl.Collator(locale === 'th' ? 'th' : 'en', { sensitivity: 'base' });
+  return (districtsByProvince[province] ?? [])
+    .map((district): LocalizedDistrictOption => ({
+      value: district.value,
+      label: district[locale],
+      searchText: `${district.en} ${district.th}`,
+    }))
+    .sort((left, right) => collator.compare(left.label, right.label));
 }

@@ -38,11 +38,19 @@ function planningPrice(sizeKwp: number, phase: EstimateAnswers['electricityPhase
 
 function classifyLoad(answers: EstimateAnswers): EstimateResult['loadProfile'] {
   const index = ['very-low', 'low', 'moderate', 'high', 'very-high'].indexOf(answers.daytimePattern);
-  let score = index;
-  if (answers.daytimeLoads.some((load) => ['other-high-use', 'ev'].includes(load))) score += 1;
-  if (score <= 1) return 'low';
-  if (score >= 4) return 'high';
+  if (index <= 1) return 'low';
+  if (index >= 3) return 'high';
   return 'medium';
+}
+
+function installedLoadUseFactor(answers: EstimateAnswers) {
+  return {
+    'very-low': 0,
+    low: 0,
+    moderate: 0.5,
+    high: 0.8,
+    'very-high': 1,
+  }[answers.daytimePattern];
 }
 
 function roofCapacity(answers: EstimateAnswers) {
@@ -80,7 +88,8 @@ export const residentialEstimator: Estimator = {
     const annualProduction = systemKw * provinceYield * orientationFactor * shadeFactor;
     const pvLoadRatio = annualProduction / Math.max(1, annualLoadKwh);
     const selfConsumptionBase = solarAssumptions.selfConsumptionAtBalancedSize[answers.daytimePattern];
-    const loadBonus = answers.daytimeLoads.some((load) => ['other-high-use', 'ev'].includes(load)) ? 0.03 : 0;
+    const hasInstalledHighUseLoad = answers.daytimeLoads.some((load) => ['other-high-use', 'ev'].includes(load));
+    const loadBonus = hasInstalledHighUseLoad ? 0.03 * installedLoadUseFactor(answers) : 0;
     const selfConsumptionRatio = clamp(
       selfConsumptionBase + loadBonus - Math.max(0, pvLoadRatio - targetShare) * 0.25,
       0.35,
@@ -169,6 +178,7 @@ export const residentialEstimator: Estimator = {
       assumptionsUsed: [
         `Monthly consumption is reverse-calculated from the entered bill using the applicable ${tariff.authority} residential tariff schedule.`,
         'System sizing is led by the bill, property type, and stated daytime-use band, then constrained by optional usable roof-area information when supplied.',
+        'Installed appliances influence the self-consumption profile only in proportion to the stated daytime-use band; installation alone does not imply daytime operation.',
         'Production uses province-level solar yield and the stated shade, direction and slope information; no clear-sky assumption is used.',
         'The base result values self-consumed electricity only and excludes export payments, tax relief, finance and tariff escalation.',
         'The 25-year figure subtracts installation cost and a 1.02% annual maintenance/component reserve, including inverter-related risk, and applies 0.5% annual module degradation.',

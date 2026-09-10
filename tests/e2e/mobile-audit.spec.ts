@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
 
 async function primeQuestion(page: Page, route: '/estimate' | '/en/estimate', step: number, overrides: Record<string, unknown> = {}) {
   await page.addInitScript(({ answers, currentStep }) => {
-    sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ version: 8, answers, step: currentStep }));
+    sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ version: 9, answers, step: currentStep }));
   }, { answers: { ...savedEstimate, ...overrides }, currentStep: step });
   await page.goto(route);
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(step + 1));

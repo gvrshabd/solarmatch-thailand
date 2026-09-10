@@ -286,7 +286,7 @@ function withoutQuestionHelp(question: AssessmentQuestion): AssessmentQuestion {
   return { ...question, help: { en: '', th: '' } };
 }
 
-export const initialQuestionnaire: QuestionnaireDocument = {
+export const legacyQuestionnaireV5: QuestionnaireDocument = {
   id: 'residential-questionnaire-v5',
   schemaVersion: 8,
   questions: [
@@ -298,6 +298,45 @@ export const initialQuestionnaire: QuestionnaireDocument = {
     withoutQuestionHelp(currentQuestion('ownershipStatus')),
     withoutQuestionHelp(currentQuestion('daytimePattern')),
     withoutQuestionHelp(currentQuestion('daytimeLoads')),
+    withoutQuestionHelp(currentQuestion('shade')),
+    withoutQuestionHelp(currentQuestion('roofMaterial')),
+    withoutQuestionHelp(quoteContactQuestion),
+  ],
+};
+
+const installedAppliancesQuestion: AssessmentQuestion = {
+  ...currentQuestion('daytimeLoads'),
+  title: {
+    en: 'Which appliances are installed in the home',
+    th: 'บ้านนี้มีเครื่องใช้ไฟฟ้าหรืออุปกรณ์ใดบ้าง?',
+  },
+  help: {
+    en: 'Select everything installed or available in the home. Your daytime-use answer determines how these items affect the estimate.',
+    th: 'เลือกทุกรายการที่มีหรือติดตั้งอยู่ในบ้าน โดยคำตอบเรื่องการใช้ไฟช่วงกลางวันจะเป็นตัวกำหนดว่ารายการเหล่านี้มีผลต่อค่าประเมินอย่างไร',
+  },
+  conditionalFields: currentQuestion('daytimeLoads').conditionalFields?.map((field) => field.id === 'customDaytimeLoad'
+    ? {
+        ...field,
+        label: {
+          en: 'What other high-use equipment is installed in the home?',
+          th: 'บ้านนี้มีอุปกรณ์อื่นที่ใช้ไฟสูงอะไรบ้าง?',
+        },
+      }
+    : field),
+};
+
+export const initialQuestionnaire: QuestionnaireDocument = {
+  id: 'residential-questionnaire-v6',
+  schemaVersion: 9,
+  questions: [
+    withoutQuestionHelp(currentQuestion('province')),
+    withoutQuestionHelp(currentQuestion('monthlyBillThb')),
+    withoutQuestionHelp(activePlanningQuestion),
+    withoutQuestionHelp(projectTypeQuestion),
+    withoutQuestionHelp(currentQuestion('propertyType')),
+    withoutQuestionHelp(currentQuestion('ownershipStatus')),
+    withoutQuestionHelp(currentQuestion('daytimePattern')),
+    withoutQuestionHelp(installedAppliancesQuestion),
     withoutQuestionHelp(currentQuestion('shade')),
     withoutQuestionHelp(currentQuestion('roofMaterial')),
     withoutQuestionHelp(quoteContactQuestion),

@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
+import { DistrictCombobox } from './district-combobox';
 import { LeadCapture } from '@/components/lead/lead-capture';
 import { CalculationLoading } from '@/components/results/calculation-loading';
 import Link from '@/components/site/internal-link';
@@ -33,7 +34,7 @@ function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
 }
 
 type SavedDraft = {
-  version: 4 | 5 | 6 | 7 | 8;
+  version: 4 | 5 | 6 | 7 | 8 | 9;
   answers: Draft;
   step: number;
   questionnaireVersionId?: string;
@@ -277,7 +278,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   useEffect(() => {
     if (!ready) return;
     const saved: SavedDraft = {
-      version: 8, answers: draft, step,
+      version: 9, answers: draft, step,
       questionnaireVersionId: assessmentConfig?.questionnaireVersionId,
       releaseId: assessmentConfig?.releaseId,
       assessmentToken: assessmentConfig?.assessmentToken ?? undefined,
@@ -323,7 +324,12 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   useEffect(() => {
     if (!ready) return;
-    const timer = window.setTimeout(() => questionHeadingRef.current?.focus(), 255);
+    const timer = window.setTimeout(() => {
+      const activeElement = document.activeElement;
+      if (!activeElement || activeElement === document.body || activeElement === questionHeadingRef.current) {
+        questionHeadingRef.current?.focus();
+      }
+    }, 255);
     return () => window.clearTimeout(timer);
   }, [ready, step]);
 
@@ -497,7 +503,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {question.type === 'province' && <div className="location-fields">
         <label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>
         {draft.province === 'other' && <label htmlFor="estimate-custom-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><input id="estimate-custom-province" maxLength={100} value={draft.customProvince ?? ''} placeholder={english ? 'e.g. Chonburi' : 'เช่น ชลบุรี'} onChange={(event) => setValue('customProvince', event.target.value)} /></label>}
-        {draft.province && draft.province !== 'other' && <label htmlFor="estimate-district"><span>{english ? 'District (Khet / Amphoe)' : 'เขต / อำเภอ'}</span><select id="estimate-district" value={draft.district ?? ''} onChange={(event) => setValue('district', event.target.value)}><option value="" disabled>{english ? 'Select a district' : 'เลือกเขตหรืออำเภอ'}</option>{districtOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>}
+        {draft.province && draft.province !== 'other' && <DistrictCombobox locale={locale} options={districtOptions} value={draft.district} onChange={(value) => setValue('district', value)} />}
         {draft.province === 'other' && <label htmlFor="estimate-district"><span>{english ? 'District or local area' : 'อำเภอ เขต หรือพื้นที่'}</span><input id="estimate-district" maxLength={100} value={draft.district ?? ''} placeholder={english ? 'e.g. Bang Lamung' : 'เช่น บางละมุง'} onChange={(event) => setValue('district', event.target.value)} /></label>}
         {draft.province && <label htmlFor="estimate-postcode"><span>{english ? 'Postcode (optional)' : 'รหัสไปรษณีย์ (ไม่บังคับ)'}</span><input id="estimate-postcode" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={draft.postcode ?? ''} onChange={(event) => setValue('postcode', event.target.value.replace(/\D/gu, '').slice(0, 5) || undefined)} /></label>}
       </div>}

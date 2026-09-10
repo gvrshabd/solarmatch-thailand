@@ -18,8 +18,8 @@ function operationalConfiguration() {
     accessRestrictedSession: true,
     restrictedSiteCollectionEnabled: true,
     publicCollectionEnabled: false,
-    releaseId: 'residential-release-v6',
-    questionnaireVersionId: 'residential-questionnaire-v5',
+    releaseId: 'residential-release-v8',
+    questionnaireVersionId: 'residential-questionnaire-v6',
     ruleVersionId: 'residential-rules-v4',
     questionnaire: initialQuestionnaire,
     assessmentToken: 'a'.repeat(96),
@@ -54,7 +54,7 @@ function operationalConfiguration() {
 async function primeQuoteStep(page: Page, answerOverrides: Record<string, unknown> = {}) {
   await page.addInitScript(({ answers, configuration }) => {
     sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({
-      version: 8, answers, step: 10, questionnaireVersionId: configuration.questionnaireVersionId,
+      version: 9, answers, step: 10, questionnaireVersionId: configuration.questionnaireVersionId,
       releaseId: configuration.releaseId, assessmentToken: configuration.assessmentToken,
       assessmentTokenExpiresAt: configuration.assessmentTokenExpiresAt,
     }));
@@ -78,6 +78,12 @@ async function choose(page: Page, name: string | RegExp, next: string) {
   await page.getByRole('button', { name: next, exact: true }).click();
 }
 
+async function chooseDistrict(page: Page, label: string) {
+  const field = page.locator('#estimate-district');
+  await field.fill(label);
+  await page.getByRole('option', { name: label, exact: true }).click();
+}
+
 async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') {
   const en = locale === 'en';
   await page.goto(en ? '/en' : '/');
@@ -86,7 +92,7 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await starter.getByRole('button', { name: en ? 'See my solar estimate' : 'ดูค่าประเมินโซลาร์' }).click();
   await expectPath(page, en ? '/en/estimate' : '/estimate');
   const next = en ? 'Next' : 'ถัดไป';
-  await page.locator('#estimate-district').selectOption(en ? { label: 'Sathon' } : { label: 'สาทร' });
+  await chooseDistrict(page, en ? 'Sathon' : 'สาทร');
   await page.getByRole('button', { name: next, exact: true }).click();
   await expect(page.locator('#monthly-bill')).toHaveValue(bill);
   await page.getByRole('button', { name: next, exact: true }).click();
@@ -96,6 +102,7 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await choose(page, en ? 'Detached house' : 'บ้านเดี่ยว', next);
   await choose(page, en ? 'I own the property' : 'เป็นเจ้าของกรรมสิทธิ์', next);
   await choose(page, en ? /High Several appliances/ : /มาก มีเครื่องใช้ไฟฟ้าหลายอย่าง/, next);
+  await expectHeading(page, en ? 'Which appliances are installed in the home' : 'บ้านนี้มีเครื่องใช้ไฟฟ้าหรืออุปกรณ์ใดบ้าง?');
   await page.getByRole('checkbox', { name: en ? 'Air conditioning' : 'เครื่องปรับอากาศ' }).click();
   await page.getByRole('checkbox', { name: en ? 'Home-office computers or equipment' : 'คอมพิวเตอร์หรืออุปกรณ์ทำงานที่บ้าน' }).click();
   await page.getByLabel(en ? 'How many air-conditioning units are installed at this property?' : 'บ้านหรือที่พักอาศัยนี้ติดตั้งเครื่องปรับอากาศทั้งหมดกี่เครื่อง?').selectOption('5');
@@ -145,12 +152,40 @@ test('homepage values hand off while the assessment still collects a district', 
   await expectPath(page, '/en/estimate');
   await expectHeading(page, 'Where is the property located?');
   await expect(page.locator('#estimate-province')).toHaveValue('nonthaburi');
-  await page.locator('#estimate-district').selectOption({ label: 'Mueang Nonthaburi' });
+  await chooseDistrict(page, 'Mueang Nonthaburi');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.locator('#monthly-bill')).toHaveValue('85000');
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expectHeading(page, 'Where is the property located?');
-  await expect(page.locator('#estimate-district')).toHaveValue('mueang-nonthaburi');
+  await expect(page.locator('#estimate-district')).toHaveValue('Mueang Nonthaburi');
+});
+
+test('district chooser is searchable, eight rows tall, and sorted for each language', async ({ page }) => {
+  await page.goto('/en/estimate');
+  await page.locator('#estimate-province').selectOption('bangkok');
+  const district = page.locator('#estimate-district');
+  await district.click();
+  const listbox = page.getByRole('listbox', { name: 'Districts' });
+  await expect(listbox.getByRole('option')).toHaveCount(50);
+  const menuSize = await listbox.evaluate((element) => {
+    const first = element.querySelector<HTMLElement>('[role="option"]');
+    return { clientHeight: element.clientHeight, scrollHeight: element.scrollHeight, rowHeight: first?.getBoundingClientRect().height ?? 0 };
+  });
+  expect(menuSize.scrollHeight).toBeGreaterThan(menuSize.clientHeight);
+  expect(Math.floor(menuSize.clientHeight / menuSize.rowHeight)).toBeLessThanOrEqual(8);
+
+  await district.fill('Sath');
+  await expect(page.getByRole('option', { name: 'Sathon', exact: true })).toBeVisible();
+  await page.getByRole('option', { name: 'Sathon', exact: true }).click();
+  await expect(district).toHaveValue('Sathon');
+
+  await page.getByRole('link', { name: 'View this estimate in Thai' }).click();
+  const thaiDistrict = page.locator('#estimate-district');
+  await expect(thaiDistrict).toHaveValue('สาทร');
+  await thaiDistrict.fill('');
+  const thaiLabels = await page.getByRole('listbox', { name: 'เขตและอำเภอ' }).getByRole('option').allTextContents();
+  const thaiSorted = await page.evaluate((labels) => [...labels].sort(new Intl.Collator('th', { sensitivity: 'base' }).compare), thaiLabels);
+  expect(thaiLabels).toEqual(thaiSorted);
 });
 
 test('all desktop navigation anchors work in Thai and English', async ({ page }, testInfo) => {
@@ -178,7 +213,7 @@ test('required estimator uses eleven concise residential questions and focused c
 test('planning and project type are separate consecutive questions', async ({ page }) => {
   await page.goto('/en/estimate');
   await page.locator('#estimate-province').selectOption('bangkok');
-  await page.locator('#estimate-district').selectOption('sathon');
+  await chooseDistrict(page, 'Sathon');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.locator('#monthly-bill').fill('6000');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
@@ -192,7 +227,7 @@ test('planning and project type are separate consecutive questions', async ({ pa
 test('refresh and language switching preserve estimator progress', async ({ page }) => {
   await page.goto('/estimate');
   await page.locator('#estimate-province').selectOption('bangkok');
-  await page.locator('#estimate-district').selectOption('sathon');
+  await chooseDistrict(page, 'สาทร');
   await page.getByRole('button', { name: 'ถัดไป', exact: true }).click();
   await page.locator('#monthly-bill').fill('7200');
   await page.getByRole('button', { name: 'ถัดไป', exact: true }).click();
@@ -363,7 +398,7 @@ test('Yes requires disclosure consent and stores an operational request from one
 test('assessment transitions preserve direction, focus and block rapid double navigation', async ({ page }) => {
   await page.goto('/en/estimate');
   await page.locator('#estimate-province').selectOption('bangkok');
-  await page.locator('#estimate-district').selectOption('sathon');
+  await chooseDistrict(page, 'Sathon');
   const next = page.getByRole('button', { name: 'Next', exact: true });
   await next.evaluate((element) => { (element as HTMLButtonElement).click(); (element as HTMLButtonElement).click(); });
   await expectHeading(page, 'About how much is the electricity bill in a typical month?');

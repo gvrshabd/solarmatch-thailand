@@ -22,7 +22,7 @@ const optionSchema = z.object({
 
 export const questionnaireDocumentSchema = z.object({
   id: z.string().min(1).max(100),
-  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]),
+  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9)]),
   questions: z.array(z.object({
     id: z.enum(['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'quoteContactRequested', 'installationTimeframe']),
     type: z.enum(['province', 'bill', 'choice', 'multichoice']),
@@ -57,6 +57,11 @@ export const questionnaireDocumentSchema = z.object({
     const expected = ['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'shade', 'roofMaterial', 'quoteContactRequested'];
     if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 8 must use the published eleven-step standalone-project order.' });
     if (ids.includes('roofArea') || ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 8 keeps roof area optional and excludes the legacy timeframe question.' });
+  }
+  if (document.schemaVersion === 9) {
+    const expected = ['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'shade', 'roofMaterial', 'quoteContactRequested'];
+    if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 9 must preserve the published eleven-step assessment order.' });
+    if (ids.includes('roofArea') || ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 9 keeps roof area optional and excludes the legacy timeframe question.' });
   }
   document.questions.forEach((question, questionIndex) => {
     const values = question.options?.map((option) => option.value) ?? [];

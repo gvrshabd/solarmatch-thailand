@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calculateLeadAssessment, initialScoringConfiguration, legacyScoringConfigurationV1, validateScoringConfiguration } from '@/lib/qualification/scoring';
-import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4 } from '@/config/assessment';
+import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4, legacyQuestionnaireV5 } from '@/config/assessment';
 import { estimateAnswersSchema } from '@/lib/validation/estimate';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 
@@ -81,8 +81,8 @@ describe('residential lead qualification and scoring', () => {
     expect(validateScoringConfiguration(invalid)).toContain('Scoring weights must total exactly 100.');
   });
 
-  it('publishes the eleven-question schema-v8 flow while preserving historic versions', () => {
-    expect(initialQuestionnaire).toMatchObject({ id: 'residential-questionnaire-v5', schemaVersion: 8 });
+  it('publishes the installed-appliance schema-v9 flow while preserving historic versions', () => {
+    expect(initialQuestionnaire).toMatchObject({ id: 'residential-questionnaire-v6', schemaVersion: 9 });
     expect(initialQuestionnaire.questions).toHaveLength(11);
     expect(initialQuestionnaire.questions[2]?.id).toBe('activelyPlanningSolar');
     expect(initialQuestionnaire.questions[3]?.id).toBe('projectType');
@@ -90,6 +90,11 @@ describe('residential lead qualification and scoring', () => {
     expect(initialQuestionnaire.questions.every((question) => question.help.en === '' && question.help.th === '')).toBe(true);
     expect(initialQuestionnaire.questions.some((question) => question.id === 'installationTimeframe')).toBe(false);
     expect(initialQuestionnaire.questions.some((question) => question.id === 'roofArea')).toBe(false);
+    expect(initialQuestionnaire.questions.find((question) => question.id === 'daytimeLoads')?.title).toEqual({
+      en: 'Which appliances are installed in the home',
+      th: 'บ้านนี้มีเครื่องใช้ไฟฟ้าหรืออุปกรณ์ใดบ้าง?',
+    });
+    expect(legacyQuestionnaireV5).toMatchObject({ id: 'residential-questionnaire-v5', schemaVersion: 8 });
     expect(legacyQuestionnaireV4).toMatchObject({ id: 'residential-questionnaire-v4', schemaVersion: 7 });
     expect(legacyQuestionnaireV4.questions).toHaveLength(10);
     expect(legacyQuestionnaireV3.questions).toHaveLength(11);
