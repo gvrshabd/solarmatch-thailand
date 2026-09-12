@@ -27,7 +27,8 @@ async function primeQuestion(page: Page, route: '/estimate' | '/en/estimate', st
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(step + 1));
   // The question surface uses an exit-before-enter transition. Wait for the
   // requested step's content, rather than measuring the outgoing first step.
-  await page.waitForTimeout(320);
+  await expect(page.locator('.question-stage')).toHaveCSS('opacity', '1');
+  await page.evaluate(() => document.fonts.ready);
 }
 
 function answerSignature(answers: Record<string, unknown>) {
@@ -257,12 +258,12 @@ test('mobile homepage image, credit, message, and estimator do not collide', asy
   await page.setViewportSize({ width: 320, height: 844 });
   for (const route of ['/', '/en']) {
     await page.goto(route);
-    const figure = page.locator('.hero-photo');
-    await expect(figure.locator('img')).toHaveAttribute('srcset', /solar-home-real-768\.webp 768w/);
-    await expect(figure.locator('figcaption')).toContainText('Kindel Media');
-    const collision = await page.locator('.hero-editorial').evaluate((element) => {
-      const photo = element.querySelector('.hero-photo')?.getBoundingClientRect();
-      const estimator = element.querySelector('.hero-estimator-panel')?.getBoundingClientRect();
+    const figure = page.locator('.terrace-hero .terrace-photo');
+    await expect(figure.locator('img')).toHaveAttribute('srcset', /terrace-house-768\.jpg 768w/);
+    await expect(figure.locator('figcaption')).toContainText('Alef Morais');
+    const collision = await page.evaluate(() => {
+      const photo = document.querySelector('.terrace-hero')?.getBoundingClientRect();
+      const estimator = document.querySelector('.terrace-starter')?.getBoundingClientRect();
       if (!photo || !estimator) return true;
       return !(photo.bottom <= estimator.top || estimator.bottom <= photo.top);
     });

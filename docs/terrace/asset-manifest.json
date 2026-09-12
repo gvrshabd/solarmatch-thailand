@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "animationIntegrated": false,
+  "generationStatus": "blocked_account_requires_basic_plan_or_higher",
+  "attempt": {
+    "provider": "Higgsfield",
+    "model": "gpt_image_2",
+    "parameters": { "aspect_ratio": "16:9", "resolution": "2k", "quality": "high", "count": 1 },
+    "prompt": "cinematic-storyboard.md#c--final-desktop-frame--first-attempted-request",
+    "jobId": null,
+    "error": "Requires basic plan or higher.",
+    "output": null
+  },
+  "video": { "plannedModel": "seedance_2_5", "attempted": false, "jobIds": [], "sources": [], "desktopFrames": [], "mobileFrames": [] },
+  "generated": {
+    "desktopOpening": null, "desktopMacro": null, "desktopFinal": null, "desktopPoster": null,
+    "mobileOpening": null, "mobileMacro": null, "mobileFinal": null, "mobilePoster": null
+  },
+  "activeStaticAssets": [
+    {
+      "role": "illustrative_architecture_placeholder",
+      "files": ["public/images/terrace-house-1920.jpg", "public/images/terrace-house-768.jpg"],
+      "sha256": {
+        "terrace-house-1920.jpg": "08d18964587188a391a7ea45bd25efcd0f6a501cf54b2d70f4b4fd8597c5a06d",
+        "terrace-house-768.jpg": "e3d2c3e550dc4f47b93e24933108bcfc27e1e9c9a855abee4f17b697e82c915c"
+      },
+      "bytes": { "terrace-house-1920.jpg": 489509, "terrace-house-768.jpg": 77143 },
+      "creator": "Alef Morais",
+      "source": "https://www.pexels.com/photo/modern-tropical-house-with-palm-trees-at-sunset-34569495/",
+      "license": "https://www.pexels.com/license/",
+      "generated": false,
+      "notes": "Responsive stock photograph, not a Bangkok/customer project or generated end-frame. No claim about photographer generation process. Mobile is a temporary responsive crop, not the pending portrait cinematic composition."
+    },
+    {
+      "role": "residential_solar_editorial_and_assessment",
+      "files": ["public/images/solar-home-real-1440.webp", "public/images/solar-home-real-768.webp"],
+      "creator": "Kindel Media",
+      "source": "https://www.pexels.com/photo/solar-panel-on-roof-of-house-in-california-usa-9875438/",
+      "license": "https://www.pexels.com/license/",
+      "generated": false,
+      "notes": "Existing licensed repository photograph; original files unchanged."
+    }
+  ]
+}

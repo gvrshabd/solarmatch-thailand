@@ -3,13 +3,15 @@ import { Anuphan, Manrope, Noto_Sans_Thai } from 'next/font/google';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { LanguageDocumentSync } from '@/components/site/language-document-sync';
+import { PublicDesignShell } from '@/components/site/public-design-shell';
 import { siteConfig } from '@/config/site';
 import './globals.css';
+import './terrace.css';
 
 const anuphan = Anuphan({
   variable: '--font-anuphan',
   subsets: ['latin', 'thai'],
-  weight: ['500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
 });
 
 const notoSansThai = Noto_Sans_Thai({
@@ -59,9 +61,11 @@ export default function RootLayout({
         className={`${anuphan.variable} ${notoSansThai.variable} ${manrope.variable} antialiased`}
       >
         <LanguageDocumentSync />
-        <SiteHeader />
-        <div id="main-content" tabIndex={-1}>{children}</div>
-        <SiteFooter />
+        <PublicDesignShell>
+          <SiteHeader />
+          <div id="main-content" tabIndex={-1}>{children}</div>
+          <SiteFooter />
+        </PublicDesignShell>
       </body>
     </html>
   );

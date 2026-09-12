@@ -7,6 +7,7 @@ export default defineConfig({
   reporter: 'line',
   use: { baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000', trace: 'retain-on-failure' },
   projects: [
+    { name: 'desktop-webkit', testMatch: /terrace\.spec\.ts/, use: { ...devices['Desktop Safari'], browserName: 'webkit' } },
     { name: 'desktop-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
     { name: 'mobile-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], channel: 'chrome' } },
     { name: 'mobile-chromium-audit', testMatch: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', channel: 'chrome' } },

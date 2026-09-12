@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
 import { DistrictCombobox } from './district-combobox';
+import { TerracePhoto } from '@/components/site/terrace-photo';
 import { LeadCapture } from '@/components/lead/lead-capture';
 import { CalculationLoading } from '@/components/results/calculation-loading';
 import Link from '@/components/site/internal-link';
@@ -495,7 +496,12 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     locale={locale}
     onStarted={(fact, durationMs, startedAt) => persistCompletionView(completionJourney, { fact, loadingDurationMs: durationMs, loadingStartedAt: startedAt, viewed: false })}
     onComplete={() => setMinimumLoadingElapsed(true)}
-  /></ScreenTransition>}<main hidden={Boolean(completionJourney)} className="estimate-page" aria-hidden={Boolean(completionJourney)}><div className="site-shell estimate-focus-layout"><section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
+  /></ScreenTransition>}<main hidden={Boolean(completionJourney)} className="estimate-page" aria-hidden={Boolean(completionJourney)}><div className="site-shell estimate-focus-layout">
+    <aside className="terrace-assessment-aside" aria-label={english ? 'Your solar assessment' : 'แบบประเมินโซลาร์ของคุณ'}>
+      <TerracePhoto locale={locale} solar />
+      <div className="terrace-assessment-context"><p className="eyebrow">{english ? 'A CLEARER START' : 'เริ่มต้นอย่างเข้าใจ'}</p><h2>{english ? <>Your home.<br />Your solar potential.</> : <>บ้านของคุณ<br />กับโอกาสจากโซลาร์</>}</h2><p>{english ? 'A few practical details. A more informed next step.' : 'ข้อมูลใกล้ตัวไม่กี่ข้อ เพื่อก้าวต่อไปอย่างมีข้อมูล'}</p></div>
+    </aside>
+    <section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
     <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage">

@@ -23,8 +23,8 @@ export function LifetimeCostChart({ data, locale = 'th' }: { data: LifetimeCostP
             formatter={(value, name) => [formatMoney(Number(value), locale), name]}
           />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
-          <Line name={labels.without} type="monotone" dataKey="withoutSolarThb" stroke="#7f8d85" strokeWidth={2.5} dot={false} isAnimationActive={false} />
-          <Line name={labels.withSolar} type="monotone" dataKey="withSolarThb" stroke="#137a50" strokeWidth={2.5} dot={false} isAnimationActive={false} />
+          <Line name={labels.without} type="monotone" dataKey="withoutSolarThb" stroke="var(--terrace-garden, #7f8d85)" strokeDasharray="6 3" strokeWidth={2.5} dot={false} isAnimationActive={false} />
+          <Line name={labels.withSolar} type="monotone" dataKey="withSolarThb" stroke="var(--terrace-pine, #137a50)" strokeWidth={2.5} dot={false} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

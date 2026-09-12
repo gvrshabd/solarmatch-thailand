@@ -121,8 +121,8 @@ test.beforeEach(async ({ page }) => { await page.route('https://tile.openstreetm
 
 test('homepage reflects the lead-first brief and language spacing', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('ค่าไฟบ้านคุณ');
-  await expect(page.locator('main')).toContainText('ประหยัดค่าไฟ พร้อมช่วยโลกไปด้วยกัน');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('บ้านยุคใหม่');
+  await expect(page.locator('main')).toContainText('เริ่มด้วยโซลาร์');
   await expect(page.locator('main')).not.toContainText(/ตัวอย่างผลเพื่อวางแผน|ประมาณ 5 kWp|ไม่ใช่คำสัญญาหรือใบเสนอราคา/);
   await expect(page.locator('footer')).not.toContainText('©');
   const switcher = page.getByRole('link', { name: 'View this page in English' });

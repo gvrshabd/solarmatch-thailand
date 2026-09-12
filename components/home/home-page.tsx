@@ -2,13 +2,11 @@ import {
   ArrowRight,
   BarChart3,
   Check,
-  FileSearch,
   Gauge,
   MessageCircle,
-  ShieldCheck,
-  SunMedium,
 } from 'lucide-react';
 import { HeroEstimator } from '@/components/home/hero-estimator';
+import { TerracePhoto } from '@/components/site/terrace-photo';
 import Link from '@/components/site/internal-link';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { localizedPath, type Locale } from '@/config/i18n';
@@ -161,51 +159,28 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
 
   return (
     <main>
-      <section className="hero hero-v2" id="top">
-        <div className="site-shell hero-editorial">
-          <div className="hero-copy hero-copy-v2">
-            <p className="eyebrow"><SunMedium size={16} aria-hidden="true" /> {text.eyebrow}</p>
-            <h1>{text.titleLead}<br /><em>{text.titleEmphasis}</em></h1>
-            <p className="hero-lede">{text.lede}</p>
-          </div>
-          <figure className="hero-photo">
-            <div className="hero-photo-frame">
-              <picture>
-                <source
-                  type="image/webp"
-                  srcSet="/images/solar-home-real-768.webp 768w, /images/solar-home-real-1440.webp 1440w"
-                  sizes="(max-width: 840px) 100vw, 56vw"
-                />
-                <img
-                  src="/images/solar-home-real-1440.webp"
-                  srcSet="/images/solar-home-real-768.webp 768w, /images/solar-home-real-1440.webp 1440w"
-                  sizes="(max-width: 840px) 100vw, 56vw"
-                  width="1440"
-                  height="960"
-                  alt={text.photoAlt}
-                  fetchPriority="high"
-                  decoding="async"
-                />
-              </picture>
-              <div className="sunline" aria-hidden="true" />
-              <div className="result-peek result-peek-v2 result-peek-message"><strong>{locale === 'en' ? 'Save money while saving the world' : 'ประหยัดค่าไฟ พร้อมช่วยโลกไปด้วยกัน'}</strong></div>
-            </div>
-            <figcaption><a href="https://www.pexels.com/photo/solar-panel-on-roof-of-house-in-california-usa-9875438/" target="_blank" rel="noreferrer">{text.photoCaption}</a></figcaption>
-          </figure>
-          <div className="hero-estimator-panel">
-            <HeroEstimator locale={locale} />
-            <ul className="trust-list" aria-label={locale === 'en' ? 'Important information' : 'ข้อมูลสำคัญ'}>{text.trust.map((item) => <li key={item}><Check size={16} aria-hidden="true" />{item}</li>)}</ul>
-          </div>
+      <section className="terrace-hero" id="top">
+        <TerracePhoto locale={locale} priority />
+        <div className="site-shell terrace-hero-content">
+          <p className="eyebrow">{locale === 'en' ? 'HOME SOLAR / BANGKOK & BEYOND' : 'โซลาร์สำหรับบ้าน / กรุงเทพฯ และปริมณฑล'}</p>
+          <h1>{locale === 'en' ? <>Get modern.<br /><em>Get solar.</em></> : <>บ้านยุคใหม่<br /><em>เริ่มด้วยโซลาร์</em></>}</h1>
+          <p>{text.lede}</p>
+          <Link className="button button-gold" href={link('/estimate')}>{text.finalCta}<ArrowRight size={18} aria-hidden="true" /></Link>
+          <a className="terrace-hero-secondary" href="#your-estimate">{locale === 'en' ? 'Start with your electricity bill' : 'เริ่มจากค่าไฟบ้านของคุณ'} <ArrowRight size={16} aria-hidden="true" /></a>
         </div>
       </section>
+
+      <div className="terrace-promise-strip"><ul className="site-shell trust-list">{text.trust.map((item) => <li key={item}><Check size={16} aria-hidden="true" />{item}</li>)}</ul></div>
 
       <section className="value-intro"><div className="site-shell value-grid"><div><p className="eyebrow">{text.introEyebrow}</p><h2>{text.introTitle}</h2></div><div className="value-copy"><p>{text.introBody}</p><Link className="text-link" href={link('/how-it-works')}>{text.introLink} <ArrowRight size={18} aria-hidden="true" /></Link></div></div></section>
 
       <section className="home-process process-editorial"><div className="site-shell"><div className="process-heading"><p className="eyebrow">{text.processEyebrow}</p><h2>{text.processTitle}</h2><p>{text.processBody}</p></div><div className="process-sequence">{text.steps.map((item, index) => { const Icon = stepIcons[index]; return <article key={item.title}><span className="process-number">0{index + 1}</span><Icon aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.body}</p></div></article>; })}</div></div></section>
 
-      <section className="savings-preview-section"><div className="site-shell savings-preview-grid"><div><p className="eyebrow">{text.previewEyebrow}</p><h2>{text.previewTitle}</h2><p>{text.previewBody}</p><small>{text.previewDisclaimer}</small><Link className="button" href={link('/estimate')}>{text.previewCta} <ArrowRight size={18} aria-hidden="true" /></Link></div><div className="preview-chart" role="img" aria-label={`${text.previewDisclaimer} ${text.before}: ฿5,000. ${text.after}: ฿2,800.`}><div className="preview-bar before"><span>{text.before}</span><i style={{ '--bar-height': '86%' } as React.CSSProperties} /><strong>฿5,000</strong></div><div className="preview-bar after"><span>{text.after}</span><i style={{ '--bar-height': '48%' } as React.CSSProperties} /><strong>฿2,800</strong></div><div className="preview-baseline" aria-hidden="true" /></div></div></section>
+      <section className="terrace-roof-section"><div className="site-shell terrace-editorial-split"><TerracePhoto locale={locale} solar /><div className="terrace-roof-copy"><p className="eyebrow">{locale === 'en' ? 'A DIFFERENT VIEW OF YOUR ROOF' : 'มองหลังคาบ้านในมุมใหม่'}</p><h2>{locale === 'en' ? 'Space above.\nPossibilities ahead.' : 'พื้นที่บนหลังคา\nกับทางเลือกใหม่ของบ้าน'}</h2><p>{text.previewBody}</p><dl className="terrace-feature-list"><div><dt>{locale === 'en' ? 'Your starting system' : 'ขนาดระบบเบื้องต้น'}</dt><dd>{locale === 'en' ? 'Sized around your bill and likely daytime use.' : 'ประเมินจากค่าไฟและรูปแบบการใช้ไฟช่วงกลางวัน'}</dd></div><div><dt>{locale === 'en' ? 'The full financial picture' : 'เห็นภาพค่าใช้จ่าย'}</dt><dd>{locale === 'en' ? 'Planning price, savings and maintenance assumptions together.' : 'ดูราคาสำหรับวางแผน ผลประหยัด และสมมติฐานค่าดูแลไปด้วยกัน'}</dd></div><div><dt>{locale === 'en' ? 'Room for a closer look' : 'เติมรายละเอียดให้ชัดขึ้น'}</dt><dd>{locale === 'en' ? 'Optional roof details refine your estimate. A site assessment still matters.' : 'รายละเอียดหลังคาช่วยปรับผลประเมินให้ใกล้เคียงขึ้น แต่ยังต้องสำรวจหน้างานจริง'}</dd></div></dl></div></div></section>
 
-      <section className="evidence-section"><div className="site-shell evidence-grid"><div className="evidence-heading"><p className="eyebrow">{text.evidenceEyebrow}</p><h2>{text.evidenceTitle}</h2><p>{text.evidenceBody}</p></div><div className="evidence-list">{text.evidence.map((item, index) => <article key={item.title}>{index === 0 ? <FileSearch /> : <ShieldCheck />}<div><h3>{item.title}</h3><p>{item.body}</p></div></article>)}</div></div></section>
+      <section className="terrace-starter" id="your-estimate"><div className="site-shell terrace-editorial-split"><div><p className="eyebrow">{locale === 'en' ? 'YOUR HOME. YOUR NUMBERS.' : 'บ้านของคุณ ตัวเลขของคุณ'}</p><h2>{locale === 'en' ? 'A useful first step.\nNot a leap of faith.' : 'เริ่มจากข้อมูล\nไม่ใช่การคาดเดา'}</h2><p>{text.processBody}</p><p className="terrace-small-note">{text.finalBody}</p></div><HeroEstimator locale={locale} /></div></section>
+
+      <section className="terrace-evidence"><div className="site-shell value-grid"><div><p className="eyebrow">{locale === 'en' ? 'BUILT ON A CLEAR BASIS' : 'มีข้อมูลอ้างอิงที่ตรวจสอบได้'}</p><h2>{locale === 'en' ? 'Understand the numbers.\nThen decide.' : 'เข้าใจตัวเลข\nก่อนตัดสินใจ'}</h2></div><div className="value-copy"><p>{locale === 'en' ? 'Published electricity tariffs, long-run solar data and planning-price evidence. See what goes into your estimate—and what it cannot tell you.' : 'อัตราค่าไฟที่ประกาศ ข้อมูลแสงอาทิตย์ระยะยาว และข้อมูลราคาเพื่อวางแผน ดูที่มาของผลประเมิน พร้อมทำความเข้าใจข้อจำกัด'}</p><Link className="text-link" href={link('/methodology')}>{locale === 'en' ? 'Read the methodology' : 'อ่านวิธีคำนวณ'}<ArrowRight size={18} aria-hidden="true" /></Link><Link className="text-link" href={link('/resources')}>{locale === 'en' ? 'Explore the sources' : 'ดูแหล่งข้อมูล'}<ArrowRight size={18} aria-hidden="true" /></Link></div></div></section>
 
       <section className="faq-section"><div className="site-shell faq-grid"><SectionHeading eyebrow={text.faqEyebrow} title={text.faqTitle} /><div className="faq-list">{text.faq.map((item, index) => <details key={item.question} open={index === 0}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</div></div></section>
 

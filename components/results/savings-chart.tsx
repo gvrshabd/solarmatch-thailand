@@ -19,8 +19,8 @@ export function SavingsChart({ currentBill, estimatedBill, locale = 'th' }: { cu
           <YAxis tickFormatter={(value) => formatMoney(Number(value), locale)} tick={{ fill: '#617169', fontSize: 11 }} width={72} />
           <Tooltip formatter={(value) => formatMoney(Number(value), locale)} />
           <Legend wrapperStyle={{ fontSize: 12 }} />
-          <Bar dataKey={before} fill="#b8c6bd" radius={[6, 6, 0, 0]} isAnimationActive={false} />
-          <Bar dataKey={after} fill="#137a50" radius={[6, 6, 0, 0]} isAnimationActive={false} />
+          <Bar dataKey={before} fill="var(--terrace-garden, #b8c6bd)" radius={[1, 1, 0, 0]} isAnimationActive={false} />
+          <Bar dataKey={after} fill="var(--terrace-pine, #137a50)" radius={[1, 1, 0, 0]} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
       </div>

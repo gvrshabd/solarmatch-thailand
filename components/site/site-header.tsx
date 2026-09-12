@@ -2,7 +2,7 @@
 
 import Link from '@/components/site/internal-link';
 import { usePathname } from 'next/navigation';
-import type { MouseEvent } from 'react';
+import { useRef, type MouseEvent } from 'react';
 import { Menu, X } from 'lucide-react';
 import { BrandMark } from './brand-mark';
 import { alternateLanguagePath, isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
@@ -21,6 +21,7 @@ function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
 }
 
 export function SiteHeader() {
+  const menuRef = useRef<HTMLDetailsElement>(null);
   const pathname = usePathname();
   const locale: Locale = isEnglishPath(pathname) ? 'en' : 'th';
   const english = locale === 'en';
@@ -40,8 +41,8 @@ export function SiteHeader() {
             <a className="language-switch" href={alternateLanguagePath(pathname)} aria-label={english ? 'View this estimate in Thai' : 'ดูแบบประเมินนี้เป็นภาษาอังกฤษ'}>
               <span className={!english ? 'active-language' : ''}>TH</span><span aria-hidden="true"> / </span><span className={english ? 'active-language' : ''}>EN</span>
             </a>
-            <Link className="focus-exit" href={localizedPath('/', locale)}>
-              {english ? 'Exit estimate' : 'ออกจากแบบประเมิน'} <X size={18} aria-hidden="true" />
+            <Link className="focus-exit" href={localizedPath('/', locale)} aria-label={english ? 'Exit estimate' : 'ออกจากแบบประเมิน'}>
+              <span className="focus-exit-label">{english ? 'Exit estimate' : 'ออกจากแบบประเมิน'}</span> <X size={18} aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -62,9 +63,16 @@ export function SiteHeader() {
           <a className="language-switch" href={alternateLanguagePath(pathname)} aria-label={english ? 'View this page in Thai' : 'View this page in English'}>
             <span className={!english ? 'active-language' : ''}>TH</span><span aria-hidden="true"> / </span><span className={english ? 'active-language' : ''}>EN</span>
           </a>
-          <details className="mobile-menu" suppressHydrationWarning>
+          <details ref={menuRef} className="mobile-menu" suppressHydrationWarning onKeyDown={(event) => {
+            if (event.key === 'Escape' && menuRef.current?.open) {
+              event.preventDefault();
+              menuRef.current.open = false;
+              menuRef.current.querySelector('summary')?.focus();
+            }
+          }}>
             <summary aria-label={english ? 'Open menu' : 'เปิดเมนู'}><Menu size={21} /></summary>
             <nav aria-label={english ? 'Mobile navigation' : 'เมนูมือถือ'}>
+              <button className="terrace-menu-close" type="button" onClick={() => { if (menuRef.current) { menuRef.current.open = false; menuRef.current.querySelector('summary')?.focus(); } }}>{english ? 'Close menu' : 'ปิดเมนู'}<X size={18} aria-hidden="true" /></button>
               {nav.map((item) => <Link key={item.href} href={localizedPath(item.href, locale)} aria-current={isCurrent(item.href) ? 'page' : undefined} onClick={closeMobileMenu}>{item[locale]}</Link>)}
               <Link className="mobile-menu-cta" href={localizedPath('/estimate', locale)} onClick={closeMobileMenu}>{english ? 'Start free estimate' : 'เริ่มประเมินฟรี'}</Link>
               <a className="mobile-language-link" href={alternateLanguagePath(pathname)} onClick={closeMobileMenu}>{english ? 'ภาษาไทย' : 'English'}</a>

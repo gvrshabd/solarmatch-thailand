@@ -2,6 +2,12 @@
 
 Last audited: **2026-09-01**
 
+## Terrace review branch supplement — 2026-09-13
+
+The static Terrace hero uses Alef Morais's illustrative tropical-house photograph from [Pexels](https://www.pexels.com/photo/modern-tropical-house-with-palm-trees-at-sunset-34569495/) under the [Pexels licence](https://www.pexels.com/license/). Local responsive files are `public/images/terrace-house-1920.jpg` and `public/images/terrace-house-768.jpg`; attribution is visible. This is not represented as a SolarMatch customer installation, Bangkok property, or generated cinematic end-frame. Hashes, sizes and exact source are in `docs/terrace/asset-manifest.json`.
+
+The existing Kindel Media roof photograph is reused unchanged in the editorial section and assessment sidebar. Official logo geometry is unchanged. The old homepage sample bill bars described below are no longer rendered on this branch. No generated video/still exists: the installed Higgsfield account rejected generation because a Basic-or-higher plan is required. Storyboards/prompts are planning artifacts, not generated assets.
+
 This register records the provenance and rights basis of every visual asset intentionally used by the public SolarMatch site. It does not claim that copyright does not exist. It records why each asset may be used, how it was transformed, and any remaining limitation.
 
 ## Licensed photographic assets
