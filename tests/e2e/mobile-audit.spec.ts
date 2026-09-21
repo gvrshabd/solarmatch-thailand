@@ -3,8 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 const widths = [320, 360, 375, 384, 390, 393, 402, 412, 414, 430, 432, 768];
 const sliderWidths = [320, 360, 375, 390, 393, 402, 414, 430];
 const routes = [
-  '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide', '/methodology', '/about', '/contact', '/resources', '/privacy', '/terms', '/cookies',
-  '/en', '/en/estimate', '/en/estimate/results', '/en/how-it-works', '/en/solar-guide', '/en/methodology', '/en/about', '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
+  '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide', '/methodology', '/contact', '/resources', '/privacy', '/terms', '/cookies',
+  '/en', '/en/estimate', '/en/estimate/results', '/en/how-it-works', '/en/solar-guide', '/en/methodology', '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
   '/missing-page', '/en/missing-page',
 ];
 
@@ -187,6 +187,18 @@ test('question headings, conditional controls, consent, and navigation remain se
     ];
     for (const probeCase of cases) {
       const page = await context.newPage();
+      if (probeCase.label === 'quote consent') {
+        await page.route('**/api/assessment/config', async (route) => {
+          const response = await route.fetch();
+          const configuration = await response.json() as Record<string, unknown> & { contact: Record<string, unknown> };
+          configuration.liveLeadSubmissions = true;
+          configuration.contact = {
+            ...configuration.contact,
+            enabled: true,
+          };
+          await route.fulfill({ response, json: configuration });
+        });
+      }
       await page.setViewportSize({ width: 390, height: 844 });
       await primeQuestion(page, route, probeCase.step, probeCase.overrides);
       await expect(page.locator(probeCase.visible)).toBeVisible();

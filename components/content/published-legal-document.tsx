@@ -19,6 +19,6 @@ export async function PublishedLegalDocument({ type, locale = 'th' }: { type: 'p
   const published = await readPublished(type);
   const document = published ?? legalLaunchDocuments[type];
   return <LegalShell locale={locale} title={document.title[locale]} updated={document.effectiveDate}>
-    {document.sections.map((section) => <section key={section.id} id={section.id}><h2>{section.title[locale]}</h2>{section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph[locale]}</p>)}{section.bullets?.length ? <ul>{section.bullets.map((bullet, index) => <li key={index}>{bullet[locale]}</li>)}</ul> : null}</section>)}
+    {type === 'terms' ? <p className="terms-continuous">{document.sections.map((section) => <span key={section.id} id={section.id}><strong>{section.title[locale]}</strong>{' '}{[...section.paragraphs, ...(section.bullets ?? [])].map((text) => text[locale]).join(' ')}{' '}</span>)}</p> : document.sections.map((section) => <section key={section.id} id={section.id}><h2>{section.title[locale]}</h2>{section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph[locale]}</p>)}{section.bullets?.length ? <ul>{section.bullets.map((bullet, index) => <li key={index}>{bullet[locale]}</li>)}</ul> : null}</section>)}
   </LegalShell>;
 }

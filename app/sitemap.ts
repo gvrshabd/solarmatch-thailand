@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { siteConfig } from '@/config/site';
 
-const routes = ['', '/estimate', '/how-it-works', '/solar-guide', '/methodology', '/about', '/contact', '/resources', '/privacy', '/terms', '/cookies'];
+const routes = ['', '/estimate', '/how-it-works', '/solar-guide', '/methodology', '/contact', '/resources', '/privacy', '/terms', '/cookies'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return routes.flatMap((route) => [

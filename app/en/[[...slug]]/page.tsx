@@ -12,7 +12,6 @@ const titles: Record<string, string> = {
   'how-it-works': 'How SolarMatch works',
   'solar-guide': 'Rooftop solar guide for homeowners',
   methodology: 'Calculator methodology and sources',
-  about: 'About SolarMatch',
   contact: 'Contact',
   resources: 'Official resources',
   privacy: 'Privacy Notice',

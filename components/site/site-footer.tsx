@@ -32,7 +32,6 @@ export function SiteFooter() {
           <h2>{english ? 'Information' : 'ข้อมูล'}</h2>
           <Link href={link('/methodology')}>{english ? 'Methodology' : 'วิธีคำนวณ'}</Link>
           <Link href={link('/resources')}>{english ? 'Resources' : 'แหล่งข้อมูล'}</Link>
-          <Link href={link('/about')}>{english ? 'About' : 'เกี่ยวกับเรา'}</Link>
           <Link href={link('/contact')}>{english ? 'Contact' : 'ติดต่อ'}</Link>
         </div>
         <div>

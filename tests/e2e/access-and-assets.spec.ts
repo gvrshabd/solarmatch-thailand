@@ -3,9 +3,9 @@ import { expect, test, type TestInfo } from '@playwright/test';
 
 const contentRoutes = [
   '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide', '/methodology',
-  '/about', '/contact', '/resources', '/privacy', '/terms', '/cookies',
+  '/contact', '/resources', '/privacy', '/terms', '/cookies',
   '/en', '/en/estimate', '/en/estimate/results', '/en/how-it-works', '/en/solar-guide',
-  '/en/methodology', '/en/about', '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
+  '/en/methodology', '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
 ];
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 

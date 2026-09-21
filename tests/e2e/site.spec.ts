@@ -61,8 +61,8 @@ async function primeQuoteStep(page: Page, answerOverrides: Record<string, unknow
   }, { answers: { ...savedEstimate, ...answerOverrides, quoteContactRequested: undefined }, configuration: operationalConfiguration() });
 }
 
-const thaiHeaderLinks = [['หน้าหลัก', '/'], ['ประเมินโซลาร์', '/estimate'], ['วิธีการทำงาน', '/how-it-works'], ['คู่มือโซลาร์', '/solar-guide'], ['วิธีคำนวณ', '/methodology'], ['เกี่ยวกับเรา', '/about']] as const;
-const englishHeaderLinks = [['Home', '/en'], ['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'], ['Methodology', '/en/methodology'], ['About', '/en/about']] as const;
+const thaiHeaderLinks = [['หน้าหลัก', '/'], ['ประเมินโซลาร์', '/estimate'], ['วิธีการทำงาน', '/how-it-works'], ['คู่มือโซลาร์', '/solar-guide'], ['วิธีคำนวณ', '/methodology']] as const;
+const englishHeaderLinks = [['Home', '/en'], ['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'], ['Methodology', '/en/methodology']] as const;
 
 function desktopOnly(testInfo: TestInfo) { test.skip(testInfo.project.name !== 'desktop-chromium', 'Desktop-only coverage.'); }
 async function expectPath(page: Page, path: string) {
@@ -109,8 +109,13 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await page.getByRole('button', { name: next, exact: true }).click();
   await choose(page, en ? 'Almost none' : 'แทบไม่มี', next);
   await choose(page, en ? 'Concrete roof tiles' : 'กระเบื้องคอนกรีต', next);
-  await page.getByRole('radio', { name: en ? 'No, show my estimate without installer contact' : 'ไม่ใช่ ดูผลประเมินโดยไม่ให้ผู้ติดตั้งติดต่อ', exact: true }).click();
-  await page.getByRole('button', { name: en ? 'See my estimate' : 'ดูผลประเมิน', exact: true }).click();
+  const decline = page.getByRole('radio', { name: en ? 'No, show my estimate without installer contact' : 'ไม่ใช่ ดูผลประเมินโดยไม่ให้ผู้ติดตั้งติดต่อ', exact: true });
+  if (await decline.isVisible()) {
+    await decline.click();
+    await page.getByRole('button', { name: en ? 'See my estimate' : 'ดูผลประเมิน', exact: true }).click();
+  } else {
+    await page.getByRole('button', { name: en ? 'View my estimate' : 'ดูผลประเมิน', exact: true }).click();
+  }
   await expectPath(page, en ? '/en/estimate/results' : '/estimate/results');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByText(en ? 'Simple payback (first-year basis)' : 'ระยะคืนทุนอย่างง่าย (อิงปีแรก)')).toBeVisible({ timeout: 10_000 });

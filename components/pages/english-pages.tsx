@@ -7,7 +7,6 @@ import {
   MessagesSquare,
 } from 'lucide-react';
 import { HomePage } from '@/components/home/home-page';
-import { AboutContent } from '@/components/pages/about-content';
 import { MethodologyContent } from '@/components/pages/methodology-content';
 import { ResourcesContent } from '@/components/pages/resources-content';
 import { ContactContent } from '@/components/pages/contact-content';
@@ -18,10 +17,6 @@ import { PublishedLegalDocument } from '@/components/content/published-legal-doc
 import { solarAssumptions } from '@/config/solar-assumptions';
 
 const en = (path = '') => `/en${path}`;
-
-function EnglishAbout() {
-  return <AboutContent locale="en" />;
-}
 
 function EnglishHowItWorks() {
   return <main><PageHero eyebrow="How it works" title="Understand your home before requesting quotes"><p>SolarMatch breaks complicated information into three stages, showing what is known, what still needs checking, and what to ask an installer.</p></PageHero>
@@ -159,7 +154,6 @@ export function EnglishPage({ slug }: { slug: string }) {
     case 'how-it-works': return <EnglishHowItWorks />;
     case 'solar-guide': return <EnglishSolarGuide />;
     case 'methodology': return <EnglishMethodology />;
-    case 'about': return <EnglishAbout />;
     case 'contact': return <EnglishContact />;
     case 'resources': return <EnglishResources />;
     case 'privacy': return <EnglishPrivacy />;

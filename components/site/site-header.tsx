@@ -13,7 +13,6 @@ const nav = [
   { href: '/how-it-works', th: 'วิธีการทำงาน', en: 'How it works' },
   { href: '/solar-guide', th: 'คู่มือโซลาร์', en: 'Solar guide' },
   { href: '/methodology', th: 'วิธีคำนวณ', en: 'Methodology' },
-  { href: '/about', th: 'เกี่ยวกับเรา', en: 'About' },
 ];
 
 function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
