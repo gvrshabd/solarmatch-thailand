@@ -2,17 +2,17 @@ import { expect, test } from '@playwright/test';
 
 for (const locale of ['en', 'th'] as const) {
   const prefix = locale === 'en' ? '/en' : '';
-  test(`${locale}: About is removed and Terms preserve all clauses in continuous prose`, async ({ page }) => {
+  test(`${locale}: About is removed and Terms preserve all clauses in readable sections`, async ({ page }) => {
     const removed = await page.goto(`${prefix}/about`);
     expect(removed?.status()).toBe(404);
     await page.goto(prefix || '/');
     await expect(page.locator('a[href="/about"],a[href="/en/about"]')).toHaveCount(0);
     await page.goto(`${prefix}/terms`);
-    await expect(page.locator('.terms-continuous')).toBeVisible();
-    await expect(page.locator('.terms-continuous > span')).toHaveCount(16);
-    await expect(page.locator('.terms-continuous #liability')).toBeVisible();
-    await expect(page.locator('.terms-continuous #law')).toBeVisible();
-    await expect(page.locator('.legal-shell article section,.legal-shell article ul')).toHaveCount(0);
+    await expect(page.locator('.terms-continuous')).toHaveCount(0);
+    await expect(page.locator('.legal-shell article section')).toHaveCount(16);
+    await expect(page.locator('.legal-shell article section > h2')).toHaveCount(16);
+    await expect(page.locator('.legal-shell #liability > p')).toBeVisible();
+    await expect(page.locator('.legal-shell #law > h2')).toBeVisible();
   });
 
   test(`${locale}: unavailable collection never offers a dead-end Yes or sends personal information`, async ({ page }) => {
