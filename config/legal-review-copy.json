@@ -1,0 +1,577 @@
+{
+  "contentVersion": "legal-review-2026-10-09",
+  "documents": {
+    "privacy": {
+      "type": "privacy",
+      "title": {
+        "en": "Privacy Notice",
+        "th": "ประกาศความเป็นส่วนตัว"
+      },
+      "lastUpdatedLabel": {
+        "en": "Effective date",
+        "th": "มีผลใช้บังคับวันที่"
+      },
+      "effectiveDate": null,
+      "pendingLegalReview": true,
+      "version": "[VERSION]",
+      "sections": [
+        {
+          "id": "who-we-are",
+          "title": {
+            "en": "Who is responsible for your personal data",
+            "th": "ผู้รับผิดชอบข้อมูลส่วนบุคคลของคุณ"
+          },
+          "paragraphs": [
+            {
+              "en": "SolarMatch Thailand (\"SolarMatch\", \"we\", \"us\") is operated by [COMPANY_EN], [ENTITY_DESCRIPTION_EN], company registration number [REGISTRATION_NUMBER], registered address [ADDRESS_EN]. This company is the personal data controller for the SolarMatch activities described in this notice. Contact us at [PRIVACY_EMAIL] for privacy questions, consent withdrawal or requests concerning your personal data.",
+              "th": "SolarMatch Thailand (\"SolarMatch\" หรือ \"เรา\") ดำเนินการโดย [COMPANY_TH] ซึ่งเป็น [ENTITY_DESCRIPTION_TH] เลขทะเบียนนิติบุคคล [REGISTRATION_NUMBER] มีสำนักงานจดทะเบียนตั้งอยู่ที่ [ADDRESS_TH] บริษัทนี้เป็นผู้ควบคุมข้อมูลส่วนบุคคลสำหรับกิจกรรมของ SolarMatch ที่อธิบายในประกาศนี้ หากมีคำถามเกี่ยวกับความเป็นส่วนตัว ต้องการถอนความยินยอม หรือใช้สิทธิเกี่ยวกับข้อมูลส่วนบุคคล โปรดติดต่อ [PRIVACY_EMAIL]"
+            }
+          ]
+        },
+        {
+          "id": "scope",
+          "title": {
+            "en": "Who this notice covers",
+            "th": "บุคคลที่ประกาศนี้ครอบคลุม"
+          },
+          "paragraphs": [
+            {
+              "en": "This notice covers website visitors, people using our solar calculator, homeowners and authorised representatives requesting installer contact, installer applicants and their business contacts, and people who contact us or make complaints. Provisions concerning referrals and installer purchases apply when those services are available and used.",
+              "th": "ประกาศนี้ครอบคลุมผู้เข้าชมเว็บไซต์ ผู้ใช้เครื่องคำนวณโซลาร์ เจ้าของบ้านและผู้แทนที่ได้รับอนุญาตซึ่งขอให้บริษัทติดตั้งติดต่อกลับ ผู้สมัครเข้าร่วมเป็นบริษัทติดตั้งและผู้ติดต่อทางธุรกิจ ตลอดจนผู้ที่ติดต่อเราหรือร้องเรียน ข้อความเกี่ยวกับการส่งต่อคำขอและการซื้อบริการของบริษัทติดตั้งจะใช้เมื่อบริการนั้นเปิดให้ใช้งานและมีการใช้บริการ"
+            }
+          ]
+        },
+        {
+          "id": "data",
+          "title": {
+            "en": "What information we process",
+            "th": "ข้อมูลที่เราประมวลผล"
+          },
+          "paragraphs": [
+            {
+              "en": "Depending on how you use the service, we may process:",
+              "th": "เราอาจประมวลผลข้อมูลต่อไปนี้ตามลักษณะการใช้บริการของคุณ:"
+            },
+            {
+              "en": "We collect information directly from you, automatically through your use of the website, and, where relevant, from participating installers or service providers for delivery, verification, payment administration, support and complaints. We do not intentionally request national identity numbers, health information or bank-account details through the standard homeowner assessment. Please do not include unnecessary sensitive information in free-text messages or evidence.",
+              "th": "เราเก็บข้อมูลจากคุณโดยตรง จากการใช้เว็บไซต์โดยอัตโนมัติ และเมื่อเกี่ยวข้อง จากบริษัทติดตั้งที่เข้าร่วมหรือผู้ให้บริการ เพื่อการส่งมอบ การตรวจสอบ การจัดการการชำระเงิน การช่วยเหลือ และข้อร้องเรียน แบบประเมินมาตรฐานสำหรับเจ้าของบ้านไม่ได้มีวัตถุประสงค์เพื่อขอเลขประจำตัวประชาชน ข้อมูลสุขภาพ หรือข้อมูลบัญชีธนาคาร โปรดอย่าใส่ข้อมูลอ่อนไหวที่ไม่จำเป็นในข้อความหรือหลักฐานที่ส่งให้เรา"
+            }
+          ],
+          "bullets": [
+            {
+              "en": "Assessment information, including province or district, property location, any optional address or map location, electricity expenditure and usage, property type, ownership or authority, roof and shading information, appliances, solar preferences and buying timeframe.",
+              "th": "ข้อมูลแบบประเมิน เช่น จังหวัดหรือเขต/อำเภอ ที่ตั้งทรัพย์สิน ที่อยู่หรือจุดบนแผนที่ที่เลือกให้เพิ่มเติม ค่าไฟและการใช้ไฟฟ้า ประเภททรัพย์สิน ความเป็นเจ้าของหรืออำนาจดำเนินการ ข้อมูลหลังคาและเงาบัง เครื่องใช้ไฟฟ้า ความต้องการเกี่ยวกับระบบโซลาร์ และช่วงเวลาที่สนใจติดตั้ง"
+            },
+            {
+              "en": "Contact information, including your name, telephone number, LINE ID or other contact details you choose to provide, and your preferred contact method.",
+              "th": "ข้อมูลติดต่อ เช่น ชื่อ หมายเลขโทรศัพท์ LINE ID หรือช่องทางอื่นที่คุณเลือกให้ และวิธีติดต่อที่คุณต้องการ"
+            },
+            {
+              "en": "Request and referral records, including eligibility answers, checks performed, request time, consent choice and wording version, matching and delivery records, installer recipients, contact preferences, corrections and withdrawals.",
+              "th": "บันทึกคำขอและการส่งต่อ เช่น คำตอบเกี่ยวกับคุณสมบัติ การตรวจสอบที่ได้ดำเนินการ เวลาส่งคำขอ ตัวเลือกความยินยอมและฉบับข้อความที่ใช้ บันทึกการจับคู่และส่งมอบ บริษัทติดตั้งที่ได้รับข้อมูล ความต้องการในการติดต่อ การแก้ไขข้อมูล และการถอนความยินยอม"
+            },
+            {
+              "en": "Support, quality and dispute information, including communications, complaints, invalid-enquiry reports and relevant feedback on whether contact, a quotation or a purchase occurred.",
+              "th": "ข้อมูลการช่วยเหลือ คุณภาพ และข้อพิพาท เช่น การติดต่อ ข้อร้องเรียน รายงานคำขอที่ไม่ถูกต้อง และข้อมูลติดตามผลที่เกี่ยวข้องว่ามีการติดต่อ เสนอราคา หรือซื้อบริการเกิดขึ้นหรือไม่"
+            },
+            {
+              "en": "Installer business and transaction information, including company details, business representatives, service areas, participation checks, package purchases, credit movements, invoices and payment references. Personal information about individuals remains protected even when supplied for business purposes.",
+              "th": "ข้อมูลธุรกิจและธุรกรรมของบริษัทติดตั้ง เช่น ข้อมูลบริษัท ผู้ติดต่อ พื้นที่บริการ การตรวจสอบเพื่อเข้าร่วม การซื้อแพ็กเกจ การเคลื่อนไหวของเครดิต ใบแจ้งหนี้ และรายการอ้างอิงการชำระเงิน ข้อมูลของบุคคลธรรมดายังคงได้รับการคุ้มครองแม้จะให้ไว้เพื่อวัตถุประสงค์ทางธุรกิจ"
+            },
+            {
+              "en": "Technical information needed to operate and protect the service, including browser and device information, IP or other network identifiers, session identifiers, security events and service logs. Browser storage may also retain assessment progress and form choices as explained in the Cookie Policy.",
+              "th": "ข้อมูลทางเทคนิคที่จำเป็นต่อการให้บริการและรักษาความปลอดภัย เช่น ข้อมูลเบราว์เซอร์และอุปกรณ์ IP หรือข้อมูลระบุเครือข่ายอื่น ตัวระบุเซสชัน เหตุการณ์ด้านความปลอดภัย และบันทึกการให้บริการ พื้นที่จัดเก็บของเบราว์เซอร์อาจเก็บความคืบหน้าและตัวเลือกในแบบฟอร์มตามที่อธิบายในนโยบายคุกกี้"
+            }
+          ]
+        },
+        {
+          "id": "required",
+          "title": {
+            "en": "Required and optional information",
+            "th": "ข้อมูลที่จำเป็นและข้อมูลที่เลือกให้ได้"
+          },
+          "paragraphs": [
+            {
+              "en": "The calculator requires enough assessment information to produce an estimate. You do not have to request installer contact or provide contact details to receive the free estimate. A contact request requires the stated contact, location and eligibility information and your separate consent to the disclosure described below. Without those details or consent, we cannot process the referral, but you can still use the calculator. Optional fields are identified as optional. Information necessary to evaluate an installer application, administer a purchase or respond to a complaint may also be required for that particular request.",
+              "th": "เครื่องคำนวณต้องใช้ข้อมูลแบบประเมินเพียงพอที่จะสร้างผลประเมิน คุณไม่จำเป็นต้องขอให้บริษัทติดตั้งติดต่อกลับหรือให้ข้อมูลติดต่อเพื่อรับผลประเมินฟรี การขอรับการติดต่อจำเป็นต้องมีข้อมูลติดต่อ ที่ตั้ง และคุณสมบัติตามที่ระบุ รวมทั้งความยินยอมแยกต่างหากสำหรับการเปิดเผยข้อมูลตามรายละเอียดด้านล่าง หากไม่มีข้อมูลหรือความยินยอมดังกล่าว เราจะไม่สามารถส่งต่อคำขอได้ แต่คุณยังใช้เครื่องคำนวณได้ ช่องข้อมูลที่ไม่บังคับจะระบุว่าเป็นทางเลือก ข้อมูลที่จำเป็นต่อการพิจารณาบริษัทติดตั้ง การจัดการการซื้อ หรือการตอบข้อร้องเรียนอาจจำเป็นสำหรับคำขอนั้นโดยเฉพาะ"
+            }
+          ]
+        },
+        {
+          "id": "purposes",
+          "title": {
+            "en": "Purposes and legal bases",
+            "th": "วัตถุประสงค์และฐานกฎหมาย"
+          },
+          "paragraphs": [
+            {
+              "en": "We use information to provide estimates, handle requested services, assess eligibility, check duplicates and fraud, match requests, record permitted disclosures, administer installer agreements and credits, handle complaints and rights requests, protect the service and meet legal obligations.",
+              "th": "เราใช้ข้อมูลเพื่อจัดทำผลประเมิน ดำเนินการตามบริการที่ขอ ตรวจสอบคุณสมบัติ ข้อมูลซ้ำและการทุจริต จับคู่คำขอ บันทึกการเปิดเผยที่ได้รับอนุญาต จัดการข้อตกลงและเครดิตของบริษัทติดตั้ง จัดการข้อร้องเรียนและคำขอใช้สิทธิ รักษาความปลอดภัย และปฏิบัติตามกฎหมาย"
+            },
+            {
+              "en": "We rely on your consent to disclose a homeowner enquiry to participating installation companies and enable contact about that request. Withdrawal stops future processing that depends on that consent.",
+              "th": "เราอาศัยความยินยอมของคุณในการเปิดเผยคำขอของเจ้าของบ้านให้บริษัทติดตั้งที่เข้าร่วมและให้ติดต่อเกี่ยวกับคำขอนั้น เมื่อถอนความยินยอม เราจะหยุดการประมวลผลในอนาคตที่อาศัยความยินยอมนั้น"
+            },
+            {
+              "en": "Where applicable, we process information to perform an agreement with you or take steps you request before entering an agreement. We also rely, where legally appropriate, on legitimate interests in service security, fraud prevention, business administration, proportionate quality checks, complaint handling and establishing or defending legal claims, after considering the effects on your rights. We process records required by tax, accounting or other applicable law to meet legal obligations.",
+              "th": "ในกรณีที่ใช้ได้ เราประมวลผลข้อมูลเพื่อปฏิบัติตามสัญญากับคุณหรือดำเนินการตามที่คุณขอก่อนเข้าทำสัญญา นอกจากนี้ เราอาจอาศัยประโยชน์โดยชอบด้วยกฎหมายในการรักษาความปลอดภัย ป้องกันการทุจริต บริหารธุรกิจ ตรวจสอบคุณภาพอย่างได้สัดส่วน จัดการข้อร้องเรียน และก่อตั้งหรือป้องกันสิทธิเรียกร้อง โดยพิจารณาผลกระทบต่อสิทธิของคุณแล้ว เราประมวลผลเอกสารที่กฎหมายภาษี บัญชี หรือกฎหมายอื่นกำหนดเพื่อปฏิบัติตามหน้าที่ตามกฎหมาย"
+            },
+            {
+              "en": "These other bases do not permit us to ignore a refusal or withdrawal of consent and continue distributing your enquiry for installer contact. We do not treat use of the calculator as consent to unrelated marketing.",
+              "th": "ฐานกฎหมายอื่นเหล่านี้ไม่อนุญาตให้เราเพิกเฉยต่อการปฏิเสธหรือถอนความยินยอมแล้วส่งต่อคำขอให้บริษัทติดตั้งติดต่อคุณต่อไป เราไม่ถือว่าการใช้เครื่องคำนวณเป็นความยินยอมให้ทำการตลาดที่ไม่เกี่ยวข้อง"
+            }
+          ]
+        },
+        {
+          "id": "sharing",
+          "title": {
+            "en": "Optional disclosure to installation companies",
+            "th": "การเลือกให้เปิดเผยข้อมูลแก่บริษัทติดตั้ง"
+          },
+          "paragraphs": [
+            {
+              "en": "If you request contact and give consent, we may disclose your name, chosen contact details, property location and relevant assessment answers to no more than three participating installation companies serving your area, for those companies to assess and contact you about your residential solar request. We share only information relevant to that purpose. The initial service focuses on Bangkok and Greater Bangkok within participating installers' service areas.",
+              "th": "หากคุณขอรับการติดต่อและให้ความยินยอม เราอาจเปิดเผยชื่อ ช่องทางติดต่อที่คุณเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของคุณไม่เกินสามบริษัท เพื่อให้บริษัทเหล่านั้นประเมินและติดต่อคุณเกี่ยวกับคำขอโซลาร์สำหรับที่อยู่อาศัยของคุณ เราเปิดเผยเฉพาะข้อมูลที่เกี่ยวข้องกับวัตถุประสงค์นี้ บริการระยะแรกมุ่งเน้นกรุงเทพมหานครและปริมณฑลภายในพื้นที่ให้บริการของบริษัทติดตั้งที่เข้าร่วม"
+            },
+            {
+              "en": "Matching may consider location, project and eligibility requirements, installer capacity, available credits and delivery limits. It is not a comparison of every installer or a guarantee of the best price or provider. We identify the companies receiving your request in a confirmation to you. We may find fewer than three suitable companies, or none.",
+              "th": "การจับคู่อาจพิจารณาที่ตั้ง ลักษณะโครงการ คุณสมบัติ ความสามารถในการรับงาน เครดิตคงเหลือ และขีดจำกัดการรับคำขอของบริษัทติดตั้ง บริการนี้ไม่ใช่การเปรียบเทียบบริษัทติดตั้งทุกราย และไม่รับประกันราคาหรือผู้ให้บริการที่ดีที่สุด เราจะแจ้งชื่อบริษัทที่ได้รับคำขอของคุณในการยืนยันที่ส่งให้คุณ อาจมีบริษัทที่เหมาะสมน้อยกว่าสามบริษัท หรือไม่มีเลยก็ได้"
+            },
+            {
+              "en": "The limit applies to distinct installation companies receiving the same request. Restoring an installer's credit does not permit us to send that request to an additional company beyond the limit. A request is not automatically renewed or redistributed as a new request.",
+              "th": "ข้อจำกัดนี้นับตามบริษัทติดตั้งแต่ละรายที่ได้รับคำขอเดียวกัน การคืนเครดิตให้บริษัทติดตั้งไม่ทำให้เราสามารถส่งคำขอนั้นให้บริษัทเพิ่มเติมจนเกินจำนวนที่กำหนด คำขอจะไม่ถูกต่ออายุหรือส่งต่อใหม่เสมือนเป็นคำขอใหม่โดยอัตโนมัติ"
+            },
+            {
+              "en": "Participating installers pay SolarMatch for delivered enquiries. Payment does not give them ownership of your personal data or unrestricted rights to use it. We prohibit resale, unrelated marketing and independent onward referrals without an appropriate separate legal basis and any consent required by law. An installer may use authorised staff or service providers under its responsibility to handle your request, but may not use this to circulate it to additional independent installation companies.",
+              "th": "บริษัทติดตั้งที่เข้าร่วมชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ การชำระเงินไม่ได้ทำให้บริษัทติดตั้งเป็นเจ้าของข้อมูลส่วนบุคคลของคุณหรือมีสิทธิใช้อย่างไม่จำกัด เราห้ามขายต่อ ใช้ทำการตลาดที่ไม่เกี่ยวข้อง หรือส่งต่ออย่างอิสระโดยไม่มีฐานกฎหมายแยกต่างหากที่เหมาะสมและความยินยอมเมื่อกฎหมายกำหนด บริษัทติดตั้งอาจใช้พนักงานหรือผู้ให้บริการที่ได้รับอนุญาตภายใต้ความรับผิดชอบของตนเพื่อดำเนินการตามคำขอ แต่ห้ามใช้ช่องทางนี้เพื่อกระจายข้อมูลให้บริษัทติดตั้งอิสระเพิ่มเติม"
+            },
+            {
+              "en": "Installers generally act as independent controllers for their own quotations, customer communications and installation contracts. They must provide appropriate privacy information and meet their own legal obligations. SolarMatch does not guarantee that an installer will contact you, quote or enter a contract.",
+              "th": "โดยทั่วไป บริษัทติดตั้งเป็นผู้ควบคุมข้อมูลส่วนบุคคลแยกต่างหากสำหรับการเสนอราคา การติดต่อกับลูกค้า และสัญญาติดตั้งของตน บริษัทติดตั้งต้องให้ข้อมูลเกี่ยวกับความเป็นส่วนตัวอย่างเหมาะสมและปฏิบัติตามหน้าที่ตามกฎหมายของตน SolarMatch ไม่รับประกันว่าบริษัทติดตั้งจะติดต่อ เสนอราคา หรือเข้าทำสัญญากับคุณ"
+            }
+          ]
+        },
+        {
+          "id": "providers",
+          "title": {
+            "en": "Other recipients and processing outside Thailand",
+            "th": "ผู้รับข้อมูลอื่นและการประมวลผลนอกประเทศไทย"
+          },
+          "paragraphs": [
+            {
+              "en": "We use service providers for functions such as website delivery, hosting, security, data storage, communications and administration. Cloudflare provides website infrastructure and related hosting, storage or security services used by SolarMatch. Relevant providers receive only the access needed for their role and, where acting as processors, must follow applicable processing instructions and contractual safeguards. We may also disclose information to professional advisers, authorities or courts where there is an appropriate legal basis.",
+              "th": "เราใช้ผู้ให้บริการสำหรับการให้บริการเว็บไซต์ โฮสติ้ง ความปลอดภัย การจัดเก็บข้อมูล การสื่อสาร และการบริหารงาน Cloudflare ให้บริการโครงสร้างพื้นฐานเว็บไซต์และบริการโฮสติ้ง การจัดเก็บ หรือความปลอดภัยที่เกี่ยวข้องซึ่ง SolarMatch ใช้งาน ผู้ให้บริการที่เกี่ยวข้องได้รับสิทธิเข้าถึงเท่าที่จำเป็นต่อหน้าที่ และเมื่อทำหน้าที่เป็นผู้ประมวลผลข้อมูล ต้องปฏิบัติตามคำสั่งและมาตรการคุ้มครองตามสัญญาที่ใช้บังคับ เราอาจเปิดเผยข้อมูลแก่ที่ปรึกษาวิชาชีพ หน่วยงานรัฐ หรือศาลเมื่อมีฐานกฎหมายที่เหมาะสม"
+            },
+            {
+              "en": "Some providers may process information outside Thailand. Where a transfer is subject to Thailand's personal data protection requirements, we must establish an applicable lawful transfer mechanism and required safeguards. This notice alone is not consent to an otherwise unlawful international transfer. You may contact [PRIVACY_EMAIL] for information about relevant recipients and safeguards.",
+              "th": "ผู้ให้บริการบางรายอาจประมวลผลข้อมูลนอกประเทศไทย หากการโอนข้อมูลอยู่ภายใต้ข้อกำหนดของกฎหมายคุ้มครองข้อมูลส่วนบุคคลไทย เราต้องจัดให้มีกลไกการโอนที่ชอบด้วยกฎหมายและมาตรการคุ้มครองที่กำหนด ประกาศนี้เพียงอย่างเดียวไม่ถือเป็นความยินยอมให้โอนข้อมูลระหว่างประเทศโดยไม่ชอบด้วยกฎหมาย คุณสามารถติดต่อ [PRIVACY_EMAIL] เพื่อขอข้อมูลเกี่ยวกับผู้รับข้อมูลและมาตรการคุ้มครองที่เกี่ยวข้อง"
+            }
+          ]
+        },
+        {
+          "id": "retention",
+          "title": {
+            "en": "Distribution window and retention",
+            "th": "ระยะเวลาส่งต่อและเก็บรักษาข้อมูล"
+          },
+          "paragraphs": [
+            {
+              "en": "We may deliver your enquiry to a new eligible installer only within [DISTRIBUTION_DAYS] days after you submit the contact request, subject to valid consent and the three-company limit. We stop earlier if you withdraw consent. After this window, we do not make new deliveries of that request unless you make a fresh request and give the necessary consent. A correction, installer dispute or credit restoration does not restart the window or sharing limit.",
+              "th": "เราอาจส่งคำขอให้บริษัทติดตั้งรายใหม่ที่เข้าเกณฑ์ได้ภายใน [DISTRIBUTION_DAYS] วันนับจากวันที่คุณส่งคำขอรับการติดต่อเท่านั้น ทั้งนี้ต้องมีความยินยอมที่ยังใช้ได้และไม่เกินสามบริษัท เราจะหยุดก่อนครบกำหนดหากคุณถอนความยินยอม เมื่อพ้นระยะเวลานี้ เราจะไม่ส่งคำขอนั้นให้รายใหม่ เว้นแต่คุณจะส่งคำขอใหม่และให้ความยินยอมที่จำเป็น การแก้ไขข้อมูล ข้อพิพาทของบริษัทติดตั้ง หรือการคืนเครดิตไม่ทำให้เริ่มนับระยะเวลาหรือจำนวนผู้รับข้อมูลใหม่"
+            },
+            {
+              "en": "We normally retain identifiable homeowner enquiry records for no longer than [ENQUIRY_RETENTION_DAYS] days after submission, and delete or anonymise them earlier when they are no longer needed and no lawful retention reason remains.",
+              "th": "โดยปกติ เราเก็บบันทึกคำขอของเจ้าของบ้านที่ระบุตัวบุคคลได้ไม่เกิน [ENQUIRY_RETENTION_DAYS] วันนับจากวันที่ส่งคำขอ และจะลบหรือทำให้ไม่สามารถระบุตัวบุคคลได้เร็วกว่านั้นเมื่อไม่มีความจำเป็นและไม่มีเหตุอันชอบด้วยกฎหมายให้เก็บต่อ"
+            },
+            {
+              "en": "Limited records may need to be kept separately for applicable tax or accounting periods, an unresolved complaint, legal obligations, or the establishment, exercise or defence of legal claims. Necessary consent and disclosure evidence is retained for as long as reasonably needed to demonstrate compliance or resolve relevant claims. Minimal suppression records may be kept where necessary to honour a withdrawal or objection and prevent unwanted recontact. These exceptions do not authorise continued referral or marketing use. We review the need for continued retention and delete or anonymise records when that need ends.",
+              "th": "เราอาจต้องเก็บข้อมูลบางส่วนแยกต่างหากตามระยะเวลาที่กฎหมายภาษีหรือบัญชีกำหนด เพื่อข้อร้องเรียนที่ยังไม่ยุติ หน้าที่ตามกฎหมาย หรือการก่อตั้ง ใช้ หรือป้องกันสิทธิเรียกร้อง หลักฐานความยินยอมและการเปิดเผยที่จำเป็นจะเก็บเท่าที่จำเป็นอย่างสมเหตุสมผลเพื่อแสดงการปฏิบัติตามกฎหมายหรือจัดการสิทธิเรียกร้องที่เกี่ยวข้อง เราอาจเก็บข้อมูลขั้นต่ำเพื่อระงับการติดต่อเมื่อจำเป็นต่อการเคารพการถอนความยินยอมหรือการคัดค้าน ข้อยกเว้นเหล่านี้ไม่อนุญาตให้ใช้ข้อมูลส่งต่อหรือทำการตลาดต่อ เราทบทวนความจำเป็นในการเก็บรักษาและลบหรือทำให้ข้อมูลไม่สามารถระบุตัวบุคคลได้เมื่อความจำเป็นสิ้นสุดลง"
+            },
+            {
+              "en": "An installer's retention obligations are its own; receiving a lead does not permit indefinite retention or unrelated use.",
+              "th": "บริษัทติดตั้งมีหน้าที่เกี่ยวกับการเก็บรักษาข้อมูลของตนเอง การได้รับคำขอไม่อนุญาตให้เก็บข้อมูลโดยไม่มีกำหนดหรือใช้เพื่อวัตถุประสงค์ที่ไม่เกี่ยวข้อง"
+            }
+          ]
+        },
+        {
+          "id": "withdrawal",
+          "title": {
+            "en": "Withdrawal and stopping contact",
+            "th": "การถอนความยินยอมและหยุดการติดต่อ"
+          },
+          "paragraphs": [
+            {
+              "en": "You may withdraw referral consent or ask us to stop further contact at any time by emailing [PRIVACY_EMAIL]. Give enough information to identify the request; we may proportionately verify your identity. Withdrawal is free and does not affect processing that was lawful before withdrawal.",
+              "th": "คุณสามารถถอนความยินยอมในการส่งต่อคำขอหรือขอให้หยุดการติดต่อเพิ่มเติมได้ทุกเมื่อโดยส่งอีเมลไปที่ [PRIVACY_EMAIL] โปรดให้ข้อมูลเพียงพอที่จะระบุคำขอ เราอาจตรวจสอบตัวตนอย่างได้สัดส่วน การถอนความยินยอมไม่มีค่าใช้จ่ายและไม่กระทบการประมวลผลที่ชอบด้วยกฎหมายก่อนถอนความยินยอม"
+            },
+            {
+              "en": "We stop further consent-based disclosure and notify the installers that received the request of a relevant withdrawal, objection or correction so they can take required action. You may also contact an installer directly. They must stop processing that depends on withdrawn consent and respect applicable objections to direct marketing. Limited records may still be retained where another lawful basis requires or permits this, for example an installation contract, tax obligations or a legal claim. Withdrawal cannot undo a disclosure already made, but it affects what may lawfully happen next.",
+              "th": "เราจะหยุดการเปิดเผยเพิ่มเติมที่อาศัยความยินยอม และแจ้งบริษัทติดตั้งที่ได้รับคำขอเกี่ยวกับการถอนความยินยอม การคัดค้าน หรือการแก้ไขที่เกี่ยวข้องเพื่อให้ดำเนินการตามหน้าที่ คุณสามารถติดต่อบริษัทติดตั้งโดยตรงได้ด้วย บริษัทติดตั้งต้องหยุดการประมวลผลที่อาศัยความยินยอมซึ่งถูกถอนและเคารพสิทธิคัดค้านการตลาดแบบตรงที่ใช้บังคับ อาจยังเก็บข้อมูลบางส่วนได้เมื่อมีฐานกฎหมายอื่นกำหนดหรืออนุญาต เช่น สัญญาติดตั้ง หน้าที่ทางภาษี หรือสิทธิเรียกร้อง การถอนความยินยอมไม่สามารถย้อนกลับการเปิดเผยที่เกิดขึ้นแล้ว แต่มีผลต่อการดำเนินการภายหลังที่กฎหมายอนุญาต"
+            }
+          ]
+        },
+        {
+          "id": "rights",
+          "title": {
+            "en": "Your rights and complaints",
+            "th": "สิทธิและการร้องเรียน"
+          },
+          "paragraphs": [
+            {
+              "en": "Subject to applicable law and its exceptions, you may request access and a copy, information about the source of data collected without consent, correction, deletion or anonymisation, restriction, applicable data portability, or objection to processing. You may withdraw consent and object to direct marketing. Contact [PRIVACY_EMAIL] to exercise these rights. We respond within the applicable legal time limit and explain any lawful reason for refusing or restricting a request. We do not require you to give up these rights to receive a free estimate.",
+              "th": "ภายใต้กฎหมายและข้อยกเว้นที่ใช้บังคับ คุณอาจขอเข้าถึงและรับสำเนา ขอทราบแหล่งที่มาของข้อมูลที่เก็บโดยไม่ได้รับความยินยอม ขอแก้ไข ลบหรือทำให้ไม่สามารถระบุตัวบุคคลได้ ระงับการใช้ ขอให้โอนข้อมูลในกรณีที่ใช้ได้ หรือคัดค้านการประมวลผล คุณสามารถถอนความยินยอมและคัดค้านการตลาดแบบตรง ติดต่อ [PRIVACY_EMAIL] เพื่อใช้สิทธิ เราจะตอบภายในระยะเวลาที่กฎหมายกำหนดและแจ้งเหตุผลตามกฎหมายหากปฏิเสธหรือจำกัดคำขอ เราไม่กำหนดให้คุณสละสิทธิเหล่านี้เพื่อรับผลประเมินฟรี"
+            },
+            {
+              "en": "You may lodge a complaint with Thailand's Personal Data Protection Committee through the Office of the Personal Data Protection Committee. You do not have to resolve a complaint with us first where the law permits a direct complaint.",
+              "th": "คุณสามารถยื่นเรื่องร้องเรียนต่อคณะกรรมการคุ้มครองข้อมูลส่วนบุคคลผ่านสำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคลได้ โดยไม่จำเป็นต้องยุติข้อร้องเรียนกับเราก่อนในกรณีที่กฎหมายอนุญาตให้ร้องเรียนโดยตรง"
+            }
+          ]
+        },
+        {
+          "id": "age",
+          "title": {
+            "en": "Eligibility and protection of information",
+            "th": "คุณสมบัติและการคุ้มครองข้อมูล"
+          },
+          "paragraphs": [
+            {
+              "en": "Our installer-contact service is intended for people aged at least 20 who own the property or are authorised by its owner. This is a service-eligibility rule, not a statement that Thai law prohibits all calculator use by younger people. Provide your own contact details; authority over a property does not automatically authorise disclosure of someone else's personal data.",
+              "th": "บริการขอให้บริษัทติดตั้งติดต่อกลับมีไว้สำหรับผู้มีอายุอย่างน้อย 20 ปีซึ่งเป็นเจ้าของทรัพย์สินหรือได้รับอนุญาตจากเจ้าของ นี่เป็นเงื่อนไขการใช้บริการ ไม่ใช่การระบุว่ากฎหมายไทยห้ามผู้ที่อายุน้อยกว่าใช้เครื่องคำนวณทุกกรณี โปรดให้ข้อมูลติดต่อของตนเอง การมีอำนาจเกี่ยวกับทรัพย์สินไม่ได้ทำให้มีสิทธิเปิดเผยข้อมูลส่วนบุคคลของผู้อื่นโดยอัตโนมัติ"
+            },
+            {
+              "en": "We apply technical and organisational safeguards appropriate to the information and risks, and handle personal data breaches in accordance with applicable law. No internet service can guarantee absolute security.",
+              "th": "เราใช้มาตรการทางเทคนิคและองค์กรที่เหมาะสมกับข้อมูลและความเสี่ยง และจัดการเหตุละเมิดข้อมูลส่วนบุคคลตามกฎหมายที่ใช้บังคับ ไม่มีบริการทางอินเทอร์เน็ตใดรับประกันความปลอดภัยได้อย่างสมบูรณ์"
+            }
+          ]
+        },
+        {
+          "id": "changes",
+          "title": {
+            "en": "Changes and related information",
+            "th": "การเปลี่ยนแปลงและข้อมูลที่เกี่ยวข้อง"
+          },
+          "paragraphs": [
+            {
+              "en": "The Cookie Policy explains cookies, browser storage and third-party map requests. We update this notice when our practices change and identify the effective date and version. An update does not retrospectively expand an existing consent. We obtain new consent where required before using information for a new purpose.",
+              "th": "นโยบายคุกกี้อธิบายคุกกี้ พื้นที่จัดเก็บของเบราว์เซอร์ และการเรียกใช้แผนที่จากบุคคลภายนอก เราจะปรับปรุงประกาศนี้เมื่อแนวทางปฏิบัติเปลี่ยนแปลงและระบุวันที่มีผลกับฉบับที่ใช้ การปรับปรุงไม่ขยายขอบเขตความยินยอมเดิมย้อนหลัง เราจะขอความยินยอมใหม่เมื่อจำเป็นก่อนใช้ข้อมูลเพื่อวัตถุประสงค์ใหม่"
+            }
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "type": "terms",
+      "title": {
+        "en": "Terms of Use",
+        "th": "ข้อกำหนดการใช้บริการ"
+      },
+      "lastUpdatedLabel": {
+        "en": "Effective date",
+        "th": "มีผลใช้บังคับวันที่"
+      },
+      "effectiveDate": null,
+      "pendingLegalReview": true,
+      "version": "[VERSION]",
+      "sections": [
+        {
+          "id": "operator",
+          "title": {
+            "en": "Operator and scope",
+            "th": "ผู้ดำเนินการและขอบเขต"
+          },
+          "paragraphs": [
+            {
+              "en": "SolarMatch Thailand is operated by [COMPANY_EN], [ENTITY_DESCRIPTION_EN], company registration number [REGISTRATION_NUMBER], registered address [ADDRESS_EN]. Contact: [GENERAL_EMAIL]. These terms describe use of our website, free calculator and optional homeowner referral service. Installer purchases are governed by a separate Installer Services and Credit Agreement. Personal data is handled under the Privacy Notice and applicable consent choices; these terms are not consent to marketing or disclosure of an enquiry.",
+              "th": "SolarMatch Thailand ดำเนินการโดย [COMPANY_TH] ซึ่งเป็น [ENTITY_DESCRIPTION_TH] เลขทะเบียนนิติบุคคล [REGISTRATION_NUMBER] มีสำนักงานจดทะเบียนตั้งอยู่ที่ [ADDRESS_TH] ติดต่อ: [GENERAL_EMAIL] ข้อกำหนดนี้อธิบายการใช้เว็บไซต์ เครื่องคำนวณฟรี และบริการส่งต่อคำขอของเจ้าของบ้านที่เลือกใช้ได้ การซื้อบริการของบริษัทติดตั้งอยู่ภายใต้ข้อตกลงบริการและเครดิตสำหรับบริษัทติดตั้งแยกต่างหาก ข้อมูลส่วนบุคคลได้รับการจัดการตามประกาศความเป็นส่วนตัวและตัวเลือกความยินยอมที่ใช้บังคับ ข้อกำหนดนี้ไม่ใช่ความยินยอมให้ทำการตลาดหรือเปิดเผยคำขอ"
+            }
+          ]
+        },
+        {
+          "id": "service",
+          "title": {
+            "en": "Free estimates and our role",
+            "th": "ผลประเมินฟรีและบทบาทของเรา"
+          },
+          "paragraphs": [
+            {
+              "en": "SolarMatch provides information and referrals. We are not the installer, electrical contractor or engineer for your project. The calculator and optional contact request are free to homeowners and do not oblige you to buy anything. Installers pay us for delivered enquiries.",
+              "th": "SolarMatch ให้ข้อมูลและบริการส่งต่อคำขอ เราไม่ใช่ผู้ติดตั้ง ผู้รับเหมาไฟฟ้า หรือวิศวกรของโครงการคุณ เครื่องคำนวณและการขอรับการติดต่อไม่มีค่าใช้จ่ายสำหรับเจ้าของบ้านและไม่ผูกมัดให้ซื้อสินค้าใด บริษัทติดตั้งชำระค่าบริการให้เราสำหรับคำขอที่ได้รับ"
+            },
+            {
+              "en": "The initial referral service focuses on Bangkok and Greater Bangkok within participating installers' service areas. Availability depends on suitable participating companies and the information you provide. We do not compare the entire market or promise the lowest price, best installer, a response or a quotation.",
+              "th": "บริการส่งต่อระยะแรกมุ่งเน้นกรุงเทพมหานครและปริมณฑลภายในพื้นที่ให้บริการของบริษัทติดตั้งที่เข้าร่วม ความพร้อมของบริการขึ้นอยู่กับบริษัทที่เหมาะสมและข้อมูลที่คุณให้ เราไม่ได้เปรียบเทียบผู้ให้บริการทั้งหมดในตลาด และไม่รับประกันราคาต่ำที่สุด บริษัทติดตั้งที่ดีที่สุด การตอบกลับ หรือการเสนอราคา"
+            }
+          ]
+        },
+        {
+          "id": "estimates",
+          "title": {
+            "en": "Preliminary estimates",
+            "th": "ผลประเมินเบื้องต้น"
+          },
+          "paragraphs": [
+            {
+              "en": "Calculator results are preliminary planning estimates, not site surveys, engineering or structural assessments, final designs, quotations, financial or tax advice, or guarantees of suitability, cost, generation, savings, payback or property value. Actual results depend on site conditions, system design, equipment, use, tariffs, maintenance and other factors. Obtain professional assessment and a written quotation before deciding to install.",
+              "th": "ผลจากเครื่องคำนวณเป็นผลประเมินเบื้องต้นเพื่อวางแผน ไม่ใช่การสำรวจหน้างาน การประเมินทางวิศวกรรมหรือโครงสร้าง แบบติดตั้งขั้นสุดท้าย ใบเสนอราคา คำแนะนำทางการเงินหรือภาษี หรือการรับประกันความเหมาะสม ราคา การผลิตไฟฟ้า เงินที่ประหยัดได้ ระยะคืนทุน หรือมูลค่าทรัพย์สิน ผลจริงขึ้นอยู่กับสภาพพื้นที่ การออกแบบ อุปกรณ์ การใช้งาน อัตราค่าไฟ การบำรุงรักษา และปัจจัยอื่น ควรรับการประเมินจากผู้เชี่ยวชาญและใบเสนอราคาเป็นลายลักษณ์อักษรก่อนตัดสินใจติดตั้ง"
+            },
+            {
+              "en": "Unless a result expressly states otherwise, export income, tax relief, financing costs and future electricity-price changes are excluded from the estimate. Any government benefit or utility programme is subject to its current rules and individual approval where required.",
+              "th": "เว้นแต่ผลประเมินจะระบุไว้อย่างชัดแจ้ง ผลประเมินไม่รวมรายได้จากการขายไฟส่วนเกิน สิทธิประโยชน์ทางภาษี ต้นทุนทางการเงิน และการเปลี่ยนแปลงราคาค่าไฟในอนาคต สิทธิประโยชน์ของรัฐหรือโครงการของการไฟฟ้าขึ้นอยู่กับเงื่อนไขที่ใช้บังคับและการอนุมัติรายกรณีเมื่อกำหนดให้ต้องได้รับอนุมัติ"
+            }
+          ]
+        },
+        {
+          "id": "eligibility",
+          "title": {
+            "en": "Contact requests and eligibility",
+            "th": "การขอรับการติดต่อและคุณสมบัติ"
+          },
+          "paragraphs": [
+            {
+              "en": "Our contact-request service is for people aged at least 20 who own the property or are authorised by the owner. Give accurate information and your own contact details. Do not impersonate another person or disclose another person's information without authority.",
+              "th": "บริการขอรับการติดต่อมีไว้สำหรับผู้มีอายุอย่างน้อย 20 ปีซึ่งเป็นเจ้าของทรัพย์สินหรือได้รับอนุญาตจากเจ้าของ โปรดให้ข้อมูลที่ถูกต้องและข้อมูลติดต่อของตนเอง ห้ามแอบอ้างเป็นผู้อื่นหรือเปิดเผยข้อมูลของผู้อื่นโดยไม่มีอำนาจ"
+            },
+            {
+              "en": "If you separately request and consent to contact, we may send relevant information to up to three participating installation companies. The request is shared, not exclusive. We identify the recipients in a confirmation to you. Fewer than three companies, or none, may be available. You can receive the estimate without requesting contact. Consent withdrawal and privacy rights are explained in the Privacy Notice.",
+              "th": "หากคุณแยกขอรับการติดต่อและให้ความยินยอม เราอาจส่งข้อมูลที่เกี่ยวข้องให้บริษัทติดตั้งที่เข้าร่วมไม่เกินสามบริษัท คำขออาจถูกส่งให้หลายบริษัทและไม่ได้สงวนไว้สำหรับบริษัทเดียว เราจะแจ้งผู้รับข้อมูลในการยืนยันที่ส่งให้คุณ อาจมีบริษัทที่พร้อมรับคำขอน้อยกว่าสามบริษัทหรือไม่มีเลย คุณสามารถรับผลประเมินโดยไม่ขอรับการติดต่อได้ การถอนความยินยอมและสิทธิด้านข้อมูลส่วนบุคคลอธิบายไว้ในประกาศความเป็นส่วนตัว"
+            }
+          ]
+        },
+        {
+          "id": "independent",
+          "title": {
+            "en": "Installer responsibility",
+            "th": "ความรับผิดชอบของบริษัทติดตั้ง"
+          },
+          "paragraphs": [
+            {
+              "en": "Participating installers are independent businesses. Their participation is not government accreditation, a guarantee of workmanship or a promise that they suit every project. Any participation checks are limited to the checks actually described by SolarMatch.",
+              "th": "บริษัทติดตั้งที่เข้าร่วมเป็นธุรกิจอิสระ การเข้าร่วมไม่ใช่การรับรองจากรัฐ การรับประกันคุณภาพงาน หรือคำรับรองว่าเหมาะกับทุกโครงการ การตรวจสอบเพื่อเข้าร่วมมีขอบเขตเฉพาะการตรวจสอบที่ SolarMatch ระบุว่าได้ดำเนินการจริง"
+            },
+            {
+              "en": "The installer is responsible for its site assessment, advice, design, quotation, licensing and professional requirements, installation, permits within its agreed scope, warranties and after-sales service. Check the proposed scope, credentials, price, payment terms and warranties before contracting. Your installation or financing contract is with the relevant provider, not SolarMatch, unless a separate written agreement expressly provides otherwise. SolarMatch remains responsible for its own service and legal obligations.",
+              "th": "บริษัทติดตั้งรับผิดชอบการสำรวจ คำแนะนำ การออกแบบ การเสนอราคา ใบอนุญาตและข้อกำหนดวิชาชีพ การติดตั้ง การขออนุญาตภายในขอบเขตที่ตกลง การรับประกัน และบริการหลังการขายของตน โปรดตรวจสอบขอบเขตงาน คุณสมบัติ ราคา เงื่อนไขชำระเงิน และการรับประกันก่อนทำสัญญา สัญญาติดตั้งหรือสินเชื่อเป็นสัญญาระหว่างคุณกับผู้ให้บริการที่เกี่ยวข้อง ไม่ใช่ SolarMatch เว้นแต่จะระบุไว้ชัดเจนในข้อตกลงแยกต่างหากเป็นลายลักษณ์อักษร SolarMatch ยังคงรับผิดชอบบริการและหน้าที่ตามกฎหมายของตน"
+            }
+          ]
+        },
+        {
+          "id": "use",
+          "title": {
+            "en": "Acceptable use and intellectual property",
+            "th": "การใช้งานที่ยอมรับได้และทรัพย์สินทางปัญญา"
+          },
+          "paragraphs": [
+            {
+              "en": "Do not submit false or unlawful information, harass others, misuse personal data, interfere with the service, attempt unauthorised access, distribute malicious material or obtain protected data without permission. We may proportionately restrict access or reject requests connected with abuse, fraud or security threats.",
+              "th": "ห้ามส่งข้อมูลเท็จหรือผิดกฎหมาย คุกคามผู้อื่น ใช้ข้อมูลส่วนบุคคลโดยมิชอบ รบกวนบริการ พยายามเข้าถึงโดยไม่ได้รับอนุญาต เผยแพร่สิ่งที่เป็นอันตรายต่อระบบ หรือได้มาซึ่งข้อมูลที่ได้รับการคุ้มครองโดยไม่มีสิทธิ เราอาจจำกัดการเข้าถึงหรือปฏิเสธคำขอที่เกี่ยวข้องกับการใช้งานมิชอบ การทุจริต หรือภัยด้านความปลอดภัยอย่างได้สัดส่วน"
+            },
+            {
+              "en": "SolarMatch and third-party materials remain protected to the extent provided by law and applicable licences. You may use the service for lawful personal planning. These terms do not grant rights to commercially reproduce protected materials, and do not restrict rights or exceptions provided by law.",
+              "th": "เนื้อหาของ SolarMatch และบุคคลภายนอกยังคงได้รับการคุ้มครองตามกฎหมายและสิทธิการใช้งานที่เกี่ยวข้อง คุณอาจใช้บริการเพื่อการวางแผนส่วนบุคคลโดยชอบด้วยกฎหมาย ข้อกำหนดนี้ไม่ได้ให้สิทธิทำซ้ำเนื้อหาที่ได้รับการคุ้มครองเพื่อการค้า และไม่จำกัดสิทธิหรือข้อยกเว้นที่กฎหมายให้ไว้"
+            }
+          ]
+        },
+        {
+          "id": "liability",
+          "title": {
+            "en": "Availability and responsibility",
+            "th": "ความพร้อมและความรับผิด"
+          },
+          "paragraphs": [
+            {
+              "en": "We may maintain, update or suspend the service and do not guarantee uninterrupted availability. Changes do not remove accrued rights or obligations. An estimate does not make SolarMatch responsible for an independent installer's contract or workmanship, but nothing in these terms excludes or limits liability for our own fraud, gross negligence, or any responsibility or consumer right that cannot lawfully be excluded or limited. Any limitation applies only to the extent permitted by Thai law.",
+              "th": "เราอาจบำรุงรักษา ปรับปรุง หรือระงับบริการ และไม่รับประกันว่าจะให้บริการได้โดยไม่หยุดชะงัก การเปลี่ยนแปลงไม่ลบล้างสิทธิหรือหน้าที่ที่เกิดขึ้นแล้ว ผลประเมินไม่ได้ทำให้ SolarMatch ต้องรับผิดชอบสัญญาหรือคุณภาพงานของบริษัทติดตั้งอิสระ แต่ไม่มีข้อความใดในข้อกำหนดนี้ยกเว้นหรือจำกัดความรับผิดจากการฉ้อฉลหรือความประมาทเลินเล่ออย่างร้ายแรงของเราเอง หรือความรับผิดและสิทธิผู้บริโภคที่กฎหมายไม่อนุญาตให้ยกเว้นหรือจำกัด ข้อจำกัดความรับผิดใดใช้ได้เพียงเท่าที่กฎหมายไทยอนุญาต"
+            }
+          ]
+        },
+        {
+          "id": "law",
+          "title": {
+            "en": "Complaints, changes and applicable law",
+            "th": "ข้อร้องเรียน การเปลี่ยนแปลง และกฎหมายที่ใช้บังคับ"
+          },
+          "paragraphs": [
+            {
+              "en": "For a service complaint, contact [GENERAL_EMAIL]. For personal data matters, contact [PRIVACY_EMAIL]. We will review the issue and explain our response. Privacy complaints are not subject to the installer credit-claim deadline.",
+              "th": "หากมีข้อร้องเรียนเกี่ยวกับบริการ โปรดติดต่อ [GENERAL_EMAIL] เรื่องข้อมูลส่วนบุคคลโปรดติดต่อ [PRIVACY_EMAIL] เราจะพิจารณาประเด็นและชี้แจงคำตอบ ข้อร้องเรียนด้านความเป็นส่วนตัวไม่อยู่ภายใต้กำหนดเวลาขอคืนเครดิตของบริษัทติดตั้ง"
+            },
+            {
+              "en": "These terms are governed by Thai law, subject to mandatory rights and applicable jurisdiction rules. We identify the effective date and version of changes. Material changes apply prospectively and do not retrospectively expand consent or remove accrued rights. English and Thai versions are intended to have the same meaning; please report a discrepancy so we can resolve it consistently with applicable law.",
+              "th": "ข้อกำหนดนี้อยู่ภายใต้กฎหมายไทย โดยไม่กระทบสิทธิที่กฎหมายบังคับคุ้มครองและหลักเกณฑ์เขตอำนาจศาลที่ใช้บังคับ เราจะระบุวันที่มีผลและฉบับเมื่อมีการเปลี่ยนแปลง การเปลี่ยนแปลงสาระสำคัญมีผลสำหรับอนาคต ไม่ขยายความยินยอมย้อนหลังหรือยกเลิกสิทธิที่เกิดขึ้นแล้ว ฉบับภาษาไทยและภาษาอังกฤษมีเจตนาให้มีความหมายตรงกัน หากพบความแตกต่าง โปรดแจ้งเราเพื่อแก้ไขให้สอดคล้องกับกฎหมายที่ใช้บังคับ"
+            }
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "type": "cookies",
+      "title": {
+        "en": "Cookie and Browser Storage Policy",
+        "th": "นโยบายคุกกี้และพื้นที่จัดเก็บของเบราว์เซอร์"
+      },
+      "lastUpdatedLabel": {
+        "en": "Effective date",
+        "th": "มีผลใช้บังคับวันที่"
+      },
+      "effectiveDate": null,
+      "pendingLegalReview": true,
+      "version": "[VERSION]",
+      "sections": [
+        {
+          "id": "scope",
+          "title": {
+            "en": "What this policy covers",
+            "th": "ขอบเขตของนโยบาย"
+          },
+          "paragraphs": [
+            {
+              "en": "This policy explains cookies, browser storage and similar technologies used by SolarMatch, operated by [COMPANY_EN]. The Privacy Notice explains who we are, personal data processing and your rights.",
+              "th": "นโยบายนี้อธิบายคุกกี้ พื้นที่จัดเก็บของเบราว์เซอร์ และเทคโนโลยีคล้ายกันที่ SolarMatch ซึ่งดำเนินการโดย [COMPANY_TH] ใช้งาน ประกาศความเป็นส่วนตัวอธิบายผู้ดำเนินการ การประมวลผลข้อมูลส่วนบุคคล และสิทธิของคุณ"
+            }
+          ]
+        },
+        {
+          "id": "necessary",
+          "title": {
+            "en": "Necessary technologies",
+            "th": "เทคโนโลยีที่จำเป็น"
+          },
+          "paragraphs": [
+            {
+              "en": "We and our infrastructure providers, including Cloudflare, may use necessary cookies, tokens and technical identifiers to deliver and secure the website, maintain session integrity and prevent abuse. Technical information may be transmitted while you browse; it is not limited to information sent with a contact request.",
+              "th": "เราและผู้ให้บริการโครงสร้างพื้นฐาน รวมถึง Cloudflare อาจใช้คุกกี้ โทเคน และตัวระบุทางเทคนิคที่จำเป็นเพื่อให้บริการและรักษาความปลอดภัยของเว็บไซต์ รักษาความถูกต้องของเซสชัน และป้องกันการใช้งานมิชอบ ข้อมูลทางเทคนิคอาจถูกส่งระหว่างที่คุณเข้าชมเว็บไซต์ ไม่ได้จำกัดเฉพาะข้อมูลที่ส่งพร้อมคำขอรับการติดต่อ"
+            }
+          ]
+        },
+        {
+          "id": "functional",
+          "title": {
+            "en": "Assessment and form storage",
+            "th": "การจัดเก็บแบบประเมินและแบบฟอร์ม"
+          },
+          "paragraphs": [
+            {
+              "en": "We use browser session storage to preserve assessment answers, language, progress, selected information and results. Depending on the stage of the form, stored assessment data may include contact-request and consent choices. Form values may also be held in memory while the form is open. Location and assessment information can be personal data; browser storage should not be assumed to be anonymous.",
+              "th": "เราใช้ session storage ของเบราว์เซอร์เพื่อเก็บคำตอบแบบประเมิน ภาษา ความคืบหน้า ข้อมูลที่เลือก และผลประเมิน ข้อมูลแบบประเมินที่จัดเก็บอาจรวมตัวเลือกการขอรับการติดต่อและความยินยอม ขึ้นอยู่กับขั้นตอนของแบบฟอร์ม ข้อมูลในแบบฟอร์มอาจอยู่ในหน่วยความจำขณะที่แบบฟอร์มยังเปิดอยู่ด้วย ข้อมูลที่ตั้งและแบบประเมินอาจเป็นข้อมูลส่วนบุคคล จึงไม่ควรถือว่าข้อมูลในพื้นที่จัดเก็บของเบราว์เซอร์ไม่สามารถระบุตัวบุคคลได้เสมอไป"
+            },
+            {
+              "en": "Session storage normally lasts for the page's browser session, although browser restoration features can preserve it. You can clear site data through browser settings. Clearing necessary storage can reset your assessment or remove saved results. Take care when using a shared device.",
+              "th": "โดยปกติ session storage จะคงอยู่ตลอดเซสชันของหน้าเว็บนั้น แต่ฟังก์ชันกู้คืนเซสชันของเบราว์เซอร์อาจเก็บข้อมูลไว้ต่อ คุณสามารถล้างข้อมูลเว็บไซต์ผ่านการตั้งค่าเบราว์เซอร์ การล้างพื้นที่จัดเก็บที่จำเป็นอาจทำให้แบบประเมินเริ่มใหม่หรือผลที่บันทึกไว้หายไป โปรดระมัดระวังเมื่อใช้อุปกรณ์ร่วมกับผู้อื่น"
+            }
+          ]
+        },
+        {
+          "id": "maps",
+          "title": {
+            "en": "Optional maps and external websites",
+            "th": "แผนที่ที่เลือกเปิดและเว็บไซต์ภายนอก"
+          },
+          "paragraphs": [
+            {
+              "en": "Opening the optional map loads map tiles from OpenStreetMap. The map provider receives technical request information such as your IP address and browser headers. The current map does not send typed address text to an external geocoding service. External links take you to websites with their own privacy and cookie practices.",
+              "th": "เมื่อเปิดแผนที่ที่เป็นทางเลือก เว็บไซต์จะโหลดภาพแผนที่จาก OpenStreetMap ผู้ให้บริการแผนที่จะได้รับข้อมูลทางเทคนิคของคำขอ เช่น IP และส่วนหัวของเบราว์เซอร์ แผนที่ที่ใช้อยู่ในปัจจุบันไม่ส่งข้อความที่อยู่ซึ่งพิมพ์ไว้ไปยังบริการแปลงที่อยู่เป็นพิกัดภายนอก ลิงก์ภายนอกจะนำไปยังเว็บไซต์ที่มีแนวทางด้านความเป็นส่วนตัวและคุกกี้ของตนเอง"
+            }
+          ]
+        },
+        {
+          "id": "analytics",
+          "title": {
+            "en": "Optional analytics and advertising",
+            "th": "การวิเคราะห์และโฆษณาที่เป็นทางเลือก"
+          },
+          "paragraphs": [
+            {
+              "en": "The public website currently does not use optional analytics, advertising or retargeting cookies. If we introduce optional tracking, we will update this policy and provide any choices and prior consent required by applicable law before activating the relevant technology. Consent to installer contact does not by itself authorise advertising tracking, remarketing or disclosure for unrelated advertising.",
+              "th": "ขณะนี้เว็บไซต์สาธารณะไม่ใช้คุกกี้วิเคราะห์ โฆษณา หรือโฆษณาติดตามที่เป็นทางเลือก หากเราเพิ่มการติดตามที่เป็นทางเลือก เราจะปรับปรุงนโยบายนี้และจัดให้มีตัวเลือกและความยินยอมล่วงหน้าตามที่กฎหมายกำหนดก่อนเปิดใช้เทคโนโลยีที่เกี่ยวข้อง ความยินยอมให้บริษัทติดตั้งติดต่อกลับไม่ได้อนุญาตโดยตัวมันเองให้ติดตามเพื่อโฆษณา ทำการตลาดติดตาม หรือเปิดเผยข้อมูลเพื่อโฆษณาที่ไม่เกี่ยวข้อง"
+            }
+          ]
+        },
+        {
+          "id": "contact",
+          "title": {
+            "en": "Questions and changes",
+            "th": "คำถามและการเปลี่ยนแปลง"
+          },
+          "paragraphs": [
+            {
+              "en": "Browser settings can restrict or remove cookies and site storage, but this may affect functionality. For questions, contact [PRIVACY_EMAIL]. The effective date and version identify the current policy.",
+              "th": "คุณสามารถจำกัดหรือลบคุกกี้และข้อมูลเว็บไซต์ผ่านการตั้งค่าเบราว์เซอร์ แต่อาจกระทบการทำงาน หากมีคำถาม โปรดติดต่อ [PRIVACY_EMAIL] วันที่มีผลและฉบับที่ระบุแสดงนโยบายปัจจุบัน"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "prelaunchNotice": {
+    "en": "SolarMatch is preparing its installer referral service. The free calculator is available, but we are not currently accepting homeowner contact requests or installer credit purchases through this website. The referral and credit provisions in our legal documents describe the planned service and apply only when that service becomes available and the relevant request or agreement is made.",
+    "th": "SolarMatch อยู่ระหว่างเตรียมเปิดบริการส่งต่อคำขอให้บริษัทติดตั้งโซลาร์ คุณสามารถใช้เครื่องคำนวณได้ฟรี แต่ขณะนี้เว็บไซต์ยังไม่เปิดรับคำขอให้บริษัทติดตั้งติดต่อกลับหรือการซื้อเครดิตจากบริษัทติดตั้ง ข้อกำหนดเกี่ยวกับการส่งต่อคำขอและเครดิตในเอกสารทางกฎหมายอธิบายบริการที่วางแผนไว้ และจะใช้เมื่อบริการนั้นเปิดให้ใช้งานและมีการส่งคำขอหรือทำข้อตกลงที่เกี่ยวข้องแล้วเท่านั้น"
+  },
+  "disclosures": {
+    "operator": {
+      "en": "SolarMatch Thailand is operated by [COMPANY_EN], company registration number [REGISTRATION_NUMBER], registered address [ADDRESS_EN]. General enquiries: [GENERAL_EMAIL]. Privacy and consent withdrawal: [PRIVACY_EMAIL].",
+      "th": "SolarMatch Thailand ดำเนินการโดย [COMPANY_TH] เลขทะเบียนนิติบุคคล [REGISTRATION_NUMBER] สำนักงานจดทะเบียนตั้งอยู่ที่ [ADDRESS_TH] สอบถามทั่วไป: [GENERAL_EMAIL] เรื่องความเป็นส่วนตัวและการถอนความยินยอม: [PRIVACY_EMAIL]"
+    },
+    "estimate": {
+      "en": "This is a preliminary planning estimate, not a quotation, engineering design, site assessment or guarantee of savings. An independent installer must confirm suitability, design, price and installation terms. SolarMatch provides information and referrals and earns fees from participating installers for delivered enquiries. You can receive this estimate free of charge without requesting installer contact.",
+      "th": "นี่คือผลประเมินเบื้องต้นเพื่อวางแผน ไม่ใช่ใบเสนอราคา แบบทางวิศวกรรม การสำรวจหน้างาน หรือการรับประกันเงินที่ประหยัดได้ บริษัทติดตั้งอิสระต้องยืนยันความเหมาะสม การออกแบบ ราคา และเงื่อนไขติดตั้ง SolarMatch ให้ข้อมูลและส่งต่อคำขอ โดยได้รับค่าบริการจากบริษัทติดตั้งที่เข้าร่วมสำหรับคำขอที่ส่งให้ คุณสามารถรับผลประเมินนี้ได้ฟรีโดยไม่ขอรับการติดต่อจากบริษัทติดตั้ง"
+    },
+    "installerRole": {
+      "en": "No. SolarMatch provides a free preliminary estimate and an optional introduction to participating installation companies. If you request contact and consent, we may share your enquiry with up to three companies serving your area. They pay us for delivered enquiries. They are responsible for their own quotations, contracts, installation and warranties. SolarMatch does not guarantee a match, quotation or completed installation.",
+      "th": "ไม่ใช่ SolarMatch ให้ผลประเมินเบื้องต้นฟรีและบริการแนะนำบริษัทติดตั้งที่คุณเลือกใช้ได้ หากคุณขอรับการติดต่อและให้ความยินยอม เราอาจส่งคำขอให้บริษัทที่ให้บริการในพื้นที่ของคุณไม่เกินสามบริษัท บริษัทเหล่านั้นชำระค่าบริการให้เราสำหรับคำขอที่ได้รับ และรับผิดชอบการเสนอราคา สัญญา การติดตั้ง และการรับประกันของตน SolarMatch ไม่รับประกันว่าจะมีบริษัทที่ตรงกับคำขอ ได้รับใบเสนอราคา หรือเกิดการติดตั้ง"
+    },
+    "contactQuote": {
+      "en": "You can use the free calculator now. Installer contact requests are not yet available through this website. SolarMatch does not issue installation quotations itself.",
+      "th": "คุณสามารถใช้เครื่องคำนวณฟรีได้แล้ว ขณะนี้เว็บไซต์ยังไม่เปิดให้ขอรับการติดต่อจากบริษัทติดตั้ง SolarMatch ไม่ได้ออกใบเสนอราคาติดตั้งด้วยตนเอง"
+    },
+    "privacyRequests": {
+      "en": "For access, correction, deletion, objection, consent withdrawal or other personal data requests, email [PRIVACY_EMAIL]. Please provide enough information to identify the relevant request; do not send identity documents unless we explain why proportionate verification is necessary. For other service complaints, email [GENERAL_EMAIL]. The installer's 48-hour credit-claim window does not limit homeowner privacy rights or complaints.",
+      "th": "หากต้องการเข้าถึง แก้ไข ลบ คัดค้าน ถอนความยินยอม หรือใช้สิทธิอื่นเกี่ยวกับข้อมูลส่วนบุคคล โปรดส่งอีเมลไปที่ [PRIVACY_EMAIL] โปรดให้ข้อมูลเพียงพอที่จะระบุคำขอที่เกี่ยวข้อง และอย่าส่งเอกสารประจำตัวเว้นแต่เราจะอธิบายเหตุผลที่จำเป็นต้องตรวจสอบอย่างได้สัดส่วน ข้อร้องเรียนเกี่ยวกับบริการอื่นติดต่อ [GENERAL_EMAIL] กำหนดเวลา 48 ชั่วโมงสำหรับบริษัทติดตั้งขอคืนเครดิตไม่จำกัดสิทธิด้านข้อมูลส่วนบุคคลหรือข้อร้องเรียนของเจ้าของบ้าน"
+    },
+    "installerChecks": {
+      "en": "Participation in SolarMatch is not government accreditation or a guarantee of workmanship, price or suitability. Any participation checks are limited to those we actually describe. Before appointing an installer, check its relevant credentials, proposed design, quotation, contract and warranties.",
+      "th": "การเข้าร่วม SolarMatch ไม่ใช่การรับรองจากรัฐหรือการรับประกันคุณภาพงาน ราคา หรือความเหมาะสม การตรวจสอบเพื่อเข้าร่วมมีขอบเขตเฉพาะที่เราระบุว่าได้ดำเนินการจริง ก่อนเลือกบริษัทติดตั้ง ควรตรวจสอบคุณสมบัติที่เกี่ยวข้อง แบบที่เสนอ ใบเสนอราคา สัญญา และการรับประกัน"
+    },
+    "incentives": {
+      "en": "Subject to the applicable conditions, eligible individuals may deduct qualifying residential solar expenditure of up to ฿200,000 under the measure covering qualifying expenditure through 31 December 2028. This is not a ฿200,000 cash refund or a deduction directly from the tax payable. Eligibility depends on the applicable requirements, including grid connection and qualifying electronic tax-invoice documentation. Actual tax savings depend on the individual's tax position. Separately, qualifying projects approved under the relevant residential surplus-electricity programme may receive ฿2.20/kWh for a 10-year purchase term, subject to programme rules, capacity limits, available quota and utility approval. Neither benefit is automatic or included in this calculator's estimate. Check current Revenue Department and utility requirements before relying on either benefit.",
+      "th": "ภายใต้เงื่อนไขที่ใช้บังคับ บุคคลธรรมดาที่มีสิทธิอาจนำค่าใช้จ่ายติดตั้งโซลาร์สำหรับที่อยู่อาศัยที่เข้าเกณฑ์มาหักลดหย่อนในการคำนวณภาษีได้ตามที่จ่ายจริงไม่เกิน 200,000 บาท ตามมาตรการที่ครอบคลุมค่าใช้จ่ายที่เข้าเกณฑ์ถึงวันที่ 31 ธันวาคม 2571 สิทธินี้ไม่ใช่เงินคืน 200,000 บาทหรือการหักจำนวนดังกล่าวออกจากภาษีที่ต้องชำระโดยตรง การมีสิทธิขึ้นอยู่กับข้อกำหนดที่เกี่ยวข้อง รวมถึงการเชื่อมต่อระบบไฟฟ้าและเอกสารใบกำกับภาษีอิเล็กทรอนิกส์ที่เข้าเกณฑ์ จำนวนภาษีที่ประหยัดได้จริงขึ้นอยู่กับสถานะภาษีของแต่ละบุคคล ส่วนโครงการที่เข้าเกณฑ์และได้รับอนุมัติในโครงการรับซื้อไฟฟ้าส่วนเกินจากบ้านอยู่อาศัยที่เกี่ยวข้องอาจได้รับอัตรา 2.20 บาทต่อกิโลวัตต์ชั่วโมงเป็นระยะเวลารับซื้อ 10 ปี ทั้งนี้ขึ้นอยู่กับกติกาโครงการ ข้อจำกัดกำลังผลิต โควตาที่เหลือ และการอนุมัติของการไฟฟ้า สิทธิทั้งสองไม่เกิดขึ้นโดยอัตโนมัติและไม่รวมอยู่ในผลประเมินของเครื่องคำนวณนี้ โปรดตรวจสอบข้อกำหนดปัจจุบันของกรมสรรพากรและการไฟฟ้าก่อนนำสิทธิไปประกอบการตัดสินใจ"
+    },
+    "homeValue": {
+      "en": "Research on some U.S. housing markets found a sale-price premium associated with homeowner-owned solar systems. This does not establish a particular percentage increase, a result for Thailand or a guaranteed increase in your home's value.",
+      "th": "งานวิจัยในตลาดที่อยู่อาศัยบางแห่งของสหรัฐอเมริกาพบความสัมพันธ์ระหว่างระบบโซลาร์ที่เจ้าของบ้านเป็นเจ้าของกับราคาขายที่สูงขึ้น ข้อมูลนี้ไม่ได้ยืนยันอัตราการเพิ่มขึ้นเป็นเปอร์เซ็นต์ใดโดยเฉพาะ ไม่ใช่ผลวิจัยสำหรับประเทศไทย และไม่รับประกันว่ามูลค่าบ้านของคุณจะเพิ่มขึ้น"
+    }
+  },
+  "contactLaunch": {
+    "shortDisclosure": {
+      "en": "Your estimate is free. If you request installer contact, SolarMatch may share your name, chosen contact details, property location and relevant assessment answers with up to three participating installation companies serving your area. Those companies pay SolarMatch for delivered enquiries and may contact you about this solar request. We will tell you which companies receive it. You do not have to request contact or buy an installation. We cannot guarantee a match, response or quotation.",
+      "th": "ผลประเมินของคุณไม่มีค่าใช้จ่าย หากคุณขอรับการติดต่อ SolarMatch อาจเปิดเผยชื่อ ช่องทางติดต่อที่คุณเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของคุณไม่เกินสามบริษัท บริษัทเหล่านี้ชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ และอาจติดต่อคุณเกี่ยวกับคำขอโซลาร์นี้ เราจะแจ้งให้คุณทราบว่าบริษัทใดได้รับคำขอ คุณไม่จำเป็นต้องขอรับการติดต่อหรือซื้อบริการติดตั้ง เราไม่รับประกันว่าจะมีบริษัทที่ตรงกับคำขอ การตอบกลับ หรือการเสนอราคา"
+    },
+    "consent": {
+      "en": "I consent to [COMPANY_EN], operating SolarMatch, disclosing my name, chosen contact details, property location and relevant assessment answers to up to three participating installation companies serving my area, so they can assess and contact me about this residential solar request using my selected contact method. A new installer may receive my request only within [DISTRIBUTION_DAYS] days after submission. I understand that installers pay SolarMatch for delivered enquiries, that the request is shared, and that I can withdraw this consent at any time by contacting [PRIVACY_EMAIL]. I can receive the free estimate without giving this consent. Details are in the Privacy Notice.",
+      "th": "ฉันยินยอมให้ [COMPANY_TH] ผู้ดำเนินการ SolarMatch เปิดเผยชื่อ ช่องทางติดต่อที่ฉันเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของฉันไม่เกินสามบริษัท เพื่อประเมินและติดต่อฉันเกี่ยวกับคำขอโซลาร์สำหรับที่อยู่อาศัยนี้ผ่านวิธีติดต่อที่ฉันเลือก บริษัทติดตั้งรายใหม่จะได้รับคำขอของฉันได้เฉพาะภายใน [DISTRIBUTION_DAYS] วันนับจากวันที่ส่งคำขอ ฉันเข้าใจว่าบริษัทติดตั้งชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ คำขออาจถูกส่งให้หลายบริษัท และฉันสามารถถอนความยินยอมนี้ได้ทุกเมื่อโดยติดต่อ [PRIVACY_EMAIL] ฉันสามารถรับผลประเมินฟรีได้โดยไม่ให้ความยินยอมนี้ ดูรายละเอียดได้ในประกาศความเป็นส่วนตัว"
+    },
+    "adultConfirmation": {
+      "en": "I confirm that I am at least 20 years old, own this property or am authorised by its owner to make this request, and have provided my own accurate contact details.",
+      "th": "ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี เป็นเจ้าของทรัพย์สินนี้หรือได้รับอนุญาตจากเจ้าของให้ส่งคำขอนี้ และได้ให้ข้อมูลติดต่อของตนเองที่ถูกต้อง"
+    },
+    "termsNotice": {
+      "en": "By submitting this contact request, you agree to the Terms of Use. The separate consent choice above governs disclosure of your enquiry. The Privacy Notice explains how your information is handled.",
+      "th": "เมื่อส่งคำขอรับการติดต่อนี้ คุณตกลงตามข้อกำหนดการใช้บริการ ตัวเลือกความยินยอมแยกต่างหากข้างต้นใช้กับการเปิดเผยคำขอของคุณ ประกาศความเป็นส่วนตัวอธิบายวิธีจัดการข้อมูลของคุณ"
+    },
+    "yesLabel": {
+      "en": "Request contact from up to 3 installers",
+      "th": "ขอรับการติดต่อจากบริษัทติดตั้งไม่เกิน 3 บริษัท"
+    },
+    "noLabel": {
+      "en": "Continue without installer contact",
+      "th": "ดำเนินการต่อโดยไม่ขอให้บริษัทติดตั้งติดต่อ"
+    },
+    "requestReceipt": {
+      "en": "We have received your contact request. We will check it against our eligibility and matching criteria. If it is shared, we will tell you which installation companies receive it, up to a maximum of three. Submission does not guarantee a match or quotation. To withdraw your request or change your details, contact [PRIVACY_EMAIL].",
+      "th": "เราได้รับคำขอรับการติดต่อของคุณแล้ว เราจะตรวจสอบตามเกณฑ์คุณสมบัติและการจับคู่ หากมีการส่งต่อ เราจะแจ้งชื่อบริษัทติดตั้งที่ได้รับคำขอให้คุณทราบ โดยไม่เกินสามบริษัท การส่งคำขอไม่รับประกันว่าจะมีบริษัทที่ตรงกับคำขอหรือได้รับใบเสนอราคา หากต้องการถอนคำขอหรือแก้ไขข้อมูล โปรดติดต่อ [PRIVACY_EMAIL]"
+    },
+    "recipientConfirmation": {
+      "en": "Your request has been shared with: [ACTUAL_INSTALLER_NAMES]. These companies may contact you through [SELECTED_CONTACT_METHOD] about your solar request. This list shows the companies that have received the request so far; any further disclosure remains subject to your consent, the distribution window and the total limit of three companies. To stop further sharing or request help stopping contact, email [PRIVACY_EMAIL].",
+      "th": "คำขอของคุณได้ส่งให้: [ACTUAL_INSTALLER_NAMES] บริษัทเหล่านี้อาจติดต่อคุณผ่าน [SELECTED_CONTACT_METHOD] เกี่ยวกับคำขอโซลาร์ของคุณ รายชื่อนี้แสดงบริษัทที่ได้รับคำขอแล้วจนถึงขณะนี้ การเปิดเผยเพิ่มเติมยังต้องอยู่ภายใต้ความยินยอม ระยะเวลาส่งต่อ และจำนวนรวมไม่เกินสามบริษัท หากต้องการหยุดการส่งต่อเพิ่มเติมหรือขอความช่วยเหลือให้หยุดการติดต่อ โปรดส่งอีเมลไปที่ [PRIVACY_EMAIL]"
+    }
+  }
+}

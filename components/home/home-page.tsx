@@ -10,6 +10,7 @@ import { TerracePhoto } from '@/components/site/terrace-photo';
 import Link from '@/components/site/internal-link';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { localizedPath, type Locale } from '@/config/i18n';
+import { legalReviewDisclosures, prelaunchNotice } from '@/config/legal-review';
 
 type HomeCopy = {
   eyebrow: string;
@@ -53,12 +54,12 @@ const copy: Record<Locale, HomeCopy> = {
     eyebrow: 'ประเมิน Solar Rooftop สำหรับบ้านในไทย',
     titleLead: 'ค่าไฟบ้านคุณ',
     titleEmphasis: 'เหมาะกับโซลาร์แค่ไหน?',
-    lede: 'ตอบแบบประเมินที่เข้าใจง่าย แล้วเลือกว่าอยากรับใบเสนอราคาจากผู้ติดตั้งในพื้นที่หรือไม่ คุณจะได้รับผลประเมินครบถ้วนไม่ว่าจะเลือกแบบใด',
+    lede: 'ตอบแบบประเมินที่เข้าใจง่ายเพื่อรับผลประเมินเบื้องต้นฟรีสำหรับวางแผน โดยไม่ต้องให้ข้อมูลติดต่อ',
     photoAlt: 'แผงโซลาร์บนหลังคากระเบื้องของบ้านพักอาศัย โดยมีต้นปาล์มอยู่ด้านหลัง',
     photoCaption: 'ภาพโดย Kindel Media ผ่าน Pexels · ใช้ภายใต้สัญญาอนุญาต Pexels',
     example: 'ตัวอย่างผลเพื่อวางแผน',
     exampleNote: 'ไม่ใช่คำสัญญาหรือใบเสนอราคา',
-    trust: ['ให้ข้อมูลติดต่อเฉพาะเมื่อเลือกขอใบเสนอราคา', 'ไม่ต้องอัปโหลดบิล', 'ใช้แบบประเมินได้ฟรี'],
+    trust: ['ดูผลโดยไม่ต้องให้ข้อมูลติดต่อ', 'ไม่ต้องอัปโหลดบิล', 'ใช้แบบประเมินได้ฟรี'],
     introEyebrow: 'ก่อนขอราคา',
     introTitle: 'ควรรู้ก่อนว่าบ้านคุณอาจต้องการอะไร',
     introBody: 'SolarMatch จัดข้อมูลพื้นฐานให้เข้าใจง่าย เพื่อให้คุณคุยกับบริษัทโซลาร์ได้อย่างมีคำถามและไม่ต้องเริ่มจากศูนย์',
@@ -69,7 +70,7 @@ const copy: Record<Locale, HomeCopy> = {
     steps: [
       { title: 'ตอบจากสิ่งที่รู้', body: 'จังหวัด ค่าไฟ และรูปแบบการใช้ไฟช่วงกลางวัน โดยไม่ต้องอัปโหลดเอกสาร' },
       { title: 'เตรียมตัวเลขที่ใช้วางแผนได้', body: 'ระบบคำนวณขนาดระบบ ผลผลิต ราคา และเงินประหยัดเบื้องต้นพร้อมอธิบายที่มา' },
-      { title: 'เลือกขั้นตอนถัดไปด้วยตัวเอง', body: 'เลือกว่าจะขอใบเสนอราคาจากผู้ติดตั้งหรือไปดูผลประเมินทันทีโดยไม่ให้ข้อมูลติดต่อ' },
+      { title: 'เลือกขั้นตอนถัดไปด้วยตัวเอง', body: 'ดูผลประเมินครบถ้วนโดยไม่ให้ข้อมูลติดต่อ และเตรียมคำถามสำหรับการประเมินโดยผู้เชี่ยวชาญ' },
     ],
     previewEyebrow: 'ตัวอย่างการแสดงผล',
     previewTitle: 'เห็นความต่าง—พร้อมเห็นสมมติฐาน',
@@ -82,33 +83,33 @@ const copy: Record<Locale, HomeCopy> = {
     evidenceTitle: 'เชื่อมั่นในวิธีทำงาน ไม่ใช่คำอ้างความนิยม',
     evidenceBody: 'SolarMatch ไม่แสดงรีวิว จำนวนลูกค้า พันธมิตร หรือผลลัพธ์ที่ยังไม่มีหลักฐานตรวจสอบได้',
     evidence: [
-      { title: 'ข้อมูลติดต่อเป็นทางเลือก', body: 'เลือกไม่รับการติดต่อแล้วดูผลได้ทันที หรือเลือกขอใบเสนอราคาแล้วกรอกช่องทางที่สะดวก' },
+      { title: 'ไม่ต้องให้ข้อมูลติดต่อ', body: 'รับผลประเมินฟรีได้โดยไม่ต้องขอรับการติดต่อจากบริษัทติดตั้ง' },
       { title: 'สมมติฐานเปิดเผย', body: 'อัตรา ค่าใช้จ่าย และข้อจำกัดอยู่ใกล้กับผล ไม่ซ่อนในข้อความเล็ก' },
-      { title: 'ติดต่อกลับเฉพาะเมื่อยินยอม', body: 'แบบฟอร์มจะเปิดเมื่อคุณเลือกขอใบเสนอราคา และจะส่งข้อมูลเมื่อคุณให้ความยินยอมโดยชัดแจ้งพร้อมกดส่งเท่านั้น' },
+      { title: 'บริการส่งต่อที่วางแผนไว้', body: 'ขณะนี้เว็บไซต์ยังไม่เปิดรับคำขอให้บริษัทติดตั้งติดต่อกลับ' },
       { title: 'ไม่มีความเร่งด่วนปลอม', body: 'ไม่มีนาฬิกานับถอยหลัง โควตาปลอม หรือข้อความกดดัน' },
     ],
     faqEyebrow: 'คำถามที่พบบ่อย',
     faqTitle: 'เริ่มต้นได้โดยไม่ต้องรู้เรื่องโซลาร์มาก่อน',
     faq: [
       { question: 'ผลประเมินนี้แม่นแค่ไหน?', answer: 'เป็นการคัดกรองเบื้องต้นจากค่าไฟและพฤติกรรมการใช้ไฟ ความแม่นยำจะเพิ่มขึ้นเมื่อมีข้อมูลหลังคา โหลดไฟ และการสำรวจหน้างานจริง' },
-      { question: 'ต้องกรอกเบอร์ก่อนดูผลไหม?', answer: 'ไม่ต้อง หากเลือก “ไม่ใช่” คุณจะไปดูผลได้ทันทีโดยไม่ให้ข้อมูลติดต่อ หากเลือกขอใบเสนอราคา จึงจะมีแบบฟอร์มให้เลือกโทรศัพท์หรือ LINE ก่อนดูผล' },
-      { question: 'SolarMatch เป็นผู้ติดตั้งหรือไม่?', answer: 'ไม่ใช่ SolarMatch เป็นบริการให้ข้อมูลและแนะนำผู้ให้บริการ หากผู้ใช้ขอให้ติดต่อและให้ความยินยอมโดยชัดแจ้ง คำขออาจถูกส่งให้ผู้รับข้อมูลด้านบริการโซลาร์มากกว่าหนึ่งราย และ SolarMatch อาจได้รับค่าตอบแทนจากการเชื่อมโยงดังกล่าว' },
+      { question: 'ต้องกรอกเบอร์ก่อนดูผลไหม?', answer: 'ไม่ต้อง คุณสามารถดูผลประเมินฟรีได้โดยไม่ให้ข้อมูลติดต่อ ขณะนี้เว็บไซต์ยังไม่เปิดรับคำขอให้บริษัทติดตั้งติดต่อกลับ' },
+      { question: 'SolarMatch เป็นผู้ติดตั้งหรือไม่?', answer: legalReviewDisclosures.installerRole.th },
       { question: 'ตัวเลขระยะคืนทุนมาจากไหน?', answer: 'แบบจำลองใช้ไฟที่ผลิตและใช้เอง ราคาติดตั้งปัจจุบัน ค่าเสื่อมประสิทธิภาพ และเงินสำรองค่าดูแล โดยไม่นับรายได้ขายไฟ สิทธิภาษี เงินกู้ หรือค่าไฟที่เพิ่มขึ้น ตัวเลขจริงยังต้องยืนยันจากผู้ติดตั้งและข้อมูลบ้าน' },
     ],
     finalTitle: 'เริ่มเข้าใจว่าบ้านคุณอาจต้องการระบบแบบไหน',
-    finalBody: 'รับผลประเมินครบถ้วนไม่ว่าจะเลือกขอใบเสนอราคาหรือไม่',
+    finalBody: 'รับผลประเมินครบถ้วนฟรีโดยไม่ต้องให้ข้อมูลติดต่อ',
     finalCta: 'เริ่มประเมินฟรี',
   },
   en: {
     eyebrow: 'Rooftop solar estimates for homes in Thailand',
     titleLead: 'Is rooftop solar',
     titleEmphasis: 'a good fit for your home?',
-    lede: 'Complete a clear assessment, then choose whether you want real quotes from local installers. You receive the full estimate either way.',
+    lede: 'Complete a clear assessment to receive a free preliminary planning estimate without providing contact details.',
     photoAlt: 'Solar panels on a tiled residential roof with palm trees in the background',
     photoCaption: 'Photo by Kindel Media via Pexels · used under the Pexels licence',
     example: 'Example planning result',
     exampleNote: 'Not a promise or quotation',
-    trust: ['Contact details only if you request quotes', 'No bill upload required', 'Free assessment'],
+    trust: ['Results without contact details', 'No bill upload required', 'Free assessment'],
     introEyebrow: 'Before requesting a quote',
     introTitle: 'First understand what your home may actually need',
     introBody: 'SolarMatch organizes the basics in plain language, helping you ask better questions instead of starting from zero with a solar company.',
@@ -119,7 +120,7 @@ const copy: Record<Locale, HomeCopy> = {
     steps: [
       { title: 'Answer from what you know', body: 'Province, electricity bill, and daytime use—without uploading documents.' },
       { title: 'Prepare a practical planning figure', body: 'The assessment calculates a starting system, production, price, and savings figure with a traceable basis.' },
-      { title: 'Choose the next step yourself', body: 'Request real quotes and provide your preferred contact method, or continue straight to the full result without contact details.' },
+      { title: 'Choose the next step yourself', body: 'View the full estimate without contact details and prepare questions for a professional assessment.' },
     ],
     previewEyebrow: 'Example result',
     previewTitle: 'See the difference—and the assumptions behind it',
@@ -132,21 +133,21 @@ const copy: Record<Locale, HomeCopy> = {
     evidenceTitle: 'Trust the process, not popularity claims',
     evidenceBody: 'SolarMatch does not display testimonials, customer counts, partners, or outcomes that cannot be verified.',
     evidence: [
-      { title: 'Contact details are optional', body: 'Choose No to go straight to the full result, or request quotes and provide the contact method you prefer.' },
+      { title: 'No contact details required', body: 'Receive the free estimate without requesting installer contact.' },
       { title: 'Assumptions are visible', body: 'Rates, costs, and limitations sit close to the result instead of hiding in fine print.' },
-      { title: 'Contact only with consent', body: 'The form opens only after you request quotes. Your details are submitted only after you give explicit consent and press Submit.' },
+      { title: 'Planned referral service', body: 'This website is not currently accepting installer contact requests.' },
       { title: 'No manufactured urgency', body: 'No countdown timers, invented availability, or pressure messages.' },
     ],
     faqEyebrow: 'Frequently asked questions',
     faqTitle: 'Start without already knowing solar',
     faq: [
       { question: 'How accurate is this estimate?', answer: 'It is an initial screen based on electricity cost and usage patterns. Accuracy improves with roof, load, and site-survey information.' },
-      { question: 'Do I need to enter a phone number first?', answer: 'No. Choose No to continue straight to the result without contact details. If you request quotes, you can choose either phone or LINE before viewing the result.' },
-      { question: 'Is SolarMatch an installer?', answer: 'No. SolarMatch is an information and referral service. With an explicit contact request and consent, one enquiry may be shared with more than one solar-service recipient, and SolarMatch may receive payment for the connection.' },
+      { question: 'Do I need to enter a phone number first?', answer: 'No. You can receive the free estimate without contact details. This website is not currently accepting installer contact requests.' },
+      { question: 'Is SolarMatch an installer?', answer: legalReviewDisclosures.installerRole.en },
       { question: 'Where does the payback figure come from?', answer: 'The model values electricity produced and used on site, then includes current installation-price references, degradation, and a maintenance/component reserve. Export income, tax relief, finance, and tariff escalation stay outside the planning figure.' },
     ],
     finalTitle: 'Start understanding what kind of system your home may need',
-    finalBody: 'Receive the full result whether or not you request installer quotes.',
+    finalBody: 'Receive the full result free of charge without providing contact details.',
     finalCta: 'Start free estimate',
   },
 };
@@ -171,6 +172,7 @@ export function HomePage({ locale = 'th' }: { locale?: Locale }) {
       </section>
 
       <div className="terrace-promise-strip"><ul className="site-shell trust-list">{text.trust.map((item) => <li key={item}><Check size={16} aria-hidden="true" />{item}</li>)}</ul></div>
+      <div className="site-shell callout"><p>{prelaunchNotice[locale]}</p></div>
 
       <section className="value-intro"><div className="site-shell value-grid"><div><p className="eyebrow">{text.introEyebrow}</p><h2>{text.introTitle}</h2></div><div className="value-copy"><p>{text.introBody}</p><Link className="text-link" href={link('/how-it-works')}>{text.introLink} <ArrowRight size={18} aria-hidden="true" /></Link></div></div></section>
 

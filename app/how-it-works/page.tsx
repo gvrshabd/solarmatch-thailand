@@ -1,6 +1,7 @@
 import Link from '@/components/site/internal-link';
 import { ArrowRight, Calculator, ClipboardList, MessagesSquare } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
+import { prelaunchNotice } from '@/config/legal-review';
 import { thaiMetadata } from '@/lib/seo/localized-metadata';
 
 export const metadata = thaiMetadata('วิธีการทำงาน', '/how-it-works');
@@ -9,7 +10,7 @@ export default function HowItWorksPage() {
     <section className="site-shell numbered-sections">
       <article><span>01</span><ClipboardList /><div><h2>เล่าจากข้อมูลที่มี</h2><p>ตอบจังหวัด ค่าไฟ พฤติกรรมใช้ไฟ และข้อมูลหลังคาเท่าที่ทราบ ไม่ต้องเดาและไม่ต้องอัปโหลดเอกสาร</p></div></article>
       <article><span>02</span><Calculator /><div><h2>เตรียมตัวเลขเพื่อวางแผน</h2><p>คำตอบจากแบบประเมินจะนำไปคำนวณขนาดระบบเริ่มต้น ผลผลิต ราคา เงินประหยัด และระยะคืนทุน โดยมีวิธีคำนวณและแหล่งข้อมูลให้ตรวจสอบ</p></div></article>
-      <article><span>03</span><MessagesSquare /><div><h2>เลือกว่าจะขอใบเสนอราคาหรือไม่</h2><p>เลือกขอใบเสนอราคาและให้ช่องทางติดต่อที่สะดวก หรือไปดูผลประเมินครบถ้วนได้ทันทีโดยไม่ให้ข้อมูลติดต่อ</p></div></article>
+      <article><span>03</span><MessagesSquare /><div><h2>เตรียมขั้นตอนถัดไป</h2><p>ดูผลประเมินครบถ้วนได้โดยไม่ให้ข้อมูลติดต่อ เพื่อเตรียมคำถามก่อนรับการประเมินจากผู้เชี่ยวชาญ</p><p>{prelaunchNotice.th}</p></div></article>
     </section>
     <section className="content-cta"><div className="site-shell"><h2>พร้อมลองด้วยค่าไฟของคุณ?</h2><Link className="button" href="/estimate">เริ่มประเมิน <ArrowRight size={18} /></Link></div></section>
   </main>;

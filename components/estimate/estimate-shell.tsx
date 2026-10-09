@@ -15,6 +15,7 @@ import Link from '@/components/site/internal-link';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
 import { initialQuestionnaire } from '@/config/assessment';
 import { lockedSharedConsentCopy } from '@/config/contact-content';
+import { prelaunchNotice } from '@/config/legal-review';
 import { localizedDistrictOptions } from '@/config/districts';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { provinceOptions } from '@/config/provinces';
@@ -525,7 +526,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       </div>}
       {question.type === 'multichoice' && <div className="choice-grid multichoice-grid" aria-labelledby="estimate-question">{question.options?.map((option) => { const checked = draft.daytimeLoads?.includes(option.value as DaytimeLoad) ?? false; const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="checkbox" aria-checked={checked} className={`choice-card visual-choice ${checked ? 'selected' : ''}`} onClick={() => toggleDaytimeLoad(option.value as DaytimeLoad)}><Icon className="choice-icon" aria-hidden="true" /><strong>{option.label[locale]}</strong><span className="choice-indicator checkbox-indicator" aria-hidden="true">{checked && <Check />}</span></button>; })}</div>}
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
-      {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{english ? 'Contact requests are currently unavailable. You can still view your full estimate without providing contact details.' : 'ขณะนี้ยังไม่สามารถรับคำขอให้ติดต่อกลับได้ คุณยังดูผลประเมินฉบับเต็มได้โดยไม่ต้องให้ข้อมูลติดต่อ'}</p>}
+      {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
       <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{(contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
     </ScreenTransition></fieldset>

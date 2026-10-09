@@ -4,7 +4,7 @@ import Link from '@/components/site/internal-link';
 import { usePathname } from 'next/navigation';
 import { BrandMark } from './brand-mark';
 import { isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
-import { OperatorDisclosure } from '@/components/content/operator-disclosure';
+import { legalReviewDisclosures, prelaunchNotice } from '@/config/legal-review';
 
 export function SiteFooter() {
   const pathname = usePathname();
@@ -20,7 +20,7 @@ export function SiteFooter() {
       <div className="site-shell footer-grid">
         <div className="footer-brand">
           <BrandMark />
-          <p>{english ? 'A residential solar assessment for Thai homeowners, with useful results before optional contact.' : 'แบบประเมินโซลาร์สำหรับเจ้าของบ้านในไทย แสดงผลที่เป็นประโยชน์ก่อนเลือกให้ติดต่อกลับ'}</p>
+          <p>{english ? 'A free residential solar planning estimate for Thai homeowners.' : 'ผลประเมินโซลาร์เบื้องต้นฟรีเพื่อวางแผนสำหรับเจ้าของบ้านในไทย'}</p>
         </div>
         <div>
           <h2>{english ? 'Get started' : 'เริ่มต้น'}</h2>
@@ -37,12 +37,12 @@ export function SiteFooter() {
         <div>
           <h2>{english ? 'Legal' : 'ข้อกำหนด'}</h2>
           <Link href={link('/privacy')}>{english ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว'}</Link>
-          <Link href={link('/terms')}>{english ? 'Terms of use' : 'ข้อกำหนดการใช้งาน'}</Link>
-          <Link href={link('/cookies')}>{english ? 'Cookies' : 'คุกกี้'}</Link>
+          <Link href={link('/terms')}>{english ? 'Terms of Use' : 'ข้อกำหนดการใช้บริการ'}</Link>
+          <Link href={link('/cookies')}>{english ? 'Cookie and Browser Storage Policy' : 'นโยบายคุกกี้และพื้นที่จัดเก็บของเบราว์เซอร์'}</Link>
         </div>
       </div>
       <div className="site-shell footer-bottom">
-        <div><span>{english ? 'All figures are preliminary estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา'}</span><OperatorDisclosure locale={locale} variant="footer" /></div>
+        <div><span>{english ? 'All figures are preliminary estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา'}</span><p>{prelaunchNotice[locale]}</p><p>{legalReviewDisclosures.operator[locale]}</p></div>
       </div>
     </footer>
   );

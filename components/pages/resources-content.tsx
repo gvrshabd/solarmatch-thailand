@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { ExternalLink } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
 import { initialLoadingFactSet } from '@/config/loading-facts';
+import legalReviewCopy from '@/config/legal-review-copy.json';
 import type { Locale } from '@/config/i18n';
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
 import { getCurrentRelease, getPublishedLoadingFacts } from '@/lib/server/releases';
@@ -9,9 +10,9 @@ import { getCurrentRelease, getPublishedLoadingFacts } from '@/lib/server/releas
 const resources = {
   th: [
     { name: 'PEA · รายละเอียดโครงการรับซื้อไฟส่วนเกิน', note: 'อัตรา 2.20 บาท/kWh, ระยะเวลา 10 ปี, เพดานส่งออก 5 kW AC และเงื่อนไขโครงการ', href: 'https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766' },
-    { name: 'PEA · ข่าวเปิดรับสมัครโครงการ', note: 'ประกาศเปิดรับสมัครสำหรับบ้านอยู่อาศัยประเภท 1 ตั้งแต่ 1 กรกฎาคม 2569', href: 'https://www.pea.co.th/news/corporate-news/2137' },
+    { name: 'คำถามและคำตอบของ กฟภ. เกี่ยวกับโครงการโซลาร์ภาคประชาชน', note: 'คำอธิบายโครงการสำหรับบ้านอยู่อาศัย ไม่ใช่ตัวบทกติกาโครงการ', href: 'https://www.pea.co.th/news/corporate-news/2137' },
     { name: 'MEA · รายละเอียดโครงการ My Energy', note: 'เงื่อนไขสมัคร ข้อกำหนดระบบ และการจำกัดกำลังส่งออกในพื้นที่ MEA', href: 'https://myenergy.mea.or.th/project/6a38ac8d329d02001dd7024e' },
-    { name: 'สำนักงาน กกพ. · ประกาศโครงการ (PDF)', note: 'กรอบกำกับ โควตา และเงื่อนไขการรับซื้อไฟส่วนเกิน', href: 'https://erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202606/m_news/9090/3441/file_download/ae5c0f3369d23b692064262036b1725f.pdf' },
+    { name: 'ประกาศข่าวของ กกพ. เกี่ยวกับโครงการโซลาร์ภาคประชาชนปี 2569', note: 'ข่าวประชาสัมพันธ์ (PDF) ไม่ใช่ตัวบทกติกาโครงการที่มีผลผูกพัน', href: 'https://erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202606/m_news/9090/3441/file_download/ae5c0f3369d23b692064262036b1725f.pdf' },
     { name: 'กรมสรรพากร · พระราชกฤษฎีกาฉบับที่ 805 (PDF)', note: 'ตัวบทสิทธิยกเว้นภาษีเงินได้บุคคลธรรมดาสำหรับโซลาร์บนหลังคา', href: 'https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dc805.pdf' },
     { name: 'PEA · อัตราค่าไฟฟ้า พฤษภาคม 2566 (PDF)', note: 'อัตราฐานบ้านอยู่อาศัยที่ใช้อ้างอิง ณ สิงหาคม 2569', href: 'https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf' },
     { name: 'PEA · อัตราค่าไฟฟ้า กันยายน 2569 (PDF)', note: 'โครงสร้างอัตราบ้านอยู่อาศัยที่ประกาศให้มีผลตั้งแต่กันยายน 2569', href: 'https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf' },
@@ -22,9 +23,9 @@ const resources = {
   ],
   en: [
     { name: 'PEA · Surplus-purchase programme details', note: '฿2.20/kWh rate, 10-year term, 5 kW AC export limit, and programme conditions', href: 'https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766' },
-    { name: 'PEA · Programme opening announcement', note: 'Opening for Type 1 residential applicants from 1 July 2026', href: 'https://www.pea.co.th/news/corporate-news/2137' },
+    { name: 'PEA questions and answers about the residential solar programme', note: 'Residential programme explanations, rather than the binding programme rules', href: 'https://www.pea.co.th/news/corporate-news/2137' },
     { name: 'MEA · My Energy programme details', note: 'Application, system, and export-control conditions within the MEA service area', href: 'https://myenergy.mea.or.th/project/6a38ac8d329d02001dd7024e' },
-    { name: 'Energy Regulatory Commission · Programme notice (PDF)', note: 'Regulatory framework, quota, and conditions for surplus purchases', href: 'https://erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202606/m_news/9090/3441/file_download/ae5c0f3369d23b692064262036b1725f.pdf' },
+    { name: 'ERC announcement about the 2026 residential solar programme', note: 'News release (PDF), rather than the binding programme regulation', href: 'https://erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202606/m_news/9090/3441/file_download/ae5c0f3369d23b692064262036b1725f.pdf' },
     { name: 'Revenue Department · Royal Decree No. 805 (PDF)', note: 'Legal text for the personal-income-tax treatment of qualifying rooftop solar', href: 'https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dc805.pdf' },
     { name: 'PEA · May 2023 electricity tariff (PDF)', note: 'Base residential tariff referenced for August 2026', href: 'https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf' },
     { name: 'PEA · September 2026 electricity tariff (PDF)', note: 'Residential tariff structure announced to take effect from September 2026', href: 'https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf' },
@@ -36,7 +37,7 @@ const resources = {
 } satisfies Record<Locale, Array<{ name: string; note: string; href: string }>>;
 
 function builtInFacts(): PublicLoadingFact[] {
-  return initialLoadingFactSet.facts.map((fact) => ({ ...fact, imageUrl: `/images/loading-facts/${fact.sketchId}.svg` }));
+  return initialLoadingFactSet.facts.filter((fact) => fact.enabled).map((fact) => ({ ...fact, imageUrl: `/images/loading-facts/${fact.sketchId}.svg` }));
 }
 
 async function publishedFacts() {
@@ -56,7 +57,7 @@ export async function ResourcesContent({ locale }: { locale: Locale }) {
       </PageHero>
       <section className="site-shell resource-list">
         {resources[locale].map((resource) => <a key={resource.name} href={resource.href} target="_blank" rel="noopener noreferrer" aria-label={`${resource.name} (${english ? 'opens in a new tab' : 'เปิดในแท็บใหม่'})`}><div><h2>{resource.name}</h2><p>{resource.note}</p></div><ExternalLink size={20} aria-hidden="true" /></a>)}
-        <div className="callout"><strong>{english ? 'Reference status' : 'สถานะการอ้างอิง'}</strong><p>{english ? 'The base result values electricity used within the home first. Surplus-purchase income and tax treatment are excluded because quota, approval, eligibility, and each household’s tax position require separate checks.' : 'ผลหลักคำนวณจากไฟที่ผลิตแล้วใช้เองก่อน รายได้จากไฟส่วนเกินและสิทธิภาษีไม่ถูกบวกเข้าไป เพราะต้องตรวจโควตา การอนุมัติ คุณสมบัติ และสถานการณ์ภาษีของแต่ละบ้าน'}</p></div>
+        <div className="callout"><strong>{english ? 'Reference status' : 'สถานะการอ้างอิง'}</strong><p>{legalReviewCopy.disclosures.incentives[locale]}</p></div>
       </section>
       <section className="site-shell solar-fact-resources" aria-labelledby="solar-fact-sources">
         <div className="section-heading"><p className="eyebrow">{english ? 'Research trail' : 'ที่มาของข้อมูล'}</p><h2 id="solar-fact-sources">{english ? 'Sources behind our solar facts' : 'แหล่งข้อมูลของเกร็ดน่ารู้เกี่ยวกับโซลาร์'}</h2><p>{english ? 'These solar facts are short, homeowner-friendly summaries of the cited sources. Results and effects may vary by system, location, climate, property and study context. Some cited research was conducted outside Thailand and may not transfer directly to Thai homes.' : 'เกร็ดเกี่ยวกับโซลาร์เหล่านี้เป็นการสรุปแหล่งข้อมูลอ้างอิงแบบสั้นและเข้าใจง่ายสำหรับเจ้าของบ้าน ผลลัพธ์และผลกระทบอาจแตกต่างกันตามระบบ พื้นที่ สภาพอากาศ อสังหาริมทรัพย์ และบริบทของงานวิจัย งานวิจัยบางส่วนดำเนินการนอกประเทศไทยและอาจไม่สามารถนำมาใช้กับบ้านในประเทศไทยได้โดยตรง'}</p><p>{english ? 'The original SolarMatch sketches are decorative interpretations; the authors and institutions do not endorse SolarMatch.' : 'ภาพลายเส้นเป็นงานตกแต่งต้นฉบับของ SolarMatch ผู้เขียนและหน่วยงานต้นทางไม่ได้รับรอง SolarMatch'}</p></div>

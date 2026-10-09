@@ -2,6 +2,7 @@ import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, leg
 import { contactContent } from '@/config/contact-content';
 import { legalLaunchDraft } from '@/config/legal-content';
 import { initialLoadingFactSet } from '@/config/loading-facts';
+import { currentPublicFacts } from '@/lib/loading-facts/public-copy';
 import type { LoadingFactReference, PublicLoadingFact } from '@/lib/loading-facts/types';
 import { initialScoringConfiguration, legacyScoringConfigurationV1, legacyScoringConfigurationV2, legacyScoringConfigurationV3, type ScoringConfiguration } from '@/lib/qualification/scoring';
 import type { PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questionnaire/types';
@@ -770,7 +771,7 @@ export async function getPublishedLoadingFacts(factSetVersionId: string, databas
       reference_json, resources_anchor, enabled, weight, source_reviewed_on
     FROM loading_facts WHERE fact_set_version_id = ? AND enabled = 1 ORDER BY display_order, stable_fact_id`)
     .bind(factSetVersionId).all<FactRow>();
-  return rows.results.map((row) => {
+  return currentPublicFacts(rows.results.map((row): PublicLoadingFact => {
     const reference = JSON.parse(row.reference_json) as LoadingFactReference;
     const sketchId = row.built_in_sketch_id;
     return {
@@ -788,7 +789,7 @@ export async function getPublishedLoadingFacts(factSetVersionId: string, databas
       weight: row.weight,
       reviewedOn: row.source_reviewed_on,
     };
-  });
+  }));
 }
 
 export async function getPublicAssessmentConfig(options: { restrictedAccess?: boolean } = {}): Promise<PublicAssessmentConfig> {

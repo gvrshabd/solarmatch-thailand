@@ -8,8 +8,8 @@ const savedEstimate = {
 };
 
 const exactSharedConsent = {
-  en: 'I explicitly consent to SolarMatch storing my request and information, and I give SolarMatch permission to share my name, contact details, location and relevant assessment answers with solar service providers, installers, their authorized representatives, or other businesses involved in providing solar services, so they may contact me with relevant solar information and/or offers for solar-related services. I understand that SolarMatch may be paid for the connection and that choosing Yes does not guarantee that I will be contacted or receive a quotation. I have read the Privacy Notice.',
-  th: 'ข้าพเจ้ายินยอมโดยชัดแจ้งให้ SolarMatch จัดเก็บคำขอและข้อมูลของข้าพเจ้า และอนุญาตให้ SolarMatch ส่งต่อหรือเปิดเผยชื่อ ข้อมูลติดต่อ สถานที่ตั้ง และคำตอบที่เกี่ยวข้องจากแบบประเมินของข้าพเจ้าแก่ผู้ให้บริการด้านโซลาร์ ผู้ติดตั้ง ตัวแทนที่ได้รับอนุญาตของผู้ให้บริการหรือผู้ติดตั้งดังกล่าว หรือธุรกิจอื่นที่เกี่ยวข้องกับการให้บริการด้านโซลาร์ เพื่อให้บุคคลหรือธุรกิจเหล่านั้นสามารถติดต่อข้าพเจ้าพร้อมข้อมูลที่เกี่ยวข้องกับโซลาร์ และ/หรือข้อเสนอเกี่ยวกับบริการที่เกี่ยวข้องกับโซลาร์ ข้าพเจ้าเข้าใจว่า SolarMatch อาจได้รับค่าตอบแทนจากการเชื่อมโยงดังกล่าว และการเลือก “ใช่” ไม่ได้รับประกันว่าจะมีผู้ใดติดต่อข้าพเจ้า หรือว่าข้าพเจ้าจะได้รับใบเสนอราคา ข้าพเจ้าได้อ่านประกาศความเป็นส่วนตัวแล้ว',
+  en: "I consent to [COMPANY_EN], operating SolarMatch, disclosing my name, chosen contact details, property location and relevant assessment answers to up to three participating installation companies serving my area, so they can assess and contact me about this residential solar request using my selected contact method. A new installer may receive my request only within [DISTRIBUTION_DAYS] days after submission. I understand that installers pay SolarMatch for delivered enquiries, that the request is shared, and that I can withdraw this consent at any time by contacting [PRIVACY_EMAIL]. I can receive the free estimate without giving this consent. Details are in the Privacy Notice.",
+  th: "ฉันยินยอมให้ [COMPANY_TH] ผู้ดำเนินการ SolarMatch เปิดเผยชื่อ ช่องทางติดต่อที่ฉันเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของฉันไม่เกินสามบริษัท เพื่อประเมินและติดต่อฉันเกี่ยวกับคำขอโซลาร์สำหรับที่อยู่อาศัยนี้ผ่านวิธีติดต่อที่ฉันเลือก บริษัทติดตั้งรายใหม่จะได้รับคำขอของฉันได้เฉพาะภายใน [DISTRIBUTION_DAYS] วันนับจากวันที่ส่งคำขอ ฉันเข้าใจว่าบริษัทติดตั้งชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ คำขออาจถูกส่งให้หลายบริษัท และฉันสามารถถอนความยินยอมนี้ได้ทุกเมื่อโดยติดต่อ [PRIVACY_EMAIL] ฉันสามารถรับผลประเมินฟรีได้โดยไม่ให้ความยินยอมนี้ ดูรายละเอียดได้ในประกาศความเป็นส่วนตัว",
 };
 
 function operationalConfiguration() {
@@ -293,7 +293,7 @@ test('integrated quote question starts unselected and No reaches the full estima
 
   const yes = page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' });
   const no = page.getByRole('radio', { name: 'No, show my estimate without installer contact', exact: true });
-  const consent = page.getByRole('checkbox', { name: /I explicitly consent to SolarMatch storing my request/u });
+  const consent = page.getByRole('checkbox', { name: /I consent to/u });
   await expect(page.getByRole('heading', { name: 'Want real quotes from local installers?' })).toBeVisible();
   await expect(yes).not.toBeChecked();
   await expect(no).not.toBeChecked();
@@ -346,7 +346,7 @@ test('Thai contact consent is verbatim, unselected, and links its Privacy Notice
   await page.goto('/estimate');
 
   await page.getByRole('radio', { name: 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ', exact: true }).click();
-  const consent = page.getByRole('checkbox', { name: /ข้าพเจ้ายินยอมโดยชัดแจ้งให้ SolarMatch จัดเก็บคำขอ/u });
+  const consent = page.getByRole('checkbox', { name: /ฉันยินยอมให้/u });
   await expect(consent).not.toBeChecked();
   await expect(page.locator('.quote-consent-check')).toHaveText(exactSharedConsent.th);
   await expect(page.getByRole('link', { name: 'ประกาศความเป็นส่วนตัว', exact: true })).toHaveAttribute('href', '/privacy');
@@ -374,7 +374,7 @@ test('Yes requires disclosure consent and stores an operational request from one
   await page.goto('/en/estimate');
 
   await page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' }).click();
-  const consent = page.getByRole('checkbox', { name: /I explicitly consent to SolarMatch storing my request/u });
+  const consent = page.getByRole('checkbox', { name: /I consent to/u });
   await expect(consent).not.toBeChecked();
   await expect(page.getByRole('link', { name: 'Privacy Notice', exact: true })).toHaveAttribute('href', '/en/privacy');
   await expect(page.locator('.quote-consent-check')).toHaveText(exactSharedConsent.en);
@@ -443,8 +443,8 @@ test('loading fact stays paired, uses the minimal loading surface, and is not re
   await expect(page.getByRole('heading', { name: 'Preparing your solar estimate' })).toHaveCount(0);
 });
 
-test('bilingual Resources pages expose all five fact anchors and references', async ({ page }) => {
-  const ids = ['home-value', 'carbon-trees', 'neighbor-effect', 'patio-gardens', 'water-use'];
+test('bilingual Resources pages expose the four supported fact anchors and references', async ({ page }) => {
+  const ids = ['home-value', 'carbon-trees', 'neighbor-effect', 'water-use'];
   for (const route of ['/resources', '/en/resources']) {
     await page.goto(route);
     for (const id of ids) {

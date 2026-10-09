@@ -6,10 +6,10 @@ export const initialLoadingFactSet: LoadingFactSet = {
   facts: [
     {
       id: 'home-value',
-      title: { en: 'Boosting Home Value', th: 'ช่วยเพิ่มมูลค่าบ้าน' },
+      title: { en: 'Solar and Home Value', th: 'โซลาร์กับมูลค่าบ้าน' },
       copy: {
-        en: 'A large U.S. study found that homes with owner-owned rooftop solar sold for a premium averaging about 4% relative to comparable homes without solar (Hoen et al., 2015). This is not a guarantee of a resale premium for an individual property or a Thailand-specific result.',
-        th: 'งานวิจัยขนาดใหญ่ในสหรัฐอเมริกาพบว่า บ้านที่เจ้าของเป็นเจ้าของระบบโซลาร์บนหลังคาขายได้ในราคาสูงกว่าบ้านเปรียบเทียบที่ไม่มีโซลาร์โดยเฉลี่ยประมาณ 4% (Hoen et al., 2015) ผลดังกล่าวไม่ใช่การรับประกันว่าบ้านแต่ละหลังจะมีมูลค่าขายต่อเพิ่มขึ้น และไม่ใช่ผลการศึกษาที่วัดจากตลาดประเทศไทยโดยตรง',
+        en: 'Research on some U.S. housing markets found a sale-price premium associated with homeowner-owned solar systems. This does not establish a particular percentage increase, a result for Thailand or a guaranteed increase in your home\'s value.',
+        th: 'งานวิจัยในตลาดที่อยู่อาศัยบางแห่งของสหรัฐอเมริกาพบความสัมพันธ์ระหว่างระบบโซลาร์ที่เจ้าของบ้านเป็นเจ้าของกับราคาขายที่สูงขึ้น ข้อมูลนี้ไม่ได้ยืนยันอัตราการเพิ่มขึ้นเป็นเปอร์เซ็นต์ใดโดยเฉพาะ ไม่ใช่ผลวิจัยสำหรับประเทศไทย และไม่รับประกันว่ามูลค่าบ้านของคุณจะเพิ่มขึ้น',
       },
       alt: {
         en: 'Monochrome line drawing of a cozy house wearing a small solar-panel hat beside an upward arrow.',
@@ -22,8 +22,8 @@ export const initialLoadingFactSet: LoadingFactSet = {
         fullReference: 'Hoen, B., Adomatis, S., Jackson, T., Graff-Zivin, J., Thayer, M. A., Klise, G. T., & Wiser, R. H. (2015). Selling Into the Sun: Price Premium Analysis of a Multi-State Dataset of Solar Homes (Report LBNL-6942E). Lawrence Berkeley National Laboratory.',
         url: 'https://doi.org/10.2172/1239972',
         context: {
-          en: 'This was a multi-state United States study of homes with owner-owned rooftop photovoltaic systems. It does not establish a guaranteed resale premium for an individual home or a Thailand-specific market effect.',
-          th: 'งานวิจัยนี้ศึกษาบ้านที่ติดตั้งระบบโซลาร์แบบเจ้าของระบบในหลายรัฐของสหรัฐอเมริกา จึงไม่ได้รับประกันว่าบ้านแต่ละหลังจะมีมูลค่าขายต่อเพิ่มขึ้นเท่ากัน หรือสะท้อนผลของตลาดอสังหาริมทรัพย์ไทยโดยตรง',
+          en: 'Research on some U.S. housing markets found a sale-price premium associated with homeowner-owned solar systems. This does not establish a particular percentage increase, a result for Thailand or a guaranteed increase in your home\'s value.',
+          th: 'งานวิจัยในตลาดที่อยู่อาศัยบางแห่งของสหรัฐอเมริกาพบความสัมพันธ์ระหว่างระบบโซลาร์ที่เจ้าของบ้านเป็นเจ้าของกับราคาขายที่สูงขึ้น ข้อมูลนี้ไม่ได้ยืนยันอัตราการเพิ่มขึ้นเป็นเปอร์เซ็นต์ใดโดยเฉพาะ ไม่ใช่ผลวิจัยสำหรับประเทศไทย และไม่รับประกันว่ามูลค่าบ้านของคุณจะเพิ่มขึ้น',
         },
       },
     },
@@ -85,7 +85,8 @@ export const initialLoadingFactSet: LoadingFactSet = {
         th: 'ภาพลายเส้นสีเดียวของต้นโหระพาในกระถางสวมแว่นกันแดดและพักอยู่ใต้ร่มคันเล็ก',
       },
       sketchSource: 'built-in', sketchId: 'patio-gardens', mediaId: null,
-      resourcesAnchor: 'patio-gardens', enabled: true, weight: 1, reviewedOn: '2026-09-08',
+      // Excluded from homeowner facts: agrivoltaics does not establish a residential patio benefit.
+      resourcesAnchor: 'patio-gardens', enabled: false, weight: 1, reviewedOn: '2026-09-08',
       reference: {
         citation: 'Barron-Gafford et al. (2019)',
         fullReference: 'Barron-Gafford, G. A., Pavao-Zuckerman, M. A., Minor, R. L., Sutter, L. F., Barnett-Moreno, I., Blackett, D. T., Thompson, M., Dimond, K., Gerlak, A. K., Nabhan, G. P., & Macknick, J. E. (2019). Agrivoltaics provide mutual benefits across the food–energy–water nexus in drylands. Nature Sustainability, 2(9), 848–855.',

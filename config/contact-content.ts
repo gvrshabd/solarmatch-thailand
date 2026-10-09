@@ -1,3 +1,4 @@
+import { contactLaunchReviewCopy } from './legal-review';
 import type { LocalizedText } from '@/lib/questionnaire/types';
 
 type ModeCopy = {
@@ -29,10 +30,8 @@ export type ContactContent = {
   };
 };
 
-export const lockedSharedConsentCopy: LocalizedText = {
-  en: 'I explicitly consent to SolarMatch storing my request and information, and I give SolarMatch permission to share my name, contact details, location and relevant assessment answers with solar service providers, installers, their authorized representatives, or other businesses involved in providing solar services, so they may contact me with relevant solar information and/or offers for solar-related services. I understand that SolarMatch may be paid for the connection and that choosing Yes does not guarantee that I will be contacted or receive a quotation. I have read the Privacy Notice.',
-  th: 'ข้าพเจ้ายินยอมโดยชัดแจ้งให้ SolarMatch จัดเก็บคำขอและข้อมูลของข้าพเจ้า และอนุญาตให้ SolarMatch ส่งต่อหรือเปิดเผยชื่อ ข้อมูลติดต่อ สถานที่ตั้ง และคำตอบที่เกี่ยวข้องจากแบบประเมินของข้าพเจ้าแก่ผู้ให้บริการด้านโซลาร์ ผู้ติดตั้ง ตัวแทนที่ได้รับอนุญาตของผู้ให้บริการหรือผู้ติดตั้งดังกล่าว หรือธุรกิจอื่นที่เกี่ยวข้องกับการให้บริการด้านโซลาร์ เพื่อให้บุคคลหรือธุรกิจเหล่านั้นสามารถติดต่อข้าพเจ้าพร้อมข้อมูลที่เกี่ยวข้องกับโซลาร์ และ/หรือข้อเสนอเกี่ยวกับบริการที่เกี่ยวข้องกับโซลาร์ ข้าพเจ้าเข้าใจว่า SolarMatch อาจได้รับค่าตอบแทนจากการเชื่อมโยงดังกล่าว และการเลือก “ใช่” ไม่ได้รับประกันว่าจะมีผู้ใดติดต่อข้าพเจ้า หรือว่าข้าพเจ้าจะได้รับใบเสนอราคา ข้าพเจ้าได้อ่านประกาศความเป็นส่วนตัวแล้ว',
-};
+/** Inactive launch wording. Stored historical consent snapshots are untouched. */
+export const lockedSharedConsentCopy: LocalizedText = contactLaunchReviewCopy.consent;
 
 export const contactContent: ContactContent = {
   contactModes: {
@@ -73,12 +72,9 @@ export const contactContent: ContactContent = {
         en: 'Want real quotes from local installers?',
         th: 'อยากได้ใบเสนอราคาจริงจากผู้ติดตั้งในพื้นที่ไหม?',
       },
-      help: {
-        en: 'Choose Yes only if you want solar companies to contact you about this request. If you choose No, you will go directly to your estimate without being asked for contact details.',
-        th: 'เลือก “ใช่” เฉพาะเมื่อคุณต้องการให้บริษัทโซลาร์ติดต่อเกี่ยวกับคำขอนี้ หากเลือก “ไม่ใช่” คุณจะไปดูผลประเมินได้ทันทีโดยไม่ต้องให้ข้อมูลติดต่อ',
-      },
-      yesLabel: { en: 'Yes, I would like solar companies to contact me', th: 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ' },
-      noLabel: { en: 'No, show my estimate without installer contact', th: 'ไม่ใช่ ดูผลประเมินโดยไม่ให้ผู้ติดตั้งติดต่อ' },
+      help: contactLaunchReviewCopy.shortDisclosure,
+      yesLabel: contactLaunchReviewCopy.yesLabel,
+      noLabel: contactLaunchReviewCopy.noLabel,
       consent: lockedSharedConsentCopy,
     },
     common: {
@@ -94,10 +90,7 @@ export const contactContent: ContactContent = {
         en: 'Your assessment and estimate are still available. You can try again or continue to your estimate without submitting contact details.',
         th: 'คำตอบและผลประเมินของคุณยังอยู่ คุณสามารถลองอีกครั้งหรือดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ',
       },
-      adultConfirmation: {
-        en: 'I confirm that I am at least 20 years old and that I am the property owner or am authorized by the property owner to request contact about this property.',
-        th: 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และเป็นเจ้าของอสังหาริมทรัพย์หรือได้รับอนุญาตจากเจ้าของให้ขอรับการติดต่อเกี่ยวกับอสังหาริมทรัพย์นี้',
-      },
+      adultConfirmation: contactLaunchReviewCopy.adultConfirmation,
     },
   },
   loading: {

@@ -8,6 +8,7 @@ import { localizedPath } from '@/config/i18n';
 import { track } from '@/lib/analytics/track';
 import { loadingDurationMs, loadingFactHistoryKey, nextFactHistory, selectLoadingFact } from '@/lib/loading-facts/selection';
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
+import { currentPublicFact, currentPublicFacts } from '@/lib/loading-facts/public-copy';
 
 function readHistory() {
   try {
@@ -31,7 +32,7 @@ export function CalculationLoading({
   const english = locale === 'en';
   const [duration] = useState(() => initialDurationMs ?? loadingDurationMs());
   const [startedAt] = useState(() => initialStartedAt ?? Date.now());
-  const [fact] = useState<PublicLoadingFact | null>(() => initialFact ?? selectLoadingFact(facts, readHistory()));
+  const [fact] = useState<PublicLoadingFact | null>(() => currentPublicFact(initialFact) ?? selectLoadingFact(currentPublicFacts(facts), readHistory()));
   const [progress, setProgress] = useState(0.015);
   const startedRef = useRef(false);
 

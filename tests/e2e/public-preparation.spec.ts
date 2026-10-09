@@ -1,17 +1,37 @@
 import { expect, test } from '@playwright/test';
+import legalReviewCopy from '../../config/legal-review-copy.json' with { type: 'json' };
 
 for (const locale of ['en', 'th'] as const) {
   const prefix = locale === 'en' ? '/en' : '';
-  test(`${locale}: About is removed and Terms preserve all clauses in readable sections`, async ({ page }) => {
+  test(`${locale}: legal pages render the supplied copy, placeholders, and localized legal links`, async ({ page }) => {
+    for (const type of ['privacy', 'terms', 'cookies'] as const) {
+      const legalDocument = legalReviewCopy.documents[type];
+      await page.goto(`${prefix}/${type}`);
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(legalDocument.title[locale]);
+      await expect(page.locator('.legal-shell header')).toContainText(locale === 'en' ? '[EFFECTIVE_DATE_EN]' : '[EFFECTIVE_DATE_TH]');
+      await expect(page.locator('.legal-shell header')).toContainText('[VERSION]');
+      for (const [index, section] of legalDocument.sections.entries()) {
+        const rendered = page.locator(`.legal-shell #${section.id}`);
+        await expect(rendered.locator('h2')).toHaveText(`${index + 1}. ${section.title[locale]}`);
+        await expect(rendered.locator(':scope > p')).toHaveText(section.paragraphs.map((paragraph) => paragraph[locale]));
+      }
+      for (const link of await page.locator('.legal-shell article a').all()) {
+        await expect(link).toHaveAttribute('href', new RegExp(`^${prefix}/(?:privacy|terms|cookies)$`));
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
+    }
+  });
+
+  test(`${locale}: About is removed and Terms use the supplied review clauses in readable sections`, async ({ page }) => {
     const removed = await page.goto(`${prefix}/about`);
     expect(removed?.status()).toBe(404);
     await page.goto(prefix || '/');
     await expect(page.locator('a[href="/about"],a[href="/en/about"]')).toHaveCount(0);
     await page.goto(`${prefix}/terms`);
     await expect(page.locator('.terms-continuous')).toHaveCount(0);
-    await expect(page.locator('.legal-shell article section')).toHaveCount(16);
-    await expect(page.locator('.legal-shell article section > h2')).toHaveCount(16);
-    await expect(page.locator('.legal-shell #liability > p')).toBeVisible();
+    await expect(page.locator('.legal-shell article section')).toHaveCount(8);
+    await expect(page.locator('.legal-shell article section > h2')).toHaveCount(8);
+    await expect(page.locator('.legal-shell #liability > p').first()).toBeVisible();
     await expect(page.locator('.legal-shell #law > h2')).toBeVisible();
   });
 
@@ -32,7 +52,7 @@ for (const locale of ['en', 'th'] as const) {
       airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'almost-none', quoteContactRequested: true,
     } })));
     await page.goto(`${prefix}/estimate`);
-    await expect(page.getByRole('status').filter({ hasText: locale === 'en' ? 'Contact requests are currently unavailable' : 'ขณะนี้ยังไม่สามารถรับคำขอ' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: locale === 'en' ? "SolarMatch is preparing its installer referral service. The free calculator is available, but we are not currently accepting homeowner contact requests or installer credit purchases through this website. The referral and credit provisions in our legal documents describe the planned service and apply only when that service becomes available and the relevant request or agreement is made." : "SolarMatch อยู่ระหว่างเตรียมเปิดบริการส่งต่อคำขอให้บริษัทติดตั้งโซลาร์ คุณสามารถใช้เครื่องคำนวณได้ฟรี แต่ขณะนี้เว็บไซต์ยังไม่เปิดรับคำขอให้บริษัทติดตั้งติดต่อกลับหรือการซื้อเครดิตจากบริษัทติดตั้ง ข้อกำหนดเกี่ยวกับการส่งต่อคำขอและเครดิตในเอกสารทางกฎหมายอธิบายบริการที่วางแผนไว้ และจะใช้เมื่อบริการนั้นเปิดให้ใช้งานและมีการส่งคำขอหรือทำข้อตกลงที่เกี่ยวข้องแล้วเท่านั้น" })).toBeVisible();
     await expect(page.locator('.quote-consent-check,input[type="tel"],.question-stage [role="radio"]')).toHaveCount(0);
     await page.getByRole('button', { name: locale === 'en' ? 'View my estimate' : 'ดูผลประเมิน', exact: true }).click();
     await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 15_000 });

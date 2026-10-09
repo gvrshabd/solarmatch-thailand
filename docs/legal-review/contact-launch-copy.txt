@@ -1,0 +1,62 @@
+INACTIVE LAUNCH-COPY REVIEW DRAFT — NOT LAUNCH-READY
+All bracketed placeholders are intentionally unresolved. Consent, receipts and recipient confirmations must not be displayed as evidence of an unavailable submission or delivery.
+
+CONTACT-REQUEST DISCLOSURE AND CONSENT — LAUNCH COPY
+============================================================
+
+Place the short disclosure immediately beside the existing optional contact choice, not only in the footer. Save as inactive draft if the request flow remains unavailable. The full Privacy Notice must remain accessible before consent. These strings must not cause any submission or opt-in by themselves.
+
+E1. SHORT COMMERCIAL AND SHARING DISCLOSURE
+
+EN:
+Your estimate is free. If you request installer contact, SolarMatch may share your name, chosen contact details, property location and relevant assessment answers with up to three participating installation companies serving your area. Those companies pay SolarMatch for delivered enquiries and may contact you about this solar request. We will tell you which companies receive it. You do not have to request contact or buy an installation. We cannot guarantee a match, response or quotation.
+
+TH:
+ผลประเมินของคุณไม่มีค่าใช้จ่าย หากคุณขอรับการติดต่อ SolarMatch อาจเปิดเผยชื่อ ช่องทางติดต่อที่คุณเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของคุณไม่เกินสามบริษัท บริษัทเหล่านี้ชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ และอาจติดต่อคุณเกี่ยวกับคำขอโซลาร์นี้ เราจะแจ้งให้คุณทราบว่าบริษัทใดได้รับคำขอ คุณไม่จำเป็นต้องขอรับการติดต่อหรือซื้อบริการติดตั้ง เราไม่รับประกันว่าจะมีบริษัทที่ตรงกับคำขอ การตอบกลับ หรือการเสนอราคา
+
+E2. SEPARATE, UNCHECKED REFERRAL-CONSENT CHECKBOX
+
+EN:
+I consent to [COMPANY_EN], operating SolarMatch, disclosing my name, chosen contact details, property location and relevant assessment answers to up to three participating installation companies serving my area, so they can assess and contact me about this residential solar request using my selected contact method. A new installer may receive my request only within [DISTRIBUTION_DAYS] days after submission. I understand that installers pay SolarMatch for delivered enquiries, that the request is shared, and that I can withdraw this consent at any time by contacting [PRIVACY_EMAIL]. I can receive the free estimate without giving this consent. Details are in the Privacy Notice.
+
+TH:
+ฉันยินยอมให้ [COMPANY_TH] ผู้ดำเนินการ SolarMatch เปิดเผยชื่อ ช่องทางติดต่อที่ฉันเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของฉันไม่เกินสามบริษัท เพื่อประเมินและติดต่อฉันเกี่ยวกับคำขอโซลาร์สำหรับที่อยู่อาศัยนี้ผ่านวิธีติดต่อที่ฉันเลือก บริษัทติดตั้งรายใหม่จะได้รับคำขอของฉันได้เฉพาะภายใน [DISTRIBUTION_DAYS] วันนับจากวันที่ส่งคำขอ ฉันเข้าใจว่าบริษัทติดตั้งชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ คำขออาจถูกส่งให้หลายบริษัท และฉันสามารถถอนความยินยอมนี้ได้ทุกเมื่อโดยติดต่อ [PRIVACY_EMAIL] ฉันสามารถรับผลประเมินฟรีได้โดยไม่ให้ความยินยอมนี้ ดูรายละเอียดได้ในประกาศความเป็นส่วนตัว
+
+E3. ELIGIBILITY CONFIRMATION — SEPARATE FROM DATA-SHARING CONSENT
+
+EN:
+I confirm that I am at least 20 years old, own this property or am authorised by its owner to make this request, and have provided my own accurate contact details.
+
+TH:
+ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี เป็นเจ้าของทรัพย์สินนี้หรือได้รับอนุญาตจากเจ้าของให้ส่งคำขอนี้ และได้ให้ข้อมูลติดต่อของตนเองที่ถูกต้อง
+
+E4. TERMS NOTICE AT SUBMISSION
+
+EN:
+By submitting this contact request, you agree to the Terms of Use. The separate consent choice above governs disclosure of your enquiry. The Privacy Notice explains how your information is handled.
+
+TH:
+เมื่อส่งคำขอรับการติดต่อนี้ คุณตกลงตามข้อกำหนดการใช้บริการ ตัวเลือกความยินยอมแยกต่างหากข้างต้นใช้กับการเปิดเผยคำขอของคุณ ประกาศความเป็นส่วนตัวอธิบายวิธีจัดการข้อมูลของคุณ
+
+E5. ACTION LABELS
+
+EN positive: Request contact from up to 3 installers
+TH positive: ขอรับการติดต่อจากบริษัทติดตั้งไม่เกิน 3 บริษัท
+EN decline: Continue without installer contact
+TH decline: ดำเนินการต่อโดยไม่ขอให้บริษัทติดตั้งติดต่อ
+
+E6. REQUEST RECEIPT — USE ONLY AFTER ACTUAL SUCCESSFUL SUBMISSION
+
+EN:
+We have received your contact request. We will check it against our eligibility and matching criteria. If it is shared, we will tell you which installation companies receive it, up to a maximum of three. Submission does not guarantee a match or quotation. To withdraw your request or change your details, contact [PRIVACY_EMAIL].
+
+TH:
+เราได้รับคำขอรับการติดต่อของคุณแล้ว เราจะตรวจสอบตามเกณฑ์คุณสมบัติและการจับคู่ หากมีการส่งต่อ เราจะแจ้งชื่อบริษัทติดตั้งที่ได้รับคำขอให้คุณทราบ โดยไม่เกินสามบริษัท การส่งคำขอไม่รับประกันว่าจะมีบริษัทที่ตรงกับคำขอหรือได้รับใบเสนอราคา หากต้องการถอนคำขอหรือแก้ไขข้อมูล โปรดติดต่อ [PRIVACY_EMAIL]
+
+E7. ACTUAL RECIPIENT CONFIRMATION — POPULATE ONLY FROM REAL DELIVERY RECORDS
+
+EN:
+Your request has been shared with: [ACTUAL_INSTALLER_NAMES]. These companies may contact you through [SELECTED_CONTACT_METHOD] about your solar request. This list shows the companies that have received the request so far; any further disclosure remains subject to your consent, the distribution window and the total limit of three companies. To stop further sharing or request help stopping contact, email [PRIVACY_EMAIL].
+
+TH:
+คำขอของคุณได้ส่งให้: [ACTUAL_INSTALLER_NAMES] บริษัทเหล่านี้อาจติดต่อคุณผ่าน [SELECTED_CONTACT_METHOD] เกี่ยวกับคำขอโซลาร์ของคุณ รายชื่อนี้แสดงบริษัทที่ได้รับคำขอแล้วจนถึงขณะนี้ การเปิดเผยเพิ่มเติมยังต้องอยู่ภายใต้ความยินยอม ระยะเวลาส่งต่อ และจำนวนรวมไม่เกินสามบริษัท หากต้องการหยุดการส่งต่อเพิ่มเติมหรือขอความช่วยเหลือให้หยุดการติดต่อ โปรดส่งอีเมลไปที่ [PRIVACY_EMAIL]

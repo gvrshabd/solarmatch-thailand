@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, LockKeyhole } from 'lucide-react';
-import Link from '@/components/site/internal-link';
-import { localizedPath, type Locale } from '@/config/i18n';
+import type { Locale } from '@/config/i18n';
+import { LegalText } from '@/components/content/legal-text';
+import { contactLaunchReviewCopy } from '@/config/legal-review';
 import { track } from '@/lib/analytics/track';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 import type { PublicAssessmentConfig } from '@/lib/questionnaire/types';
@@ -159,13 +160,7 @@ export function LeadCapture({
 
   if (!contact.enabled || contact.mode === 'disabled') return null;
 
-  const adultConfirmation = answers.ownershipStatus === 'owner'
-    ? (english
-      ? 'I confirm that I am at least 20 years old and that I own this property.'
-      : 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และเป็นเจ้าของอสังหาริมทรัพย์นี้')
-    : (english
-      ? 'I confirm that I am at least 20 years old and have the property owner’s permission to request contact about solar for this property.'
-      : 'ฉันยืนยันว่ามีอายุอย่างน้อย 20 ปี และได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อเกี่ยวกับโซลาร์สำหรับอสังหาริมทรัพย์นี้');
+  const adultConfirmation = contactLaunchReviewCopy.adultConfirmation[locale];
 
   return <section hidden={!active} className="contact-form-step" aria-labelledby="contact-form-title" aria-hidden={!active}>
     <div className="contact-form-panel">
@@ -211,7 +206,7 @@ export function LeadCapture({
           <span>{adultConfirmation}</span>
         </label>
         {errors.adultConfirmed && <p className="field-error" role="alert">{errors.adultConfirmed}</p>}
-        <div className="privacy-inline"><LockKeyhole size={17} aria-hidden="true" /><span>{english ? 'Your request is stored securely under the ' : 'คำขอของคุณจะจัดเก็บอย่างปลอดภัยตาม '}<Link href={localizedPath('/privacy', locale)} target="_blank" rel="noopener">{english ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว'}</Link></span></div>
+        <div className="privacy-inline"><LockKeyhole size={17} aria-hidden="true" /><span><LegalText text={contactLaunchReviewCopy.termsNotice[locale]} locale={locale} openInNewTab /></span></div>
         <input className="website-honeypot" tabIndex={-1} autoComplete="off" aria-hidden="true" value={fields.website} onChange={(event) => setValue('website', event.target.value)} />
         {submissionError && <div className="form-error form-error-summary" role="alert"><strong>{contact.failureTitle[locale]}</strong><p>{submissionError}</p></div>}
         <div className="contact-form-actions">

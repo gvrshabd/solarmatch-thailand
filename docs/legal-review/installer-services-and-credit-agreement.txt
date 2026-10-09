@@ -1,0 +1,124 @@
+NON-PUBLIC LAWYER REVIEW DRAFT — NOT LAUNCH-READY
+All bracketed placeholders are intentionally unresolved. This draft does not activate installer purchases, payments, referrals or operational controls.
+
+ENGLISH DRAFT COPY
+
+Installer Services and Credit Agreement
+Effective date: [EFFECTIVE_DATE_EN]
+Version: [VERSION]
+
+1. Parties and scope
+This agreement is between [COMPANY_EN], [ENTITY_DESCRIPTION_EN], company registration number [REGISTRATION_NUMBER], registered address [ADDRESS_EN], operating SolarMatch ("SolarMatch"), and the installation company identified in the accepted order confirmation ("Installer"). The person accepting for the Installer must have authority to bind that company. This agreement governs the purchase and use of homeowner enquiry credits. Agreed service areas, qualification criteria, delivery method and limits must be recorded before paid delivery starts.
+
+2. What an enquiry and a credit mean
+An enquiry is a residential solar contact request submitted by a person who states that they are at least 20 years old and the property owner or an authorised representative, provides the required information, and requests installer contact with the required consent. It must meet the qualification criteria agreed with the Installer. Assessment answers are self-reported unless a particular check is expressly identified as independently verified. 'Qualified' does not mean guaranteed affordability, roof suitability, purchasing intention or a completed sale.
+One credit purchases one eligible enquiry delivered to one Installer. The same enquiry may be delivered to up to three installation companies in total. It is not exclusive. The initial service focuses on Bangkok and Greater Bangkok within agreed service areas. There is no guarantee of enquiry volume, contactability, a site visit, quotation, sale, revenue or return on expenditure.
+An enquiry described as fresh must be delivered to the purchasing Installer within [MAX_ENQUIRY_AGE_HOURS] hours after the homeowner's contact request. Each delivery remains subject to that age limit, the disclosed distribution window, current consent and sharing limit.
+
+3. Package, price and taxes
+The proposed launch price is ฿400 per credit, with a package of 10 credits for ฿4,000. [VAT_STATEMENT_EN]
+The order confirmation must state the number of credits, applicable taxes and total amount payable before purchase. Any legally required withholding must be handled using the appropriate documentation and agreed payment instructions. A price change applies to future purchases only; it does not reduce the enquiry entitlement of credits already bought. A credit has no guaranteed resale value and is for SolarMatch's own enquiry service. Credits are not transferable to another business without SolarMatch's written agreement and any legally required checks. Refund rights are governed by clause 8 and applicable law.
+
+4. Delivery and deduction
+Paid delivery occurs when the enquiry is successfully made available to the Installer through the agreed secure channel and SolarMatch issues the corresponding delivery notice. The recorded time is the later of those events. A failed delivery or a mere attempt does not consume a credit. Evidence must identify the enquiry, receiving company, delivery event and time. Timestamps are expressed in Thailand time (UTC+7).
+One credit is deducted for each valid delivery. Repeated notifications or technical retries of the same delivery must not cause another deduction. No paid delivery may occur while the Installer is paused or lacks sufficient credits, unless a different arrangement is expressly agreed. The Installer must keep its service areas, limits and contact details accurate.
+The same homeowner-and-property enquiry delivered to the same Installer within [DUPLICATE_WINDOW_DAYS] days is treated as a duplicate unless a genuinely new request was clearly identified and separately agreed before charging. A data edit, retry or credit restoration does not by itself create a new chargeable enquiry.
+
+5. Shared requests and contact conduct
+No more than three distinct installation companies may receive the same homeowner request. Restoring a credit does not free a sharing slot or permit delivery beyond that cap. SolarMatch may deliver to fewer than three companies. The Installer must not represent a shared enquiry as exclusive.
+Use only the permitted contact details and selected contact method. Identify the Installer and explain that the contact follows the homeowner's SolarMatch request. Communicate reasonably, avoid harassment, provide an easy way to stop contact, and respect withdrawals and objections. An unanswered call or message does not authorise persistent or unrelated marketing.
+
+6. Invalid-enquiry credit claims
+The Installer must report an invalid-enquiry claim to [GENERAL_EMAIL] within 48 elapsed hours after recorded delivery, identifying the enquiry, reason and reasonable supporting evidence. The window includes weekends and public holidays. An enquiry that was not actually delivered is not chargeable. If a SolarMatch system failure prevented access or a timely claim, the claim deadline must be reasonably extended for the affected period.
+After verification, SolarMatch restores the deducted credit for an enquiry that:
+• contains a fake, disconnected, incorrect or unusable contact detail for the selected contact method;
+• is a duplicate excluded by the agreed duplicate policy;
+• falls outside the agreed location or qualification criteria;
+• was not requested by the identified person or lacks the required valid permission for the referral; or
+• otherwise fails an expressly agreed delivery requirement.
+An immediate failure to answer, a homeowner's decision to choose another installer, or failure to complete a purchase does not by itself establish invalidity. Withdrawal after an otherwise valid delivery does not by itself prove the delivery was invalid; it still requires contact and data-use restrictions to be respected immediately. A claim of no consent must be investigated, not rejected merely because it concerns a completed delivery.
+SolarMatch aims to decide within two business days after receiving sufficient information. Business days exclude Saturdays, Sundays and Thai public holidays. If more time is needed, we explain why and provide an update. We record the decision and reasons; the Installer may request reconsideration at [GENERAL_EMAIL]. Provide only evidence necessary for the claim and lawfully obtained; do not submit unnecessary identity documents, sensitive information or unlawful recordings.
+Restoration means returning a service credit, not automatically paying cash. Where an enquiry is found to be fake or affected by a common defect, SolarMatch reviews all deliveries affected by that defect and restores credits where appropriate. An equivalent remedy must be provided if a restoration would otherwise be unusable solely because of account closure, service discontinuation or expiry while the claim was pending.
+The 48-hour period governs this commercial credit procedure. It does not bar data-protection complaints, reporting lack of consent, correction of unlawful processing, claims concerning SolarMatch's fraud or gross negligence, or rights that cannot lawfully be restricted.
+
+7. Pausing and service availability
+The Installer may request a pause or changes to delivery limits through [GENERAL_EMAIL] or an available account control. SolarMatch confirms the effective time; deliveries after that time must not be charged while the pause remains effective. A pause does not reverse valid deliveries made earlier. SolarMatch may suspend deliveries for insufficient credits, security concerns, suspected misuse or a material breach, and must notify the Installer and explain the reason where lawful and practicable. Suspension must not be used to avoid accrued credit or refund obligations.
+
+8. Unused credits, closure and refunds
+[UNUSED_CREDIT_POLICY_EN]
+The agreed unused-credit terms must be supplied before purchase. SolarMatch may not retrospectively shorten credit validity, remove an agreed refund entitlement or increase the number of credits needed for an enquiry already purchased. Ending the relationship does not remove payment, credit-restoration, confidentiality, privacy or other obligations that have already arisen or are intended to continue.
+
+9. Permitted data use and independent responsibilities
+The Installer may use enquiry information only to assess and respond to the homeowner's particular residential solar request and, where applicable, perform a contract the homeowner later enters. It must provide its own required privacy information and establish lawful bases for its subsequent processing. Receiving or paying for an enquiry does not constitute ownership of personal data.
+Do not sell the information, place it in a general lead database, use it for unrelated marketing, upload it to advertising audiences, or refer it to another independent installation company without a separate lawful basis and any required consent. Staff and processors may access only what is necessary, under suitable confidentiality, security and contractual controls. They may not use access as a means of distributing the request to additional independent companies.
+The Installer must keep information secure, limit access, correct relevant inaccuracies, honour withdrawals and objections, and delete or anonymise information when no longer needed unless lawful retention is required. It must assist with relevant rights requests and promptly notify SolarMatch of data misuse or a breach affecting an enquiry so the parties can meet their legal duties. Any cross-border transfer must have the necessary legal basis and safeguards.
+Feedback to SolarMatch must be accurate, proportionate and limited to matters needed for service quality, contact outcomes, disputes and lawful administration. Do not send unnecessary customer documents or sensitive information. Each party remains responsible for its own obligations as a controller; any processing genuinely performed on another party's instructions requires the appropriate separate arrangement.
+
+10. Installation services and liability
+The Installer is responsible for its representations, pricing, site assessments, designs, professional and licensing requirements, installation work, permits within its agreed scope, consumer contracts, warranties and after-sales service. SolarMatch is responsible for its own referral and credit-administration service. This agreement does not make SolarMatch a party to the homeowner's installation contract or guarantee the Installer's sales results.
+Each party remains responsible for its own breaches and liabilities under applicable law. Nothing excludes or limits liability for fraud, gross negligence or liability that cannot lawfully be excluded or limited. Credit restoration is not stated to be the exclusive remedy for every possible breach of this agreement.
+
+11. Complaints, changes and applicable law
+Commercial notices and complaints: [GENERAL_EMAIL]. Personal data matters: [PRIVACY_EMAIL]. The parties should attempt to resolve a dispute in good faith without preventing access to lawful remedies. Thai law applies, subject to mandatory rights and applicable jurisdiction rules.
+The accepted order confirmation and this agreement identify the applicable version. Material changes apply prospectively; existing purchased entitlements and accrued rights cannot be reduced unilaterally. Any agreed variations must be recorded. No variation may authorise disclosure beyond the homeowner's consent or override applicable data-protection law.
+
+THAI DRAFT COPY
+
+ข้อตกลงบริการและเครดิตสำหรับบริษัทติดตั้ง
+มีผลใช้บังคับวันที่: [EFFECTIVE_DATE_TH]
+ฉบับที่: [VERSION]
+
+1. คู่สัญญาและขอบเขต
+ข้อตกลงนี้ทำขึ้นระหว่าง [COMPANY_TH] ซึ่งเป็น [ENTITY_DESCRIPTION_TH] เลขทะเบียนนิติบุคคล [REGISTRATION_NUMBER] สำนักงานจดทะเบียนตั้งอยู่ที่ [ADDRESS_TH] ผู้ดำเนินการ SolarMatch ("SolarMatch") และบริษัทติดตั้งที่ระบุในเอกสารยืนยันคำสั่งซื้อที่ยอมรับแล้ว ("บริษัทติดตั้ง") ผู้ยอมรับข้อตกลงแทนบริษัทติดตั้งต้องมีอำนาจผูกพันบริษัท ข้อตกลงนี้ใช้กับการซื้อและใช้เครดิตสำหรับคำขอของเจ้าของบ้าน ต้องบันทึกพื้นที่บริการ เกณฑ์คุณสมบัติ วิธีส่งมอบ และขีดจำกัดที่ตกลงกันก่อนเริ่มส่งมอบแบบคิดค่าบริการ
+
+2. ความหมายของคำขอและเครดิต
+คำขอหมายถึงคำขอรับการติดต่อเกี่ยวกับโซลาร์สำหรับที่อยู่อาศัย ซึ่งส่งโดยผู้ที่ระบุว่ามีอายุอย่างน้อย 20 ปีและเป็นเจ้าของทรัพย์สินหรือผู้แทนที่ได้รับอนุญาต ให้ข้อมูลที่จำเป็น และขอรับการติดต่อพร้อมความยินยอมที่จำเป็น คำขอต้องผ่านเกณฑ์คุณสมบัติที่ตกลงกับบริษัทติดตั้ง คำตอบแบบประเมินเป็นข้อมูลที่ผู้ส่งแจ้งเอง เว้นแต่จะระบุชัดเจนว่าข้อใดได้รับการตรวจสอบอย่างอิสระ คำว่า "ผ่านเกณฑ์" ไม่ได้หมายถึงการรับประกันความสามารถในการชำระเงิน ความเหมาะสมของหลังคา ความตั้งใจซื้อ หรือการขายสำเร็จ
+หนึ่งเครดิตใช้สำหรับหนึ่งคำขอที่เข้าเกณฑ์ซึ่งส่งมอบให้บริษัทติดตั้งหนึ่งราย คำขอเดียวกันอาจส่งให้บริษัทติดตั้งรวมไม่เกินสามราย จึงไม่ใช่คำขอเฉพาะราย บริการระยะแรกมุ่งเน้นกรุงเทพมหานครและปริมณฑลภายในพื้นที่ที่ตกลงกัน ไม่รับประกันจำนวนคำขอ การติดต่อได้ การสำรวจหน้างาน การเสนอราคา การขาย รายได้ หรือผลตอบแทนจากค่าใช้จ่าย
+คำขอที่ระบุว่าเป็นคำขอใหม่ต้องได้รับการส่งมอบให้บริษัทติดตั้งที่ซื้อภายใน [MAX_ENQUIRY_AGE_HOURS] ชั่วโมงหลังเจ้าของบ้านส่งคำขอรับการติดต่อ การส่งมอบแต่ละครั้งต้องอยู่ภายในอายุคำขอสูงสุดนี้ ระยะเวลาส่งต่อ ความยินยอมที่ยังมีผล และจำนวนผู้รับที่กำหนด
+
+3. แพ็กเกจ ราคา และภาษี
+ราคาที่เสนอสำหรับเริ่มให้บริการคือ 400 บาทต่อเครดิต โดยมีแพ็กเกจ 10 เครดิต ราคา 4,000 บาท [VAT_STATEMENT_TH]
+เอกสารยืนยันคำสั่งซื้อต้องระบุจำนวนเครดิต ภาษีที่ใช้บังคับ และยอดชำระทั้งหมดก่อนซื้อ การหักภาษี ณ ที่จ่ายที่กฎหมายกำหนดต้องดำเนินการโดยมีเอกสารที่เหมาะสมและตามวิธีชำระเงินที่ตกลงกัน การเปลี่ยนราคาใช้กับการซื้อในอนาคตเท่านั้น ไม่ลดจำนวนคำขอที่มีสิทธิได้รับจากเครดิตที่ซื้อแล้ว เครดิตไม่มีมูลค่าขายต่อที่รับประกันและใช้สำหรับบริการคำขอของ SolarMatch เอง ห้ามโอนเครดิตให้ธุรกิจอื่นโดยไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรจาก SolarMatch และผ่านการตรวจสอบที่กฎหมายกำหนด สิทธิคืนเงินอยู่ภายใต้ข้อ 8 และกฎหมายที่ใช้บังคับ
+
+4. การส่งมอบและหักเครดิต
+การส่งมอบที่คิดค่าบริการเกิดขึ้นเมื่อบริษัทติดตั้งสามารถเข้าถึงคำขอได้สำเร็จผ่านช่องทางที่ปลอดภัยซึ่งตกลงไว้ และ SolarMatch ได้ส่งการแจ้งส่งมอบที่เกี่ยวข้อง เวลาที่บันทึกคือเวลาของเหตุการณ์ที่เกิดภายหลัง การส่งไม่สำเร็จหรือเพียงพยายามส่งไม่ทำให้เสียเครดิต หลักฐานต้องระบุคำขอ บริษัทผู้รับ เหตุการณ์ส่งมอบ และเวลา โดยแสดงเวลาประเทศไทย (UTC+7)
+หักหนึ่งเครดิตต่อการส่งมอบที่ถูกต้องหนึ่งครั้ง การแจ้งซ้ำหรือการลองส่งทางเทคนิคซ้ำสำหรับการส่งมอบเดียวกันต้องไม่หักเพิ่ม ห้ามส่งมอบแบบคิดค่าบริการระหว่างที่บริษัทติดตั้งหยุดรับคำขอหรือมีเครดิตไม่เพียงพอ เว้นแต่ตกลงเป็นอย่างอื่นโดยชัดแจ้ง บริษัทติดตั้งต้องดูแลให้ข้อมูลพื้นที่บริการ ขีดจำกัด และข้อมูลติดต่อถูกต้อง
+คำขอของเจ้าของบ้านและทรัพย์สินเดียวกันที่ส่งให้บริษัทติดตั้งรายเดียวกันภายใน [DUPLICATE_WINDOW_DAYS] วันถือเป็นคำขอซ้ำ เว้นแต่เป็นคำขอใหม่จริงที่ระบุชัดเจนและตกลงแยกต่างหากก่อนคิดค่าบริการ การแก้ไขข้อมูล การลองส่งซ้ำ หรือการคืนเครดิตเพียงอย่างเดียวไม่ทำให้เกิดคำขอใหม่ที่คิดค่าบริการได้
+
+5. คำขอที่ส่งให้หลายบริษัทและการติดต่อ
+คำขอเดียวกันอาจส่งให้บริษัทติดตั้งที่แตกต่างกันได้ไม่เกินสามบริษัท การคืนเครดิตไม่ทำให้เกิดสิทธิส่งเพิ่มหรือส่งเกินจำนวนนี้ SolarMatch อาจส่งให้บริษัทน้อยกว่าสามราย บริษัทติดตั้งต้องไม่อ้างว่าคำขอที่ส่งให้หลายบริษัทเป็นคำขอเฉพาะของตน
+ใช้เฉพาะข้อมูลติดต่อที่ได้รับอนุญาตและวิธีติดต่อที่เจ้าของบ้านเลือก ระบุชื่อบริษัทติดตั้งและอธิบายว่าติดต่อเนื่องจากคำขอผ่าน SolarMatch ติดต่ออย่างสมเหตุสมผล ไม่คุกคาม จัดให้มีวิธีหยุดการติดต่อที่ง่าย และเคารพการถอนความยินยอมกับการคัดค้าน การไม่รับสายหรือไม่ตอบข้อความไม่ได้อนุญาตให้ทำการตลาดซ้ำอย่างรบกวนหรือไม่เกี่ยวข้อง
+
+6. การขอคืนเครดิตสำหรับคำขอที่ไม่ถูกต้อง
+บริษัทติดตั้งต้องแจ้งขอคืนเครดิตสำหรับคำขอที่ไม่ถูกต้องไปที่ [GENERAL_EMAIL] ภายใน 48 ชั่วโมงต่อเนื่องนับจากเวลาส่งมอบที่บันทึกไว้ โดยระบุคำขอ เหตุผล และหลักฐานสนับสนุนที่สมเหตุสมผล ระยะเวลานี้รวมวันหยุดสุดสัปดาห์และวันหยุดนักขัตฤกษ์ คำขอที่ไม่ได้ส่งมอบจริงไม่สามารถคิดค่าบริการได้ หากระบบของ SolarMatch ขัดข้องจนทำให้เข้าถึงข้อมูลหรือแจ้งภายในกำหนดไม่ได้ ต้องขยายเวลาอย่างสมเหตุสมผลตามช่วงที่ได้รับผลกระทบ
+เมื่อยืนยันแล้ว SolarMatch จะคืนเครดิตที่หักไปสำหรับคำขอที่:
+• มีข้อมูลติดต่อปลอม ถูกยกเลิก ไม่ถูกต้อง หรือใช้ไม่ได้สำหรับวิธีติดต่อที่เลือก;
+• เป็นคำขอซ้ำที่ต้องยกเว้นตามนโยบายข้อมูลซ้ำที่ตกลงไว้;
+• อยู่นอกพื้นที่หรือเกณฑ์คุณสมบัติที่ตกลงไว้;
+• บุคคลที่ระบุไม่ได้เป็นผู้ขอรับการติดต่อ หรือไม่มีการอนุญาตที่ถูกต้องและจำเป็นสำหรับการส่งต่อ; หรือ
+• ไม่ผ่านข้อกำหนดการส่งมอบอื่นที่ตกลงไว้อย่างชัดแจ้ง
+การไม่ตอบทันที การเลือกบริษัทติดตั้งรายอื่น หรือการไม่ซื้อ ไม่ทำให้คำขอไม่ถูกต้องโดยตัวมันเอง การถอนความยินยอมหลังการส่งมอบที่ถูกต้องไม่ได้พิสูจน์ด้วยตัวมันเองว่าการส่งมอบไม่ถูกต้อง แต่ยังต้องปฏิบัติตามข้อจำกัดการติดต่อและใช้ข้อมูลทันที ต้องตรวจสอบข้อกล่าวอ้างว่าไม่ได้ให้ความยินยอม และห้ามปฏิเสธเพียงเพราะส่งมอบเสร็จแล้ว
+SolarMatch ตั้งเป้าตัดสินภายในสองวันทำการหลังได้รับข้อมูลเพียงพอ วันทำการไม่รวมวันเสาร์ วันอาทิตย์ และวันหยุดนักขัตฤกษ์ของไทย หากต้องใช้เวลาเพิ่ม เราจะชี้แจงเหตุผลและแจ้งความคืบหน้า เราจะบันทึกผลและเหตุผล บริษัทติดตั้งสามารถขอทบทวนได้ที่ [GENERAL_EMAIL] ส่งเฉพาะหลักฐานที่จำเป็นและได้มาโดยชอบด้วยกฎหมาย ห้ามส่งเอกสารประจำตัว ข้อมูลอ่อนไหวที่ไม่จำเป็น หรือบันทึกเสียงที่ได้มาโดยมิชอบ
+การคืนเครดิตหมายถึงคืนหน่วยสิทธิใช้บริการ ไม่ใช่คืนเงินสดโดยอัตโนมัติ หากพบว่าคำขอเป็นข้อมูลปลอมหรือมีข้อบกพร่องร่วมกัน SolarMatch จะทบทวนการส่งมอบทั้งหมดที่ได้รับผลกระทบและคืนเครดิตตามสมควร ต้องจัดให้มีการเยียวยาที่เทียบเท่าหากเครดิตที่คืนจะใช้ไม่ได้เพียงเพราะปิดบัญชี ยุติบริการ หรือหมดอายุระหว่างพิจารณาคำขอ
+กำหนดเวลา 48 ชั่วโมงใช้กับขั้นตอนคืนเครดิตทางการค้านี้ ไม่ตัดสิทธิร้องเรียนด้านข้อมูลส่วนบุคคล แจ้งว่าไม่มีความยินยอม แก้ไขการประมวลผลที่ผิดกฎหมาย เรียกร้องเกี่ยวกับการฉ้อฉลหรือความประมาทเลินเล่ออย่างร้ายแรงของ SolarMatch หรือใช้สิทธิที่กฎหมายไม่อนุญาตให้จำกัด
+
+7. การหยุดรับคำขอและความพร้อมของบริการ
+บริษัทติดตั้งอาจขอหยุดรับคำขอหรือเปลี่ยนขีดจำกัดผ่าน [GENERAL_EMAIL] หรือเครื่องมือบัญชีที่มีให้ SolarMatch จะยืนยันเวลาที่มีผล และต้องไม่คิดค่าบริการสำหรับการส่งมอบหลังเวลานั้นระหว่างที่ยังหยุดรับคำขอ การหยุดรับไม่ยกเลิกการส่งมอบที่ถูกต้องก่อนหน้า SolarMatch อาจระงับการส่งมอบเมื่อเครดิตไม่พอ มีปัญหาความปลอดภัย สงสัยการใช้มิชอบ หรือมีการผิดข้อตกลงสาระสำคัญ โดยต้องแจ้งบริษัทติดตั้งและชี้แจงเหตุผลเมื่อกฎหมายอนุญาตและปฏิบัติได้ การระงับต้องไม่ใช้เพื่อหลีกเลี่ยงหน้าที่เกี่ยวกับเครดิตหรือเงินคืนที่เกิดขึ้นแล้ว
+
+8. เครดิตที่ยังไม่ได้ใช้ การปิดบัญชี และการคืนเงิน
+[UNUSED_CREDIT_POLICY_TH]
+ต้องให้ข้อกำหนดเครดิตที่ยังไม่ได้ใช้ซึ่งตกลงกันก่อนซื้อ SolarMatch ไม่สามารถลดอายุเครดิตย้อนหลัง ยกเลิกสิทธิคืนเงินที่ตกลงไว้ หรือเพิ่มจำนวนเครดิตที่ต้องใช้สำหรับคำขอที่ซื้อสิทธิไว้แล้ว การยุติความสัมพันธ์ไม่ลบล้างหน้าที่ชำระเงิน คืนเครดิต รักษาความลับ คุ้มครองข้อมูล หรือหน้าที่อื่นที่เกิดขึ้นแล้วหรือมีเจตนาให้มีผลต่อไป
+
+9. การใช้ข้อมูลที่อนุญาตและความรับผิดชอบแยกกัน
+บริษัทติดตั้งใช้ข้อมูลคำขอได้เฉพาะเพื่อประเมินและตอบสนองคำขอโซลาร์สำหรับที่อยู่อาศัยนั้น และเพื่อปฏิบัติตามสัญญาที่เจ้าของบ้านเข้าทำภายหลังเมื่อเกี่ยวข้อง บริษัทติดตั้งต้องให้ข้อมูลความเป็นส่วนตัวที่กฎหมายกำหนดและมีฐานกฎหมายสำหรับการประมวลผลต่อไป การได้รับหรือชำระเงินสำหรับคำขอไม่ได้ทำให้เป็นเจ้าของข้อมูลส่วนบุคคล
+ห้ามขายข้อมูล นำเข้าสู่ฐานรายชื่อลูกค้าทั่วไป ใช้ทำการตลาดที่ไม่เกี่ยวข้อง อัปโหลดเป็นกลุ่มเป้าหมายโฆษณา หรือส่งให้บริษัทติดตั้งอิสระรายอื่นโดยไม่มีฐานกฎหมายแยกต่างหากและความยินยอมที่จำเป็น พนักงานและผู้ประมวลผลข้อมูลเข้าถึงได้เท่าที่จำเป็น ภายใต้มาตรการรักษาความลับ ความปลอดภัย และสัญญาที่เหมาะสม ห้ามใช้การเข้าถึงเป็นช่องทางกระจายคำขอให้บริษัทติดตั้งอิสระเพิ่มเติม
+บริษัทติดตั้งต้องรักษาความปลอดภัย จำกัดการเข้าถึง แก้ไขข้อมูลที่ไม่ถูกต้องซึ่งเกี่ยวข้อง เคารพการถอนความยินยอมและการคัดค้าน และลบหรือทำให้ข้อมูลไม่สามารถระบุตัวบุคคลได้เมื่อหมดความจำเป็น เว้นแต่ต้องเก็บตามกฎหมาย ต้องช่วยจัดการคำขอใช้สิทธิที่เกี่ยวข้องและแจ้ง SolarMatch โดยเร็วเมื่อมีการใช้ข้อมูลผิดวัตถุประสงค์หรือเหตุละเมิดที่กระทบคำขอ เพื่อให้คู่สัญญาปฏิบัติตามหน้าที่ตามกฎหมาย การโอนข้อมูลข้ามประเทศต้องมีฐานกฎหมายและมาตรการคุ้มครองที่จำเป็น
+ข้อมูลติดตามผลที่ส่งให้ SolarMatch ต้องถูกต้อง ได้สัดส่วน และจำกัดเฉพาะที่จำเป็นต่อคุณภาพบริการ ผลการติดต่อ ข้อพิพาท และการบริหารโดยชอบด้วยกฎหมาย ห้ามส่งเอกสารลูกค้าหรือข้อมูลอ่อนไหวที่ไม่จำเป็น คู่สัญญาแต่ละฝ่ายยังรับผิดชอบหน้าที่ของตนในฐานะผู้ควบคุมข้อมูล การประมวลผลใดที่ทำตามคำสั่งของอีกฝ่ายจริงต้องมีข้อตกลงแยกต่างหากที่เหมาะสม
+
+10. บริการติดตั้งและความรับผิด
+บริษัทติดตั้งรับผิดชอบคำรับรอง ราคา การสำรวจ การออกแบบ ข้อกำหนดวิชาชีพและใบอนุญาต งานติดตั้ง การขออนุญาตภายในขอบเขตที่ตกลง สัญญากับผู้บริโภค การรับประกัน และบริการหลังการขายของตน SolarMatch รับผิดชอบบริการส่งต่อคำขอและบริหารเครดิตของตน ข้อตกลงนี้ไม่ทำให้ SolarMatch เป็นคู่สัญญาในสัญญาติดตั้งของเจ้าของบ้านหรือรับประกันผลการขายของบริษัทติดตั้ง
+คู่สัญญาแต่ละฝ่ายยังรับผิดชอบการผิดข้อตกลงและความรับผิดของตนตามกฎหมาย ไม่มีข้อความใดยกเว้นหรือจำกัดความรับผิดจากการฉ้อฉล ความประมาทเลินเล่ออย่างร้ายแรง หรือความรับผิดที่กฎหมายไม่อนุญาตให้ยกเว้นหรือจำกัด การคืนเครดิตไม่ได้ถูกกำหนดให้เป็นการเยียวยาเพียงอย่างเดียวสำหรับการผิดข้อตกลงทุกกรณี
+
+11. ข้อร้องเรียน การเปลี่ยนแปลง และกฎหมายที่ใช้บังคับ
+การแจ้งและข้อร้องเรียนทางการค้า: [GENERAL_EMAIL] เรื่องข้อมูลส่วนบุคคล: [PRIVACY_EMAIL] คู่สัญญาควรพยายามแก้ไขข้อพิพาทโดยสุจริตโดยไม่ขัดขวางการใช้สิทธิทางกฎหมาย ใช้กฎหมายไทยโดยไม่กระทบสิทธิที่กฎหมายบังคับคุ้มครองและหลักเกณฑ์เขตอำนาจศาลที่ใช้บังคับ
+เอกสารยืนยันคำสั่งซื้อที่ยอมรับแล้วและข้อตกลงนี้ระบุฉบับที่ใช้บังคับ การเปลี่ยนแปลงสาระสำคัญมีผลในอนาคต ไม่สามารถลดสิทธิจากการซื้อที่มีอยู่และสิทธิที่เกิดขึ้นแล้วโดยฝ่ายเดียว ต้องบันทึกการแก้ไขที่ตกลงกัน การแก้ไขใดไม่อาจอนุญาตให้เปิดเผยเกินความยินยอมของเจ้าของบ้านหรือขัดต่อกฎหมายคุ้มครองข้อมูลส่วนบุคคล
