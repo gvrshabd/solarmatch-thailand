@@ -5,12 +5,13 @@ import { ArrowLeft, ArrowRight, LockKeyhole } from 'lucide-react';
 import type { Locale } from '@/config/i18n';
 import { LegalText } from '@/components/content/legal-text';
 import { contactLaunchReviewCopy } from '@/config/legal-review';
+import { contactReviewCopy } from '@/config/contact-review';
 import { track } from '@/lib/analytics/track';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 import type { PublicAssessmentConfig } from '@/lib/questionnaire/types';
 import { leadSchema, thaiPhonePattern } from '@/lib/validation/lead';
 
-type ContactOutcome = 'submitted' | 'skipped';
+type ContactOutcome = 'submitted' | 'skipped' | 'reviewed';
 type Fields = {
   legalFirstName: string;
   legalLastName: string;
@@ -31,13 +32,14 @@ function nextIdempotencyKey() {
 }
 
 export function LeadCapture({
-  locale = 'th', answers, configuration, active, resetKey, onBack, onContinue, onConfigurationChanged, onProcessingStart, onProcessingFailed,
+  locale = 'th', answers, configuration, active, resetKey, reviewOnly = false, onBack, onContinue, onConfigurationChanged, onProcessingStart, onProcessingFailed,
 }: {
   locale?: Locale;
   answers: EstimateAnswers;
   configuration: PublicAssessmentConfig;
   active: boolean;
   resetKey: number;
+  reviewOnly?: boolean;
   onBack: () => void;
   onContinue: (outcome: ContactOutcome) => void;
   onConfigurationChanged: (configuration: PublicAssessmentConfig) => void;
@@ -53,6 +55,7 @@ export function LeadCapture({
   const [idempotencyKey, setIdempotencyKey] = useState(nextIdempotencyKey);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousResetKey = useRef(resetKey);
+  const reviewCompletedRef = useRef(false);
 
   useEffect(() => {
     if (previousResetKey.current === resetKey) return;
@@ -60,6 +63,8 @@ export function LeadCapture({
     setFields(initialFields);
     setErrors({});
     setSubmissionError('');
+    setSending(false);
+    reviewCompletedRef.current = false;
     setIdempotencyKey(nextIdempotencyKey());
   }, [resetKey]);
 
@@ -97,8 +102,20 @@ export function LeadCapture({
     return Object.keys(next).length === 0;
   }
 
+  function finishReview() {
+    if (reviewCompletedRef.current) return;
+    reviewCompletedRef.current = true;
+    setFields(initialFields);
+    setErrors({});
+    setSending(true);
+    onContinue('reviewed');
+  }
+
   async function submit() {
-    if (sending || !validate()) return;
+    if (sending || reviewCompletedRef.current || !validate()) return;
+    // A review must never reach token checks, API calls, analytics, or lead storage,
+    // even if the real configuration is enabled while the reviewer uses the form.
+    if (reviewOnly) { finishReview(); return; }
     if (!configuration.assessmentToken || !configuration.liveLeadSubmissions || !fields.contactMethod) {
       setSubmissionError(english ? 'Contact requests are temporarily unavailable. You can still continue to your estimate.' : 'ขณะนี้ยังไม่สามารถส่งคำขอติดต่อได้ คุณยังดูผลประเมินต่อได้');
       return;
@@ -158,25 +175,26 @@ export function LeadCapture({
     }
   }
 
-  if (!contact.enabled || contact.mode === 'disabled') return null;
+  if (!reviewOnly && (!contact.enabled || contact.mode === 'disabled')) return null;
 
   const adultConfirmation = contactLaunchReviewCopy.adultConfirmation[locale];
 
-  return <section hidden={!active} className="contact-form-step" aria-labelledby="contact-form-title" aria-hidden={!active}>
+  return <section hidden={!active} className="contact-form-step" aria-labelledby="contact-form-title" aria-hidden={!active} data-review-only={reviewOnly || undefined}>
     <div className="contact-form-panel">
       <>
         <div className="contact-form-heading">
-          <p className="eyebrow">{english ? 'Contact details' : 'ข้อมูลติดต่อ'}</p>
+          <p className="eyebrow">{reviewOnly ? contactReviewCopy.label[locale] : english ? 'Contact details' : 'ข้อมูลติดต่อ'}</p>
           <h1 id="contact-form-title" ref={headingRef} tabIndex={-1}>{english ? 'Where should installers contact you?' : 'ต้องการให้ผู้ติดตั้งติดต่อคุณผ่านช่องทางใด?'}</h1>
           <p>{english ? 'Complete the details below in one step. Your estimate is already calculated.' : 'กรอกข้อมูลด้านล่างในขั้นตอนเดียว ผลประเมินของคุณคำนวณไว้แล้ว'}</p>
         </div>
+        {reviewOnly && <p className="contact-review-notice" role="status">{contactReviewCopy.notice[locale]}</p>}
         <div className="contact-form-grid">
           <label><span>{english ? 'First name' : 'ชื่อ'}</span>
-            <input autoComplete="given-name" maxLength={80} value={fields.legalFirstName} aria-invalid={Boolean(errors.legalFirstName)} aria-describedby={errors.legalFirstName ? 'contact-first-error' : undefined} onChange={(event) => setValue('legalFirstName', event.target.value)} />
+            <input autoComplete={reviewOnly ? 'off' : 'given-name'} maxLength={80} value={fields.legalFirstName} aria-invalid={Boolean(errors.legalFirstName)} aria-describedby={errors.legalFirstName ? 'contact-first-error' : undefined} onChange={(event) => setValue('legalFirstName', event.target.value)} />
             {errors.legalFirstName && <small id="contact-first-error" className="field-error" role="alert">{errors.legalFirstName}</small>}
           </label>
           <label><span>{english ? 'Last name' : 'นามสกุล'}</span>
-            <input autoComplete="family-name" maxLength={80} value={fields.legalLastName} aria-invalid={Boolean(errors.legalLastName)} aria-describedby={errors.legalLastName ? 'contact-last-error' : undefined} onChange={(event) => setValue('legalLastName', event.target.value)} />
+            <input autoComplete={reviewOnly ? 'off' : 'family-name'} maxLength={80} value={fields.legalLastName} aria-invalid={Boolean(errors.legalLastName)} aria-describedby={errors.legalLastName ? 'contact-last-error' : undefined} onChange={(event) => setValue('legalLastName', event.target.value)} />
             {errors.legalLastName && <small id="contact-last-error" className="field-error" role="alert">{errors.legalLastName}</small>}
           </label>
           <fieldset className="contact-method-field">
@@ -191,7 +209,7 @@ export function LeadCapture({
             {!fields.contactMethod && <p>{english ? 'Choose a contact method to continue.' : 'เลือกช่องทางที่สะดวกให้ติดต่อ'}</p>}
             {fields.contactMethod === 'phone' && <label><span>{english ? 'Mobile phone number' : 'หมายเลขโทรศัพท์มือถือ'}</span>
               <small>{english ? 'Enter a number solar companies can use to contact you.' : 'กรอกหมายเลขที่บริษัทโซลาร์สามารถใช้ติดต่อคุณได้'}</small>
-              <input type="tel" inputMode="tel" autoComplete="tel" placeholder="081 234 5678" value={fields.phone} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'contact-phone-error' : undefined} onChange={(event) => setValue('phone', event.target.value)} />
+              <input type="tel" inputMode="tel" autoComplete={reviewOnly ? 'off' : 'tel'} placeholder="081 234 5678" value={fields.phone} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'contact-phone-error' : undefined} onChange={(event) => setValue('phone', event.target.value)} />
               {errors.phone && <small id="contact-phone-error" className="field-error" role="alert">{errors.phone}</small>}
             </label>}
             {fields.contactMethod === 'line' && <label><span>LINE ID</span>
@@ -211,8 +229,9 @@ export function LeadCapture({
         {submissionError && <div className="form-error form-error-summary" role="alert"><strong>{contact.failureTitle[locale]}</strong><p>{submissionError}</p></div>}
         <div className="contact-form-actions">
           <button type="button" className="button button-secondary" disabled={sending} onClick={onBack}><ArrowLeft size={18} />{english ? 'Back' : 'ย้อนกลับ'}</button>
-          <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : submissionError ? (english ? 'Try again' : 'ลองอีกครั้ง') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button>
+          <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{reviewOnly ? contactReviewCopy.finish[locale] : sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : submissionError ? (english ? 'Try again' : 'ลองอีกครั้ง') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button>
         </div>
+        {reviewOnly && <button type="button" className="text-link contact-skip" disabled={sending} onClick={finishReview}>{contactReviewCopy.skip[locale]}</button>}
         {submissionError && <button type="button" className="text-link contact-skip" disabled={sending} onClick={() => onContinue('skipped')}>{english ? 'Continue to my estimate without submitting' : 'ดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ'}</button>}
       </>
     </div>

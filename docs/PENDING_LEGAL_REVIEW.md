@@ -134,3 +134,13 @@ docs/PENDING_LEGAL_REVIEW.md
 docs/legal-review/contact-launch-copy.txt
 docs/legal-review/installer-services-and-credit-agreement.txt
 ```
+
+## Display-only contact review — 9 October 2026
+
+The existing calculator quote-choice step now offers **Test** / **ทดสอบ (Test)**. This is a transient UI choice, not a new questionnaire answer, collection mode, permission or lead status. It displays the current `contactLaunchReviewCopy.consent` verbatim with an unchecked checkbox and localized Privacy Notice link, then the existing single-panel contact form and separate unchecked adult/property-authority confirmation. Existing placeholders remain literal.
+
+Reviewers are instructed to use sample details. The review completion action performs local field validation only and continues to the ordinary estimate; it never calls `/api/leads`, refreshes a submission token, reports a saved request, records referral consent, or writes to D1/R2. This remains true even with an otherwise enabled real-contact configuration. Test details and checkbox acceptance stay in component memory only and are cleared on leaving the review, selecting No, or restarting. Closing/reloading the page intentionally discards them; ordinary non-sensitive assessment progress remains resumable.
+
+The normal No path, calculation logic, question order, real submission gates, published configuration, historical records, admin protection, recipient controls and deployment bindings are unchanged. Real collection remains disabled in an ordinary public session. The deferred legal/operational gaps listed above are not solved or activated by this preview.
+
+Validation: lint, TypeScript, all 57 unit tests and the clean production build passed. The final full browser suite passed 115 tests with 6 intentional skips, including the display-only test in both languages, exact review consent, required unchecked boxes, conditional contact fields, no submission/token refresh during review, no stored test PII, Back/No/restart clearing, 320px overflow and axe checks. Existing enabled-contact fixtures and the free estimate path also passed. English desktop and Thai 320px screenshots were visually reviewed. Read-only preflight counts remain 7 leads, 0 media assets, 3 legal versions, 0 deliveries and 9 audit events; no migration or data mutation is required.

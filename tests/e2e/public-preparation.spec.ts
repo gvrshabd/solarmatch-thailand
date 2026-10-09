@@ -53,7 +53,9 @@ for (const locale of ['en', 'th'] as const) {
     } })));
     await page.goto(`${prefix}/estimate`);
     await expect(page.getByRole('status').filter({ hasText: locale === 'en' ? "SolarMatch is preparing its installer referral service. The free calculator is available, but we are not currently accepting homeowner contact requests or installer credit purchases through this website. The referral and credit provisions in our legal documents describe the planned service and apply only when that service becomes available and the relevant request or agreement is made." : "SolarMatch อยู่ระหว่างเตรียมเปิดบริการส่งต่อคำขอให้บริษัทติดตั้งโซลาร์ คุณสามารถใช้เครื่องคำนวณได้ฟรี แต่ขณะนี้เว็บไซต์ยังไม่เปิดรับคำขอให้บริษัทติดตั้งติดต่อกลับหรือการซื้อเครดิตจากบริษัทติดตั้ง ข้อกำหนดเกี่ยวกับการส่งต่อคำขอและเครดิตในเอกสารทางกฎหมายอธิบายบริการที่วางแผนไว้ และจะใช้เมื่อบริการนั้นเปิดให้ใช้งานและมีการส่งคำขอหรือทำข้อตกลงที่เกี่ยวข้องแล้วเท่านั้น" })).toBeVisible();
-    await expect(page.locator('.quote-consent-check,input[type="tel"],.question-stage [role="radio"]')).toHaveCount(0);
+    await expect(page.locator('.quote-consent-check,input[type="tel"]')).toHaveCount(0);
+    await expect(page.getByRole('radio', { name: locale === 'en' ? /^Test/ : /^ทดสอบ/ })).toBeVisible();
+    await expect(page.getByRole('radio', { name: locale === 'en' ? /^Yes,/ : /^ใช่ / })).toHaveCount(0);
     await page.getByRole('button', { name: locale === 'en' ? 'View my estimate' : 'ดูผลประเมิน', exact: true }).click();
     await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 15_000 });
     expect(submissions).toBe(0);

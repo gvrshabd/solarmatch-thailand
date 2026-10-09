@@ -15,6 +15,7 @@ import Link from '@/components/site/internal-link';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
 import { initialQuestionnaire } from '@/config/assessment';
 import { lockedSharedConsentCopy } from '@/config/contact-content';
+import { contactReviewCopy } from '@/config/contact-review';
 import { prelaunchNotice } from '@/config/legal-review';
 import { localizedDistrictOptions } from '@/config/districts';
 import { localizedPath, type Locale } from '@/config/i18n';
@@ -232,6 +233,9 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const [direction, setDirection] = useState<ScreenDirection>('forward');
   const [transitioning, setTransitioning] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
+  // Review choices and checkbox state are transient, never real referral consent.
+  const [contactReview, setContactReview] = useState(false);
+  const [reviewConsentAccepted, setReviewConsentAccepted] = useState(false);
   const [contactResetKey, setContactResetKey] = useState(0);
   const [completionJourney, setCompletionJourney] = useState<CompletionJourney | null>(null);
   const [calculationComplete, setCalculationComplete] = useState(false);
@@ -325,7 +329,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }, [calculationComplete, completionJourney, locale, minimumLoadingElapsed, persistCompletionView, submissionComplete]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || showContactForm) return;
     const timer = window.setTimeout(() => {
       const activeElement = document.activeElement;
       if (!activeElement || activeElement === document.body || activeElement === questionHeadingRef.current) {
@@ -333,7 +337,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       }
     }, 255);
     return () => window.clearTimeout(timer);
-  }, [ready, step]);
+  }, [ready, step, showContactForm]);
 
   useEffect(() => () => {
     if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current);
@@ -371,7 +375,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   function selected(id: string, value: string) {
     const current = draft[id as keyof Draft];
     if (id === 'activelyPlanningSolar') return draft.planningTimeframe === value;
-    if (id === 'quoteContactRequested') return current === (value === 'yes');
+    if (id === 'quoteContactRequested') return value === 'test' ? contactReview : !contactReview && current === (value === 'yes');
     return current === value;
   }
 
@@ -386,14 +390,17 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       return;
     }
     if (id === 'quoteContactRequested') {
+      const review = value === 'test';
       const requested = value === 'yes';
+      setContactReview(review);
+      setReviewConsentAccepted(false);
+      if (review || contactReview || !requested) setContactResetKey((current) => current + 1);
       setDraft((current) => {
         const next: Draft = { ...current, quoteContactRequested: requested };
-        if (!requested) delete next.quoteConsentAccepted;
+        if (!requested || contactReview) delete next.quoteConsentAccepted;
         return next;
       });
       if (!requested) {
-        setContactResetKey((current) => current + 1);
         setShowContactForm(false);
       }
       setError('');
@@ -415,8 +422,13 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   function next() {
     if (navigationLockRef.current) return;
+    const reviewingContact = question.id === 'quoteContactRequested' && contactReview;
+    if (reviewingContact && !reviewConsentAccepted) {
+      setError(english ? 'Tick the consent box before continuing to the contact form.' : 'กรุณาทำเครื่องหมายในช่องความยินยอมก่อนกรอกข้อมูลติดต่อ');
+      return;
+    }
     const collectionUnavailable = question.id === 'quoteContactRequested' && (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
-    const validationDraft = collectionUnavailable ? { ...draft, quoteContactRequested: false, quoteConsentAccepted: undefined } : draft;
+    const validationDraft = collectionUnavailable || reviewingContact ? { ...draft, quoteContactRequested: false, quoteConsentAccepted: undefined } : draft;
     const questionError = firstQuestionError(question, validationDraft, english);
     if (questionError) { setError(questionError); return; }
     track('estimate_step_completed', { stepId: question.id, stepNumber: step + 1 });
@@ -433,6 +445,11 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       const firstQuestion = questions.findIndex((item) => item.id === firstIssue.path[0] || item.conditionalFields?.some((field) => field.id === firstIssue.path[0]));
       if (firstQuestion >= 0) moveStep(firstQuestion, firstQuestion < step ? 'backward' : 'forward');
       setError(english ? 'One answer still needs attention.' : 'ยังมีคำตอบที่ต้องตรวจสอบอีกหนึ่งข้อ');
+      return;
+    }
+    if (reviewingContact && assessmentConfig) {
+      setShowContactForm(true);
+      window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       return;
     }
     if (parsed.data.quoteContactRequested) {
@@ -466,6 +483,11 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function previous() {
+    if (contactReview) {
+      setContactReview(false);
+      setReviewConsentAccepted(false);
+      setContactResetKey((current) => current + 1);
+    }
     moveStep(step - 1, 'backward');
     setError('');
     window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -473,7 +495,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   function restart() {
     [starterStorageKey, draftStorageKey, resultStorageKey, assessmentContextStorageKey].forEach(removeSessionValue);
-    setDirection('backward'); setDraft({}); setStep(0); setError(''); setShowContactForm(false); setContactResetKey((current) => current + 1); window.scrollTo({ top: 0, behavior: 'auto' });
+    setDirection('backward'); setDraft({}); setStep(0); setError(''); setShowContactForm(false); setContactReview(false); setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   function toggleDaytimeLoad(value: DaytimeLoad) {
@@ -493,6 +515,10 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const completedAnswers = estimateAnswersSchema.safeParse(draft);
   const contactPermissionUnavailable = question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet';
   const contactCollectionUnavailable = question.id === 'quoteContactRequested' && (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
+  const visibleOptions = question.id === 'quoteContactRequested' ? [
+    ...(question.options ?? []).filter((option) => option.value !== 'yes' || (!contactPermissionUnavailable && !contactCollectionUnavailable)),
+    ...(assessmentConfig ? [{ value: 'test', label: contactReviewCopy.label, description: contactReviewCopy.help }] : []),
+  ] : question.options;
   const districtOptions = localizedDistrictOptions(draft.province ?? '', locale);
 
   return <>{completionJourney && <ScreenTransition transitionKey="journey-preparing" direction="forward" pace="result" className="journey-transition-surface"><CalculationLoading
@@ -518,19 +544,20 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
         {draft.province && <label htmlFor="estimate-postcode"><span>{english ? 'Postcode (optional)' : 'รหัสไปรษณีย์ (ไม่บังคับ)'}</span><input id="estimate-postcode" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={draft.postcode ?? ''} onChange={(event) => setValue('postcode', event.target.value.replace(/\D/gu, '').slice(0, 5) || undefined)} /></label>}
       </div>}
       {question.type === 'bill' && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
-      {question.type === 'choice' && !contactPermissionUnavailable && !contactCollectionUnavailable && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{question.options?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = question.options?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
+      {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{visibleOptions?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = visibleOptions?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
       {question.id === 'ownershipStatus' && draft.ownershipStatus !== undefined && draft.ownershipStatus !== 'owner' && <fieldset className="inline-followup"><legend id="owner-permission-title">{english ? 'Do you have the property owner’s permission to request contact from solar installers?' : 'คุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อจากผู้ติดตั้งโซลาร์แล้วหรือไม่?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="owner-permission-title" onKeyDown={handleRadioKeys}>{([['yes', english ? 'Yes' : 'ได้รับอนุญาตแล้ว'], ['not-yet', english ? 'Not yet' : 'ยังไม่ได้รับอนุญาต']] as const).map(([value, label], index) => <button key={value} type="button" role="radio" aria-checked={draft.ownerPermission === value} tabIndex={draft.ownerPermission === value || (!draft.ownerPermission && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.ownerPermission === value ? 'selected' : ''}`} onClick={() => setValue('ownerPermission', value)}><Home className="choice-icon" aria-hidden="true" /><strong>{label}</strong><span className="choice-indicator" aria-hidden="true">{draft.ownerPermission === value && <Check />}</span></button>)}</div></fieldset>}
       {contactPermissionUnavailable && <div className="permission-result-notice"><p>{english ? 'You can still view your estimate. To request installer contact, you will first need the property owner’s permission.' : 'คุณยังดูผลประเมินได้ตามปกติ หากต้องการให้ผู้ติดตั้งติดต่อ คุณต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ก่อน'}</p></div>}
-      {question.id === 'quoteContactRequested' && !contactCollectionUnavailable && draft.quoteContactRequested === true && <div className="quote-consent-block">
-        <label className="quote-consent-check"><input type="checkbox" checked={draft.quoteConsentAccepted ?? false} onChange={(event) => setValue('quoteConsentAccepted', event.target.checked ? true : undefined)} /><span><ConsentCopy copy={assessmentConfig?.contact.consent?.[locale] ?? lockedSharedConsentCopy[locale]} locale={locale} /></span></label>
+      {question.id === 'quoteContactRequested' && (contactReview || (!contactCollectionUnavailable && !contactPermissionUnavailable && draft.quoteContactRequested === true)) && <div className="quote-consent-block">
+        {contactReview && <p className="contact-review-notice" role="status">{contactReviewCopy.notice[locale]}</p>}
+        <label className="quote-consent-check"><input type="checkbox" checked={contactReview ? reviewConsentAccepted : draft.quoteConsentAccepted ?? false} onChange={(event) => { if (contactReview) { setReviewConsentAccepted(event.target.checked); setError(''); } else setValue('quoteConsentAccepted', event.target.checked ? true : undefined); }} /><span><ConsentCopy copy={contactReview ? lockedSharedConsentCopy[locale] : assessmentConfig?.contact.consent?.[locale] ?? lockedSharedConsentCopy[locale]} locale={locale} /></span></label>
       </div>}
       {question.type === 'multichoice' && <div className="choice-grid multichoice-grid" aria-labelledby="estimate-question">{question.options?.map((option) => { const checked = draft.daytimeLoads?.includes(option.value as DaytimeLoad) ?? false; const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="checkbox" aria-checked={checked} className={`choice-card visual-choice ${checked ? 'selected' : ''}`} onClick={() => toggleDaytimeLoad(option.value as DaytimeLoad)}><Icon className="choice-icon" aria-hidden="true" /><strong>{option.label[locale]}</strong><span className="choice-indicator checkbox-indicator" aria-hidden="true">{checked && <Check />}</span></button>; })}</div>}
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
       {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
-      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{(contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
+      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{contactReview ? (english ? 'Continue' : 'ถัดไป') : (contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
     </ScreenTransition></fieldset>
-    <div className="estimate-privacy-line"><span>{english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
+    <div className="estimate-privacy-line"><span>{contactReview ? contactReviewCopy.notice[locale] : english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
   </section>
   {assessmentConfig && completedAnswers.success && <LeadCapture
     locale={locale}
@@ -538,11 +565,16 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     configuration={assessmentConfig}
     active={showContactForm}
     resetKey={contactResetKey}
-    onBack={() => { setShowContactForm(false); setDirection('backward'); setError(''); }}
+    reviewOnly={contactReview}
+    onBack={() => { setShowContactForm(false); setDirection('backward'); setError(''); if (contactReview) { setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); } }}
     onConfigurationChanged={(configuration) => { setAssessmentConfig(configuration); writeSessionValue(assessmentContextStorageKey, configuration); }}
     onProcessingStart={() => beginCompletion(completedAnswers.data, 'submitted', true)}
     onProcessingFailed={cancelCompletion}
-    onContinue={(outcome) => outcome === 'submitted' ? setSubmissionComplete(true) : beginCompletion(completedAnswers.data, 'skipped', false)}
+    onContinue={(outcome) => {
+      if (outcome === 'reviewed') setReviewConsentAccepted(false);
+      if (outcome === 'submitted') setSubmissionComplete(true);
+      else beginCompletion(completedAnswers.data, 'skipped', false);
+    }}
   />}
   </div></main></>;
 }

@@ -112,7 +112,7 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   const decline = page.getByRole('radio', { name: en ? 'No, show my estimate without installer contact' : 'ไม่ใช่ ดูผลประเมินโดยไม่ให้ผู้ติดตั้งติดต่อ', exact: true });
   if (await decline.isVisible()) {
     await decline.click();
-    await page.getByRole('button', { name: en ? 'See my estimate' : 'ดูผลประเมิน', exact: true }).click();
+    await page.getByRole('button', { name: en ? /^(?:See|View) my estimate$/ : 'ดูผลประเมิน', exact: true }).click();
   } else {
     await page.getByRole('button', { name: en ? 'View my estimate' : 'ดูผลประเมิน', exact: true }).click();
   }

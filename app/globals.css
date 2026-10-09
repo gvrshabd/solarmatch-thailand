@@ -3449,6 +3449,8 @@ body.calculation-loading-active .site-footer { display: none; }
 .quote-consent-check { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 11px; align-items: start; color: var(--dark); font-size: 13px; line-height: 1.65; }
 .quote-consent-check input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--forest); }
 .quote-consent-check input:disabled + span { color: var(--muted); }
+.contact-review-notice { margin: 0 0 18px; padding: 12px 14px; border: 1px solid #cbdacf; border-radius: 8px; background: #f3f7f1; color: var(--dark); font-size: 13px; line-height: 1.65; }
+.quote-consent-block .contact-review-notice { margin-bottom: 4px; }
 .quote-privacy-link { width: fit-content; margin-left: 33px; color: var(--forest); font-size: 12px; font-weight: 800; text-underline-offset: 3px; }
 .contact-form-step { width: min(100%, 900px); margin-inline: auto; }
 .contact-form-panel { padding: clamp(24px, 4vw, 42px); border: 1px solid var(--border); border-radius: 14px; background: #fff; box-shadow: 0 20px 60px rgba(31, 63, 48, .08); }
