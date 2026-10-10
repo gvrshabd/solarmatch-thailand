@@ -15,6 +15,9 @@ describe('installer authentication configuration boundaries', () => {
     expect(() => validateInstallerAuthConfig('local-test', 'https://example.com', secret)).toThrow();
     expect(validateInstallerAuthConfig('local-test', 'http://localhost:3000', secret).secure).toBe(false);
     expect(validateInstallerAuthConfig('sandbox', 'https://example.com', secret).secure).toBe(true);
+    expect(() => validateInstallerAuthConfig('production', 'http://example.com', secret)).toThrow();
+    expect(() => validateInstallerAuthConfig('production', 'https://localhost:3000', secret)).toThrow();
+    expect(validateInstallerAuthConfig('production', 'https://installers.example.com', secret).secure).toBe(true);
   });
   it('never enables email recovery previews from remote hosts or sandbox mode', () => {
     expect(isLocalAuthPreview('local-test', new Request('http://localhost:3000/api/installer-auth/sign-up/email'))).toBe(true);

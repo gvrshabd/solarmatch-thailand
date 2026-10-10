@@ -22,12 +22,13 @@ export async function trustedInstallerAuthRequest(request:Request) {
 
 export function validateInstallerAuthConfig(mode: string | undefined, base: string | undefined, secret: string | undefined) {
   if (!mode || mode === 'off') throw new Error('Installer accounts are disabled.');
-  if (!['local-test', 'sandbox'].includes(mode)) throw new Error('Installer authentication mode is invalid.');
+  if (!['local-test', 'sandbox', 'production'].includes(mode)) throw new Error('Installer authentication mode is invalid.');
   if (!base || !secret || secret.length < 32) throw new Error('Installer authentication is not configured.');
   const url = new URL(base);
   const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
   if (url.protocol !== 'https:' && !(mode === 'local-test' && loopback && url.protocol === 'http:')) throw new Error('Installer authentication requires HTTPS.');
   if (mode === 'local-test' && !loopback) throw new Error('Local authentication requires a loopback origin.');
+  if (mode === 'production' && loopback) throw new Error('Production authentication requires a public HTTPS origin.');
   return { baseURL: url.origin, secure: url.protocol === 'https:' };
 }
 

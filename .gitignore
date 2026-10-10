@@ -1,6 +1,8 @@
 node_modules/
 .dev.vars*
 .installer-test/.dev.vars*
+.installer-test/demo-share-links.json
+.installer-test/demo-state.json
 dist/
 .next/
 .vinext/

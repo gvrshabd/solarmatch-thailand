@@ -1,9 +1,9 @@
-export type ProviderMode = 'off' | 'local-test' | 'sandbox';
+export type ProviderMode = 'off' | 'local-test' | 'sandbox' | 'live';
 export class ProviderError extends Error {
   constructor(public readonly code: string) { super(code); this.name = 'ProviderError'; }
 }
 export function requireMode(mode: ProviderMode) {
-  if (!['local-test', 'sandbox'].includes(mode)) throw new ProviderError('provider_disabled');
+  if (!['local-test', 'sandbox', 'live'].includes(mode)) throw new ProviderError('provider_disabled');
 }
 export function parseObject(raw: string): Record<string, unknown> {
   try { const value = JSON.parse(raw); if (value && typeof value === 'object' && !Array.isArray(value)) return value; } catch { /* safe error */ }

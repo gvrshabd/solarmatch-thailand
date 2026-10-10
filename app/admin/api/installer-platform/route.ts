@@ -3,17 +3,20 @@ import { requireAdminRequest,isAdminError } from '@/lib/server/admin-api';
 import { requireDatabase } from '@/lib/server/runtime';
 import { assertPlatformRequest,platformBody,platformJson } from '@/lib/installer/platform';
 import { getPlatformSettings,installerSettingsSchema,materialTermsChanged } from '@/lib/installer/settings';
-import { allocateEnquiry,processQueue,grantTrial,decideClaim,suppressEnquiry,platformAudit,isoNow,type Row } from '@/lib/installer/deliveries';
-import { processOutbox } from '@/lib/installer/jobs';
-import { reconcileOrder } from '@/lib/installer/payments';
+import { allocateEnquiry,processQueue,retryEnquiry,grantTrial,decideClaim,suppressEnquiry,platformAudit,isoNow,type Row } from '@/lib/installer/deliveries';
+import { processOutbox,retryNotification } from '@/lib/installer/jobs';
+import { getInstallerOperations } from '@/lib/installer/operations';
+import { reconcileOrder,associateProviderCharge } from '@/lib/installer/payments';
 import {reviewEnquiry} from '@/lib/installer/review';
 import {previewRetention} from '@/lib/installer/privacy';
+import {setLocalTestClock} from '@/lib/installer/test-clock';
+import {reconcileNotification} from '@/lib/installer/notification-reconciliation';
 export const dynamic='force-dynamic';
-const input=z.object({action:z.enum(['approve-company','grant-trial','allocate','process-queue','retry-outbox','decide-claim','adjust-credit','save-settings','reconcile','pause-company','suppress-enquiry','record-ad-spend','acknowledge-privacy-notification','review-enquiry','preview-retention']),companyId:z.string().uuid().optional(),approve:z.boolean().optional(),enquiryId:z.string().max(100).optional(),companyIds:z.array(z.string().uuid()).max(3).optional(),claimId:z.string().uuid().optional(),decision:z.enum(['approved','rejected','needs-information','same-project','distinct-project','reject']).optional(),leadId:z.string().uuid().optional(),notes:z.string().trim().max(2000).optional(),units:z.number().int().min(-10000).max(10000).optional(),reason:z.string().trim().min(3).max(1000).optional(),settings:installerSettingsSchema.optional(),orderId:z.string().uuid().optional(),paused:z.boolean().optional(),amountMinor:z.number().int().positive().max(100000000).optional(),outboxId:z.string().max(100).optional()}).strict();
+const input=z.object({action:z.enum(['approve-company','record-company-contract','set-company-preferences','connect-local-line-preview','set-local-test-clock','grant-trial','allocate','retry-enquiry','process-queue','retry-outbox','retry-notification','reconcile-notification','decide-claim','adjust-credit','save-settings','reconcile','associate-provider-charge','pause-company','suppress-enquiry','record-ad-spend','acknowledge-privacy-notification','review-enquiry','preview-retention']),companyId:z.string().uuid().optional(),approve:z.boolean().optional(),enquiryId:z.string().max(100).optional(),companyIds:z.array(z.string().trim().min(1).max(100)).max(3).optional(),claimId:z.string().uuid().optional(),decision:z.enum(['approved','rejected','needs-information','same-project','distinct-project','reject']).optional(),leadId:z.string().uuid().optional(),notes:z.string().trim().max(2000).optional(),units:z.number().int().min(-10000).max(10000).optional(),reason:z.string().trim().min(3).max(1000).optional(),settings:installerSettingsSchema.optional(),orderId:z.string().uuid().optional(),chargeId:z.string().trim().min(8).max(120).optional(),paused:z.boolean().optional(),amountMinor:z.number().int().positive().max(100000000).optional(),outboxId:z.string().max(100).optional(),outcome:z.enum(['accepted','not-sent']).optional(),providerReference:z.string().trim().max(100).optional(),registrationNumber:z.string().trim().min(3).max(100).optional(),privacyNoticeUrl:z.string().url().max(500).optional(),contractEffectiveDate:z.iso.date().optional(),contractExpiryDate:z.iso.date().optional(),fixedAt:z.iso.datetime().nullable().optional(),minimumBill:z.number().int().min(0).max(100000000).optional(),propertyTypes:z.array(z.enum(['detached-home','semi-detached-home','townhouse','large-home','other-residential'])).min(1).max(5).optional()}).strict();
 export async function GET(request:Request) {
   const identity=await requireAdminRequest(request);if(isAdminError(identity))return identity;
   try{assertPlatformRequest(request);const db=requireDatabase();const settings=await getPlatformSettings(db);
-const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.debt FROM solar_company_partners p LEFT JOIN installer_credit_accounts a ON a.company_id=p.id ORDER BY p.created_at DESC LIMIT 200',enquiries:`SELECT e.*,(SELECT o.attribution_json FROM installer_operational_events o WHERE o.enquiry_id=e.id AND o.event_type='qualification-evaluated' AND json_extract(o.attribution_json,'$.sourceLeadId')=e.lead_id ORDER BY o.created_at DESC,o.rowid DESC LIMIT 1) AS qualification_snapshot FROM installer_enquiries e ORDER BY e.created_at DESC LIMIT 200`,deliveries:'SELECT * FROM lead_recipient_deliveries ORDER BY created_at DESC LIMIT 200',orders:'SELECT id,company_id,amount_minor,credits,status,created_at FROM installer_payment_orders ORDER BY created_at DESC LIMIT 200',claims:'SELECT * FROM installer_claims ORDER BY submitted_at DESC LIMIT 200',ledger:'SELECT * FROM installer_credit_ledger ORDER BY created_at DESC LIMIT 200',outbox:'SELECT id,delivery_id,company_id,kind,state,attempts,last_error,created_at FROM installer_outbox ORDER BY created_at DESC LIMIT 200'};
+const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.debt FROM solar_company_partners p LEFT JOIN installer_credit_accounts a ON a.company_id=p.id ORDER BY p.created_at DESC LIMIT 200',enquiries:`SELECT e.*,(SELECT o.attribution_json FROM installer_operational_events o WHERE o.enquiry_id=e.id AND o.event_type='qualification-evaluated' AND json_extract(o.attribution_json,'$.sourceLeadId')=e.lead_id ORDER BY o.created_at DESC,o.rowid DESC LIMIT 1) AS qualification_snapshot FROM installer_enquiries e ORDER BY e.created_at DESC LIMIT 200`,deliveries:'SELECT * FROM lead_recipient_deliveries ORDER BY created_at DESC LIMIT 200',orders:'SELECT id,company_id,amount_minor,credits,status,provider,provider_order_id,last_reconciliation_at,reconciliation_error_code,created_at FROM installer_payment_orders ORDER BY created_at DESC LIMIT 200',claims:'SELECT * FROM installer_claims ORDER BY submitted_at DESC LIMIT 200',ledger:'SELECT * FROM installer_credit_ledger ORDER BY created_at DESC LIMIT 200',outbox:'SELECT id,delivery_id,company_id,kind,state,attempts,last_error,created_at FROM installer_outbox ORDER BY created_at DESC LIMIT 200'};
     const tables:Record<string,unknown>={};for(const [key,sql] of Object.entries(queries))tables[key]=(await db.prepare(sql).all()).results;
     const summary=await db.prepare(`SELECT (SELECT COUNT(*) FROM leads) AS rawSubmissionRecords,
       (SELECT COUNT(*) FROM leads WHERE quote_contact_requested=1) AS contactRequestSubmissions,
@@ -42,7 +45,7 @@ const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.
       NULL AS verifiedBankSettlementMinor,
       (SELECT COALESCE(SUM(amount_minor),0) FROM installer_operational_events WHERE event_type='ad-spend') AS adSpendMinor,
       (SELECT COUNT(*) FROM installer_outbox WHERE state IN ('failed','needs-reconciliation','action-required')) AS attentionRequired`).bind(settings.creditValueMinor).first();
-    return platformJson({settings,...tables,summary});
+    return platformJson({settings,...tables,summary,operations:await getInstallerOperations(db)});
   }catch{return platformJson({error:'installer_platform_unavailable'},503);}
 }
 export async function POST(request:Request) {
@@ -55,12 +58,36 @@ export async function POST(request:Request) {
     }else if(data.action==='approve-company'){
       const company=await db.prepare('SELECT * FROM solar_company_partners WHERE id=?').bind(data.companyId??'').first<Row>();
       if(!company)throw new Error('company_missing');
+      if(data.approve===undefined)throw new Error('approval_decision_required');
+      if(company.archived_at)throw new Error('company_archived');
       if(data.approve&&(!company.registration_number||!company.privacy_notice_url||company.contract_state!=='active'||!company.contract_effective_date||!company.contract_expiry_date))throw new Error('legal_identity_and_contract_required');
-      await db.batch([db.prepare('UPDATE solar_company_partners SET approval_status=?,updated_at=?,updated_by=? WHERE id=?').bind(data.approve?'approved':'rejected',now,actor,company.id),db.prepare('INSERT OR IGNORE INTO installer_credit_accounts(company_id) VALUES(?)').bind(company.id),platformAudit(db,actor,'company-approval',String(company.id),{approved:!!data.approve})]);
+      await db.batch([db.prepare('UPDATE solar_company_partners SET approval_status=?,active=?,updated_at=?,updated_by=? WHERE id=? AND archived_at IS NULL').bind(data.approve?'approved':'rejected',data.approve?1:0,now,actor,company.id),db.prepare('INSERT OR IGNORE INTO installer_credit_accounts(company_id) VALUES(?)').bind(company.id),platformAudit(db,actor,'company-approval',String(company.id),{approved:data.approve})]);
+    }else if(data.action==='record-company-contract'){
+      if(!data.companyId||!data.registrationNumber||!data.privacyNoticeUrl||!data.contractEffectiveDate||!data.contractExpiryDate||!data.reason||data.contractExpiryDate<data.contractEffectiveDate)throw new Error('contract_evidence_required');
+      const existing=await db.prepare('SELECT id FROM solar_company_partners WHERE id=?').bind(data.companyId).first();if(!existing)throw new Error('company_missing');
+      await db.batch([db.prepare("UPDATE solar_company_partners SET registration_number=?,privacy_notice_url=?,contract_state='active',contract_effective_date=?,contract_expiry_date=?,updated_at=?,updated_by=? WHERE id=?").bind(data.registrationNumber,data.privacyNoticeUrl,data.contractEffectiveDate,data.contractExpiryDate,now,actor,data.companyId),platformAudit(db,actor,'company-contract-recorded',data.companyId,{reason:data.reason})]);
+    }else if(data.action==='set-company-preferences'){
+      if(!data.companyId||data.minimumBill===undefined||!data.propertyTypes?.length)throw new Error('preferences_required');
+      const result=await db.prepare('UPDATE solar_company_partners SET preferences_json=?,updated_at=?,updated_by=? WHERE id=? RETURNING id').bind(JSON.stringify({minimumBill:data.minimumBill,propertyTypes:data.propertyTypes}),now,actor,data.companyId).first();
+      if(!result)throw new Error('company_missing');
+      await platformAudit(db,actor,'company-preferences',data.companyId,{minimumBill:data.minimumBill,propertyTypes:data.propertyTypes}).run();
+    }else if(data.action==='connect-local-line-preview'){
+      if(assertPlatformRequest(request).mode!=='local-test'||!data.companyId)throw new Error('local_test_only');
+      const result=await db.prepare("UPDATE solar_company_partners SET line_user_id=COALESCE(line_user_id,?),updated_at=?,updated_by=? WHERE id=? AND legal_name_en LIKE 'Synthetic %' RETURNING id").bind(`U${data.companyId.replaceAll('-','')}`,now,actor,data.companyId).first();
+      if(!result)throw new Error('synthetic_company_required');
+      await platformAudit(db,actor,'local-line-preview-fixture',data.companyId).run();
+    }else if(data.action==='set-local-test-clock'){
+      if(data.fixedAt===undefined)throw new Error('clock_value_required');
+      const result=await setLocalTestClock(db,request,data.fixedAt);
+      await platformAudit(db,actor,'local-test-clock',result.fixedAt?'enabled':'cleared').run();
+      return platformJson(result);
     }else if(data.action==='grant-trial'){await grantTrial(db,data.companyId??'',actor);
     }else if(data.action==='allocate'){return platformJson(await allocateEnquiry(db,data.enquiryId??'',actor,data.companyIds));
+    }else if(data.action==='retry-enquiry'){if(!data.enquiryId)throw new Error('enquiry_required');return platformJson(await retryEnquiry(db,data.enquiryId,actor));
     }else if(data.action==='process-queue'){return platformJson({results:await processQueue(db,actor)});
     }else if(data.action==='retry-outbox'){return platformJson(await processOutbox(db));
+    }else if(data.action==='retry-notification'){if(!data.outboxId)throw new Error('notification_required');return platformJson(await retryNotification(db,data.outboxId,actor));
+    }else if(data.action==='reconcile-notification'){if(!data.outboxId||!data.outcome||!data.notes)throw new Error('notification_evidence_required');return platformJson(await reconcileNotification(db,data.outboxId,data.outcome,data.notes,data.providerReference,actor,assertPlatformRequest(request).mode));
     }else if(data.action==='decide-claim'){
       if(!data.claimId||!data.decision||!['approved','rejected','needs-information'].includes(data.decision)||!data.notes)throw new Error('claim_decision_requires_reason');await decideClaim(db,data.claimId,data.decision,data.notes,actor);
     }else if(data.action==='adjust-credit'){
@@ -68,6 +95,11 @@ export async function POST(request:Request) {
     }else if(data.action==='reconcile'){
       const orders=data.orderId?[{id:data.orderId}]:(await db.prepare("SELECT id FROM installer_payment_orders WHERE status IN ('pending','paid','reconciliation-required') ORDER BY updated_at LIMIT 30").all<{id:string}>()).results;
       for(const order of orders)await reconcileOrder(db,null,order.id,request);
+    }else if(data.action==='associate-provider-charge'){
+      if(!data.orderId||!data.chargeId||!data.reason||data.reason.length<20)throw new Error('provider_evidence_required');
+      const confirmed=await associateProviderCharge(db,data.orderId,data.chargeId,request);
+      await platformAudit(db,actor,'provider-charge-associated',data.orderId,{reason:data.reason,providerChargeId:data.chargeId}).run();
+      return platformJson({ok:true,orderId:confirmed.id,status:confirmed.status});
     }else if(data.action==='pause-company'){await db.batch([db.prepare('UPDATE solar_company_partners SET paused=? WHERE id=?').bind(data.paused?1:0,data.companyId??''),platformAudit(db,actor,'company-pause',data.companyId??'',{paused:data.paused})]);
     }else if(data.action==='suppress-enquiry'){await suppressEnquiry(db,data.enquiryId??'',data.reason??'privacy-request',actor);
     }else if(data.action==='review-enquiry'){
@@ -79,7 +111,14 @@ export async function POST(request:Request) {
     }else if(data.action==='record-ad-spend'){
       if(!data.amountMinor||!data.reason)throw new Error('spend_requires_reason');await db.batch([db.prepare("INSERT INTO installer_operational_events(id,event_type,amount_minor,attribution_json,created_at) VALUES(?,'ad-spend',?,?,?)").bind(crypto.randomUUID(),data.amountMinor,JSON.stringify({campaign:data.reason}),now),platformAudit(db,actor,'ad-spend','manual',{amountMinor:data.amountMinor})]);
     }else if(data.action==='acknowledge-privacy-notification'){
-      if(!data.outboxId||!data.notes)throw new Error('notification_evidence_required');await db.batch([db.prepare("UPDATE installer_outbox SET state='accepted',updated_at=? WHERE id=? AND kind='withdrawal' AND state='action-required'").bind(now,data.outboxId),platformAudit(db,actor,'privacy-recipient-notified',data.outboxId,{notes:data.notes})]);
+      if(!data.outboxId||!data.notes)throw new Error('notification_evidence_required');
+      const changed=await db.batch([
+        db.prepare("UPDATE installer_outbox SET state='accepted',updated_at=? WHERE id=? AND kind='withdrawal' AND state='action-required'").bind(now,data.outboxId),
+        db.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,previous_json,next_json,request_id)
+          SELECT ?,?,'installer.privacy-recipient-notified','installer_platform',?,NULL,?,NULL WHERE changes()=1`)
+          .bind(crypto.randomUUID(),actor,data.outboxId,JSON.stringify({notes:data.notes})),
+      ]);
+      if(changed[0].meta.changes!==1||changed[1].meta.changes!==1)throw new Error('withdrawal_task_not_action_required');
     }
     return platformJson({ok:true});
   }catch{return platformJson({error:'operation_rejected_check_eligibility_and_required_fields'},409);}

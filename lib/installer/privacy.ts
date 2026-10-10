@@ -13,6 +13,13 @@ export async function previewRetention(db: D1Database, request: Request, retenti
 /** Caller retains existing authenticated administrator + CSRF checks. */
 export async function purgeInstallerLeads(db: D1Database, request: Request, leadIds: string[], actor: string) {
   assertPlatformRequest(request);
+  return redactInstallerLeads(db,leadIds,actor);
+}
+
+/** Internal DB operation. Its HTTP caller MUST require administrator identity and CSRF.
+ * Privacy redaction remains available when installer collection is switched off. */
+export async function redactInstallerLeads(db:D1Database,leadIds:string[],actor:string) {
+  if(!actor||leadIds.length<1||leadIds.length>50)throw new Error('invalid_privacy_redaction');
   const selected = await db.prepare(`SELECT DISTINCT l.id,l.phone_e164,l.line_id,l.request_fingerprint FROM leads l WHERE l.id IN (${leadIds.map(() => '?').join(',')})
     OR l.id IN(SELECT el.lead_id FROM installer_enquiry_leads el WHERE el.enquiry_id IN(SELECT enquiry_id FROM installer_enquiry_leads WHERE lead_id IN(${leadIds.map(() => '?').join(',')})))`)
     .bind(...leadIds,...leadIds).all<{id:string;phone_e164:string|null;line_id:string|null;request_fingerprint:string}>();

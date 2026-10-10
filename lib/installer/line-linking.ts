@@ -3,7 +3,7 @@ import { encodeBase64Url,hmacSha256,sha256 } from '@/lib/server/crypto';
 import { assertPlatformRequest } from './platform';
 import { getPlatformSettings } from './settings';
 import { lineAccountLinkUrl,requestLinkToken,sendAccountLinkInvitation,verifyLineWebhook,type LineConfig,type LineEvent } from './providers/line';
-async function configFor(db:D1Database,request:Request):Promise<LineConfig>{const {mode}=assertPlatformRequest(request);const env=getRuntimeEnv(),settings=await getPlatformSettings(db);let recipients:string[]=[];try{const value=JSON.parse(env.LINE_TEST_RECIPIENTS??'[]');if(Array.isArray(value)&&value.every(item=>typeof item==='string'))recipients=value;}catch{/* fail closed */}return {mode:mode==='local-test'?'local-test':'sandbox',channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:settings.notificationsEnabled&&env.OUTBOUND_MESSAGES_ENABLED==='true',sandboxRecipients:recipients};}
+async function configFor(db:D1Database,request:Request):Promise<LineConfig>{const {mode}=assertPlatformRequest(request);const env=getRuntimeEnv(),settings=await getPlatformSettings(db);let recipients:string[]=[];try{const value=JSON.parse(env.LINE_TEST_RECIPIENTS??'[]');if(Array.isArray(value)&&value.every(item=>typeof item==='string'))recipients=value;}catch{/* fail closed */}const providerMode=mode==='local-test'?'local-test':env.LINE_PROVIDER_MODE==='live'&&String(mode)==='production'?'live':env.LINE_PROVIDER_MODE==='sandbox'&&mode==='sandbox'?'sandbox':'off';return {mode:providerMode,channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:!settings.platformPaused&&settings.notificationsEnabled&&env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:recipients};}
 export async function beginLineLink(db:D1Database,companyId:string,request:Request,linkRequest?:string){
   const config=await configFor(db,request);
   const company=await db.prepare("SELECT id,line_user_id FROM solar_company_partners WHERE id=? AND approval_status='approved'").bind(companyId).first<{id:string;line_user_id:string|null}>();if(!company)throw new Error('company_not_approved');
@@ -37,6 +37,16 @@ export async function processLineWebhook(db:D1Database,request:Request,raw:strin
     const eventId=`line:${event.webhookEventId}`;
     if(await db.prepare('SELECT id FROM installer_webhook_events WHERE id=?').bind(eventId).first())continue;
     if(event.type==='accountLink'){await applyAccountLink(db,event);continue;}
+    if(event.type==='unfollow'&&event.source.type==='user'&&event.source.userId){
+      const now=new Date().toISOString();
+      await db.batch([
+        db.prepare(`UPDATE installer_outbox SET state='cancelled',last_error='line_unfollowed',updated_at=? WHERE kind='installer-delivery' AND state IN ('pending','failed') AND delivery_id IN
+          (SELECT d.id FROM lead_recipient_deliveries d JOIN solar_company_partners p ON p.id=d.partner_id WHERE p.line_user_id=?)`).bind(now,event.source.userId),
+        db.prepare('UPDATE solar_company_partners SET line_user_id=NULL,updated_at=? WHERE line_user_id=?').bind(now,event.source.userId),
+        db.prepare("INSERT OR IGNORE INTO installer_webhook_events(id,provider,created_at) VALUES(?,'line',?)").bind(eventId,now),
+      ]);
+      continue;
+    }
     if((event.type!=='follow'&&event.type!=='message')||event.source.type!=='user'||!event.source.userId)continue;
     if(event.type==='message'&&(event as LineEvent&{message?:{type?:string;text?:string}}).message?.text?.trim().toUpperCase()!=='LINK')continue;
     if(!config.channelSecret)throw new Error('missing_line_secret');

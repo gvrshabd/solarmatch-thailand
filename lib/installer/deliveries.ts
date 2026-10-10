@@ -1,5 +1,7 @@
 import { getPlatformSettings, withinDeliveryHours } from './settings';
 import { auditStatement } from '@/lib/server/audit';
+import { beginJobRun,finishJobRun } from './operations';
+import { installerAllocationNow } from './test-clock';
 
 export type Row = Record<string, string | number | null>;
 export const parseJson = <T>(value: unknown, fallback: T): T => { try { return typeof value === 'string' ? JSON.parse(value) as T : fallback; } catch { return fallback; } };
@@ -11,7 +13,8 @@ export function platformAudit(db:D1Database,actor:string,action:string,id:string
 /** The DB trigger is the final authority: debit, slot, outbox and rotation commit together. */
 export async function allocateEnquiry(db:D1Database,enquiryId:string,actor:string,requestedCompanyIds?:string[]) {
   const settings=await getPlatformSettings(db);
-  if(settings.deliveryPaused||!settings.collectionEnabled||!withinDeliveryHours(new Date(),settings)) return {allocated:[],reason:'paused_or_outside_hours'};
+  const allocationTime=await installerAllocationNow(db);
+  if(settings.platformPaused||settings.deliveryPaused||!settings.collectionEnabled||!withinDeliveryHours(allocationTime,settings)) return {allocated:[],reason:'paused_or_outside_hours'};
   const enquiry=await db.prepare('SELECT * FROM installer_enquiries WHERE id=?').bind(enquiryId).first<Row>();
   if(!enquiry) throw new Error('enquiry_not_found');
   const candidates=await db.prepare(`SELECT p.id FROM solar_company_partners p JOIN installer_credit_accounts a ON a.company_id=p.id
@@ -20,7 +23,7 @@ export async function allocateEnquiry(db:D1Database,enquiryId:string,actor:strin
   const allocated:string[]=[];
   for(const company of candidates.results) {
     if(requestedCompanyIds&&!requestedCompanyIds.includes(company.id)) continue;
-    const id=crypto.randomUUID();const now=isoNow();
+    const id=crypto.randomUUID();const now=allocationTime.toISOString();
     try {
       const committed=await db.batch([
         db.prepare(`INSERT INTO lead_recipient_deliveries(id,lead_id,partner_id,consent_version,privacy_notice_version_id,disclosure_purpose,fields_disclosed_json,
@@ -28,13 +31,15 @@ export async function allocateEnquiry(db:D1Database,enquiryId:string,actor:strin
           SELECT ?,l.id,?,l.consent_version,l.privacy_notice_version_id,'residential_solar_site_survey_and_quotation',l.disclosed_fields_snapshot_json,
           ?,?,'manual-email',e.request_expires_at,?,?,e.id,'shared_residential',?,?,
           CASE WHEN a.trial_remaining>0 THEN 'trial' ELSE 'purchased' END,?,?,'portal'
-          FROM installer_enquiries e JOIN leads l ON l.id=e.lead_id JOIN installer_credit_accounts a ON a.company_id=? WHERE e.id=?`)
-          .bind(id,company.id,now,actor,now,now,settings.sharedCredits,settings.sharedCredits*settings.creditValueMinor,now,new Date(Date.now()+settings.claimDays*86400000).toISOString(),company.id,enquiryId),
+          FROM installer_enquiries e JOIN leads l ON l.id=e.lead_id JOIN installer_credit_accounts a ON a.company_id=? WHERE e.id=? RETURNING id`)
+          .bind(id,company.id,now,actor,now,now,settings.sharedCredits,settings.sharedCredits*settings.creditValueMinor,now,new Date(allocationTime.getTime()+settings.claimDays*86400000).toISOString(),company.id,enquiryId),
         db.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json)
           SELECT ?,?,'installer.allocate','installer_platform',?,? WHERE EXISTS(SELECT 1 FROM lead_recipient_deliveries WHERE id=?)`)
           .bind(crypto.randomUUID(),actor,id,JSON.stringify({enquiryId,companyId:company.id}),id),
       ]);
-      if(committed[0].meta.changes===1)allocated.push(id);
+      // D1 meta.changes includes trigger writes; RETURNING identifies the actual
+      // inserted delivery consistently in local Workerd and SQLite fixtures.
+      if(committed[0].results.some(row=>(row as {id?:string}).id===id))allocated.push(id);
     } catch(error) {
       // Eligibility can change between selection and INSERT. Never relax it on retry.
       const message=error instanceof Error?error.message:'';
@@ -42,14 +47,68 @@ export async function allocateEnquiry(db:D1Database,enquiryId:string,actor:strin
     }
   }
   if(!allocated.length)await db.prepare(`UPDATE installer_enquiries SET status='unmatched' WHERE id=? AND status IN ('queued','unmatched')
-    AND verification_state='verified' AND qualification_state='eligible' AND suppressed_at IS NULL AND julianday(request_expires_at)>julianday('now')
-    AND NOT EXISTS(SELECT 1 FROM lead_recipient_deliveries WHERE enquiry_id=?)`).bind(enquiryId,enquiryId).run();
+    AND verification_state='verified' AND qualification_state='eligible' AND suppressed_at IS NULL AND julianday(request_expires_at)>julianday(?)
+    AND NOT EXISTS(SELECT 1 FROM lead_recipient_deliveries WHERE enquiry_id=?)`).bind(enquiryId,allocationTime.toISOString(),enquiryId).run();
   return {allocated,reason:allocated.length?'allocated':'no_eligible_company_or_capacity'};
 }
 export async function processQueue(db:D1Database,actor:string) {
-  const pending=await db.prepare("SELECT id FROM installer_enquiries WHERE status IN ('queued','partially-delivered','unmatched') AND suppressed_at IS NULL AND julianday(request_expires_at)>julianday('now') ORDER BY created_at,id LIMIT 50").all<{id:string}>();
-  const results=[];for(const item of pending.results) results.push({enquiryId:item.id,...await allocateEnquiry(db,item.id,actor)});
-  return results;
+  const runId=await beginJobRun(db,'allocation',actor);
+  const results:Array<{enquiryId:string;allocated:string[];reason:string}>=[];
+  try {
+    const settings=await getPlatformSettings(db);
+    if(settings.platformPaused||settings.deliveryPaused||!settings.collectionEnabled||!withinDeliveryHours(await installerAllocationNow(db),settings)) {
+      await finishJobRun(db,runId,{processed:0,reason:'paused_or_outside_hours'});return results;
+    }
+    const clock=(await installerAllocationNow(db)).toISOString();
+    const pending=await db.prepare(`SELECT id FROM installer_enquiries
+      WHERE status IN ('queued','partially-delivered','unmatched') AND verification_state='verified' AND qualification_state='eligible'
+      AND duplicate_state IN('original','repeat') AND suppressed_at IS NULL AND julianday(request_expires_at)>julianday(?)
+      AND (next_allocation_at IS NULL OR julianday(next_allocation_at)<=julianday(?))
+      AND (allocation_lease_until IS NULL OR julianday(allocation_lease_until)<=julianday(?))
+      ORDER BY COALESCE(next_allocation_at,created_at),created_at,id LIMIT 50`).bind(clock,clock,clock).all<{id:string}>();
+    for(const item of pending.results) {
+      const now=(await installerAllocationNow(db)).toISOString();
+      const lease=await db.prepare(`UPDATE installer_enquiries SET allocation_lease_until=?,last_allocation_at=?,allocation_attempts=allocation_attempts+1
+        WHERE id=? AND status IN('queued','partially-delivered','unmatched') AND suppressed_at IS NULL
+        AND (allocation_lease_until IS NULL OR julianday(allocation_lease_until)<=julianday(?))
+        AND (next_allocation_at IS NULL OR julianday(next_allocation_at)<=julianday(?)) RETURNING allocation_attempts`)
+        .bind(new Date(Date.parse(now)+120000).toISOString(),now,item.id,now,now).first<{allocation_attempts:number}>();
+      if(!lease)continue;
+      try {
+        const result=await allocateEnquiry(db,item.id,actor);results.push({enquiryId:item.id,...result});
+        await db.prepare('UPDATE installer_enquiries SET allocation_lease_until=NULL,allocation_error_code=NULL,next_allocation_at=? WHERE id=?')
+          .bind(new Date(Date.parse(now)+300000).toISOString(),item.id).run();
+      } catch {
+        // Safe operational code only: raw database/provider errors may contain private values.
+        await db.prepare(`UPDATE installer_enquiries SET allocation_lease_until=NULL,allocation_error_code='allocation_failed',next_allocation_at=?,
+          status=CASE WHEN allocation_attempts>=8 THEN 'review' ELSE status END WHERE id=?`)
+          .bind(new Date(Date.parse(now)+Math.min(21600000,2**Math.min(lease.allocation_attempts,8)*60000)).toISOString(),item.id).run();
+        results.push({enquiryId:item.id,allocated:[],reason:'allocation_failed'});
+      }
+    }
+    const failures=results.filter(result=>result.reason==='allocation_failed').length;
+    await finishJobRun(db,runId,{processed:results.length,deliveries:results.reduce((count,result)=>count+result.allocated.length,0),failures},failures?'allocation_items_failed':undefined);
+    return results;
+  } catch(error) {
+    await finishJobRun(db,runId,{processed:results.length},'allocation_run_failed');throw error;
+  }
+}
+export async function retryEnquiry(db:D1Database,enquiryId:string,actor:string) {
+  const clock=(await installerAllocationNow(db)).toISOString();
+  const result=await db.batch([
+    db.prepare(`UPDATE installer_enquiries SET next_allocation_at=NULL,allocation_lease_until=NULL,allocation_attempts=0,allocation_error_code=NULL,
+      status=CASE WHEN EXISTS(SELECT 1 FROM lead_recipient_deliveries WHERE enquiry_id=installer_enquiries.id) THEN 'partially-delivered' ELSE 'queued' END
+      WHERE id=? AND verification_state='verified' AND qualification_state='eligible' AND duplicate_state IN('original','repeat') AND suppressed_at IS NULL
+      AND julianday(request_expires_at)>julianday(?) AND (allocation_lease_until IS NULL OR julianday(allocation_lease_until)<=julianday(?))
+      AND (SELECT COUNT(DISTINCT partner_id) FROM lead_recipient_deliveries WHERE enquiry_id=installer_enquiries.id)<recipient_limit
+      AND EXISTS(SELECT 1 FROM leads l WHERE l.id=installer_enquiries.lead_id AND l.suppressed=0 AND l.consent_withdrawn_at IS NULL
+      AND l.purged_at IS NULL AND l.deleted_at IS NULL AND l.archived_at IS NULL AND l.distribution_allowed=1 AND l.quote_contact_requested=1
+      AND l.third_party_disclosure_authorized_v2=1 AND julianday(l.distribution_expires_at)>julianday(?))`).bind(enquiryId,clock,clock,clock),
+    db.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id)
+      SELECT ?,?,'installer.retry-enquiry','installer_platform',? WHERE changes()=1`).bind(crypto.randomUUID(),actor,enquiryId),
+  ]);
+  if(result[0].meta.changes!==1)throw new Error('enquiry_retry_not_allowed');
+  return {queued:true};
 }
 export async function grantTrial(db:D1Database,companyId:string,actor:string) {
   const now=isoNow();

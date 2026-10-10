@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { base64, hmac } from '../../lib/installer/providers/common';
-import { confirmPayment, createCharge, createHostedOrder, normalizePayment, verifyPaymentEvent } from '../../lib/installer/providers/payment';
+import { confirmPayment, createCharge, createHostedOrder, normalizePayment, verifyPaymentEvent, type PaymentConfig } from '../../lib/installer/providers/payment';
 import { enquiryNotificationText, sendEnquiryNotification, verifyLineWebhook } from '../../lib/installer/providers/line';
 import { sendMessage } from '../../lib/installer/providers/sms';
+import { sendAuthEmail } from '../../lib/installer/providers/email';
 
 const order = { orderId: 'order_fixture', amountMinor: 400000, currency: 'thb' as const, description: '20 credits', returnUrl: 'https://example.test/installers/purchases' };
 const charge = { id: 'chrg_test_fixture', object: 'charge', livemode: false, amount: 400000, currency: 'THB', paid: true, capture: true, status: 'successful', refunded_amount: 0, metadata: { solarmatch_order_id: order.orderId }, transaction: 'trxn_test_fixture' };
@@ -77,5 +78,61 @@ describe('installer provider boundaries', () => {
     expect(enquiryNotificationText(notification)).toContain('สิทธิ์ทดลองฟรี');
     await expect(sendEnquiryNotification(notification, { mode: 'sandbox', fetch: transport })).rejects.toThrow('outbound_disabled');
     expect(transport).not.toHaveBeenCalled();
+  });
+  it('requires deliberate live payment mode and matching live keys before checkout',async()=>{
+    const transport=vi.fn();
+    const live:PaymentConfig={mode:'live',liveEnabled:false,secretKey:'skey_live_fixture',publicKey:'pkey_live_fixture',activatedMethods:['promptpay'],fetch:transport};
+    await expect(createHostedOrder(order,live)).rejects.toThrow('payments_disabled');
+    await expect(createHostedOrder(order,{...live,liveEnabled:true,secretKey:'skey_test_fixture'})).rejects.toThrow('missing_live_payment_key');
+    const checkout=await createHostedOrder(order,{...live,liveEnabled:true});
+    expect(checkout.provider).toBe('omise');
+    expect(checkout.checkout?.publicKey).toBe('pkey_live_fixture');
+    expect(transport).not.toHaveBeenCalled();
+  });
+  it('validates a live charge from the authenticated provider in read-only reconciliation',async()=>{
+    const liveCharge={...charge,id:'chrg_fixture',livemode:true,metadata:{solarmatch_order_id:order.orderId}};
+    const transport=vi.fn(async()=>json(liveCharge));
+    const payment=await confirmPayment({...order,providerOrderId:'chrg_fixture'},'chrg_fixture',{mode:'live',liveEnabled:false,secretKey:'skey_live_fixture',fetch:transport});
+    expect(payment.status).toBe('paid');
+    await expect(confirmPayment({...order,providerOrderId:'chrg_fixture'},'chrg_test_fixture',{mode:'live',secretKey:'skey_live_fixture',fetch:transport})).rejects.toThrow('invalid_live_resource');
+    expect(transport).toHaveBeenCalledTimes(1);
+  });
+  it('gates live SMS, requires a configured sender and checks provider acceptance',async()=>{
+    const message={to:'+66800000000',body:'Fixture OTP only',idempotencyKey:'one'};
+    const sid=`SM${'a'.repeat(32)}`;
+    const transport=vi.fn(async(_url:string|URL|Request,init?:RequestInit)=>{
+      const form=new URLSearchParams(String(init?.body));
+      expect(form.get('MessagingServiceSid')).toBe(`MG${'b'.repeat(32)}`);
+      expect(form.get('To')).toBe(message.to);
+      return json({sid,to:message.to,status:'queued'});
+    });
+    const live={mode:'live' as const,outboundEnabled:true,liveEnabled:true,credentialsAreTest:false,accountSid:`AC${'c'.repeat(32)}`,authToken:'fixture',messagingServiceSid:`MG${'b'.repeat(32)}`,fetch:transport};
+    await expect(sendMessage(message,{...live,liveEnabled:false})).rejects.toThrow('outbound_disabled');
+    await expect(sendMessage(message,{...live,credentialsAreTest:true})).rejects.toThrow('sms_credential_mode_mismatch');
+    await expect(sendMessage(message,{...live,messagingServiceSid:undefined})).rejects.toThrow('missing_sms_sender');
+    expect((await sendMessage(message,live)).providerMessageId).toBe(sid);
+    expect(transport).toHaveBeenCalledTimes(1);
+  });
+  it('guards authentication links and treats provider failure as delivery failure',async()=>{
+    const message={to:'fixture@example.test',kind:'password-reset' as const,url:'https://installer.example.test/api/installer-auth/reset-password?token=private'};
+    const transport=vi.fn(async(url:string|URL|Request,init?:RequestInit)=>{
+      expect(String(url)).toBe('https://api.resend.com/emails');
+      expect(init?.headers).toHaveProperty('Idempotency-Key');
+      return json({id:'email_fixture'});
+    });
+    const live={mode:'live' as const,outboundEnabled:true,liveEnabled:true,token:'fixture',from:'auth@example.test',baseUrl:'https://installer.example.test',fetch:transport};
+    await expect(sendAuthEmail(message,{...live,liveEnabled:false})).rejects.toThrow('auth_email_disabled');
+    await expect(sendAuthEmail({...message,url:'https://other.example.test/reset?token=private'},live)).rejects.toThrow('invalid_auth_email_link');
+    expect((await sendAuthEmail(message,live)).providerMessageId).toBe('email_fixture');
+    expect(transport).toHaveBeenCalledTimes(1);
+  });
+  it('requires live LINE activation and a confirmed linked recipient',async()=>{
+    const notification={to:`U${'a'.repeat(32)}`,reference:'SM-1',product:'shared_residential' as const,trial:false,credits:2,enquiryUrl:'https://example.test/installers/enquiry/one',retryKey:'00000000-0000-4000-8000-000000000001'};
+    const transport=vi.fn(async()=>new Response('',{status:200,headers:{'x-line-request-id':'fixture'}}));
+    const config={mode:'live' as const,outboundEnabled:true,liveEnabled:true,accessToken:'fixture',linkedRecipient:true,fetch:transport};
+    await expect(sendEnquiryNotification(notification,{...config,liveEnabled:false})).rejects.toThrow('outbound_disabled');
+    await expect(sendEnquiryNotification(notification,{...config,linkedRecipient:false})).rejects.toThrow('line_recipient_not_linked');
+    expect((await sendEnquiryNotification(notification,config)).status).toBe('accepted');
+    expect(transport).toHaveBeenCalledTimes(1);
   });
 });

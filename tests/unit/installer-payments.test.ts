@@ -20,7 +20,7 @@ function fixture() {
   }
   const db={prepare,async batch(statements:Array<ReturnType<typeof prepare>>){sqlite.exec('BEGIN');try{const results=statements.map(statement=>({meta:{changes:Number(statement.execute().changes)}}));sqlite.exec('COMMIT');return results;}catch(error){sqlite.exec('ROLLBACK');throw error;}}} as unknown as D1Database;
   function order(id='order'):StoredPaymentOrder {
-    sqlite.prepare("INSERT INTO installer_payment_orders(id,company_id,package_id,credits,amount_minor,currency,status,provider,provider_order_id,created_at,updated_at) VALUES(?,'company','shared-20',20,400000,'thb','pending','omise',?,'2026-10-11','2026-10-11')").run(id,`chrg_test_${id}`);
+    sqlite.prepare("INSERT INTO installer_payment_orders(id,company_id,package_id,credits,amount_minor,currency,status,provider,provider_order_id,created_at,updated_at) VALUES(?,'company','credits-20',20,400000,'thb','pending','omise',?,'2026-10-11','2026-10-11')").run(id,`chrg_test_${id}`);
     return sqlite.prepare('SELECT * FROM installer_payment_orders WHERE id=?').get(id) as unknown as StoredPaymentOrder;
   }
   function payment(row:StoredPaymentOrder):ProviderPayment{return {provider:'omise',chargeId:row.provider_order_id!,providerOrderId:row.provider_order_id!,amountMinor:row.amount_minor,currency:'thb',status:'paid',refundedMinor:0,receiptReference:'fixture'};}
@@ -59,6 +59,13 @@ describe('atomic payment ledger SQL',()=>{
     expect(f.sqlite.prepare('SELECT reversed_credits FROM installer_payment_orders').get()?.reversed_credits).toBe(8);
     await expect(applyConfirmedPayment(f.db,row,{...f.payment(row),amountMinor:1})).rejects.toThrow('payment_order_mismatch');f.sqlite.close();
   });
+  it('rejects mismatched provider and package before issuing credit',async()=>{
+    const f=fixture(),row=f.order();
+    await expect(applyConfirmedPayment(f.db,row,{...f.payment(row),provider:'local-test'})).rejects.toThrow('payment_order_mismatch');
+    await expect(applyConfirmedPayment(f.db,{...row,package_id:'other-package'},f.payment(row))).rejects.toThrow('payment_order_mismatch');
+    expect(f.sqlite.prepare('SELECT COUNT(*) n FROM installer_credit_ledger').get()?.n).toBe(0);
+    f.sqlite.close();
+  });
 });
 describe('secure LINE linking SQL',()=>{
   async function webhook(event:unknown){const raw=JSON.stringify({events:[event]});const signature=base64(await hmac(new TextEncoder().encode('fixture-secret'),raw));return {raw,request:new Request('http://localhost:3000/api/installer/webhooks/line',{method:'POST',headers:{'x-line-signature':signature},body:raw})};}
@@ -93,5 +100,15 @@ describe('secure LINE linking SQL',()=>{
     const result=await beginLineLink(f.db,'company',new Request('http://localhost:3000/installers'),token);
     expect(result.authorizationUrl).toContain('https://access.line.me/dialog/bot/accountLink?');
     await expect(beginLineLink(f.db,'company',new Request('http://localhost:3000/installers'),token)).rejects.toThrow('line_invitation_expired');f.sqlite.close();
+  });
+  it('signed unfollow unlinks the company once',async()=>{
+    const f=fixture(),user=`U${'e'.repeat(32)}`;
+    f.sqlite.prepare('UPDATE solar_company_partners SET line_user_id=? WHERE id=?').run(user,'company');
+    const unfollow=await webhook({type:'unfollow',webhookEventId:'unfollow-fixture',timestamp:Date.now(),source:{type:'user',userId:user}});
+    await processLineWebhook(f.db,unfollow.request,unfollow.raw);
+    await processLineWebhook(f.db,unfollow.request,unfollow.raw);
+    expect(f.sqlite.prepare("SELECT line_user_id FROM solar_company_partners WHERE id='company'").get()?.line_user_id).toBeNull();
+    expect(f.sqlite.prepare("SELECT COUNT(*) n FROM installer_webhook_events WHERE id='line:unfollow-fixture'").get()?.n).toBe(1);
+    f.sqlite.close();
   });
 });

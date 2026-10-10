@@ -13,7 +13,8 @@ const reply = (body: object, status = 200) => NextResponse.json(body, {status, h
 export async function POST(request: NextRequest) {
   try {
     const platform = assertPlatformRequest(request);
-    const mode=platform.mode==='local-test'?'local-test':'sandbox';
+    const env = getRuntimeEnv();
+    const mode = platform.mode === 'local-test' ? 'local-test' : env.SMS_PROVIDER_MODE === 'live' && String(platform.mode) === 'production' ? 'live' : env.SMS_PROVIDER_MODE === 'sandbox' && platform.mode === 'sandbox' ? 'sandbox' : 'off';
     if (request.headers.get('origin') !== request.nextUrl.origin) return reply({ok:false,code:'invalid_origin'},403);
     if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return reply({ok:false,code:'invalid_content_type'},415);
     let raw: unknown;
@@ -24,7 +25,8 @@ export async function POST(request: NextRequest) {
     const token = await verifyAssessmentToken(parsed.data.assessmentToken);
     if (!token) return reply({ok:false,code:'invalid_assessment_session'},403);
     const database = requireDatabase();
-    if (!(await getPlatformSettings(database)).collectionEnabled) return reply({ok:false,code:'verification_unavailable'},503);
+    const settings=await getPlatformSettings(database);
+    if (!settings.collectionEnabled || settings.platformPaused) return reply({ok:false,code:'verification_unavailable'},503);
     const address = trustedShareAddress(request);
     if (!await allowPhoneAttempt(database,address,parsed.data.phone,verifying?'verify':'send')) return reply({ok:false,code:'rate_limited'},429);
     if (verifying) {
@@ -32,6 +34,7 @@ export async function POST(request: NextRequest) {
       const proof = await verifyPhoneCode(database,data.challengeId,data.phone,data.assessmentToken,data.code);
       return proof ? reply({ok:true,proof}) : reply({ok:false,code:'invalid_or_expired_code'},400);
     }
+    if (mode === 'off') return reply({ok:false,code:'verification_unavailable'},503);
     const binding = await verificationBindings(parsed.data.phone,parsed.data.assessmentToken);
     const now = new Date();
     const id = crypto.randomUUID();
@@ -40,9 +43,8 @@ export async function POST(request: NextRequest) {
       SELECT ?,?,?,?,?,?,?,?,?, 'pending' WHERE NOT EXISTS(SELECT 1 FROM installer_phone_challenges WHERE phone_hash=? AND resend_after>?) RETURNING id`)
       .bind(id,binding.phoneHash,parsed.data.phone,await phoneCodeHash(id,code),binding.sessionHash,now.toISOString(),new Date(now.getTime()+PHONE_CODE_TTL_MS).toISOString(),new Date(now.getTime()+PHONE_RESEND_MS).toISOString(),platform.mode,binding.phoneHash,now.toISOString()).first();
     if (!inserted) return reply({ok:false,code:'resend_cooldown'},429);
-    const env = getRuntimeEnv() as unknown as Record<string,string>;
     try {
-      const result = await sendMessage({to:parsed.data.phone,body:`SolarMatch: ${code} คือรหัสยืนยันของคุณ ใช้ได้ 5 นาที / Your verification code expires in 5 minutes.`,idempotencyKey:id},{mode,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',accountSid:env.SMS_ACCOUNT_SID,authToken:env.SMS_AUTH_TOKEN,credentialsAreTest:env.SMS_CREDENTIALS_ARE_TEST==='true'});
+      const result = await sendMessage({to:parsed.data.phone,body:`SolarMatch: ${code} คือรหัสยืนยันของคุณ ใช้ได้ 5 นาที / Your verification code expires in 5 minutes.`,idempotencyKey:id},{mode,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.SMS_LIVE_ENABLED==='true',accountSid:env.SMS_ACCOUNT_SID,authToken:env.SMS_AUTH_TOKEN,credentialsAreTest:env.SMS_CREDENTIALS_ARE_TEST==='true',from:env.SMS_FROM,messagingServiceSid:env.SMS_MESSAGING_SERVICE_SID});
       const statements = [database.prepare("UPDATE installer_phone_challenges SET send_state='accepted' WHERE id=?").bind(id)];
       if (result.captured) statements.push(database.prepare('INSERT INTO installer_test_messages(id,channel,recipient,body,created_at) VALUES(?,?,?,?,?)').bind(id,'sms',result.captured.to,result.captured.body,now.toISOString()));
       await database.batch(statements);

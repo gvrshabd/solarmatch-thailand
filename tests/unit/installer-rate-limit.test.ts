@@ -17,6 +17,8 @@ describe('installer request throttling',()=>{
     const request=new Request('https://example.test/api/installer/share',{headers:{'cf-connecting-ip':'1.2.3.4','x-forwarded-for':'8.8.8.8'}});
     expect(trustedShareAddress(request)).toBe('untrusted-origin');
     Object.defineProperty(request,'cf',{value:{colo:'BKK'}});expect(trustedShareAddress(request)).toBe('1.2.3.4');
+    request.headers.set('cf-connecting-ip','1.2.3.4, 8.8.8.8');expect(trustedShareAddress(request)).toBe('edge-unknown');
+    request.headers.set('cf-connecting-ip','2001:db8::1');expect(trustedShareAddress(request)).toBe('2001:db8::1');
     const local=new Request('http://localhost:3000/api/installer/share',{headers:{'cf-connecting-ip':'1.2.3.4'}});expect(trustedShareAddress(local)).toBe('local-loopback');
   });
 });

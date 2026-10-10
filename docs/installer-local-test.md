@@ -11,11 +11,13 @@ pnpm dev --port 3000 --host localhost
 
 Open `http://localhost:3000/installers`. Registration sends a verification preview into the isolated `installer_test_messages` table. Inspect that local table with Wrangler and open the verification URL; never export these private recovery links or treat test previews as real delivery. The configuration disables outbound messages and payments, and settings initially disable collection and delivery. Synthetic fixtures and settings must be configured before running the complete test workflow.
 
-The Worker delegates HTTP handling to vinext and exports a scheduled handler. It invokes `runInstallerJobs` only in local-test or sandbox mode; the jobs also enforce their settings. No cron trigger is configured. Future activation requires separately reviewed production credentials, flags and cron setup. During an isolated Wrangler test, use the documented `/__scheduled` local trigger with `wrangler dev --test-scheduled` against a built Worker, or invoke the job through the authenticated admin operation.
+The Worker delegates HTTP handling to vinext and exports a scheduled handler. `runInstallerJobs` accepts local-test, sandbox or deliberate production mode only after validating its origin and setting gates. No cron trigger is configured. The inactive [deployment example](installer-deployment.example.jsonc) uses fictitious bindings, provider modes off and an empty cron list; production `wrangler.jsonc` remains unchanged. During an isolated Wrangler test, use the documented `/__scheduled` local trigger with `wrangler dev --test-scheduled` against a built Worker, or invoke the job through the authenticated admin operation. Never expose an unauthenticated public job endpoint.
 
 The main Vite configuration selects this isolated binding configuration only when `INSTALLER_LOCAL_TEST=true`. Without that opt-in the existing binding configuration is used and installer mode defaults to off. Keep `.installer-test/.dev.vars` ignored; the setup script creates it exclusively and never overwrites existing secrets. It does not read or reuse the repository root `.dev.vars`.
 
 ## Repeatable synthetic workflow
+
+For the populated company, four verified fictional homeowner requests, purchased and trial deliveries, claims, staff links, and local notification captures, follow [installer-demo-local.md](installer-demo-local.md) after building and migrating the isolated preview. The script uses the protected loopback admin session and normal application services, including actual local authentication and OTP proof with captured email/SMS transport. It restores paused settings afterward. Use Node.js 22 or newer; this computer's default `node` may be older than the project requirement.
 
 Keep the server running in one terminal. In a second terminal at the same repository, run:
 
@@ -49,7 +51,7 @@ pnpm exec wrangler dev --config .installer-test/preview.jsonc --local --port 300
 
 Keep the preview running while the second terminal runs Playwright. Stop it before rebuilding `dist`; no source hot reload is needed for these checks. The dedicated preview configuration sits beside the ignored `.installer-test/.dev.vars`, so Wrangler loads the isolated signing keys correctly. Starting directly from the generated `dist/server/wrangler.json` does not reliably load those keys and may correctly fail authentication/OTP closed. The explicit `--local`, fictitious binding identifiers, private test signing keys and disabled outbound flag preserve isolation. The general suite should run with `INSTALLER_E2E` unset and local collection disabled; the six explicit installer cases are run separately with the opt-in variable.
 
-For a genuinely fresh synthetic run, choose a new directory under `.wrangler` and use that same `--persist-to` directory for migrations, the preview and any local SQL commands. The final isolated installer verification used `.wrangler/installer-final-state`. This leaves earlier local fixtures intact and avoids weakening or clearing application abuse limits.
+For a genuinely fresh synthetic run, choose a new directory under `.wrangler` and use that same `--persist-to` directory for migrations, the preview and any local SQL commands. An earlier isolated installer verification used `.wrangler/installer-final-state`. This leaves earlier local fixtures intact and avoids weakening or clearing application abuse limits.
 
 ## Queue and notification operation
 
@@ -57,27 +59,52 @@ A verified submission atomically creates its canonical queue record. It does not
 
 Admin provides queue processing and retry controls behind the existing Access identity and CSRF checks; local tests do not weaken those checks. Failed/ambiguous notifications appear in the outbox. An ambiguous SMS acceptance needs reconciliation, not blind resending. Withdrawal tasks need recorded recipient notification. The current alert surface is the admin attention-required count; no external alert channel was activated.
 
+The protected, loopback-only test clock drives allocation and outbox due/lease times in the isolated demonstration, so a queued delivery made at a pinned 10:00 Bangkok can be captured immediately in that same scenario. Authentication, phone-code expiry, and real provider delivery are not simulated by this clock. A withdrawal cancels pending notifications and access, but cannot retract a provider call already in flight; if that call is accepted after cancellation, the outbox remains cancelled and records the provider reference for operator review. Never interpret cancellation alone as proof that no message reached a recipient.
+
 ## Configuration without secret values
 
 | Setting | Purpose and safe default |
 | --- | --- |
-| `INSTALLER_PLATFORM_MODE` | `off` by default; only explicit `local-test` or `sandbox` accepted. No live provider mode exists. |
-| `INSTALLER_BASE_URL` | Exact origin. Local tests require loopback; sandbox uses HTTPS. Future installer hostname must be routed to this same app and added to the reviewed authentication origin/callback configuration. |
+| `INSTALLER_PLATFORM_MODE` | `off` by default; explicit `local-test`, `sandbox`, or `production`. Production requires a reviewed HTTPS non-loopback origin. No key selects it automatically. |
+| `INSTALLER_BASE_URL` | Exact origin. Local tests require loopback; sandbox and production require HTTPS. Future installer hostname must be routed to this same app and added to reviewed authentication origin/callback configuration. |
 | `INSTALLER_AUTH_SECRET` | Random signing secret, at least 32 characters, supplied through private environment configuration. |
 | `PHONE_VERIFICATION_SECRET` | Separate random secret for OTP and canonical-enquiry HMAC domains. Rotation requires a duplicate-identity continuity plan. |
 | `ASSESSMENT_SIGNING_SECRET` | Existing assessment-token signing; isolated setup generates its own, never copies production. |
-| `OUTBOUND_MESSAGES_ENABLED` | `false`; enabling it is separate from persisted notification settings. |
-| `AUTH_EMAIL_FROM`, `AUTH_EMAIL_PROVIDER_TOKEN` | Verified sender and Resend API credential; local mode captures email instead. Requires a separately authorized email-delivery exercise. |
-| `OMISE_PUBLIC_KEY`, `OMISE_SECRET_KEY`, `OMISE_WEBHOOK_SECRET` | Test merchant credentials/signature verification only. Live keys rejected. Activated methods/brands must also be configured in business settings. |
-| `SMS_ACCOUNT_SID`, `SMS_AUTH_TOKEN`, `SMS_CREDENTIALS_ARE_TEST` | Twilio test credentials only; true test marker required. Local mode captures messages. Real Thai SMS deliverability remains untested. |
-| `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_TEST_RECIPIENTS` | OA webhook verification, Messaging API token, explicit JSON test-recipient allowlist. Leave outbound off until separately authorized. |
+| `OUTBOUND_MESSAGES_ENABLED` | `false`; enabling it is separate from persisted notification settings and every provider's own live gate. |
+| `AUTH_EMAIL_PROVIDER_MODE`, `AUTH_EMAIL_LIVE_ENABLED`, `AUTH_EMAIL_FROM`, `AUTH_EMAIL_PROVIDER_TOKEN` | Off/false by default. Explicit Resend sandbox or live transport requires verified sender/domain and credentials. Local mode captures email instead. |
+| `OMISE_PROVIDER_MODE`, `OMISE_LIVE_ENABLED`, `OMISE_PUBLIC_KEY`, `OMISE_SECRET_KEY`, `OMISE_WEBHOOK_SECRET` | Off/false by default. Sandbox/test and production/live modes require matching keys. Purchases also require enabled business settings and actual activated methods/brands; read-only reconciliation can continue after purchases are switched off. |
+| `SMS_PROVIDER_MODE`, `SMS_LIVE_ENABLED`, `SMS_ACCOUNT_SID`, `SMS_AUTH_TOKEN`, `SMS_CREDENTIALS_ARE_TEST`, `SMS_FROM`/`SMS_MESSAGING_SERVICE_SID` | Off/false by default. Twilio sandbox uses test credentials and magic sender; production requires explicit live mode, non-test credentials and approved sender or service. Local mode captures messages. Thai deliverability remains untested. |
+| `LINE_PROVIDER_MODE`, `LINE_LIVE_ENABLED`, `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_TEST_RECIPIENTS` | Off/false by default. Sandbox requires a JSON test-recipient allowlist; live enquiry pushes require a linked recipient. Leave outbound off until separately authorized. |
+| `LOCAL_ADMIN_PASSWORD`, `LOCAL_ADMIN_SESSION_SECRET` | Generated only in ignored isolated `.installer-test/.dev.vars`; protected loopback `/admin/local-access` is unavailable elsewhere. |
 
-Preserve existing `DB`, `MEDIA`, admin Access AUD/team, `ADMIN_EMAILS` and `CSRF_SECRET`. No production secret changes were made. Settings separately gate collection, purchases, delivery pause and notifications; all default disabled/paused. A future production mode requires deliberate implementation and acceptance, not merely a flag flip.
+Preserve existing `DB`, `MEDIA`, admin Access AUD/team, `ADMIN_EMAILS` and `CSRF_SECRET`. No production secret changes were made. Settings separately gate global pause, collection, purchases, allocation and notifications; all active effects default disabled/paused. Production mode code exists but requires deliberate provider/account activation and acceptance, not merely a flag flip. See [provider setup](INSTALLER_PROVIDER_SETUP.md) and [remaining work](INSTALLER_REMAINING_WORK.md).
 
 ## Migration, backup and recovery
 
-The new additive migrations start at `0006`; apply the complete ordered chain to this local database. Historical leads stay unverified, historic delivery facts remain, and no old consent is rewritten. Verification evidence is stored separately from expiring OTP secrets. Never edit a migration after it has been applied to an authoritative environment.
+The eight additive migrations run from `0006` through `0013`; apply the complete ordered chain to this local database. `0011` adds operation/run tracking and database allocation guards; `0012` contains the isolated test clock; `0013` adds Omise reconciliation timestamps and error codes. Historical leads stay unverified, historic delivery facts remain, and no old consent is rewritten. Verification evidence is stored separately from expiring OTP secrets. Never edit a migration after it has been applied to an authoritative environment.
 
 Before any future production migration, obtain separate approval, export only the SolarMatch D1 database to the established protected backup location, record its Time Travel bookmark and table counts, and inventory SolarMatch private objects. Test restoration and the ordered migrations on a disposable copy. Do not commit backups, read unrelated buckets, or substitute this fake local database ID for production bindings.
 
 Application rollback and database rollback are different. Leave additive tables intact when rolling application code back; reversing a Git commit does not reverse D1. Use a reviewed backup/Time Travel recovery only for an actual data/schema problem. Purging homeowner data is irreversible in normal application operation; never promise a deleted record can be restored. Keep backup retention and deletion requirements in the final privacy policy.
+
+### Completed synthetic recovery exercise (11 October 2026)
+
+The preview was stopped while taking the snapshot. `scripts/installer-local-export.mjs` uses Wrangler's installed Miniflare exporter against the exact fictitious database ID and `.wrangler/installer-final-state/v3/d1`; Wrangler 4.92 `d1 export --local` does not support `--persist-to`, so using its default path would export the wrong local store. No remote API is used.
+
+Private ignored exports:
+
+- `.wrangler/installer-recovery-2026-10-11/synthetic-final.sql` (raw snapshot; SHA-256 `1c583eee342dc431e46583df52a5872590e2be5e6c3461777c52e8c863cf9a5f`).
+- `.wrangler/installer-recovery-2026-10-11/synthetic-restore-ordered.sql` (all tables/indexes first, data second, safety triggers last).
+- Disposable restored store: `.wrangler/restore12`.
+
+The ordinary raw import failed because referenced tables may appear later in D1's export. The ordered restore also prevents ledger/delivery triggers from replaying charges against already-restored balances. Use a fresh empty destination; do not import over a populated database. Short local folder names avoid the Windows SQLite path-length limit.
+
+Commands exercised with the bundled Node/pnpm runtime:
+
+```powershell
+node scripts/installer-local-export.mjs
+pnpm exec wrangler d1 execute solarmatch-installer-local-test --local --config .installer-test/preview.jsonc --persist-to .wrangler/restore12 --file .wrangler/installer-recovery-2026-10-11/synthetic-restore-ordered.sql --json
+node scripts/installer-local-restore-check.mjs
+```
+
+All 55 application tables and 19 triggers matched at the snapshot: eight leads/enquiries, six deliveries, fourteen ledger entries, two claims and thirteen migrations. Foreign-key and ledger-conservation checks passed. Private SQL files include local sessions/verification captures and must not be packaged or committed. Scripts preserve existing exports and reject a changed snapshot instead of overwriting it; choose a separately reviewed fresh private location for another rehearsal. Later demo reruns legitimately add audits and rotate links, so comparison against the earlier snapshot is only expected to pass before further interactions. R2 recovery, production Time Travel and real data restoration were not exercised.

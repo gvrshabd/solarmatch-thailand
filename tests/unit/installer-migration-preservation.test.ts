@@ -34,6 +34,10 @@ it('additive installer migrations preserve legacy phone/LINE consent and manual 
     for(const enquiry of enquiries)expect(enquiry).toEqual({verification_state:'unverified',qualification_state:'review',duplicate_state:'legacy',status:'review'});
     for(const table of ['installer_credit_ledger','installer_credit_accounts','installer_trial_grants','installer_outbox','installer_payment_orders'])expect(legacy.sqlite.prepare(`SELECT COUNT(*) count FROM ${table}`).get()?.count).toBe(0);
     expect(legacy.sqlite.prepare('SELECT COUNT(*) count FROM lead_recipient_deliveries').get()?.count).toBe(1);
+    // An inert/off installer platform must not disable the pre-existing manual
+    // workflow solely because its historical lead was backfilled for review.
+    expect(()=>legacy.sqlite.prepare(`INSERT INTO lead_recipient_deliveries(id,lead_id,partner_id,consent_version,privacy_notice_version_id,disclosure_purpose,fields_disclosed_json,delivered_at,delivered_by,delivery_method,distribution_expires_at)
+      VALUES('legacy-after-upgrade',?,'synthetic-company-1','fixture-v1','fixture-privacy','residential_solar_site_survey_and_quotation','[]','2026-10-11T03:00:00Z','synthetic-legacy-admin','manual-copy','2026-10-18T03:00:00Z')`).run(line.leadId)).not.toThrow();
     expect(legacy.sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   }finally{legacy.close();donor.close();}
 });

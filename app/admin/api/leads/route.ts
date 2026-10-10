@@ -5,8 +5,8 @@ import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { sha256 } from '@/lib/server/crypto';
 import { ensureInitialRelease, getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
-import { getRuntimeEnv, requireDatabase } from '@/lib/server/runtime';
-import { purgeInstallerLeads } from '@/lib/installer/privacy';
+import { requireDatabase } from '@/lib/server/runtime';
+import { redactInstallerLeads } from '@/lib/installer/privacy';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,8 +153,9 @@ export async function POST(request: Request) {
   }
 
   if (parsedBody.action === 'purge') {
-    if (['local-test','sandbox'].includes(getRuntimeEnv().INSTALLER_PLATFORM_MODE || 'off')) {
-      try { return NextResponse.json(await purgeInstallerLeads(database,request,parsedBody.leadIds,identity.email)); }
+    const installerSchema=await database.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='installer_enquiry_leads'").first();
+    if (installerSchema) {
+      try { return NextResponse.json(await redactInstallerLeads(database,parsedBody.leadIds,identity.email)); }
       catch { return NextResponse.json({error:'privacy_redaction_failed_or_legal_hold'}, {status:409}); }
     }
     const rows = await database.prepare(`SELECT id, request_fingerprint FROM leads WHERE id IN (${parsedBody.leadIds.map(() => '?').join(',')})`).bind(...parsedBody.leadIds).all<{ id: string; request_fingerprint: string }>();

@@ -1,5 +1,5 @@
 import { ProviderError, base64, constantEqual, hmac, parseObject, requireMode, requestJson, safeUrl, type ProviderMode } from './common';
-export interface LineConfig { mode: ProviderMode; channelSecret?: string; accessToken?: string; outboundEnabled?: boolean; sandboxRecipients?: string[]; fetch?: typeof fetch }
+export interface LineConfig { mode: ProviderMode; channelSecret?: string; accessToken?: string; outboundEnabled?: boolean; liveEnabled?: boolean; linkedRecipient?: boolean; sandboxRecipients?: string[]; fetch?: typeof fetch }
 export interface LineEvent { type: string; webhookEventId: string; timestamp: number; source: { type: string; userId?: string }; link?: { result: 'ok' | 'failed'; nonce: string }; deliveryContext?: { isRedelivery: boolean } }
 export async function verifyLineWebhook(raw: string, headers: Headers, config: LineConfig): Promise<LineEvent[]> {
   requireMode(config.mode);
@@ -19,7 +19,7 @@ export async function verifyLineWebhook(raw: string, headers: Headers, config: L
 function userId(value: string) { if (!/^U[0-9a-f]{32}$/i.test(value)) throw new ProviderError('invalid_line_user'); }
 function outbound(config: LineConfig, to: string) {
   requireMode(config.mode); userId(to);
-  if (!config.outboundEnabled || !config.sandboxRecipients?.includes(to)) throw new ProviderError('outbound_disabled');
+  if (!config.outboundEnabled || (config.mode === 'live' && !config.liveEnabled) || (config.mode === 'sandbox' && !config.sandboxRecipients?.includes(to))) throw new ProviderError('outbound_disabled');
   if (!config.accessToken) throw new ProviderError('missing_line_token');
 }
 export async function requestLinkToken(to: string, config: LineConfig) {
@@ -48,6 +48,7 @@ export async function sendEnquiryNotification(input: EnquiryNotification, config
   const captured = { to: input.to, messages: [{ type: 'text', text: enquiryNotificationText(input) }] };
   if (config.mode === 'local-test') return { status: 'captured' as const, providerMessageId: `local_${input.retryKey}`, captured };
   outbound(config, input.to);
+  if (config.mode === 'live' && !config.linkedRecipient) throw new ProviderError('line_recipient_not_linked');
   // Keep this UUID fixed on every retry of this outbox record. LINE accepts a
   // duplicate retry key with 409 and X-Line-Accepted-Request-Id.
   try {

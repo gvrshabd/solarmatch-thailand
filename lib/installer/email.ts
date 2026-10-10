@@ -1,4 +1,5 @@
 import { getRuntimeEnv, requireDatabase } from '@/lib/server/runtime';
+import { sendAuthEmail } from './providers/email';
 
 export function isLocalAuthPreview(mode: string | undefined, request?: Request) {
   if (mode !== 'local-test' || !request) return false;
@@ -8,16 +9,12 @@ export function isLocalAuthPreview(mode: string | undefined, request?: Request) 
 
 /** Contains private recovery URLs: inspect only in an isolated loopback test database. */
 export async function queueInstallerAuthEmail(message: { to: string; userId: string; kind: 'verification' | 'password-reset'; url: string }, request?: Request) {
-  const env = getRuntimeEnv() as ReturnType<typeof getRuntimeEnv> & { AUTH_EMAIL_FROM?: string; AUTH_EMAIL_PROVIDER_TOKEN?: string; OUTBOUND_MESSAGES_ENABLED?: string };
+  const env = getRuntimeEnv();
   if (!isLocalAuthPreview(env.INSTALLER_PLATFORM_MODE, request)) {
-    // Never persist recoverable reset links in a general-purpose delivery outbox.
-    if (env.INSTALLER_PLATFORM_MODE !== 'sandbox' || env.OUTBOUND_MESSAGES_ENABLED !== 'true' || !env.AUTH_EMAIL_PROVIDER_TOKEN || !env.AUTH_EMAIL_FROM) throw new Error('Installer authentication email delivery is not configured.');
-    const purpose = message.kind === 'verification' ? 'ยืนยันอีเมล / Verify your email' : 'ตั้งรหัสผ่านใหม่ / Reset your password';
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST', headers: { Authorization: 'Bearer ' + env.AUTH_EMAIL_PROVIDER_TOKEN, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: env.AUTH_EMAIL_FROM, to: [message.to], subject: 'SolarMatch — ' + purpose, text: purpose + '\n\n' + message.url + '\n\nหากคุณไม่ได้ร้องขอ สามารถละเว้นอีเมลนี้ได้ / If you did not request this, ignore this email.' }),
-    });
-    if (!response.ok) throw new Error('Installer authentication email delivery failed.');
+    // Recovery links stay in memory only. The provider receives them only after
+    // deliberate configuration, and no URL or API error body enters logs.
+    const mode = env.AUTH_EMAIL_PROVIDER_MODE === 'live' && env.INSTALLER_PLATFORM_MODE === 'production' ? 'live' : env.AUTH_EMAIL_PROVIDER_MODE === 'sandbox' && env.INSTALLER_PLATFORM_MODE === 'sandbox' ? 'sandbox' : 'off';
+    await sendAuthEmail(message,{mode,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.AUTH_EMAIL_LIVE_ENABLED==='true',token:env.AUTH_EMAIL_PROVIDER_TOKEN,from:env.AUTH_EMAIL_FROM,baseUrl:env.INSTALLER_BASE_URL});
     return;
   }
   await requireDatabase().prepare('INSERT INTO installer_test_messages (id, channel, recipient, body, created_at) VALUES (?, ?, ?, ?, ?)')

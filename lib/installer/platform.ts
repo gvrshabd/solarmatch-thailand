@@ -2,9 +2,12 @@ import { getRuntimeEnv } from '@/lib/server/runtime';
 export function isLoopback(url: string) { return ['localhost','127.0.0.1','[::1]'].includes(new URL(url).hostname); }
 export function assertPlatformRequest(request: Request) {
   const mode = getRuntimeEnv().INSTALLER_PLATFORM_MODE;
-  if (mode !== 'local-test' && mode !== 'sandbox') throw new Error('platform_unavailable');
+  if (mode !== 'local-test' && mode !== 'sandbox' && mode !== 'production') throw new Error('platform_unavailable');
   if (mode === 'local-test' && !isLoopback(request.url)) throw new Error('platform_unavailable');
-  if (mode === 'sandbox' && new URL(request.url).origin !== getRuntimeEnv().INSTALLER_BASE_URL) throw new Error('platform_unavailable');
+  if (mode === 'sandbox' || mode === 'production') {
+    const base=new URL(getRuntimeEnv().INSTALLER_BASE_URL??'');
+    if(base.protocol!=='https:'||isLoopback(base.href)||base.username||base.password||base.pathname!=='/'||base.search||base.hash||new URL(request.url).origin!==base.origin)throw new Error('platform_unavailable');
+  }
   return { mode };
 }
 export const privateHeaders = { 'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow','X-Content-Type-Options':'nosniff' };

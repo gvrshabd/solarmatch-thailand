@@ -30,7 +30,7 @@ describe('contact-mode readiness and consent', () => {
   });
 
   it('uses a separate phone-only consent revision with matching Thai meaning and unchanged recipient cap', () => {
-    expect(currentLegalCopy.contentVersion).toBe('legal-review-installer-commercial-2026-10-11-v2');
+    expect(currentLegalCopy.contentVersion).toBe('legal-review-installer-commercial-2026-10-11-v3');
     expect(lockedSharedConsentCopy.en).toBe(historicalLegalCopy.contactLaunch.consent.en.replace('chosen contact details','verified mobile number').replace('using my selected contact method','by telephone').replace('installers pay SolarMatch','installers may pay SolarMatch'));
     expect(lockedSharedConsentCopy.th).toBe(historicalLegalCopy.contactLaunch.consent.th.replace('ช่องทางติดต่อที่ฉันเลือก','หมายเลขโทรศัพท์มือถือที่ยืนยันแล้วของฉัน').replace('ผ่านวิธีติดต่อที่ฉันเลือก','ทางโทรศัพท์').replace('บริษัทติดตั้งชำระค่าบริการให้ SolarMatch','บริษัทติดตั้งอาจชำระค่าบริการให้ SolarMatch'));
   });

@@ -10,7 +10,7 @@ export async function localTestContact(request:Request|undefined, release:Releas
   if (!request) return null;
   try { if (assertPlatformRequest(request).mode!=='local-test') return null; } catch { return null; }
   const settings=await getPlatformSettings(database);
-  if (!settings.collectionEnabled) return null;
+  if (settings.platformPaused || !settings.collectionEnabled) return null;
   return {...publicContactConfiguration(release),...contactContent.contactModes.shared_solar_company_handoff,
     enabled:true,preview:false,mode:'shared_solar_company_handoff' as const,
     publicCollectionEnabled:false,restrictedSiteCollectionEnabled:false,operationalDistributionEnabled:true,

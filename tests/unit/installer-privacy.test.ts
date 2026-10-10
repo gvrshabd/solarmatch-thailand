@@ -2,12 +2,12 @@ import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 const runtime=vi.hoisted(()=>({PHONE_VERIFICATION_SECRET:'fixture-secret-at-least-32-characters',INSTALLER_PLATFORM_MODE:'local-test',DB:undefined as D1Database|undefined}));
 vi.mock('@/lib/server/runtime',()=>({getRuntimeEnv:()=>runtime,requireDatabase:()=>runtime.DB!}));
 import { FixtureDatabase,seedFixture,seedLead } from '../installer/fixtures';
-import { purgeInstallerLeads } from '@/lib/installer/privacy';
+import { purgeInstallerLeads,redactInstallerLeads } from '@/lib/installer/privacy';
 import { allocateEnquiry } from '@/lib/installer/deliveries';
 
 describe('canonical personal-data redaction',()=>{
   let fixture:FixtureDatabase;
-  beforeEach(async()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-11T03:00:00Z'));fixture=new FixtureDatabase();runtime.DB=fixture.d1();await seedFixture(fixture.d1());});
+  beforeEach(async()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-11T03:00:00Z'));fixture=new FixtureDatabase();runtime.INSTALLER_PLATFORM_MODE='local-test';runtime.DB=fixture.d1();await seedFixture(fixture.d1());});
   afterEach(()=>{fixture.close();vi.useRealTimers();});
   it('redacts known personal markers including notes/snapshots while retaining delivery slots',async()=>{
     const first=await seedLead(fixture.d1());const duplicate=await seedLead(fixture.d1());
@@ -33,5 +33,10 @@ describe('canonical personal-data redaction',()=>{
   });
   it('rejects remote callers in local test mode',async()=>{
     await expect(purgeInstallerLeads(fixture.d1(),new Request('https://example.com/admin/api/leads'),['missing'],'fixture')).rejects.toThrow('platform_unavailable');
+  });
+  it('keeps the private administrator redaction operation functional after installer activation is switched off',async()=>{
+    const lead=await seedLead(fixture.d1());runtime.INSTALLER_PLATFORM_MODE='off';
+    expect((await redactInstallerLeads(fixture.d1(),[lead.leadId],'authenticated-synthetic-administrator')).purged).toBe(1);
+    expect(fixture.sqlite.prepare('SELECT legal_first_name FROM leads WHERE id=?').get(lead.leadId)?.legal_first_name).toBe('[deleted]');
   });
 });

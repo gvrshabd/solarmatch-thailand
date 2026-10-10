@@ -1,0 +1,25 @@
+// Review example only. Fictitious bindings, no routes, no cron, no credentials.
+// Do not deploy this file or replace the existing production wrangler.jsonc with it.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "solarmatch-installer-review-example",
+  "main": "../dist/server/index.js",
+  "compatibility_date": "2026-05-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "INSTALLER_PLATFORM_MODE": "off",
+    "INSTALLER_BASE_URL": "https://installer.example.invalid",
+    "OUTBOUND_MESSAGES_ENABLED": "false",
+    "AUTH_EMAIL_PROVIDER_MODE": "off",
+    "AUTH_EMAIL_LIVE_ENABLED": "false",
+    "SMS_PROVIDER_MODE": "off",
+    "SMS_LIVE_ENABLED": "false",
+    "OMISE_PROVIDER_MODE": "off",
+    "OMISE_LIVE_ENABLED": "false",
+    "LINE_PROVIDER_MODE": "off",
+    "LINE_LIVE_ENABLED": "false"
+  },
+  "triggers": { "crons": [] },
+  "d1_databases": [{ "binding": "DB", "database_name": "example-not-real", "database_id": "00000000-0000-0000-0000-000000000099", "migrations_dir": "../migrations" }],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "example-not-real-private" }]
+}

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 export const installerSettingsSchema = z.object({
+  platformPaused:z.boolean().default(false),
   collectionEnabled:z.boolean().default(false),paymentsEnabled:z.boolean().default(false),deliveryPaused:z.boolean().default(true),notificationsEnabled:z.boolean().default(false),exclusiveEnabled:z.literal(false).default(false),
   creditValueMinor:z.number().int().min(100).max(1000000).default(20000),sharedCredits:z.number().int().min(1).max(100).default(2),exclusiveCredits:z.number().int().min(1).max(100).default(4),packageCredits:z.number().int().min(1).max(10000).default(20),packageAmountMinor:z.number().int().min(100).max(100000000).default(400000),
   recipientLimit:z.number().int().min(1).max(3).default(3),trialDeliveries:z.number().int().min(0).max(2).default(2),claimDays:z.number().int().min(1).max(90).default(7),minimumQuality:z.number().int().min(1).max(5).default(4),ownerRequired:z.boolean().default(true),minimumAcUnits:z.number().int().min(0).max(100).default(4),

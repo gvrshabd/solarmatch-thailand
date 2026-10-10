@@ -1,5 +1,6 @@
 import {encodeBase64Url,hmacSha256} from '@/lib/server/crypto';
 import {getRuntimeEnv} from '@/lib/server/runtime';
+import {z} from 'zod';
 /** Keys are internal authenticated subjects, never supplied by the caller. */
 export async function allowInstallerRequest(db:D1Database,key:string,limit:number,windowSeconds:number){
   if(!key||!Number.isSafeInteger(limit)||limit<1||limit>1000||!Number.isSafeInteger(windowSeconds)||windowSeconds<1||windowSeconds>86400)throw new Error('invalid_rate_limit');
@@ -14,6 +15,9 @@ export function trustedShareAddress(request:Request){
   const cf=(request as Request&{cf?:{colo?:unknown}}).cf;
   // Browser/X-Forwarded-For headers do not establish an IP identity. The
   // edge-injected header is used only with Cloudflare request metadata.
-  if(cf&&typeof cf.colo==='string')return request.headers.get('cf-connecting-ip')??'edge-unknown';
+  if(cf&&typeof cf.colo==='string'){
+    const ip=request.headers.get('cf-connecting-ip');
+    return ip&&(z.ipv4().safeParse(ip).success||z.ipv6().safeParse(ip).success)?ip:'edge-unknown';
+  }
   return ['localhost','127.0.0.1','[::1]'].includes(new URL(request.url).hostname)?'local-loopback':'untrusted-origin';
 }

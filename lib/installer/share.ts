@@ -19,5 +19,17 @@ export async function readShareLink(db:D1Database,token:string) {
   const now=isoNow();await db.batch([db.prepare('UPDATE lead_recipient_deliveries SET viewed_at=COALESCE(viewed_at,?) WHERE id=?').bind(now,row.id),
     db.prepare("INSERT INTO installer_operational_events(id,event_type,delivery_id,company_id,created_at) VALUES(?,'enquiry-viewed',?,?,?)").bind(crypto.randomUUID(),row.id,row.partner_id,now)]);
   const expiry=await db.prepare('SELECT expires_at FROM installer_share_tokens WHERE token_hash=?').bind(hash).first<{expires_at:string}>();
-  return {delivery:deliveryProjection(row),expiresAt:expiry?.expires_at};
+  // Staff links grant access to this enquiry only. Account, funding and claim
+  // details remain behind authenticated company membership.
+  const delivery=deliveryProjection(row);
+  return {delivery:{
+    reference:delivery.reference,
+    product:delivery.product,
+    homeownerName:delivery.homeownerName,
+    phone:delivery.phone,
+    location:delivery.location,
+    requestedAt:delivery.requestedAt,
+    assessment:delivery.assessment,
+    qualification:delivery.qualification,
+  },expiresAt:expiry?.expires_at};
 }

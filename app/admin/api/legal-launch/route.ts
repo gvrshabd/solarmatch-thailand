@@ -360,8 +360,9 @@ export async function POST(request: Request) {
   }
 
   if (body.action === 'update-delivery') {
-    const current = await database.prepare('SELECT id, lead_id, partner_id FROM lead_recipient_deliveries WHERE id=?').bind(body.deliveryId).first();
+    const current = await database.prepare('SELECT id, lead_id, partner_id, delivery_channel FROM lead_recipient_deliveries WHERE id=?').bind(body.deliveryId).first();
     if (!current) return publicSafeError('delivery_not_found', 404);
+    if(current.delivery_channel==='portal')return publicSafeError('use_installer_platform_operations',409);
     await database.batch([
       database.prepare(`UPDATE lead_recipient_deliveries SET delivery_status=?, rejection_reason=?, payment_status=?,
         survey_status=?, quotation_status=?, outcome_status=?, deletion_notification_state=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`)
@@ -376,7 +377,9 @@ export async function POST(request: Request) {
   if (body.action === 'prepare-delivery' || body.action === 'confirm-delivery') {
     // Installer deliveries must go through the atomic allocation/ledger service,
     // never through the legacy clipboard-confirmation path.
-    if (['local-test', 'sandbox'].includes(getRuntimeEnv().INSTALLER_PLATFORM_MODE ?? '')) {
+    const managed=await database.prepare(`SELECT a.lead_id FROM installer_enquiry_leads a JOIN installer_enquiries e ON e.id=a.enquiry_id
+      WHERE a.lead_id=? AND (e.duplicate_state<>'legacy' OR e.verification_state='verified')`).bind(body.leadId).first();
+    if (managed || ['local-test', 'sandbox', 'production'].includes(getRuntimeEnv().INSTALLER_PLATFORM_MODE ?? '')) {
       return publicSafeError('use_installer_platform_allocation', 409);
     }
     let resolved: Awaited<ReturnType<typeof validatedDistribution>>;
