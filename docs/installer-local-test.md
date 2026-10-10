@@ -44,10 +44,12 @@ $env:INSTALLER_LOCAL_TEST = 'true'
 pnpm build
 $previewConfig = Get-Content -Raw dist/server/wrangler.json | ConvertFrom-Json
 if ($previewConfig.name -ne 'solarmatch-installer-local-test' -or $previewConfig.d1_databases[0].database_id -ne '00000000-0000-0000-0000-000000000006') { throw 'Refusing non-isolated preview configuration' }
-pnpm exec wrangler dev --config dist/server/wrangler.json --local --port 3000 --ip localhost --persist-to .wrangler/installer-test-state --env-file .installer-test/.dev.vars --log-level error
+pnpm exec wrangler dev --config .installer-test/preview.jsonc --local --port 3000 --ip localhost --persist-to .wrangler/installer-test-state --log-level error
 ```
 
-Keep the preview running while the second terminal runs Playwright. Stop it before rebuilding `dist`; no source hot reload is needed for these checks. The explicit `--local`, fictitious binding identifiers, private test signing keys and disabled outbound flag preserve isolation. The general suite should run with `INSTALLER_E2E` unset and local collection disabled; the six explicit installer cases are run separately with the opt-in variable.
+Keep the preview running while the second terminal runs Playwright. Stop it before rebuilding `dist`; no source hot reload is needed for these checks. The dedicated preview configuration sits beside the ignored `.installer-test/.dev.vars`, so Wrangler loads the isolated signing keys correctly. Starting directly from the generated `dist/server/wrangler.json` does not reliably load those keys and may correctly fail authentication/OTP closed. The explicit `--local`, fictitious binding identifiers, private test signing keys and disabled outbound flag preserve isolation. The general suite should run with `INSTALLER_E2E` unset and local collection disabled; the six explicit installer cases are run separately with the opt-in variable.
+
+For a genuinely fresh synthetic run, choose a new directory under `.wrangler` and use that same `--persist-to` directory for migrations, the preview and any local SQL commands. The final isolated installer verification used `.wrangler/installer-final-state`. This leaves earlier local fixtures intact and avoids weakening or clearing application abuse limits.
 
 ## Queue and notification operation
 

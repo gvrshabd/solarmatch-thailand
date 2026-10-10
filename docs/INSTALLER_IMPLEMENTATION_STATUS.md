@@ -22,6 +22,39 @@ The current draft model is ฿200 per credit, two credits for a shared residenti
 
 Required unresolved settings include operator legal identity, contact/address/registration details, VAT status and tax wording, invoice requirements, approved merchant and bank settlement accounts, activated payment methods, credit expiry and unused-credit/refund policy, final claim eligibility, enquiry freshness, qualification assumptions, share-link expiry and retention periods. Development defaults are not legal approval. Historical contracts and versioned consent snapshots remain historical evidence. Current public legal copy must be reviewed against the new draft before activation; archived legal-review drafts containing obsolete pricing or deadlines must not be presented as launch terms.
 
+Current configurable test defaults are owner required, at least four installed AC units and quality score at least 4/5, with separate verified-phone and referral-consent checks. The original calculator/scoring model is unchanged. Distribution is seven days, duplicate review is thirty days, staff links expire after seven days, and retention is unset. These are visible configuration defaults, not finalized legal policies. Every new submission records the evaluated criteria and outcomes for administrator explanation. Changing material commercial terms requires a new version and renewed company acceptance; earlier acceptance timestamps are preserved.
+
+## Changed implementation areas
+
+- `app/installers`, `components/installers`, `app/enquiry`, `app/installers.css`: bilingual account, company, credit, enquiry, claim and staff-link interfaces.
+- `app/api/installer-auth`, `app/api/installer`, `app/api/phone-verification`, `lib/installer`: authentication, tenant boundaries, payment adapters, phone verification, canonical enquiries, ledger, allocation, outbox, privacy and scoped sharing.
+- Existing lead/config routes and contact component: phone-only verified requests in the existing optional step, current immutable consent snapshot, and a strictly local synthetic collection override. No/decline still produces the complete result without contact submission.
+- `app/admin/api/installer-platform`, `components/admin/installer-platform-panel.tsx`, existing admin integration: approvals, review, settings, trials, allocation, claims, reconciliation, privacy and reports, retaining existing Access/CSRF protection.
+- `migrations/0006_installer_platform.sql` through `0010_installer_terms_version_guard.sql`: additive schema and safety constraints; original migration files remain unchanged.
+- `config/installer-commercial-copy.ts`: new `legal-review-installer-commercial-2026-10-11-v2` content revision. Original legal JSON and historical database records are not rewritten or published by this task.
+- `worker.ts`, `vite.config.ts`, `.installer-test/wrangler.jsonc`, `.installer-test/preview.jsonc`, `scripts/installer-local-setup.mjs`: scheduled-service entry point without an enabled cron, and isolated development/compiled-preview setup. Production `wrangler.jsonc` is unchanged.
+- `package.json`, lockfile: Better Auth 1.7.7; no new paid infrastructure. Unit, browser and local D1 fixtures are under `tests`.
+
+## Explicit verification limits
+
+Authenticated production admin UI, live Cloudflare edge metadata propagation, actual LINE in-app browser hardware, Omise merchant methods/settlement, email deliverability and Thai SMS delivery are not verified here. The local browser and SQLite checks cannot substitute for those acceptance exercises. No production customer counts, credentials, records or R2 objects were read. Private contract upload/storage remains the existing subsystem rather than a new copy. The portal currently lists the most recent 100 items per history/inbox; an authenticated individual-delivery link loads its scoped delivery independently of that list. Large-history pagination and team invitation administration are future enhancements; membership boundaries already exist.
+
+Exclusive/factory products, live provider activation, automatic refund execution, tax-invoice certification, buyer auctions, public coupons, advertising automation and production cron/DNS changes remain deferred. The future live-mode path requires a deliberate code/configuration review; current adapters reject live payment keys and do not implement live SMS delivery.
+
+## Final local acceptance record — 11 October 2026
+
+- Source implementation checkpoint: `f8a705c957c4485d0f8dbf84e5da892258dbdefe` on `feature/installer-shared-workflow`; subsequent checkpoint adds the compiled local preview configuration and this handoff. Main remains `6567ffc84a9ee4e609591e80da587229c6482384`.
+- Unit/service tests: **143 passed, 24 files**. TypeScript passes. Full lint passes with zero errors and one advisory about the provider-generated payment QR's direct `<img>` rendering.
+- Both isolated-test and normal production-profile builds pass. Build warnings concern the existing framework's middleware/proxy convention, route classification and plugin timings; they did not prevent output generation. Building was not deployment. The local preview was stopped cleanly after tests.
+- Compiled general browser run: **116 passed, 12 intentionally skipped, one transient connection-reset failure**. The failing Thai mobile unavailable-collection case then passed **three consecutive unchanged reruns**. A final fresh-state run of the complete public-preparation file passed **12/12**, including that case. No unresolved assertion failure remains, but the initial run was not a zero-failure run.
+- The twelve intentional skips comprise six installer tests requiring explicit isolated-mode opt-in and six duplicate/project-specific checks. The six installer cases were run separately, not omitted from acceptance.
+- Final compiled installer workflow: **6/6 passed**, desktop and mobile. It covers real local registration/email verification/session persistence/company creation/recovery; failed logout without false success; Thai/English 320px views; no overflow and zero scoped axe violations; No-to-full-estimate with no contact API call; real local SMS challenge/proof and saved contact request; repeat-safe synthetic payment completion.
+- Compiled public regression covers Thai/English legal pages and links, homeowner journeys, formula consistency, optional refinements, consent, admin denial/forged identity, Chromium and WebKit layouts from 320px to 768px, slider geometry/dragging, keyboard focus, rotation and reduced motion.
+- Fresh local Wrangler D1 applied **all ten migrations**. Final aggregate verification: **two synthetic leads, both phone-verified, two canonical enquiries, no foreign-key violations**. Collection, payments and notifications were returned to disabled and allocation paused after testing. No real contact details were submitted.
+- Initial development-server broad tests suffered hydration/timeouts; compiled checks replaced that run. Directly starting the generated build config also omitted isolated signing keys and failed closed. `.installer-test/preview.jsonc` fixes the preview setup by loading its adjacent ignored test keys; the final six-case run passed with this setup.
+- Screenshots/traces and local data remain ignored under `playwright-report`, `test-results` and `.wrangler`. Local signing keys are ignored. They are not deployment artifacts or public repository content.
+- No push, production deployment/migration, production data query, external payment/message, DNS change, secret rotation or Milly's operation occurred.
+
 ## Activation checklist
 
 1. Review the final Thai/English commercial and privacy text, operator facts, taxes and unresolved policies with responsible business/legal reviewers.
