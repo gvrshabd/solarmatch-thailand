@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { interpolateLegalDocuments, legalLaunchDraft, operatorProfileComplete } from '@/config/legal-content';
 import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
-import { requireDatabase } from '@/lib/server/runtime';
+import { getRuntimeEnv, requireDatabase } from '@/lib/server/runtime';
 
 export const dynamic = 'force-dynamic';
 
@@ -374,6 +374,11 @@ export async function POST(request: Request) {
   }
 
   if (body.action === 'prepare-delivery' || body.action === 'confirm-delivery') {
+    // Installer deliveries must go through the atomic allocation/ledger service,
+    // never through the legacy clipboard-confirmation path.
+    if (['local-test', 'sandbox'].includes(getRuntimeEnv().INSTALLER_PLATFORM_MODE ?? '')) {
+      return publicSafeError('use_installer_platform_allocation', 409);
+    }
     let resolved: Awaited<ReturnType<typeof validatedDistribution>>;
     try { resolved = await validatedDistribution(database, body.leadId, body.partnerIds); }
     catch (error) { return publicSafeError(error instanceof Error ? error.message : 'distribution_not_allowed', 409); }

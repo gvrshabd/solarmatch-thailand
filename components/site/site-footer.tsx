@@ -13,7 +13,7 @@ export function SiteFooter() {
   const link = (path: string) => localizedPath(path, locale);
   const focusMode = pathname === '/estimate' || pathname === '/en/estimate';
 
-  if (focusMode || pathname.startsWith('/admin')) return null;
+  if (focusMode || pathname.startsWith('/admin') || pathname.startsWith('/installers') || pathname === '/enquiry') return null;
 
   return (
     <footer className="site-footer">
@@ -27,6 +27,7 @@ export function SiteFooter() {
           <Link href={link('/estimate')}>{english ? 'Solar estimate' : 'ประเมินโซลาร์'}</Link>
           <Link href={link('/how-it-works')}>{english ? 'How it works' : 'วิธีการทำงาน'}</Link>
           <Link href={link('/solar-guide')}>{english ? 'Solar guide' : 'คู่มือโซลาร์'}</Link>
+          <Link href={'/installers' + (english ? '?lang=en' : '')}>{english ? 'For solar installers' : 'สำหรับบริษัทติดตั้งโซลาร์'}</Link>
         </div>
         <div>
           <h2>{english ? 'Information' : 'ข้อมูล'}</h2>

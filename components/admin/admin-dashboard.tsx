@@ -7,6 +7,7 @@ import type { LoadingFactSet } from '@/lib/loading-facts/types';
 import type { QuestionnaireDocument } from '@/lib/questionnaire/types';
 import { calculateLeadAssessment, type ScoringConfiguration } from '@/lib/qualification/scoring';
 import { LegalLaunchPanel } from './legal-launch-panel';
+import { InstallerPlatformPanel } from './installer-platform-panel';
 
 type Lead = {
   id: string; created_at: string; legal_first_name: string; legal_last_name: string; phone_display: string | null;
@@ -52,7 +53,7 @@ type LeadDetailPayload = {
   notes: Array<{ id: string; note: string; actor_email: string; created_at: string }>;
 };
 
-type Tab = 'leads' | 'assessment' | 'scoring' | 'contact' | 'legal-launch' | 'facts' | 'media' | 'history';
+type Tab = 'leads' | 'assessment' | 'scoring' | 'contact' | 'legal-launch' | 'installer-platform' | 'facts' | 'media' | 'history';
 
 const targetProvinceOptions = [
   ['bangkok', 'Bangkok'], ['nonthaburi', 'Nonthaburi'], ['pathum-thani', 'Pathum Thani'],
@@ -264,7 +265,7 @@ export function AdminDashboard({ csrfToken, signedInEmail }: { csrfToken: string
     {configuration?.restrictedSiteAccess.configured && <div className="admin-alert private-preview-admin" role="status"><strong>Access-restricted collection is configured.</strong> Approved Access users can create ordinary operational submissions. Public collection remains controlled by its own launch switch.</div>}
     {message && <div className="admin-alert" role="status">{message}<button type="button" onClick={() => setMessage('')}>Dismiss</button></div>}
     <nav className="admin-tabs" aria-label="Administration sections">
-      {([['leads', LayoutList, 'Leads'], ['assessment', Settings2, 'Assessment'], ['scoring', ShieldCheck, 'Scoring'], ['contact', ContactRound, 'Contact and consent'], ['legal-launch', ShieldCheck, 'Legal launch'], ['facts', BookOpen, 'Solar facts'], ['media', ImageIcon, 'Media'], ['history', FileClock, 'History']] as const).map(([value, Icon, label]) => <button type="button" key={value} className={tab === value ? 'active' : ''} onClick={() => setTab(value)}><Icon />{label}</button>)}
+      {([['leads', LayoutList, 'Leads'], ['assessment', Settings2, 'Assessment'], ['scoring', ShieldCheck, 'Scoring'], ['contact', ContactRound, 'Contact and consent'], ['legal-launch', ShieldCheck, 'Legal launch'], ['installer-platform', LayoutList, 'Installer operations'], ['facts', BookOpen, 'Solar facts'], ['media', ImageIcon, 'Media'], ['history', FileClock, 'History']] as const).map(([value, Icon, label]) => <button type="button" key={value} className={tab === value ? 'active' : ''} onClick={() => setTab(value)}><Icon />{label}</button>)}
     </nav>
 
     {tab === 'leads' && <section className="admin-section"><div className="admin-section-heading"><div><h2>Residential contact submissions</h2><p>Stored submissions are distinct from sellable leads. The quality score is never shown to public users.</p></div><button className="admin-button secondary" type="button" onClick={() => void loadLeads()}><RefreshCcw />Refresh</button></div>
@@ -330,6 +331,7 @@ export function AdminDashboard({ csrfToken, signedInEmail }: { csrfToken: string
     </section>}
 
     {tab === 'legal-launch' && <LegalLaunchPanel csrfToken={csrfToken} setMessage={setMessage} />}
+    {tab === 'installer-platform' && <InstallerPlatformPanel csrfToken={csrfToken} setMessage={setMessage} />}
 
     {tab === 'facts' && factDraft && <section className="admin-section">
       <div className="admin-section-heading"><div><h2>Solar facts</h2><p>Edit the bilingual fact, paired sketch, citation, Resources anchor, and research context as one versioned record.</p></div><div className="admin-heading-actions"><button className="admin-button secondary" type="button" onClick={() => window.open('/en/resources', '_blank', 'noopener')}>Preview published Resources</button><button className="admin-button secondary" type="button" disabled={busy || !csrfToken} onClick={() => void saveFactsDraft()}><Save />Save new draft</button><button className="admin-button" type="button" disabled={busy || !configuration?.facts.some((item) => item.state === 'draft')} onClick={() => void publish('facts')}>Publish fact set</button></div></div>

@@ -6,6 +6,8 @@ import { loadingDurationMs, nextFactHistory, selectLoadingFact } from '@/lib/loa
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
 import { assessContactReadiness, consentSnapshot, publicContactConfiguration, restrictedOperationalContactConfiguration, type ContactConfigurationRow } from '@/lib/server/contact-mode';
 import { leadSchema, normalizeThaiPhone } from '@/lib/validation/lead';
+import historicalLegalCopy from '@/config/legal-review-copy.json';
+import currentLegalCopy from '@/config/installer-commercial-copy';
 
 function row(overrides: Partial<ContactConfigurationRow> = {}): ContactConfigurationRow {
   return {
@@ -21,9 +23,16 @@ function row(overrides: Partial<ContactConfigurationRow> = {}): ContactConfigura
 const facts: PublicLoadingFact[] = initialLoadingFactSet.facts.map((fact) => ({ ...fact, imageUrl: `/images/loading-facts/${fact.sketchId}.svg` }));
 
 describe('contact-mode readiness and consent', () => {
-  it('preserves the supplied English and Thai launch consent copy verbatim', () => {
+  it('preserves the historical supplied consent independently of the new phone-only revision', () => {
+    const lockedSharedConsentCopy=historicalLegalCopy.contactLaunch.consent;
     expect(lockedSharedConsentCopy.en).toBe("I consent to [COMPANY_EN], operating SolarMatch, disclosing my name, chosen contact details, property location and relevant assessment answers to up to three participating installation companies serving my area, so they can assess and contact me about this residential solar request using my selected contact method. A new installer may receive my request only within [DISTRIBUTION_DAYS] days after submission. I understand that installers pay SolarMatch for delivered enquiries, that the request is shared, and that I can withdraw this consent at any time by contacting [PRIVACY_EMAIL]. I can receive the free estimate without giving this consent. Details are in the Privacy Notice.");
     expect(lockedSharedConsentCopy.th).toBe("ฉันยินยอมให้ [COMPANY_TH] ผู้ดำเนินการ SolarMatch เปิดเผยชื่อ ช่องทางติดต่อที่ฉันเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของฉันไม่เกินสามบริษัท เพื่อประเมินและติดต่อฉันเกี่ยวกับคำขอโซลาร์สำหรับที่อยู่อาศัยนี้ผ่านวิธีติดต่อที่ฉันเลือก บริษัทติดตั้งรายใหม่จะได้รับคำขอของฉันได้เฉพาะภายใน [DISTRIBUTION_DAYS] วันนับจากวันที่ส่งคำขอ ฉันเข้าใจว่าบริษัทติดตั้งชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ คำขออาจถูกส่งให้หลายบริษัท และฉันสามารถถอนความยินยอมนี้ได้ทุกเมื่อโดยติดต่อ [PRIVACY_EMAIL] ฉันสามารถรับผลประเมินฟรีได้โดยไม่ให้ความยินยอมนี้ ดูรายละเอียดได้ในประกาศความเป็นส่วนตัว");
+  });
+
+  it('uses a separate phone-only consent revision with matching Thai meaning and unchanged recipient cap', () => {
+    expect(currentLegalCopy.contentVersion).toBe('legal-review-installer-commercial-2026-10-11-v2');
+    expect(lockedSharedConsentCopy.en).toBe(historicalLegalCopy.contactLaunch.consent.en.replace('chosen contact details','verified mobile number').replace('using my selected contact method','by telephone').replace('installers pay SolarMatch','installers may pay SolarMatch'));
+    expect(lockedSharedConsentCopy.th).toBe(historicalLegalCopy.contactLaunch.consent.th.replace('ช่องทางติดต่อที่ฉันเลือก','หมายเลขโทรศัพท์มือถือที่ยืนยันแล้วของฉัน').replace('ผ่านวิธีติดต่อที่ฉันเลือก','ทางโทรศัพท์').replace('บริษัทติดตั้งชำระค่าบริการให้ SolarMatch','บริษัทติดตั้งอาจชำระค่าบริการให้ SolarMatch'));
   });
 
   it('keeps disabled mode fail-closed without readiness requirements', () => {
@@ -137,11 +146,12 @@ describe('loading-fact selection', () => {
 });
 
 describe('public lead input boundaries', () => {
-  it('normalizes Thai mobile numbers and requires LINE ID conditionally', () => {
+  it('normalizes Thai mobile numbers and rejects new LINE submissions', () => {
     expect(normalizeThaiPhone('081 234 5678')).toBe('+66812345678');
     const base = { legalFirstName: 'Somchai', legalLastName: 'Jaidee', contactMethod: 'line', adultConfirmed: true, consent: true, locale: 'th', assessmentToken: 'a'.repeat(80), idempotencyKey: crypto.randomUUID(), website: '', answers: { province: 'bangkok', district: 'sathon', monthlyBillThb: 6000, activelyPlanningSolar: true, planningTimeframe: 'within-3-months', projectType: 'new-rooftop', propertyType: 'detached-home', ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning'], airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'little', quoteContactRequested: true, quoteConsentAccepted: true } };
     expect(leadSchema.safeParse(base).success).toBe(false);
-    expect(leadSchema.safeParse({ ...base, lineId: 'somchai' }).success).toBe(true);
+    expect(leadSchema.safeParse({ ...base, lineId: 'somchai' }).success).toBe(false);
+    expect(leadSchema.safeParse({ ...base, contactMethod: 'phone', phone:'0812345678', phoneVerificationId:crypto.randomUUID(),phoneVerificationProof:'a'.repeat(43) }).success).toBe(true);
   });
 
   it('rejects client-supplied mode, recipient, and score fields', () => {

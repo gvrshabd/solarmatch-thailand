@@ -1,0 +1,152 @@
+'use client';
+import { assessmentRows, sharedResidentialLabel } from '@/lib/installer/assessment-display';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type { InstallerPortalAction, InstallerPortalData } from '@/lib/installer/portal-contract';
+
+type View = 'inbox' | 'credits' | 'profile' | 'terms' | 'claims';
+export function InstallerPortal({ deliveryId }: { deliveryId?: string }) {
+  const router = useRouter();
+  const [en, setEn] = useState(false);
+  const [data, setData] = useState<InstallerPortalData | null>(null);
+  const [view, setView] = useState<View>('inbox');
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'recovery' | 'reset'>('login');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [share, setShare] = useState('');
+  const [qrImage, setQrImage] = useState('');
+  const [lineRequest, setLineRequest] = useState<string | undefined>();
+  const t = (th: string, english: string) => {
+    const commercial=data?.commercial;
+    if(commercial&&english==='One credit has a commercial value of ฿200. A shared enquiry uses two credits. No automatic billing.') return en ? `One credit has a commercial value of ฿${commercial.creditValueMinor/100}. A shared enquiry uses ${commercial.sharedCredits} credits. No automatic billing.` : `1 เครดิตมีมูลค่า ${commercial.creditValueMinor/100} บาท คำขอแบบแชร์ใช้ ${commercial.sharedCredits} เครดิต ไม่มีการเรียกเก็บเงินอัตโนมัติ`;
+    if(commercial&&english==='Submit from an enquiry page within seven days of portal availability. Credit restoration is separate from a cash refund.') return en ? `Submit from an enquiry page within ${commercial.claimDays} days of portal availability. Credit restoration is separate from a cash refund.` : `ยื่นคำร้องจากหน้าคำขอภายใน ${commercial.claimDays} วันนับจากพร้อมใช้ในพอร์ทัล การคืนเครดิตแยกจากการคืนเงินสด`;
+    if(commercial&&english==='Shared residential enquiries only, with at most three receiving companies per enquiry.') return en ? `Shared residential enquiries only, with at most ${commercial.recipientLimit} receiving companies per enquiry.` : `รับคำขอที่อยู่อาศัยแบบแชร์เท่านั้น สูงสุด ${commercial.recipientLimit} บริษัทต่อคำขอ`;
+    return en ? english : th;
+  };
+  useEffect(() => { document.documentElement.lang = en ? 'en' : 'th'; }, [en]);
+  async function load() {
+    const response = await fetch('/api/installer/portal' + (deliveryId ? '?deliveryId=' + encodeURIComponent(deliveryId) : ''), { cache: 'no-store', credentials: 'same-origin' });
+    if (response.status === 401) { setData(null); return; }
+    if (!response.ok) throw new Error(t('ระบบพอร์ทัลยังไม่พร้อม กรุณาลองใหม่ภายหลัง', 'The portal is unavailable. Please try again later.'));
+    setData(await response.json());
+  }
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedView = params.get('view') as View | null;
+    if (requestedView && ['inbox', 'credits', 'profile', 'terms', 'claims'].includes(requestedView)) queueMicrotask(() => setView(requestedView));
+    const invitation = params.get('linkRequest');
+    if (invitation) { params.delete('linkRequest'); window.history.replaceState({}, '', window.location.pathname + (params.size ? '?' + params.toString() : '')); queueMicrotask(() => setLineRequest(invitation)); }
+    queueMicrotask(() => { setEn(params.get('lang') === 'en'); if (params.has('token')) setAuthMode('reset'); });
+    queueMicrotask(() => { void load().catch((error: Error) => setMessage(error.message)); });
+    // Language changes do not reload private data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  async function action(body: InstallerPortalAction) {
+    if (body.action === 'link-line') body = { ...body, linkRequest: lineRequest };
+    if (body.action === 'create-company' || body.action === 'update-company') body = { ...body, supportedProducts: body.supportedProducts.map((value) => value.replaceAll('-', '_')) };
+    setBusy(true); setMessage('');
+    try {
+      const response = await fetch('/api/installer/portal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' });
+      const result = await response.json() as { error?: string; instructions?: string; shareUrl?: string; checkout?: Record<string, unknown>; orderId?: string; order?: { id: string }; qrImageUrl?: string; checkoutUrl?: string; authorizationUrl?: string; url?: string };
+      if (!response.ok) throw new Error(portalErrorMessage(response.status,result.error,en));
+      if (result.shareUrl) setShare(result.shareUrl);
+      if (body.action === 'rotate-share-link' && result.url) { setShare(result.url); await load(); return; }
+      if (result.checkout) {
+        await openHostedPayment(result.orderId || result.order?.id || '', result.checkout);
+        return;
+      }
+      if (result.qrImageUrl) setQrImage(result.qrImageUrl);
+      const redirect = result.checkoutUrl || result.authorizationUrl || result.url;
+      if (redirect) { window.location.assign(redirect); return; }
+      setMessage(result.instructions || t('บันทึกแล้ว', 'Saved.')); await load();
+    } catch (error) { setMessage(error instanceof Error ? error.message : t('เกิดข้อผิดพลาด', 'Something went wrong.')); }
+    finally { setBusy(false); }
+  }
+  async function openHostedPayment(orderId: string, checkout: Record<string, unknown>) {
+    if (!orderId || !checkout.publicKey) throw new Error(t('ข้อมูลชำระเงินไม่ครบ', 'Payment configuration is incomplete.'));
+    const browser = window as unknown as { OmiseCard?: { configure: (options: Record<string, unknown>) => void; open: (options: Record<string, unknown>) => void } };
+    if (!browser.OmiseCard) await new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script'); script.src = 'https://cdn.omise.co/omise.js'; script.async = true;
+      script.onload = () => resolve(); script.onerror = () => reject(new Error(t('โหลดหน้าชำระเงินไม่สำเร็จ', 'Unable to load the payment form.'))); document.head.appendChild(script);
+    });
+    if (!browser.OmiseCard) throw new Error(t('หน้าชำระเงินยังไม่พร้อม', 'The payment form is unavailable.'));
+    browser.OmiseCard.configure({ publicKey: checkout.publicKey });
+    browser.OmiseCard.open({ ...checkout, locale: en ? 'en' : 'th', onCreateTokenSuccess: (nonce: string) => { void action({ action: 'authorize-payment', orderId, tokenOrSourceId: nonce }); } });
+  }
+  async function authSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setBusy(true); setMessage('');
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get('email') || '');
+    const password = String(form.get('password') || '');
+    const base = window.location.origin + '/installers' + (en ? '?lang=en' : '');
+    const endpoint = authMode === 'register' ? 'sign-up/email' : authMode === 'recovery' ? 'request-password-reset' : authMode === 'reset' ? 'reset-password' : 'sign-in/email';
+    const body = authMode === 'register' ? { email, password, name: form.get('name'), callbackURL: base } : authMode === 'recovery' ? { email, redirectTo: base } : authMode === 'reset' ? { newPassword: password, token: new URLSearchParams(window.location.search).get('token') } : { email, password, rememberMe: true, callbackURL: base };
+    try {
+      const response = await fetch('/api/installer-auth/' + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(t('ไม่สามารถดำเนินการได้ ตรวจสอบข้อมูลและยืนยันอีเมลก่อนเข้าสู่ระบบ', 'Unable to continue. Check your details and verify your email before signing in.'));
+      if (authMode === 'login') await load();
+      else { setMessage(t('ตรวจสอบอีเมลเพื่อดำเนินการต่อ หากบัญชีนี้มีอยู่ในระบบ', 'Check your email to continue if this account exists.')); if (authMode === 'reset') { setAuthMode('login'); window.history.replaceState({}, '', base); } }
+      void result;
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Error'); }
+    finally { setBusy(false); }
+  }
+  async function signOut() {
+    if (busy) return;
+    setBusy(true); setMessage('');
+    try {
+      const response = await fetch('/api/installer-auth/sign-out', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      if (!response.ok) throw new Error('sign_out_failed');
+      setData(null); setShare(''); setQrImage(''); setLineRequest(undefined);
+    } catch {
+      setMessage(t('ยังออกจากระบบไม่สำเร็จ กรุณาลองอีกครั้ง', 'You are still signed in. Please try signing out again.'));
+    } finally { setBusy(false); }
+  }
+  const delivery = data?.deliveries.find((item) => item.id === deliveryId);
+  return <main className="installer-shell" lang={en ? 'en' : 'th'}>
+    <header className="installer-header"><a href="/installers" className="installer-brand">SolarMatch <span>for Installers</span></a><div><a href={en ? '/en' : '/'}>{t('สำหรับเจ้าของบ้าน', 'Homeowner website')}</a><button onClick={() => { setEn(!en); const url = new URL(window.location.href); url.searchParams.set('lang', en ? 'th' : 'en'); window.history.replaceState({}, '', url); }}>{en ? 'ไทย' : 'English'}</button></div></header>
+    {message && <p className="installer-notice" role="status">{['Saved.', 'บันทึกแล้ว'].includes(message) ? t('บันทึกแล้ว', 'Saved.') : ['Check your email to continue if this account exists.', 'ตรวจสอบอีเมลเพื่อดำเนินการต่อ หากบัญชีนี้มีอยู่ในระบบ'].includes(message) ? t('ตรวจสอบอีเมลเพื่อดำเนินการต่อ หากบัญชีนี้มีอยู่ในระบบ', 'Check your email to continue if this account exists.') : message}</p>}
+    {qrImage && <section className="installer-card"><h2>{t('สแกนชำระเงิน', 'Scan to pay')}</h2>{/* Provider-created QR only; status is confirmed server-side. */}<img src={qrImage} alt={t('คิวอาร์โค้ดสำหรับชำระเงิน', 'Payment QR code')} width={240} height={240} /><p>{t('เครดิตจะเข้าเมื่อผู้ให้บริการยืนยันการชำระเงินแล้ว ตรวจสอบสถานะในประวัติการซื้อ', 'Credits are issued after provider confirmation. Check the purchase history for payment status.')}</p></section>}
+    {!data ? <section className="installer-auth installer-card"><p className="installer-eyebrow">SOLARMATCH FOR INSTALLERS</p><h1>{t('โอกาสใหม่สำหรับบริษัทติดตั้งโซลาร์', 'New opportunities for solar installation companies')}</h1><p>{t('รับคำขอจากเจ้าของบ้านในพื้นที่บริการของคุณ บริษัทที่ได้รับอนุมัติมีสิทธิ์ทดลองรับคำขอแบบแชร์ 2 รายการ โดยไม่ต้องซื้อเครดิต', 'Receive homeowner enquiries in your service area. Approved companies receive two free shared enquiries, with no purchase required.')}</p><form onSubmit={authSubmit}>
+      <h2>{authMode === 'register' ? t('สร้างบัญชี', 'Create account') : authMode === 'recovery' ? t('กู้คืนบัญชี', 'Recover account') : authMode === 'reset' ? t('ตั้งรหัสผ่านใหม่', 'Set a new password') : t('เข้าสู่ระบบ', 'Sign in')}</h2>
+      {authMode === 'register' && <label>{t('ชื่อผู้ติดต่อ', 'Your name')}<input name="name" autoComplete="name" required maxLength={120} /></label>}
+      {authMode !== 'reset' && <label>{t('อีเมล', 'Email')}<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>}
+      {authMode !== 'recovery' && <label>{t('รหัสผ่าน (อย่างน้อย 12 ตัวอักษร)', 'Password (at least 12 characters)')}<input name="password" type="password" minLength={12} maxLength={128} autoComplete={authMode === 'login' ? 'current-password' : 'new-password'} required /></label>}
+      <button className="installer-primary" disabled={busy}>{busy ? t('กำลังดำเนินการ…', 'Working…') : t('ดำเนินการต่อ', 'Continue')}</button>
+    </form><div className="installer-auth-links"><button onClick={() => setAuthMode(authMode === 'register' ? 'login' : 'register')}>{authMode === 'register' ? t('มีบัญชีแล้ว', 'Already have an account') : t('สร้างบัญชีบริษัท', 'Create a company account')}</button><button onClick={() => setAuthMode('recovery')}>{t('ลืมรหัสผ่าน', 'Forgot password')}</button></div><p className="installer-muted">{t('ต้องยืนยันอีเมลก่อนใช้บัญชี บริษัทแต่ละแห่งจะได้รับการตรวจสอบก่อนเริ่มรับคำขอ ไม่มีการเรียกเก็บเงินอัตโนมัติหลังทดลอง', 'Verify your email before using your account. Companies are reviewed before receiving enquiries. The trial does not start automatic billing.')}</p></section> : <>
+      <div className="installer-welcome"><div><p className="installer-eyebrow">{data.company?.name || data.session.user.name}</p><h1>{t('พอร์ทัลผู้ติดตั้ง', 'Installer portal')}</h1></div><button disabled={busy} onClick={signOut}>{t('ออกจากระบบ', 'Sign out')}</button></div>
+      {!data.session.user.emailVerified && <p className="installer-notice">{t('กรุณายืนยันอีเมลก่อนใช้ข้อมูลบริษัท', 'Please verify your email before using company controls.')}</p>}
+      <nav className="installer-nav" aria-label={t('เมนูผู้ติดตั้ง', 'Installer navigation')}>{(['inbox', 'credits', 'profile', 'claims', 'terms'] as View[]).map((item, index) => <button key={item} aria-current={view === item ? 'page' : undefined} onClick={() => { setView(item); if (deliveryId) router.push('/installers?lang=' + (en ? 'en' : 'th') + '&view=' + item); }}>{[t('คำขอ', 'Enquiries'), t('เครดิต', 'Credits'), t('บริษัท', 'Company'), t('คำร้อง', 'Claims'), t('ข้อตกลง', 'Terms')][index]}</button>)}</nav>
+      {data.company && <div className="installer-summary"><section><span>{t('เครดิตพร้อมใช้', 'Available credits')}</span><strong>{data.balance.available}</strong><small>{t('สำรอง', 'Reserved')}: {data.balance.reserved}</small></section><section><span>{t('สิทธิ์ทดลองคงเหลือ', 'Free enquiries remaining')}</span><strong>{data.balance.trialRemaining}</strong><small>{t('เฉพาะคำขอที่อยู่อาศัยแบบแชร์', 'Shared residential only')}</small></section><section><span>{t('สถานะบริษัท', 'Company status')}</span><strong>{statusLabel(data.company.approvalStatus, en)}</strong><small>{data.company.paused ? t('พักรับคำขอ', 'Paused') : t('ตั้งค่ารับคำขอแล้ว', 'Delivery preferences saved')}</small></section></div>}
+      {deliveryId ? delivery ? <section className="installer-card"><a href={'/installers?lang=' + (en ? 'en' : 'th')}>← {t('กลับไปที่คำขอ', 'Back to inbox')}</a><h2>{delivery.reference}</h2><p>{delivery.homeownerName}</p><a href={'tel:' + delivery.phone}>{delivery.phone}</a><p>{delivery.location}</p><p>{t('ร้องขอเมื่อ', 'Requested')}: {date(delivery.requestedAt, en)}</p><p>{t('พร้อมใช้ในพอร์ทัลเมื่อ', 'Available in portal')}: {date(delivery.deliveredAt, en)}</p><p>{statusLabel(delivery.product, en)} · {delivery.fundingSource === 'trial' ? t('ทดลองฟรี', 'Free trial') : delivery.creditCost + ' ' + t('เครดิต', 'credits')}</p><p>{delivery.qualification}</p><dl>{assessmentRows(delivery.assessment, en).map((row) => <div key={row.key}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl><h3>{t('แชร์กับทีมงาน', 'Share with staff')}</h3><p>{t('ผู้ที่ได้รับลิงก์สามารถอ่านข้อมูลคำขอนี้ได้ ใช้สำหรับพนักงานที่ดูแลคำขอของบริษัทเท่านั้น ลิงก์ไม่ได้ยืนยันตัวตนผู้เปิดและสามารถส่งต่อได้', 'Anyone with the link can read this enquiry. Forward only to staff handling it for your company. It does not verify the viewer’s identity and can be forwarded again.')}</p><button disabled={busy} onClick={() => action({ action: 'rotate-share-link', deliveryId: delivery.id })}>{t('สร้างลิงก์ใหม่', 'Create replacement link')}</button><button disabled={busy} onClick={() => { setShare(''); action({ action: 'revoke-share-link', deliveryId: delivery.id }); }}>{t('เพิกถอนลิงก์', 'Revoke link')}</button>{share && <label>{t('ลิงก์สำหรับทีมงาน', 'Staff access link')}<input readOnly value={share} onFocus={(event) => event.target.select()} /></label>}<h3>{t('รายงานผล', 'Report outcome')}</h3><select aria-label={t('ผลการติดต่อ', 'Contact outcome')} defaultValue={delivery.outcome || ''} onChange={(event) => action({ action: 'report-outcome', deliveryId: delivery.id, outcome: event.target.value })}><option value="">{t('เลือกผล', 'Choose outcome')}</option>{['open', 'won', 'lost', 'not-suitable'].map((value) => <option key={value} value={value}>{statusLabel(value, en)}</option>)}</select><h3>{t('คำร้องคืนเครดิต', 'Credit claim')}</h3><p>{t('ยื่นได้ถึง', 'Submit by')}: {date(delivery.claimDeadline, en)}. {t('การไม่รับสายหรือไม่ซื้อ ไม่ถือเป็นคำขอที่ไม่ถูกต้องโดยอัตโนมัติ', 'No answer or no purchase does not automatically make an enquiry invalid.')}</p><form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); action({ action: 'create-claim', deliveryId: delivery.id, reason: String(form.get('reason')), notes: String(form.get('notes')) }); }}><label>{t('เหตุผล', 'Reason')}<select name="reason">{['incorrect-contact', 'duplicate', 'outside-criteria', 'no-request', 'withdrawn'].map((value) => <option key={value} value={value}>{statusLabel(value, en)}</option>)}</select></label><label>{t('ข้อมูลสนับสนุน', 'Supporting information')}<textarea name="notes" required maxLength={2000} /></label><button disabled={busy}>{t('ส่งคำร้อง', 'Submit claim')}</button></form></section> : <p className="installer-card">{t('ไม่พบคำขอในบัญชีบริษัทนี้', 'This enquiry is not available to your company.')}</p> : <>
+      {view === 'inbox' && <section className="installer-card"><h2>{t('คำขอจากเจ้าของบ้าน', 'Homeowner enquiries')}</h2>{!data.deliveries.length && <p>{t('ยังไม่มีคำขอ บริษัทต้องผ่านการอนุมัติและตั้งค่าพื้นที่บริการก่อนรับคำขอ', 'No enquiries yet. Your company needs approval and service-area settings before receiving enquiries.')}</p>}{data.deliveries.map((item) => <a className="installer-row" key={item.id} href={'/installers/enquiry/' + encodeURIComponent(item.id) + '?lang=' + (en ? 'en' : 'th')}><div><strong>{item.reference}</strong><p>{item.location}</p><small>{date(item.deliveredAt, en)}</small></div><span>{item.fundingSource === 'trial' ? t('ทดลองฟรี', 'Free trial') : item.creditCost + ' ' + t('เครดิต', 'credits')} →</span></a>)}</section>}
+      {view === 'profile' || !data.company ? <section className="installer-card"><h2>{t('ข้อมูลบริษัทและการรับคำขอ', 'Company and delivery preferences')}</h2><form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); action({ action: data.company ? 'update-company' : 'create-company', name: String(form.get('name')), contactName: String(form.get('contactName')), phone: String(form.get('phone')), serviceAreas: String(form.get('serviceAreas')).split(',').map((x) => x.trim()).filter(Boolean), supportedProducts: ['shared-residential'], dailyLimit: Number(form.get('dailyLimit')), paused: form.get('paused') === 'on' }); }}>
+        <label>{t('ชื่อบริษัท', 'Company name')}<input name="name" defaultValue={data.company?.name} required maxLength={160} /></label><label>{t('ชื่อผู้ติดต่อ', 'Contact name')}<input name="contactName" defaultValue={data.company?.contactName || data.session.user.name} required maxLength={120} /></label><label>{t('โทรศัพท์บริษัท', 'Company phone')}<input name="phone" type="tel" defaultValue={data.company?.phone} required /></label><label>{t('พื้นที่บริการ (คั่นด้วยจุลภาค)', 'Service areas (comma-separated)')}<input name="serviceAreas" defaultValue={data.company?.serviceAreas.join(', ')} placeholder={t('กรุงเทพมหานคร, นนทบุรี', 'Bangkok, Nonthaburi')} required /></label><label>{t('จำนวนคำขอสูงสุดต่อวัน', 'Maximum daily deliveries')}<input name="dailyLimit" type="number" min={0} max={100} defaultValue={data.company?.dailyLimit ?? 2} required /></label><label className="installer-check"><input name="paused" type="checkbox" defaultChecked={data.company?.paused} />{t('พักรับคำขอ', 'Pause deliveries')}</label><p>{t('รับคำขอที่อยู่อาศัยแบบแชร์เท่านั้น สูงสุด 3 บริษัทต่อคำขอ', 'Shared residential enquiries only, with at most three receiving companies per enquiry.')}</p><button disabled={busy || !data.session.user.emailVerified} className="installer-primary">{t('บันทึกข้อมูลบริษัท', 'Save company')}</button></form><h3>LINE</h3><p>{data.company?.lineLinked ? t('เชื่อมต่อแล้ว', 'Connected') : t('ยังไม่เชื่อมต่อ', 'Not connected')}</p><button disabled={busy || !data.integrations.lineConfigured || data.company?.approvalStatus !== 'approved'} onClick={() => action({ action: 'link-line' })}>{t('เชื่อมต่อ LINE อย่างปลอดภัย', 'Connect LINE securely')}</button></section> : null}
+      {view === 'credits' && <section className="installer-card"><h2>{t('เครดิตและการซื้อ', 'Credits and purchases')}</h2><p>{t('1 เครดิตมีมูลค่า ฿200 · คำขอแบบแชร์ใช้ 2 เครดิต · ไม่มีการเรียกเก็บเงินอัตโนมัติ', 'One credit has a commercial value of ฿200. A shared enquiry uses two credits. No automatic billing.')}</p>{data.packages.map((pack) => <div className="installer-package" key={pack.id}><h3>{en ? pack.nameEn : pack.nameTh}</h3><p>{pack.credits} {t('เครดิต', 'credits')} · {money(pack.amountMinor, pack.currency, en)}</p><p>{pack.taxLabel}</p>{data.integrations.paymentMethods.map((method) => <button disabled={busy || !data.integrations.paymentsEnabled || data.company?.approvalStatus !== 'approved'} key={method} onClick={() => action({ action: 'checkout', packageId: pack.id, method })}>{t('ชำระผ่าน', 'Pay with')} {method}</button>)}</div>)}{!data.integrations.paymentsEnabled && <p>{t('ยังไม่เปิดรับชำระเงิน', 'Payments are not enabled.')}</p>}<h3>{t('ประวัติการซื้อ', 'Purchase history')}</h3>{data.orders.map((order) => <div className="installer-row" key={order.id}><div><strong>{money(order.amountMinor, order.currency, en)}</strong><p>{statusLabel(order.status, en)} · {date(order.createdAt, en)}</p><small>{order.receiptReference || order.id}</small></div><button disabled={busy} onClick={() => action({ action: 'reconcile-order', orderId: order.id })}>{t('ตรวจสอบสถานะ', 'Check status')}</button></div>)}<h3>{t('รายการเครดิต', 'Credit transactions')}</h3>{data.ledger.map((entry) => <div className="installer-row" key={entry.id}><div><strong>{statusLabel(entry.kind, en)}</strong><p>{entry.reason}</p><small>{date(entry.createdAt, en)}</small></div><span>{entry.units > 0 ? '+' : ''}{entry.units}</span></div>)}</section>}
+      {view === 'claims' && <section className="installer-card"><h2>{t('คำร้องคืนเครดิต', 'Credit claims')}</h2><p>{t('ยื่นคำร้องจากหน้าคำขอภายใน 7 วันนับจากพร้อมใช้ในพอร์ทัล การคืนเครดิตแยกจากการคืนเงินสด', 'Submit from an enquiry page within seven days of portal availability. Credit restoration is separate from a cash refund.')}</p>{!data.claims.length && <p>{t('ยังไม่มีคำร้อง', 'No claims yet.')}</p>}{data.claims.map((claim) => <div className="installer-row" key={claim.id}><div><strong>{statusLabel(claim.reason, en)}</strong><p>{statusLabel(claim.status, en)} · {date(claim.submittedAt, en)}</p>{claim.decision && <p>{claim.decision}</p>}</div><a href={'/installers/enquiry/' + claim.deliveryId + '?lang=' + (en ? 'en' : 'th')}>{t('เปิดคำขอ', 'Open enquiry')}</a></div>)}</section>}
+      {view === 'terms' && <section className="installer-card"><h2>{t('ข้อตกลงผู้ติดตั้ง', 'Installer terms')}</h2><p>{data.terms.version}</p><div className="installer-terms">{en ? data.terms.textEn : data.terms.textTh}</div>{data.terms.acceptedAt ? <p>{t('ยอมรับเมื่อ', 'Accepted')}: {date(data.terms.acceptedAt, en)}</p> : <button disabled={busy || !data.company} className="installer-primary" onClick={() => action({ action: 'accept-terms', version: data.terms.version })}>{t('ยอมรับข้อตกลงฉบับนี้', 'Accept these terms')}</button>}</section>}
+      </>}
+    </>}
+    <footer className="installer-footer">{t('SolarMatch ให้ข้อมูลประเมินเบื้องต้น ผู้ติดตั้งเป็นผู้เสนอราคา ทำสัญญา และรับประกันงาน', 'SolarMatch provides a preliminary assessment. The installer provides the quotation, contract and warranties.')}</footer>
+  </main>;
+}
+function date(value: string, en: boolean) { const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString(en ? 'en-GB' : 'th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'medium', timeStyle: 'short' }); }
+function money(amount: number, currency: string, en: boolean) { return new Intl.NumberFormat(en ? 'en-GB' : 'th-TH', { style: 'currency', currency }).format(amount / 100); }
+function statusLabel(value: string, en: boolean) {
+  if (['shared-residential', 'shared_residential'].includes(value)) return sharedResidentialLabel(en);
+  value = value.replaceAll('_', '-');
+  const extra: Record<string, [string, string]> = { submitted: ['ส่งคำร้องแล้ว', 'Submitted'], 'needs-information': ['ต้องการข้อมูลเพิ่มเติม', 'More information needed'], authorizing: ['กำลังอนุมัติการชำระเงิน', 'Authorizing payment'], reversed: ['ยกเลิกยอดชำระแล้ว', 'Payment reversed'], 'trial-grant': ['ได้รับสิทธิ์ทดลอง', 'Trial allowance granted'], 'claim-restoration': ['คืนเครดิตตามคำร้อง', 'Claim credit restoration'], 'payment-reversal': ['หักเครดิตจากการคืนเงิน', 'Payment credit reversal'], reservation: ['สำรองเครดิต', 'Credit reservation'], release: ['คืนเครดิตที่สำรอง', 'Reserved credits released'] };
+  if (extra[value]) return extra[value][en ? 1 : 0];
+  const outcomes: Record<string, [string, string]> = { open: ['อยู่ระหว่างดำเนินการ', 'In progress'], won: ['ตกลงซื้อ', 'Sale agreed'], lost: ['ไม่ได้งาน', 'Not won'], 'not-suitable': ['ไม่เหมาะสม', 'Not suitable'] };
+  if (outcomes[value]) return outcomes[value][en ? 1 : 0];
+  const labels: Record<string, [string, string]> = { approved: ['อนุมัติแล้ว', 'Approved'], pending: ['รอตรวจสอบ', 'Pending'], rejected: ['ไม่อนุมัติ', 'Rejected'], paid: ['ชำระแล้ว', 'Paid'], failed: ['ไม่สำเร็จ', 'Failed'], cancelled: ['ยกเลิก', 'Cancelled'], refunded: ['คืนเงินแล้ว', 'Refunded'], 'shared-residential': ['คำขอที่อยู่อาศัยแบบแชร์', 'Shared residential'], 'incorrect-contact': ['ข้อมูลติดต่อไม่ถูกต้อง', 'Incorrect contact details'], duplicate: ['คำขอซ้ำ', 'Duplicate'], 'outside-criteria': ['นอกเกณฑ์ที่ตกลง', 'Outside agreed criteria'], 'no-request': ['ไม่ได้ขอให้ติดต่อ', 'No contact request'], withdrawn: ['ไม่ต้องการใบเสนอราคาแล้ว', 'No longer wants quotes'], contacted: ['ติดต่อแล้ว', 'Contacted'], quoted: ['เสนอราคาแล้ว', 'Quoted'], won: ['ตกลงซื้อ', 'Sale agreed'], 'not-interested': ['ไม่สนใจ', 'Not interested'], unreachable: ['ยังติดต่อไม่ได้', 'Unreachable'], restored: ['คืนเครดิตแล้ว', 'Credits restored'], purchase: ['ซื้อเครดิต', 'Credit purchase'], delivery: ['รับคำขอ', 'Enquiry delivery'], restoration: ['คืนเครดิต', 'Credit restoration'] };
+  return labels[value]?.[en ? 1 : 0] || (en ? value.replaceAll('-', ' ').replaceAll('_', ' ') : value);
+}
+function portalErrorMessage(status:number,code:string|undefined,en:boolean) {
+  if(status===429)return en?'Too many attempts. Please wait a moment and try again.':'ทำรายการบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่';
+  if(status===401)return en?'Please sign in with a verified email account to continue.':'กรุณาเข้าสู่ระบบด้วยบัญชีที่ยืนยันอีเมลแล้ว';
+  if(status===403)return en?'Only the company account owner can make this change.':'เฉพาะเจ้าของบัญชีบริษัทเท่านั้นที่ทำรายการนี้ได้';
+  if(code==='claim_window_closed')return en?'The claim submission window has closed for this enquiry.':'พ้นกำหนดยื่นคำร้องสำหรับคำขอนี้แล้ว';
+  if(status>=500)return en?'The service is temporarily unavailable. Please try again later.':'ระบบยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง';
+  return en?'Unable to complete this request. Check the company status, details and accepted terms, then try again.':'ทำรายการไม่สำเร็จ กรุณาตรวจสอบสถานะบริษัท ข้อมูล และการยอมรับข้อตกลง แล้วลองใหม่';
+}

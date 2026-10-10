@@ -9,8 +9,9 @@ export function LanguageDocumentSync() {
   const english = isEnglishPath(pathname);
 
   useEffect(() => {
+    if (pathname.startsWith('/installers') || pathname === '/enquiry') return;
     document.documentElement.lang = english ? 'en' : 'th';
-  }, [english]);
+  }, [english, pathname]);
 
   return <a className="skip-link" href="#main-content">{english ? 'Skip to main content' : 'ข้ามไปยังเนื้อหาหลัก'}</a>;
 }

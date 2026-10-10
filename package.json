@@ -19,6 +19,7 @@
     "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
+    "better-auth": "1.7.7",
     "image-size": "2.0.2",
     "jose": "6.2.10",
     "leaflet": "1.9.4",

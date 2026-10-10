@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import legalReviewCopy from '../../config/legal-review-copy.json' with { type: 'json' };
+import legalReviewCopy from '../../config/installer-commercial-copy';
 
 async function openReview(page: Page, locale: 'en' | 'th', enabled = false) {
   const requests = { submissions: 0, configurations: 0 };
@@ -60,19 +60,17 @@ for (const locale of ['en', 'th'] as const) {
     const form = page.locator('.contact-form-step');
     await expect(form.locator('[role="status"]')).toContainText(locale === 'en' ? 'Test only' : 'สำหรับทดสอบเท่านั้น');
     await expect(form.locator('.contact-form-grid')).toHaveCount(1);
-    await expect(form.getByRole('radio', { name: locale === 'en' ? 'Phone' : 'โทรศัพท์', exact: true })).not.toBeChecked();
-    await expect(form.getByRole('radio', { name: 'LINE', exact: true })).not.toBeChecked();
+    await expect(form.locator('input[type="tel"]')).toHaveValue('');
+    await expect(form.getByRole('radio', { name: 'LINE', exact: true })).toHaveCount(0);
     await expect(form.locator('.contact-adult-confirmation input')).not.toBeChecked();
     const finish = form.getByRole('button', { name: locale === 'en' ? 'Finish test and view my estimate' : 'จบการทดสอบและดูผลประเมิน', exact: true });
     await finish.click();
     await expect(form.locator('[role="alert"]').first()).toBeVisible();
     await form.getByRole('textbox', { name: locale === 'en' ? /^First name/ : /^ชื่อ/ }).fill('ReviewOnlyFirst');
     await form.getByRole('textbox', { name: locale === 'en' ? /^Last name/ : /^นามสกุล/ }).fill('ReviewOnlyLast');
-    await form.getByRole('radio', { name: locale === 'en' ? 'Phone' : 'โทรศัพท์', exact: true }).check();
     await expect(form.locator('input[type="tel"]')).toBeVisible();
-    await form.getByRole('radio', { name: 'LINE', exact: true }).check();
-    await expect(form.locator('input[type="tel"]')).toHaveCount(0);
-    await form.getByRole('textbox', { name: /^LINE ID/ }).fill('review-only-line');
+    await form.locator('input[type="tel"]').fill('0812345678');
+    await expect(form.getByRole('textbox', { name: /^LINE ID/ })).toHaveCount(0);
     await form.locator('.contact-adult-confirmation input').check();
     await expectNoStoredDetails(page);
     const draft = await page.evaluate(() => JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft') ?? '{}'));
@@ -100,8 +98,7 @@ test('Test remains non-submitting even when the real contact configuration is en
   const form = page.locator('.contact-form-step');
   await form.getByRole('textbox', { name: 'First name', exact: true }).fill('ReviewOnlyFirst');
   await form.getByRole('textbox', { name: 'Last name', exact: true }).fill('ReviewOnlyLast');
-  await form.getByRole('radio', { name: 'LINE', exact: true }).check();
-  await form.getByRole('textbox', { name: /^LINE ID/ }).fill('review-only-line');
+  await form.locator('input[type="tel"]').fill('0812345678');
   await form.locator('.contact-adult-confirmation input').check();
   const finish = form.getByRole('button', { name: 'Finish test and view my estimate', exact: true });
   expect(requests.configurations).toBe(1);

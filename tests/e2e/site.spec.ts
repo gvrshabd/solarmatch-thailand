@@ -383,20 +383,27 @@ test('Yes requires disclosure consent and stores an operational request from one
   await consent.check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
 
-  await expect(page.getByRole('heading', { name: 'Where should installers contact you?' })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'What number should installers call?' })).toBeFocused();
   await page.locator('input[autocomplete="given-name"]').fill('Private');
   await page.locator('input[autocomplete="family-name"]').fill('Tester');
-  await page.getByRole('radio', { name: 'LINE' }).check();
-  await expect(page.locator('input[autocomplete="tel"]')).toHaveCount(0);
-  await page.getByRole('textbox', { name: 'LINE ID' }).fill('private.tester');
+  await page.locator('input[autocomplete="tel"]').fill('0812345678');
+  const challengeId=crypto.randomUUID();
+  await page.route('**/api/phone-verification',async route=>{
+    const body=route.request().postDataJSON();
+    await route.fulfill({json:body.code?{ok:true,proof:'a'.repeat(43)}:{ok:true,challengeId}});
+  });
+  await page.getByRole('button',{name:'Send SMS code',exact:true}).click();
+  await page.getByRole('textbox',{name:/SMS verification code/}).fill('123456');
+  await page.getByRole('button',{name:'Verify number',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('Phone number verified.');
   const adult = page.getByRole('checkbox', { name: /I confirm that I am at least 20 years old/u });
   await expect(adult).not.toBeChecked();
   await adult.check();
   await page.getByRole('button', { name: 'Submit my request' }).click();
 
   await expect(page.locator('.solar-loading-indicator')).toBeVisible();
-  expect(submitted).toMatchObject({ legalFirstName: 'Private', legalLastName: 'Tester', contactMethod: 'line', lineId: 'private.tester', adultConfirmed: true, consent: true });
-  expect(submitted).not.toHaveProperty('phone');
+  expect(submitted).toMatchObject({ legalFirstName: 'Private', legalLastName: 'Tester', contactMethod: 'phone', phone:'0812345678', phoneVerificationId:challengeId, adultConfirmed: true, consent: true });
+  expect(submitted).not.toHaveProperty('lineId');
   await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
 });
 

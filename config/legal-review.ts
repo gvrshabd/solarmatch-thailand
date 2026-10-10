@@ -1,4 +1,4 @@
-import copy from './legal-review-copy.json';
+import copy from './installer-commercial-copy';
 
 /** Exact owner-supplied review copy. Unresolved tokens intentionally remain literal. */
 export const legalReviewContentVersion = copy.contentVersion;

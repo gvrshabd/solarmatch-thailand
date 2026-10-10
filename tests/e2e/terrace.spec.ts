@@ -40,6 +40,9 @@ test('Terrace static surfaces retain accessibility and stay within the viewport'
 test('Terrace mobile menu closes with Escape and returns keyboard focus', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/en');
+  // Native details can open before hydration; Escape/focus restoration is a
+  // React interaction, so wait for its handlers rather than arbitrary delays.
+  await expect(page.locator('.mobile-menu')).toHaveAttribute('data-interactive-ready', 'true');
   const summary = page.locator('.mobile-menu summary');
   await summary.click();
   await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();

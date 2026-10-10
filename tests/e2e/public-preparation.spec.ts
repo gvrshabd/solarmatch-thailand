@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import legalReviewCopy from '../../config/legal-review-copy.json' with { type: 'json' };
+import legalReviewCopy from '../../config/installer-commercial-copy';
 
 for (const locale of ['en', 'th'] as const) {
   const prefix = locale === 'en' ? '/en' : '';

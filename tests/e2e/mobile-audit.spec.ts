@@ -227,19 +227,14 @@ test('mobile contact fields stay readable, focusable, and separated from confirm
   await page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' }).click();
   await page.locator('.quote-consent-check input').check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Where should installers contact you?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What number should installers call?' })).toBeVisible();
 
   await page.getByLabel('First name').fill('Mobile');
   await page.getByLabel('Last name').fill('Tester');
-  await page.getByRole('radio', { name: 'Phone', exact: true }).check();
   await page.getByLabel('Mobile phone number').fill('081 234 5678');
   await page.getByLabel('Mobile phone number').click();
   await expect(page.getByLabel('Mobile phone number')).toBeFocused();
-  await page.getByRole('radio', { name: 'LINE', exact: true }).check();
-  await expect(page.getByLabel('Mobile phone number')).toHaveCount(0);
-  await page.getByLabel('LINE ID').fill('mobile.tester');
-  await page.getByLabel('LINE ID').click();
-  await expect(page.getByLabel('LINE ID')).toBeFocused();
+  await expect(page.getByLabel('LINE ID')).toHaveCount(0);
 
   const inputGeometry = await page.locator('.contact-form-grid input[type="text"]:visible, .contact-form-grid input[type="tel"]:visible, .contact-form-grid input:not([type]):visible').evaluateAll((elements) => elements.map((element) => {
     const rect = element.getBoundingClientRect();

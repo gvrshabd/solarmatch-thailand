@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const restrictedIdentity = await authenticateRestrictedSiteOwner(request.headers);
-    const configuration = await getPublicAssessmentConfig({ restrictedAccess: Boolean(restrictedIdentity) });
+    const configuration = await getPublicAssessmentConfig({ restrictedAccess: Boolean(restrictedIdentity),request });
     return NextResponse.json(configuration, {
       headers: {
         'Cache-Control': 'no-store',

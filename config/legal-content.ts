@@ -1,4 +1,4 @@
-import legalReviewCopy from './legal-review-copy.json';
+import legalReviewCopy from './installer-commercial-copy';
 import type { LocalizedText } from '@/lib/questionnaire/types';
 
 export type LegalSection = { id: string; title: LocalizedText; paragraphs: LocalizedText[]; bullets?: LocalizedText[] };

@@ -9,6 +9,7 @@ import type { PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questi
 import { publicContactConfiguration, restrictedOperationalContactConfiguration, type ContactConfigurationRow } from './contact-mode';
 import { createAssessmentToken } from './assessment-token';
 import { requireDatabase } from './runtime';
+import { localTestContact } from '@/lib/installer/local-collection';
 
 const seedActor = 'system:initial-migration';
 const questionnaireId = legacyQuestionnaireV1.id;
@@ -792,14 +793,15 @@ export async function getPublishedLoadingFacts(factSetVersionId: string, databas
   }));
 }
 
-export async function getPublicAssessmentConfig(options: { restrictedAccess?: boolean } = {}): Promise<PublicAssessmentConfig> {
+export async function getPublicAssessmentConfig(options: { restrictedAccess?: boolean; request?:Request } = {}): Promise<PublicAssessmentConfig> {
   const release = await getCurrentRelease();
   if (!release) throw new Error('No published SolarMatch release is available.');
   const accessRestrictedSession = Boolean(options.restrictedAccess);
-  const configuredContact = accessRestrictedSession
+  const localContact=await localTestContact(options.request,release,requireDatabase());
+  const configuredContact = localContact ?? (accessRestrictedSession
     ? restrictedOperationalContactConfiguration(release)
-    : publicContactConfiguration(release);
-  const shouldIssueToken = configuredContact.enabled && (
+    : publicContactConfiguration(release));
+  const shouldIssueToken = configuredContact.enabled && (Boolean(localContact) ||
     (accessRestrictedSession && configuredContact.restrictedSiteCollectionEnabled)
     || (!accessRestrictedSession && configuredContact.publicCollectionEnabled && Boolean(release.live_lead_submissions))
   );
@@ -815,7 +817,7 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
   const loadingFactSetVersionId = release.fact_set_version_id ?? factSetId;
   const loadingFacts = await getPublishedLoadingFacts(loadingFactSetVersionId);
   return {
-    privatePreview: false,
+    privatePreview: Boolean(localContact),
     accessRestrictedSession,
     restrictedSiteCollectionEnabled: configuredContact.restrictedSiteCollectionEnabled,
     publicCollectionEnabled: configuredContact.publicCollectionEnabled,

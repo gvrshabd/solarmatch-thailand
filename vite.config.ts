@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === 'seatbelt';
 
 const localBindingConfig = {
-  main: 'vinext/server/app-router-entry',
+  main: './worker.ts',
 };
 
 export default defineConfig(async () => {
@@ -28,8 +28,9 @@ export default defineConfig(async () => {
     plugins: [
       vinext(),
       cloudflare({
+        ...(process.env.INSTALLER_LOCAL_TEST === 'true' ? { configPath: './.installer-test/wrangler.jsonc', persistState: { path: '.wrangler/installer-test-state' } } : {}),
         viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },
-        config: localBindingConfig,
+        config: process.env.INSTALLER_LOCAL_TEST === 'true' ? { main: '../worker.ts' } : localBindingConfig,
       }),
     ],
   };

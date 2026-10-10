@@ -2,7 +2,7 @@
 
 import Link from '@/components/site/internal-link';
 import { usePathname } from 'next/navigation';
-import { useRef, type MouseEvent } from 'react';
+import { useEffect, useRef, type MouseEvent } from 'react';
 import { Menu, X } from 'lucide-react';
 import { BrandMark } from './brand-mark';
 import { alternateLanguagePath, isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
@@ -22,12 +22,13 @@ function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
 export function SiteHeader() {
   const menuRef = useRef<HTMLDetailsElement>(null);
   const pathname = usePathname();
+  useEffect(() => { menuRef.current?.setAttribute('data-interactive-ready', 'true'); }, [pathname]);
   const locale: Locale = isEnglishPath(pathname) ? 'en' : 'th';
   const english = locale === 'en';
   const focusMode = pathname === '/estimate' || pathname === '/en/estimate';
   const isCurrent = (href: string) => pathname === localizedPath(href, locale);
 
-  if (pathname.startsWith('/admin')) return null;
+  if (pathname.startsWith('/admin') || pathname.startsWith('/installers') || pathname === '/enquiry') return null;
 
   if (focusMode) {
     return (
