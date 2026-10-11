@@ -3,8 +3,9 @@ import { encodeBase64Url,hmacSha256,sha256 } from '@/lib/server/crypto';
 import { assertPlatformRequest } from './platform';
 import { getPlatformSettings } from './settings';
 import { platformAudit } from './deliveries';
+import {stagingLineBudget} from './staging-line-budget';
 import { lineAccountLinkUrl,requestLinkToken,sendAccountLinkInvitation,verifyLineWebhook,type LineConfig,type LineEvent } from './providers/line';
-async function configFor(db:D1Database,request:Request):Promise<LineConfig>{const {mode}=assertPlatformRequest(request);const env=getRuntimeEnv(),settings=await getPlatformSettings(db);let recipients:string[]=[];try{const value=JSON.parse(env.LINE_TEST_RECIPIENTS??'[]');if(Array.isArray(value)&&value.every(item=>typeof item==='string'))recipients=value;}catch{/* fail closed */}const providerMode=mode==='local-test'?'local-test':env.LINE_PROVIDER_MODE==='live'&&String(mode)==='production'?'live':env.LINE_PROVIDER_MODE==='sandbox'&&mode==='sandbox'?'sandbox':'off';return {mode:providerMode,channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:!settings.platformPaused&&settings.notificationsEnabled&&env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:recipients};}
+async function configFor(db:D1Database,request:Request):Promise<LineConfig>{const {mode}=assertPlatformRequest(request);const env=getRuntimeEnv(),settings=await getPlatformSettings(db);let recipients:string[]=[];try{const value=JSON.parse(env.LINE_TEST_RECIPIENTS??'[]');if(Array.isArray(value)&&value.every(item=>typeof item==='string'))recipients=value;}catch{/* fail closed */}const providerMode=mode==='local-test'?'local-test':env.LINE_PROVIDER_MODE==='live'&&String(mode)==='production'?'live':env.LINE_PROVIDER_MODE==='sandbox'&&mode==='sandbox'?'sandbox':'off';return {mode:providerMode,channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:!settings.platformPaused&&settings.notificationsEnabled&&env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:recipients,reserveMessage:stagingLineBudget(db,env),stagingLabel:!!env.STAGING_LINE_MAX_MESSAGES};}
 export async function beginLineLink(db:D1Database,companyId:string,request:Request,linkRequest?:string){
   const config=await configFor(db,request);
   const company=await db.prepare("SELECT id,line_user_id,line_link_generation FROM solar_company_partners WHERE id=? AND approval_status='approved'").bind(companyId).first<{id:string;line_user_id:string|null;line_link_generation:number}>();if(!company)throw new Error('company_not_approved');
@@ -69,6 +70,12 @@ export async function processLineWebhook(db:D1Database,request:Request,raw:strin
   const config=await configFor(db,request),events=await verifyLineWebhook(raw,request.headers,config);
   for(const event of events){
     const eventId=`line:${event.webhookEventId}`;
+    // This staging exercise must not even persist invitations/links for another
+    // real OA visitor. Verify the signature first, then restrict event identity.
+    if(config.stagingLabel&&(!event.source.userId||!config.sandboxRecipients?.includes(event.source.userId)))continue;
+    // Controlled staging exercise: adding the OA does not spend a push slot.
+    // The owner deliberately sends LINK; reconnection then fits the three-message cap.
+    if(config.stagingLabel&&event.type==='follow')continue;
     if(await db.prepare('SELECT id FROM installer_webhook_events WHERE id=?').bind(eventId).first())continue;
     if(event.type==='accountLink'){await applyAccountLink(db,event);continue;}
     if(event.type==='unfollow'&&event.source.type==='user'&&event.source.userId){

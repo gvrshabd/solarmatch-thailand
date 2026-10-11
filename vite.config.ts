@@ -10,6 +10,7 @@ const localBindingConfig = {
 };
 
 export default defineConfig(async () => {
+  if(process.env.INSTALLER_STAGING==='true'&&process.env.INSTALLER_LOCAL_TEST==='true')throw new Error('Choose staging or loopback testing, not both.');
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= 'false';
@@ -28,9 +29,10 @@ export default defineConfig(async () => {
     plugins: [
       vinext(),
       cloudflare({
+        ...(process.env.INSTALLER_STAGING==='true'?{configPath:'./staging/wrangler.jsonc',persistState:{path:'.wrangler/installer-staging-build'}}:{}),
         ...(process.env.INSTALLER_LOCAL_TEST === 'true' ? { configPath: './.installer-test/wrangler.jsonc', persistState: { path: '.wrangler/installer-test-state' } } : {}),
         viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },
-        config: process.env.INSTALLER_LOCAL_TEST === 'true' ? { main: '../worker.ts' } : localBindingConfig,
+        config: process.env.INSTALLER_STAGING==='true'?{main:'../staging/worker.ts'}:process.env.INSTALLER_LOCAL_TEST === 'true' ? { main: '../worker.ts' } : localBindingConfig,
       }),
     ],
   };

@@ -8,6 +8,7 @@ import { beginJobRun,finishJobRun } from './operations';
 import { reconcilePendingPayments } from './payments';
 import { installerAllocationNow } from './test-clock';
 import {acquireSchedulerLease,renewSchedulerLease,releaseSchedulerLease,schedulerLeaseCurrent} from './scheduler-lease';
+import {stagingLineBudget} from './staging-line-budget';
 export function assertInstallerJobEnvironment(env:SolarMatchRuntimeEnv) {
   let base:URL;try{base=new URL(env.INSTALLER_BASE_URL??'');}catch{throw new Error('platform_unavailable');}
   const loopback=['localhost','127.0.0.1','[::1]'].includes(base.hostname);
@@ -17,8 +18,9 @@ export function assertInstallerJobEnvironment(env:SolarMatchRuntimeEnv) {
   throw new Error('platform_unavailable');
 }
 
-export function lineConfiguration(env:SolarMatchRuntimeEnv=getRuntimeEnv()):LineConfig {
-  return {mode:env.INSTALLER_PLATFORM_MODE==='local-test'?'local-test':env.INSTALLER_PLATFORM_MODE==='sandbox'&&env.LINE_PROVIDER_MODE==='sandbox'?'sandbox':env.INSTALLER_PLATFORM_MODE==='production'&&env.LINE_PROVIDER_MODE==='live'?'live':'off',channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:parseJson<string[]>(env.LINE_TEST_RECIPIENTS,[])};
+export function lineConfiguration(env:SolarMatchRuntimeEnv=getRuntimeEnv(),db?:D1Database):LineConfig {
+  if(env.STAGING_LINE_MAX_MESSAGES&&!db)throw Error('staging_message_budget_requires_database');
+  return {mode:env.INSTALLER_PLATFORM_MODE==='local-test'?'local-test':env.INSTALLER_PLATFORM_MODE==='sandbox'&&env.LINE_PROVIDER_MODE==='sandbox'?'sandbox':env.INSTALLER_PLATFORM_MODE==='production'&&env.LINE_PROVIDER_MODE==='live'?'live':'off',channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:parseJson<string[]>(env.LINE_TEST_RECIPIENTS,[]),reserveMessage:db?stagingLineBudget(db,env):undefined,stagingLabel:!!env.STAGING_LINE_MAX_MESSAGES};
 }
 function notificationContextMatches(row:Row,env:SolarMatchRuntimeEnv) {
   const mode=env.INSTALLER_PLATFORM_MODE;
@@ -113,7 +115,7 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv,schedul
       }
       if(lease.kind==='installer-delivery'){
         if(!row.line_user_id)throw new Error('line_not_linked');
-        const result=await sendEnquiryNotification({to:String(row.line_user_id),reference:`SM-${String(row.id).slice(0,8).toUpperCase()}`,product:'shared_residential',credits:Number(row.credit_cost),trial:row.funding_source==='trial',enquiryUrl:`${env.INSTALLER_BASE_URL}/installers/enquiry/${encodeURIComponent(String(row.id))}`,retryKey:String(row.id)},{...lineConfiguration(env),linkedRecipient:true});
+        const result=await sendEnquiryNotification({to:String(row.line_user_id),reference:`SM-${String(row.id).slice(0,8).toUpperCase()}`,product:'shared_residential',credits:Number(row.credit_cost),trial:row.funding_source==='trial',enquiryUrl:`${env.INSTALLER_BASE_URL}/installers/enquiry/${encodeURIComponent(String(row.id))}`,retryKey:String(row.id)},{...lineConfiguration(env,db),linkedRecipient:true});
         providerReference=result.providerMessageId;captured='captured' in result?result.captured:undefined;
       }else if(lease.kind==='homeowner-confirmation'){
         const company=String(row.trading_name||row.legal_name_en);

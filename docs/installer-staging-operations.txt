@@ -1,0 +1,168 @@
+SOLARMATCH ISOLATED HTTPS STAGING — 12 OCTOBER 2026
+
+Scope: feature/installer-shared-workflow only. Never target main, production
+bindings, solarmatch-thailand, Milly's, or a production/customer database.
+
+Actual HTTPS origin:
+https://solarmatch-installer-staging.deluxejahseh.workers.dev
+LINE endpoint:
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/api/installer/webhooks/line
+
+Dedicated Worker: solarmatch-installer-staging
+Dedicated D1: solarmatch-installer-staging-db
+D1 ID: 153b8867-e7ad-40ad-8a63-c2bde2338b43
+Dedicated private Standard R2: solarmatch-installer-staging-private
+Dedicated configuration: staging/wrangler.jsonc
+Management identity/secrets: ignored .wrangler/installer-staging-management
+No production secret, customer export or demo database was copied.
+
+Current hold / owner-confirmation boundary
+The deployed wrapper returns 403 on pages/assets without an approved, signed
+staging Access identity. The separate site/admin audiences are intentionally
+empty until the browser-confirmed applications exist. No unauthenticated
+installer/admin/configuration/data is accessible. This is fail-closed preparation,
+not a completed owner login or a claim that Cloudflare's outer barrier is ready.
+Wrangler OAuth can list Access apps, but creation and reusable-policy detail
+requests returned 403/1010. Its token was not broadened or replaced.
+The unsaved dedicated owner policy form is ready in the browser; no Access
+application or policy has been saved by this task so far.
+
+Confirm the outstanding security request before saving browser changes:
+- Site application, exact staging hostname, allow verified owner email only.
+- Separate /admin* staging application with its own AUD and same exact owner.
+- Exact /api/installer/webhooks/line application, bypass outer login only there.
+Never use a path wildcard for the webhook or change all-Worker/account policies.
+Keep the existing team domain; do not edit the production admin application.
+After creating them, run `node scripts/installer-staging-cloudflare.mjs prepare`
+to record IDs/AUDs. Put the new site AUD in STAGING_ACCESS_AUD and staging admin
+AUD in ACCESS_AUD in staging/wrangler.jsonc. Do not use production AUD values.
+Rebuild/redeploy through the guarded helper below and verify actual owner login,
+installer login, admin identity, assets, and anonymous denial.
+
+Build/deploy (bundled Node 24 / pnpm 11)
+Unset INSTALLER_LOCAL_TEST, then set INSTALLER_STAGING=true and run pnpm build.
+node scripts/installer-staging-cloudflare.mjs deploy
+node scripts/installer-staging-cloudflare.mjs secrets
+These commands verify the exact new database/name/configuration first. They do
+not push Git or run a production deployment. Never deploy a loopback build.
+The wrapper requires the actual staging origin, runs before static assets,
+disables preview URLs and cron, and blocks local admin, fixture, synthetic clock
+trigger, public lead and phone-verification endpoints. No demo credential is
+public. HTML has a bilingual staging banner; all responses have noindex/no-store.
+
+Migration / synthetic seed
+The repository has eighteen migrations. The original bulk apply/import failed
+at 0006 with incomplete input, and that import rolled back. Nested SELECT CASE
+... THEN RAISE ... END; confused the remote import parser. The controlled helper
+preserves historical files, records their SHA256, and transports those trigger
+checks as equivalent SELECT RAISE(...) WHERE condition; statements. Other CASE
+expressions, conditions, messages, financial rules and version names are retained.
+The whole chain is rehearsed in SQLite before any remote write. Before each
+management D1 call, its exact name/ID is checked. Individual statements have a
+private progress checkpoint; this fallback is NOT an atomic whole-file import.
+If a call has an ambiguous response before checkpoint persistence, stop and
+compare schema/state before resuming; do not reset or blindly repeat DDL.
+node scripts/installer-staging-cloudflare.mjs migrate
+This checks exact applied prefix and source hash; no new migration file was added.
+
+One-time private account: installer-staging-seed.mjs used supported Better Auth
+signup/verification APIs in a private management process, then uploaded only the
+new account/password hash. The verified Cloudflare owner was checked; the private
+verification challenge was not a public bypass or a real inbox-delivery test.
+Private credentials: .wrangler/installer-staging-management/owner-account.json.
+Do not print, commit or include this file in a review package.
+The seed refuses an existing account; do not reset it to rerun setup.
+installer-staging-enquiries.mjs generates entirely new in-memory fixture data,
+not a copy of demo/production. It seeded two sandbox-classified requests with
+invalid synthetic telephone numbers and explicit synthetic consent evidence.
+There was no real phone verification or homeowner permission event. Database
+insertion gates were enabled only inside its controlled seed batch and restored;
+HTTP collection remained blocked independently by the wrapper. Synthetic account
+has four non-cash fixture credits, not purchased credits or refund liability.
+
+LINE state and required continuation
+OA: Solar Match, @944yqdue; Messaging API channel 2011973927; provider Soft Fabrics.
+The logged-in channel administrator email matches the verified Cloudflare owner.
+Channel assignment exists. Developer Basic settings exposes the actual owner API
+user ID; it was retained in browser memory, not printed or committed. Searchable
+username shabdsingh is NOT an API recipient ID.
+Developer webhook URL was blank, no long-lived token was displayed, greeting and
+auto-reply were enabled, and group joining was disabled. No active webhook was
+observed; this alone does not prove no other system uses the channel. Confirm no
+other integration uses it before issuing a token/changing its endpoint.
+No channel setting was changed, token issued, or provider push made in this task.
+The existing channel secret and single developer-owner recipient were transferred
+privately into staging secret bindings. No access token exists there yet. The
+initial OA page snapshot unexpectedly displayed the channel secret in the private
+tool transcript. It was not repeated in source/reports/screenshots or committed.
+Treat the chat as private; no secret was silently rotated because other consumers
+could break. No Access cookie/token or LINE access token was displayed.
+
+After token-creation confirmation, issue only the Messaging API token if needed;
+never reissue the channel secret or create LINE Login. Use masked Cloudflare
+staging secret fields to transfer channel secret/token and an owner-only JSON
+LINE_TEST_RECIPIENTS allowlist. Do not put token/ID values in source or reports.
+Require LINE_PROVIDER_MODE=sandbox and LINE_LIVE_ENABLED=false. This sandbox
+really calls LINE. OUTBOUND_MESSAGES_ENABLED stays false until the test window.
+The ignored secrets bundle now contains the existing channel secret and owner-only
+recipient list alongside generated staging keys. It has no access token.
+LINE_TEST_RECIPIENTS is a secret, not a public variable; the conflicting empty
+variable was removed before deployment. Verify names only, never reveal values.
+
+Set exact HTTPS webhook, run LINE Verify, enable webhooks only after success.
+Record prior webhook/use-webhook/redelivery/token/greeting/auto-reply settings
+before each change. Original blank URL/response settings are saved privately;
+the replacement URL is filled but unsaved. Do not claim LINE Verify success from
+HTTP tests: signed empty events passed 200, bad/tampered signatures 400, and a
+signed non-owner LINK was ignored with no invitation/message-budget row.
+For the three-message exercise, temporarily disable greeting/auto-reply so LINE's
+independent automatic responses do not spend an untracked message. Restore them
+afterwards. The application ignores staging follow events; LINK is deliberate.
+
+Phone steps, only after the endpoint/token/allowlist are ready:
+1. Add @944yqdue: https://line.me/R/ti/p/@944yqdue
+2. Send LINK from the intended owner account. Verify signed source matches the
+   single developer API user ID before any allowed invitation.
+3. Open invitation and authenticate through Access, then sign into /installers
+   with the private owner credentials. Approve the account connection.
+4. Verify the signed accountLink event binds the same user and synthetic company.
+5. In real 09:00–17:00 Asia/Bangkok hours, enable only necessary staging controls
+   and manually allocate one synthetic sandbox enquiry to this company. No cron.
+6. Send one labelled enquiry push, verify portal details/ledger and ask the owner
+   to confirm receipt. API acceptance is not receipt. Then unlink, check queued
+   suppression, and reconnect with a new LINK. Use mocks for further retry cases.
+Maximum three DISTINCT push attempts total, including invitations and enquiry.
+STAGING_LINE_MAX_MESSAGES=3 uses atomic persistent reservations; same retry UUID
+reuses a slot. Ambiguous/failed attempts consume a slot conservatively. Do not
+delete/replenish budget records or bypass hours. LINE retries must retain the UUID.
+No payment, email, SMS, attribution or automatic scheduler may be enabled.
+
+Pause / resume / remove
+Pause: leave staging/wrangler.jsonc OUTBOUND_MESSAGES_ENABLED=false; guarded
+redeploy if any temporary override was used. Through the verified management
+query helper, set platformPaused=true, collectionEnabled=false, paymentsEnabled=
+false, deliveryPaused=true, notificationsEnabled=false. Check fixed_at IS NULL,
+all live flags off, no cron and budget count. Pauses never erase linked history.
+Resume: only after the outstanding owner confirmations, successful Access/LINE
+Verify, sole allowlisted verified owner and remaining budget are established.
+Use staging admin to unpause only the controlled test; do not enable public PII.
+Do not leave outbound enabled while waiting for the owner; pause again on handoff.
+
+Removal is a separate, explicitly approved destructive operation:
+First pause, disable/restore the LINE webhook and restore prior channel response
+settings. Export any needed synthetic evidence privately. Verify exact names/IDs.
+Delete only solarmatch-installer-staging through its explicit staging config;
+delete only its dedicated D1 after confirming ID above; delete its R2 only after
+inventory confirms disposable/empty contents. Delete only the new staging Access
+apps/policies once their IDs exist. Never remove a reusable production policy.
+Use Cloudflare's confirmation screens or explicit CLI confirmations. Do not use
+account-wide deletion, change production DNS, or delete the review/local demo.
+No resource deletion or purchase/plan upgrade occurred here.
+
+Cost boundary
+Account displayed Workers usage 5/100,000 and $0 billable usage before deployment,
+and Zero Trust 3/50 seats. No plan was upgraded; small staging D1 schema/fixtures
+and an empty private R2 bucket were used. Free-tier quota exhaustion must stop the
+test, not select a paid plan. Do not infer free provider messaging entitlement;
+confirm LINE quota before any of the three real pushes. A purchased domain is not
+needed for this verified workers.dev HTTPS address.

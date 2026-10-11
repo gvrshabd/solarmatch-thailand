@@ -6,6 +6,8 @@ export type SolarMatchRuntimeEnv = {
   ACCESS_TEAM_DOMAIN?: string;
   ACCESS_AUD?: string;
   PRIVATE_SITE_ACCESS_AUD?: string;
+  STAGING_ACCESS_AUD?: string;
+  STAGING_LINE_MAX_MESSAGES?: string;
   ADMIN_EMAILS?: string;
   CSRF_SECRET?: string;
   ASSESSMENT_SIGNING_SECRET?: string;

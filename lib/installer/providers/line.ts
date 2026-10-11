@@ -1,5 +1,5 @@
 import { ProviderError, base64, constantEqual, hmac, parseObject, requireMode, requestJson, safeUrl, type ProviderMode } from './common';
-export interface LineConfig { mode: ProviderMode; channelSecret?: string; accessToken?: string; outboundEnabled?: boolean; liveEnabled?: boolean; linkedRecipient?: boolean; sandboxRecipients?: string[]; fetch?: typeof fetch }
+export interface LineConfig { mode: ProviderMode; channelSecret?: string; accessToken?: string; outboundEnabled?: boolean; liveEnabled?: boolean; linkedRecipient?: boolean; sandboxRecipients?: string[]; fetch?: typeof fetch; reserveMessage?:(retryKey:string,to:string)=>Promise<void>; stagingLabel?:boolean }
 export interface LineEvent { type: string; webhookEventId: string; timestamp: number; source: { type: string; userId?: string }; link?: { result: 'ok' | 'failed'; nonce: string }; deliveryContext?: { isRedelivery: boolean } }
 export async function verifyLineWebhook(raw: string, headers: Headers, config: LineConfig): Promise<LineEvent[]> {
   requireMode(config.mode);
@@ -49,6 +49,8 @@ export async function sendEnquiryNotification(input: EnquiryNotification, config
   if (config.mode === 'local-test') return { status: 'captured' as const, providerMessageId: `local_${input.retryKey}`, captured };
   outbound(config, input.to);
   if (config.mode === 'live' && !config.linkedRecipient) throw new ProviderError('line_recipient_not_linked');
+  await config.reserveMessage?.(input.retryKey,input.to);
+  if(config.stagingLabel)captured.messages[0].text='[SolarMatch STAGING TEST — SYNTHETIC DATA / ทดสอบด้วยข้อมูลจำลอง]\n'+captured.messages[0].text;
   // Keep this UUID fixed on every retry of this outbox record. LINE accepts a
   // duplicate retry key with 409 and X-Line-Accepted-Request-Id.
   try {
@@ -65,6 +67,8 @@ export async function sendAccountLinkInvitation(to: string, invitationUrl: strin
   const captured={to,messages:[{type:'text',text}]};
   if(config.mode==='local-test')return {status:'captured' as const,providerMessageId:`local_${retryKey}`,captured};
   outbound(config,to);
+  await config.reserveMessage?.(retryKey,to);
+  if(config.stagingLabel)captured.messages[0].text='[SolarMatch STAGING TEST / ข้อความทดสอบ]\n'+captured.messages[0].text;
   try {
     const response=await(config.fetch??fetch)('https://api.line.me/v2/bot/message/push',{method:'POST',headers:{Authorization:`Bearer ${config.accessToken}`,'Content-Type':'application/json','X-Line-Retry-Key':retryKey},body:JSON.stringify(captured),redirect:'error',signal:AbortSignal.timeout(15000)});
     const id=response.headers.get('x-line-accepted-request-id')??response.headers.get('x-line-request-id');

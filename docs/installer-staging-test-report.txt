@@ -1,0 +1,105 @@
+SOLARMATCH HTTPS STAGING PREPARATION — ACTUAL EVIDENCE, 12 OCTOBER 2026
+
+Starting feature commit: 5ed9378d0f70b06094dceebe41a0b607cc588290, clean checkout.
+Preserved main: 6567ffc84a9ee4e609591e80da587229c6482384.
+Repository origin verified gvrshabd/solarmatch-thailand. No push/main modification.
+
+New remote resources actually created:
+Worker solarmatch-installer-staging
+https://solarmatch-installer-staging.deluxejahseh.workers.dev
+D1 solarmatch-installer-staging-db, 153b8867-e7ad-40ad-8a63-c2bde2338b43
+R2 solarmatch-installer-staging-private; managed public-domain enabled=false.
+All bindings differ from production. No production/customer data or secrets copied.
+Initial staging code deployment: f2255b08-ee88-494a-a175-daa76fd961e6.
+After five generated staging-secret bindings:
+deployment e8df060e-7ec0-4620-9bd5-ebe224a07355
+100% version 276f033c-6203-4d08-b3a1-5db122e09dc9.
+Final code deployment: b0e01311-aee9-40fd-ae97-f8a80bf0ed4a.
+After seven secret bindings, final deployment 08198cd1-f084-4e90-b058-7c9cf83dcc34,
+100% version 74ca2892-5fae-4c1d-ae5e-ad3b05744cdf.
+Existing LINE channel secret and single-owner allowlist uploaded privately;
+no LINE access token issued or installed. Empty allowlist variable removed.
+
+Migration evidence / failures retained
+Pinned Wrangler normal bulk migration applied 0001–0005 then 0006 failed with
+incomplete input / 7500. Failed 0006 import rolled back (no installer tables).
+Direct full-file HTTP query also failed; a split original trigger query still
+failed at statement 31. No historical migration was edited. Controlled transport
+uses equivalent RAISE-WHERE guards, records original source hashes/checkpoints,
+checks destination before each remote query, and reuses installed SQLite splitter.
+Fresh local original/transport chains have the same schema object identities;
+credit nonnegativity, application and immutability checks passed. All eighteen
+remote migration names now match; twenty-five triggers and zero FK violations.
+Statement transport is checkpointed, not falsely claimed whole-file atomic.
+
+Synthetic management seed actually completed
+Supported Better Auth private signup and verification APIs generated the new owner
+account and its password hash. Cloudflare's verified owner identity was checked.
+No public registration verification bypass or fixture route was added. No inbox
+message, SMS proof or real homeowner consent occurred. Private credentials are
+ignored and excluded from commits. One synthetic approved, paused company; four
+explicit non-cash fixture credits (one ledger row); two sandbox-classified leads/
+canonical enquiries; zero deliveries, payment orders/calls or outbound budget slots.
+Final clock NULL; collection/payments/notifications false; platform/delivery paused.
+HTTP PII/OTP endpoints blocked independently during the controlled database seed.
+
+Current code verification actually run
+Final pnpm test: 335/335 passed, 47 files (7.58s).
+pnpm typecheck passed. pnpm lint zero errors, one existing QR img advisory.
+INSTALLER_STAGING=true pnpm build passed and actual compiled protected entrypoint
+was deployed only through the name/ID/build/config-checked staging helper.
+No dependency/lockfile or production configuration change.
+Earlier new-test runs failed due a returned mock treated as after-test cleanup,
+two TypeScript test annotation/mock tuple errors and an over-strict transport
+guard; these were corrected without deleting security/financial assertions.
+The first complete run had five campaign failures/329 passes after midnight:
+SQLite CURRENT_TIMESTAMP bypassed JavaScript fake Date. Synthetic seedLead now
+explicitly writes its mocked submission time, matching consent/expiry. Reporting
+application logic is unchanged. All 334 then passed. Initial compiled-marker
+guard incorrectly looked for an identifier erased by minification; it stopped
+before deployment. Guard now verifies literal wrapper/build markers instead.
+Node alias hook initially affected an Undici CommonJS dependency; restricted it
+to repository ESM TypeScript imports. No existing demo/data was used or reset.
+
+Actual unauthenticated HTTPS checks
+/ /en /installers /admin /admin/api/installer-platform /api/assessment/config
+and /favicon.svg: 403, noindex/nofollow/noarchive, private/no-store.
+/api/installer/test /admin/local-access /admin/api/local-session /__scheduled:404.
+GET exact LINE webhook:405. Trailing-slash webhook child:403 (not an exception).
+POST events=[] with invalid signature:400. Oversized 100001-byte body:413.
+Those initial 400 checks preceded credential installation and were only safe
+rejection. After installing the actual channel secret, signed events=[] returned
+200, invalid/tampered raw-body signatures returned 400. On the final deployment,
+signed non-owner LINK returned 200/ignored: zero invitations/message-budget rows.
+This proves the deployed signature/allowlist boundary, NOT LINE Verify, actual
+signed phone association or message receipt.
+Remote wrapper gates static assets, expected origin and exact webhook path;
+unit tests cover issuer/audience/exact owner, bad identity/verification failure,
+fixture exclusions and three-slot concurrent budget/retry/allowlist behavior.
+
+Not completed — genuine owner/account interaction required
+Wrangler OAuth Access creation/detail requests returned 403/1010. Browser Access
+and token actions need the pending at-action security confirmation. No token
+permission was broadened. Site/admin AUD fields remain empty and fail closed.
+No saved outer Access apps, authenticated staging owner/admin/installer login,
+banner-render check or protected Thai/English browser journey is claimed.
+LINE channel 2011973927 / Solar Match / @944yqdue is assigned under Soft Fabrics;
+administrator email matches verified owner; developer API ID and channel secret
+were observed privately. No long-lived token was displayed. Existing developer
+webhook blank; greeting/auto-reply enabled. No channel setting changed. Replacement
+URL is prepared but unsaved, and original response settings are recorded privately.
+The first OA binding automatically displayed the channel secret in tool output.
+It was not repeated in chat text, committed or exported. No LINE access token,
+Access token or cookie was displayed. Treat transcript as private; no unapproved
+secret reissue/rotation or claim of external compromise occurred.
+Still required: owner confirmation; access-token private transfer; actual free messaging
+quota/channel-no-other-system check; successful LINE Verify/use-webhook; owner
+friend/LINK/accountLink/receipt interaction; one controlled business-hours push,
+unlink/suppression/reconnection and exact remote ledger/recipient repeat check.
+No real outbound test was attempted outside Bangkok hours or before allowlisting.
+Three-message cap remains unused; no real API acceptance or phone receipt claim.
+
+Deferred/not authorised: production deployment or migration, main/push, plan
+upgrade/purchase/domain/DNS, merchant/payment/SMS/email activation and real customer
+data. No Milly's resource operation was targeted. No deletion occurred.
+Pause/resume/removal and exact continuation are in installer-staging-operations.txt.
