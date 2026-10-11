@@ -2,7 +2,7 @@ import { getRuntimeEnv } from '@/lib/server/runtime';
 import { assertPlatformRequest } from './platform';
 import { getPlatformSettings } from './settings';
 import { ProviderError } from './providers/common';
-import { confirmPayment, createCharge, createHostedOrder, type PaymentConfig, type PaymentOrder, type ProviderPayment } from './providers/payment';
+import { confirmPayment, createCharge, createHostedOrder, enabledPaymentMethods, type PaymentConfig, type PaymentMethod, type PaymentOrder, type ProviderPayment } from './providers/payment';
 
 export interface StoredPaymentOrder { id: string; company_id: string; package_id: string; credits: number; amount_minor: number; currency: 'thb'; status: string; provider: string; provider_order_id: string | null; receipt_reference: string | null; refunded_minor: number; reversed_credits: number; credited_at: string | null; last_reconciliation_at: string | null; reconciliation_error_code: string | null; created_at: string; updated_at: string }
 export async function paymentConfig(db: D1Database, request: Request): Promise<PaymentConfig> {
@@ -15,18 +15,27 @@ async function orderFor(db: D1Database, companyId: string | null, orderId: strin
   if (!row) throw new Error('payment_order_not_found'); return row;
 }
 function providerOrder(row: StoredPaymentOrder, request: Request): PaymentOrder {
-  return { orderId: row.id, amountMinor: row.amount_minor, currency: row.currency, description: `SolarMatch ${row.credits} credits`, returnUrl: new URL('/installers/purchases', request.url).href };
+  const returnUrl=new URL('/installers/payment',request.url);
+  returnUrl.searchParams.set('orderId',row.id);
+  returnUrl.searchParams.set('lang',new URL(request.url).searchParams.get('lang')==='en'?'en':'th');
+  return { orderId: row.id, amountMinor: row.amount_minor, currency: row.currency, description: `SolarMatch ${row.credits} credits`, returnUrl:returnUrl.href };
 }
-export async function createOrder(db: D1Database, companyId: string, request: Request) {
+export async function createOrder(db: D1Database, companyId: string, request: Request, requestedMethod?: string) {
   const config = await paymentConfig(db,request); const settings = await getPlatformSettings(db);
   if (!settings.paymentsEnabled || settings.platformPaused) throw new Error('payments_disabled');
+  if((config.mode!=='local-test'||requestedMethod!==undefined)&&!enabledPaymentMethods(config).includes(requestedMethod as PaymentMethod))throw new ProviderError('payment_method_unavailable');
   const approved = await db.prepare("SELECT id FROM solar_company_partners WHERE id=? AND approval_status='approved'").bind(companyId).first();
   if (!approved) throw new Error('company_not_approved');
   const id=crypto.randomUUID(), now=new Date().toISOString();
   const row: StoredPaymentOrder = { id, company_id: companyId, package_id: 'credits-20', credits: settings.packageCredits, amount_minor: settings.packageAmountMinor, currency: 'thb', status: 'pending', provider: config.mode === 'local-test' ? 'local-test' : 'omise', provider_order_id:null, receipt_reference:null, refunded_minor:0, reversed_credits:0, credited_at:null,last_reconciliation_at:null,reconciliation_error_code:null,created_at:now,updated_at:now };
-  const checkout = await createHostedOrder(providerOrder(row,request),config);
+  const checkout = await createHostedOrder({...providerOrder(row,request),method:requestedMethod as PaymentMethod|undefined},config);
   await db.prepare('INSERT INTO installer_payment_orders (id,company_id,package_id,credits,amount_minor,currency,status,provider,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)').bind(id,companyId,row.package_id,row.credits,row.amount_minor,'thb','pending',row.provider,now,now).run();
   return { orderId:id, order:row, checkout:checkout.checkout, methods:checkout.methods, provider:checkout.provider };
+}
+/** Browser returns identify an order; only this server-owned row supplies its status. */
+export async function readPaymentOrder(db:D1Database,companyId:string,orderId:string) {
+  if(!companyId)throw new Error('payment_order_not_found');
+  return orderFor(db,companyId,orderId);
 }
 export async function authorizeOrder(db:D1Database,companyId:string,orderId:string,tokenOrSourceId:string,request:Request) {
   const row=await orderFor(db,companyId,orderId); const config=await paymentConfig(db,request);
@@ -76,7 +85,10 @@ export async function applyConfirmedPayment(db:D1Database,row:StoredPaymentOrder
 export async function reconcileOrder(db:D1Database,companyId:string|null,orderId:string,request:Request) {
   const row=await orderFor(db,companyId,orderId); const config=await paymentConfig(db,request);
   if(row.provider==='local-test')return row;
-  if(!row.provider_order_id)throw new Error('payment_attempt_requires_manual_reconciliation');
+  if(!row.provider_order_id){
+    if(row.status==='pending')return row;
+    throw new Error('payment_attempt_requires_manual_reconciliation');
+  }
   const confirmed=await confirmPayment({orderId:row.id,providerOrderId:row.provider_order_id,amountMinor:row.amount_minor,currency:row.currency},row.provider_order_id,config);
   return applyConfirmedPayment(db,row,confirmed);
 }

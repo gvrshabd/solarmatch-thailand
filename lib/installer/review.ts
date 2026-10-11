@@ -1,4 +1,4 @@
-import { canonicalEnquiryKey } from './enquiries';
+import { canonicalEnquiryKey,type SubmissionMode } from './enquiries';
 import { getPlatformSettings } from './settings';
 import { isoNow,parseJson,platformAudit,type Row } from './deliveries';
 import type { EstimateAnswers } from '@/lib/calculator/types';
@@ -14,7 +14,9 @@ export async function reviewEnquiry(db:D1Database,enquiryId:string,decision:'sam
   if(!leadId||leadId===enquiry.lead_id)throw new Error('separate_project_evidence_required');
   const lead=await db.prepare(`SELECT l.* FROM leads l JOIN installer_enquiry_leads el ON el.lead_id=l.id WHERE l.id=? AND el.enquiry_id=? AND l.suppressed=0 AND l.consent_withdrawn_at IS NULL AND l.purged_at IS NULL AND l.third_party_disclosure_authorized_v2=1 AND l.quote_contact_requested=1 AND julianday(l.distribution_expires_at)>julianday('now')`).bind(leadId,enquiryId).first<Row>();
   if(!lead||!lead.phone_e164||!lead.phone_verified_at)throw new Error('valid_new_request_required');
-  const key=await canonicalEnquiryKey(String(lead.phone_e164),parseJson<EstimateAnswers>(lead.answers_json,{} as EstimateAnswers));
+  const mode:SubmissionMode=lead.submission_mode==='production'||lead.submission_mode==='sandbox'||lead.submission_mode==='local-test'||lead.submission_mode==='restricted-preview'
+    ?lead.submission_mode:Number(lead.is_test_submission)===1?(lead.submission_environment==='restricted_site_operational'?'restricted-preview':'local-test'):'production';
+  const key=await canonicalEnquiryKey(String(lead.phone_e164),parseJson<EstimateAnswers>(lead.answers_json,{} as EstimateAnswers),mode);
   if(key===enquiry.canonical_key)throw new Error('same_property_cannot_reset_recipient_slots');
   const settings=await getPlatformSettings(db);const id=crypto.randomUUID();const now=isoNow();
   const eligible=(!settings.ownerRequired||lead.ownership_status==='owner')&&Number(lead.air_conditioner_count)>=settings.minimumAcUnits&&Number(lead.quality_score)>=settings.minimumQuality;

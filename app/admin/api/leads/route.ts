@@ -7,6 +7,7 @@ import { sha256 } from '@/lib/server/crypto';
 import { ensureInitialRelease, getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
 import { requireDatabase } from '@/lib/server/runtime';
 import { redactInstallerLeads } from '@/lib/installer/privacy';
+import type { SubmissionMode } from '@/lib/installer/enquiries';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,7 @@ type LeadRow = {
   third_party_disclosure_authorized: number;
   recipient_snapshot_json: string | null;
   submission_environment: 'production' | 'private_development_preview' | 'restricted_site_operational';
+  submission_mode: SubmissionMode | null;
   is_test_submission: number;
   distribution_allowed: number;
   suppressed: number;
@@ -82,7 +84,10 @@ export async function GET(request: Request) {
   else clauses.push("status NOT IN ('archived', 'deleted')");
   const submissionType = url.searchParams.get('submissionType');
   if (submissionType === 'test') clauses.push('is_test_submission = 1');
-  if (submissionType === 'production') clauses.push('is_test_submission = 0');
+  if (submissionType === 'production') clauses.push("is_test_submission = 0 AND submission_environment = 'production' AND COALESCE(submission_mode, 'production') = 'production'");
+  const submissionMode=url.searchParams.get('submissionMode');
+  if(submissionMode==='historical')clauses.push('submission_mode IS NULL');
+  else if(['production','sandbox','local-test','restricted-preview'].includes(submissionMode??'')){clauses.push('submission_mode = ?');values.push(submissionMode);}
   const from = url.searchParams.get('from');
   if (from && /^\d{4}-\d{2}-\d{2}$/u.test(from)) { clauses.push('created_at >= ?'); values.push(`${from}T00:00:00.000Z`); }
   const to = url.searchParams.get('to');
@@ -104,10 +109,13 @@ export async function GET(request: Request) {
       contact_configuration_version_id, COALESCE(consent_scope_v2, consent_scope) AS consent_scope,
       COALESCE(solar_match_followup_authorized_v2, solar_match_followup_authorized) AS solar_match_followup_authorized,
       COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
-      recipient_snapshot_json, submission_environment, is_test_submission, distribution_allowed, suppressed
+      recipient_snapshot_json, submission_environment, submission_mode, is_test_submission, distribution_allowed, suppressed
     FROM leads WHERE ${clauses.length ? clauses.join(' AND ') : '1 = 1'} ORDER BY ${order} LIMIT 200`).bind(...values).all<LeadRow>();
   const release = await getCurrentRelease(database);
   const threshold = release ? parseScoringConfiguration(release).automaticSelectionThreshold : 4;
+  const submissionCounts=await database.prepare(`SELECT submission_mode,is_test_submission,COUNT(*) AS count FROM leads
+    WHERE ${clauses.length?clauses.join(' AND '):'1 = 1'} GROUP BY submission_mode,is_test_submission ORDER BY submission_mode,is_test_submission`)
+    .bind(...values).all<{submission_mode:SubmissionMode|null;is_test_submission:number;count:number}>();
   return NextResponse.json({
     leads: result.results.map((lead) => {
       const compatible = isLegacyExportCompatible(lead, exportScope, recipientKey);
@@ -122,6 +130,7 @@ export async function GET(request: Request) {
       exportReason: lead.is_test_submission ? 'Historical test record — external delivery is permanently blocked' : !lead.distribution_allowed || lead.suppressed ? 'External delivery is suppressed' : compatible ? 'Compatible with the selected legacy export scope' : lead.contact_collection_mode === 'shared_solar_company_handoff' ? 'Use Legal launch → Manual shared-lead distribution to choose and record each recipient' : exportScope === 'solar_match_validation_followup' ? 'Consent does not authorize SolarMatch validation follow-up' : 'Consent does not authorize this named-recipient export',
     }); }),
     automaticSelectionThreshold: threshold,
+    submissionCounts:submissionCounts.results,
     exportScope,
     recipientKey,
   }, { headers: { 'Cache-Control': 'no-store' } });
@@ -182,7 +191,7 @@ export async function POST(request: Request) {
       contact_configuration_version_id, COALESCE(consent_scope_v2, consent_scope) AS consent_scope,
       COALESCE(solar_match_followup_authorized_v2, solar_match_followup_authorized) AS solar_match_followup_authorized,
       COALESCE(third_party_disclosure_authorized_v2, third_party_disclosure_authorized) AS third_party_disclosure_authorized,
-      recipient_snapshot_json, submission_environment, is_test_submission, distribution_allowed, suppressed
+      recipient_snapshot_json, submission_environment, submission_mode, is_test_submission, distribution_allowed, suppressed
       FROM leads WHERE id IN (${placeholders}) AND status <> 'deleted'`).bind(...parsedBody.leadIds).all<LeadRow>();
     const incompatible = rows.results.filter((lead) => !isLegacyExportCompatible(lead, parsedBody.exportScope, parsedBody.recipientKey));
     if (incompatible.length || rows.results.length !== parsedBody.leadIds.length) return NextResponse.json({ error: 'consent_scope_mismatch', incompatibleLeadIds: incompatible.map((lead) => lead.id) }, { status: 409 });

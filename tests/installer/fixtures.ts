@@ -58,7 +58,7 @@ export async function seedFixture(database:D1Database) {
   }
 }
 
-export async function seedLead(database:D1Database,phone='+66812345678',answers=syntheticAnswers) {
+export async function seedLead(database:D1Database,phone='+66812345678',answers=syntheticAnswers,submissionMode:'production'|'sandbox'|'local-test'|'restricted-preview'='local-test') {
   const release=await getCurrentRelease(database);
   if(!release) throw new Error('missing fixture release');
   const id=crypto.randomUUID();const now=new Date().toISOString();
@@ -66,13 +66,17 @@ export async function seedLead(database:D1Database,phone='+66812345678',answers=
   const values:Record<string,unknown>={id,idempotency_key:crypto.randomUUID(),request_fingerprint:crypto.randomUUID(),legal_first_name:'Synthetic',legal_last_name:'Homeowner',phone_e164:phone,phone_display:phone,preferred_contact_method:'phone',province:answers.province,ownership_status:answers.ownershipStatus,property_type:answers.propertyType,daytime_loads_json:JSON.stringify(answers.daytimeLoads),air_conditioner_count:answers.airConditionerCount,monthly_bill_thb:answers.monthlyBillThb,roof_material:answers.roofMaterial,roof_shade:answers.shade,roof_area:'unsure',daytime_pattern:answers.daytimePattern,installation_timeframe:answers.planningTimeframe,quote_contact_requested:1,answers_json:JSON.stringify(answers),questionnaire_version_id:release.questionnaire_version_id,rule_version_id:release.rule_version_id,release_id:release.release_id,raw_score:90,quality_score:5,hard_eligible:1,high_quality:1,scoring_explanation_json:'{}',consent_version:'fixture-v1',consent_text_en:'Synthetic consent',consent_text_th:'ความยินยอมทดสอบ',consented_at:now,source_locale:'th',contact_collection_mode:'validation_interest',consent_scope:'solar_match_validation_followup',solar_match_followup_authorized:1,third_party_disclosure_authorized:0,contact_configuration_version_id:release.contact_configuration_version_id,content_version_id:release.content_version_id,contact_collection_mode_v2:'shared_solar_company_handoff',consent_scope_v2:'shared_residential_solar_referral',solar_match_followup_authorized_v2:0,third_party_disclosure_authorized_v2:1,distribution_expires_at:expires,disclosed_fields_snapshot_json:'["phone","assessmentAnswers"]',privacy_notice_version_id:'fixture-privacy',submission_environment:'private_development_preview',is_test_submission:1};
   values.hard_eligible=answers.ownershipStatus==='owner'&&(answers.airConditionerCount??0)>=4?1:0;
   values.high_quality=values.hard_eligible;
+  values.submission_mode=submissionMode;
+  values.submission_environment=submissionMode==='production'?'production':'private_development_preview';
+  values.is_test_submission=submissionMode==='production'?0:1;
+  values.distribution_allowed=submissionMode==='restricted-preview'?0:1;
   const columns=Object.keys(values);
   values.adult_confirmed_at=now;
   values.phone_verified_at=now;
   columns.push('adult_confirmed_at','phone_verified_at');
   await database.batch([
     database.prepare(`INSERT INTO leads(${columns.join(',')}) VALUES(${columns.map(()=>'?').join(',')})`).bind(...Object.values(values)),
-    ...await canonicalEnquiryStatements(database,id,phone,answers,await getPlatformSettings(database)),
+    ...await canonicalEnquiryStatements(database,id,phone,answers,{...await getPlatformSettings(database),submissionMode}),
   ]);
   const enquiry=await database.prepare('SELECT enquiry_id FROM installer_enquiry_leads WHERE lead_id=?').bind(id).first<{enquiry_id:string}>();
   return {leadId:id,enquiryId:enquiry!.enquiry_id};

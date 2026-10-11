@@ -2,23 +2,57 @@ import { getRuntimeEnv } from '@/lib/server/runtime';
 import { encodeBase64Url,hmacSha256,sha256 } from '@/lib/server/crypto';
 import { assertPlatformRequest } from './platform';
 import { getPlatformSettings } from './settings';
+import { platformAudit } from './deliveries';
 import { lineAccountLinkUrl,requestLinkToken,sendAccountLinkInvitation,verifyLineWebhook,type LineConfig,type LineEvent } from './providers/line';
 async function configFor(db:D1Database,request:Request):Promise<LineConfig>{const {mode}=assertPlatformRequest(request);const env=getRuntimeEnv(),settings=await getPlatformSettings(db);let recipients:string[]=[];try{const value=JSON.parse(env.LINE_TEST_RECIPIENTS??'[]');if(Array.isArray(value)&&value.every(item=>typeof item==='string'))recipients=value;}catch{/* fail closed */}const providerMode=mode==='local-test'?'local-test':env.LINE_PROVIDER_MODE==='live'&&String(mode)==='production'?'live':env.LINE_PROVIDER_MODE==='sandbox'&&mode==='sandbox'?'sandbox':'off';return {mode:providerMode,channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:!settings.platformPaused&&settings.notificationsEnabled&&env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:recipients};}
 export async function beginLineLink(db:D1Database,companyId:string,request:Request,linkRequest?:string){
   const config=await configFor(db,request);
-  const company=await db.prepare("SELECT id,line_user_id FROM solar_company_partners WHERE id=? AND approval_status='approved'").bind(companyId).first<{id:string;line_user_id:string|null}>();if(!company)throw new Error('company_not_approved');
+  const company=await db.prepare("SELECT id,line_user_id,line_link_generation FROM solar_company_partners WHERE id=? AND approval_status='approved'").bind(companyId).first<{id:string;line_user_id:string|null;line_link_generation:number}>();if(!company)throw new Error('company_not_approved');
   if(!linkRequest)return {status:company.line_user_id?'connected':'not-connected',instructions:'เพิ่ม SolarMatch Official Account เป็นเพื่อน แล้วส่งข้อความ LINK เพื่อรับลิงก์เชื่อมต่อ / Add the SolarMatch Official Account and send LINK to receive a secure connection link.'};
   if(!/^[A-Za-z0-9_-]{43}$/.test(linkRequest))throw new Error('invalid_line_invitation');
   const hash=await sha256(linkRequest),now=new Date().toISOString();
   const invitation=await db.prepare('SELECT * FROM installer_line_invitations WHERE token_hash=? AND consumed_at IS NULL AND expires_at>?').bind(hash,now).first<{id:string;line_user_id:string}>();if(!invitation)throw new Error('line_invitation_expired');
-  const token=await requestLinkToken(invitation.line_user_id,config);
   const nonce=encodeBase64Url(crypto.getRandomValues(new Uint8Array(32))),nonceHash=await sha256(nonce),id=crypto.randomUUID();
+  // Persist cancellable state before provider work. The generation guard also
+  // handles unlink during any earlier asynchronous hashing or invitation reads.
   const results=await db.batch([
     db.prepare('UPDATE installer_line_invitations SET consumed_at=? WHERE id=? AND consumed_at IS NULL AND expires_at>?').bind(now,invitation.id,now),
-    db.prepare('INSERT INTO installer_line_links(id,company_id,nonce_hash,line_user_id,expires_at,created_at) SELECT ?,?,?,?,?,? WHERE changes()=1').bind(id,companyId,nonceHash,invitation.line_user_id,new Date(Date.now()+600000).toISOString(),now),
+    db.prepare(`INSERT INTO installer_line_links(id,company_id,nonce_hash,line_user_id,expires_at,created_at) SELECT ?,?,?,?,?,? WHERE changes()=1
+      AND EXISTS(SELECT 1 FROM solar_company_partners WHERE id=? AND approval_status='approved' AND line_link_generation=?)`)
+      .bind(id,companyId,nonceHash,invitation.line_user_id,new Date(Date.now()+600000).toISOString(),now,companyId,company.line_link_generation),
   ]);
-  if(results[1].meta.changes!==1)throw new Error('line_invitation_already_claimed');
-  return {status:'confirmation-pending',authorizationUrl:lineAccountLinkUrl(token.linkToken,nonce)};
+  if(results[0].meta.changes!==1)throw new Error('line_invitation_already_claimed');
+  if(results[1].meta.changes!==1)throw new Error('line_link_cancelled');
+  try {
+    const token=await requestLinkToken(invitation.line_user_id,config);
+    const active=await db.prepare(`SELECT link.id FROM installer_line_links link JOIN solar_company_partners p ON p.id=link.company_id
+      WHERE link.id=? AND link.company_id=? AND link.consumed_at IS NULL AND link.expires_at>? AND p.approval_status='approved' AND p.line_link_generation=?`)
+      .bind(id,companyId,new Date().toISOString(),company.line_link_generation).first();
+    if(!active)throw new Error('line_link_cancelled');
+    return {status:'confirmation-pending',authorizationUrl:lineAccountLinkUrl(token.linkToken,nonce)};
+  } catch(error) {
+    await db.prepare('UPDATE installer_line_links SET consumed_at=COALESCE(consumed_at,?) WHERE id=? AND company_id=?').bind(new Date().toISOString(),id,companyId).run();
+    throw error;
+  }
+}
+/** Called only after the portal authenticates and scopes a company owner. */
+export async function unlinkLine(db:D1Database,companyId:string,actor:string){
+  const now=new Date().toISOString();
+  const results=await db.batch([
+    // Invalidate unused invitations for both the current connection and any
+    // unfinished company challenge before clearing either source of identity.
+    db.prepare(`UPDATE installer_line_invitations SET consumed_at=? WHERE consumed_at IS NULL AND line_user_id IN
+      (SELECT line_user_id FROM solar_company_partners WHERE id=? AND line_user_id IS NOT NULL UNION SELECT line_user_id FROM installer_line_links WHERE company_id=? AND consumed_at IS NULL)`).bind(now,companyId,companyId),
+    db.prepare('UPDATE installer_line_links SET consumed_at=? WHERE company_id=? AND consumed_at IS NULL').bind(now,companyId),
+    db.prepare(`UPDATE installer_outbox SET state=CASE WHEN state='sending' THEN 'cancelled' ELSE 'action-required' END,
+      last_error='line_unlinked',lease_until=NULL,updated_at=? WHERE kind='installer-delivery' AND state IN('pending','failed','sending','action-required')
+      AND delivery_id IN(SELECT id FROM lead_recipient_deliveries WHERE partner_id=?) RETURNING id`).bind(now,companyId),
+    db.prepare(`UPDATE lead_recipient_deliveries SET notification_status='action-required',updated_at=? WHERE partner_id=?
+      AND withdrawal_suppressed=0 AND EXISTS(SELECT 1 FROM installer_outbox o WHERE o.delivery_id=lead_recipient_deliveries.id AND o.last_error='line_unlinked')`).bind(now,companyId),
+    db.prepare('UPDATE solar_company_partners SET line_user_id=NULL,line_link_generation=line_link_generation+1,updated_at=?,updated_by=? WHERE id=?').bind(now,actor,companyId),
+    platformAudit(db,actor,'line-unlinked',companyId),
+  ]);
+  return {status:'not-connected' as const,notificationsRequireAction:results[2].results.length};
 }
 async function applyAccountLink(db:D1Database,event:LineEvent){
   if(event.link?.result!=='ok'||!event.source.userId)return;

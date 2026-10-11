@@ -1,7 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHmac, randomUUID } from 'node:crypto';
 
-const origin = 'http://localhost:3000';
+const base = new URL(process.env.INSTALLER_DEMO_ORIGIN ?? 'http://localhost:3000');
+if(base.protocol!=='http:'||!['localhost','127.0.0.1','[::1]'].includes(base.hostname)||base.username||base.password||base.pathname!=='/'||base.search||base.hash)throw new Error('Synthetic demonstration requires a loopback HTTP origin.');
+const origin = base.origin;
 const email = 'preview-installer@example.test';
 const installerPassword = process.env.INSTALLER_DEMO_PASSWORD;
 if (!installerPassword) throw new Error('Set INSTALLER_DEMO_PASSWORD privately to the verified synthetic installer account password.');

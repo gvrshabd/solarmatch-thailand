@@ -1,5 +1,5 @@
 import { getRuntimeEnv,type SolarMatchRuntimeEnv } from '@/lib/server/runtime';
-import { getPlatformSettings } from './settings';
+import { getPlatformSettings,installerSettingsSchema,withinDeliveryHours } from './settings';
 import { processQueue,type Row,parseJson } from './deliveries';
 import { sendEnquiryNotification,type LineConfig } from './providers/line';
 import { sendMessage } from './providers/sms';
@@ -19,6 +19,30 @@ export function assertInstallerJobEnvironment(env:SolarMatchRuntimeEnv) {
 export function lineConfiguration(env:SolarMatchRuntimeEnv=getRuntimeEnv()):LineConfig {
   return {mode:env.INSTALLER_PLATFORM_MODE==='local-test'?'local-test':env.INSTALLER_PLATFORM_MODE==='sandbox'&&env.LINE_PROVIDER_MODE==='sandbox'?'sandbox':env.INSTALLER_PLATFORM_MODE==='production'&&env.LINE_PROVIDER_MODE==='live'?'live':'off',channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:parseJson<string[]>(env.LINE_TEST_RECIPIENTS,[])};
 }
+function notificationContextMatches(row:Row,env:SolarMatchRuntimeEnv) {
+  const mode=env.INSTALLER_PLATFORM_MODE;
+  if(mode==='production')return row.allocation_environment==='production'&&row.is_test_submission===0&&row.submission_environment==='production'&&(row.submission_mode===null||row.submission_mode==='production');
+  if(mode==='sandbox')return row.allocation_environment==='sandbox'&&row.is_test_submission===1&&row.submission_mode==='sandbox'&&row.submission_environment==='private_development_preview';
+  if(mode==='local-test'){
+    const historical=row.submission_mode===null&&row.submission_environment==='private_development_preview';
+    return row.is_test_submission===1&&(row.submission_mode==='local-test'||historical)&&(row.allocation_environment==='local-test'||(row.allocation_environment===null&&historical));
+  }
+  return false;
+}
+async function markNotificationContextMismatch(db:D1Database,itemId:string,state:string,leaseUntil:string|null,now:string) {
+  await db.batch([
+    db.prepare(`UPDATE installer_outbox SET state='action-required',last_error='notification_environment_mismatch',attempts=attempts-?,lease_until=NULL,updated_at=?
+      WHERE id=? AND state=? AND (lease_until=? OR (? IS NULL AND lease_until IS NULL))`).bind(state==='sending'?1:0,now,itemId,state,leaseUntil,leaseUntil),
+    db.prepare(`UPDATE lead_recipient_deliveries SET notification_status='action-required',updated_at=? WHERE id=(SELECT delivery_id FROM installer_outbox
+      WHERE id=? AND kind='installer-delivery' AND state='action-required' AND last_error='notification_environment_mismatch')`).bind(now,itemId),
+  ]);
+}
+function notificationSnapshotTime(row:Row,env:SolarMatchRuntimeEnv) {
+  if(!row.notification_fixed_at)return new Date();
+  if(env.INSTALLER_PLATFORM_MODE!=='local-test'||env.INSTALLER_TEST_CLOCK_ENABLED!=='true')throw new Error('test_clock_not_allowed');
+  assertInstallerJobEnvironment(env);
+  const date=new Date(String(row.notification_fixed_at));if(!Number.isFinite(date.getTime()))throw new Error('invalid_test_clock');return date;
+}
 export async function processOutbox(db:D1Database,env:SolarMatchRuntimeEnv=getRuntimeEnv()) {
   assertInstallerJobEnvironment(env);
   const runId=await beginJobRun(db,'notifications','notification-worker');
@@ -35,6 +59,7 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
   if(!['local-test','sandbox','production'].includes(env.INSTALLER_PLATFORM_MODE??''))throw new Error('platform_unavailable');
   if(env.INSTALLER_PLATFORM_MODE!=='local-test'&&env.OUTBOUND_MESSAGES_ENABLED!=='true')return {processed:0,failed:0};
   const dispatchTime=await installerAllocationNow(db),dispatchNow=dispatchTime.toISOString();
+  if(!withinDeliveryHours(dispatchTime,settings))return {processed:0,failed:0};
   // Ambiguous SMS sends are never retried automatically. LINE has a persistent provider retry key.
   await db.prepare(`UPDATE installer_outbox SET state=CASE WHEN kind='installer-delivery' THEN 'pending' ELSE 'needs-reconciliation' END
     WHERE state='sending' AND julianday(lease_until)<julianday(?)`).bind(dispatchNow).run();
@@ -42,8 +67,13 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
   let processed=0,failed=0;
   for(const item of due.results){
     const dispatchTime=await installerAllocationNow(db),now=dispatchTime.toISOString(),leaseUntil=new Date(dispatchTime.getTime()+120000).toISOString();
+    if(!withinDeliveryHours(dispatchTime,settings))break;
+    const previous=await db.prepare(`SELECT o.state,d.allocation_environment,l.submission_mode,l.submission_environment,l.is_test_submission
+      FROM installer_outbox o JOIN lead_recipient_deliveries d ON d.id=o.delivery_id JOIN leads l ON l.id=d.lead_id WHERE o.id=?`).bind(item.id).first<Row>();
+    if(!previous||!['pending','failed'].includes(String(previous.state)))continue;
+    if(!notificationContextMatches(previous,env)){await markNotificationContextMismatch(db,item.id,String(previous.state),null,now);continue;}
     const lease=await db.prepare(`UPDATE installer_outbox SET state='sending',attempts=attempts+1,lease_until=?,updated_at=?
-      WHERE id=? AND state IN ('pending','failed') AND attempts<8 AND julianday(next_attempt_at)<=julianday(?) RETURNING *`).bind(leaseUntil,now,item.id,now).first<Row>();
+      WHERE id=? AND state=? AND attempts<8 AND julianday(next_attempt_at)<=julianday(?) RETURNING *`).bind(leaseUntil,now,item.id,previous.state,now).first<Row>();
     if(!lease)continue;
     const row=await db.prepare(`SELECT d.*,p.line_user_id,p.trading_name,p.legal_name_en,l.phone_e164,l.suppressed,l.consent_withdrawn_at,e.suppressed_at
       FROM lead_recipient_deliveries d JOIN solar_company_partners p ON p.id=d.partner_id JOIN leads l ON l.id=d.lead_id JOIN installer_enquiries e ON e.id=d.enquiry_id WHERE d.id=?`).bind(lease.delivery_id).first<Row>();
@@ -53,10 +83,31 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
     try{
       // A pause applied while processing must take effect before the next provider call.
       const currentSettings=await getPlatformSettings(db);
+      const releaseLease=async()=>{
+        await db.prepare("UPDATE installer_outbox SET state=?,attempts=attempts-1,lease_until=NULL,updated_at=? WHERE id=? AND state='sending' AND lease_until=?").bind(previous.state,(await installerAllocationNow(db)).toISOString(),item.id,leaseUntil).run();
+      };
       if(currentSettings.platformPaused||!currentSettings.notificationsEnabled){
-        await db.prepare("UPDATE installer_outbox SET state='pending',lease_until=NULL,updated_at=? WHERE id=? AND state='sending' AND lease_until=?").bind(now,item.id,leaseUntil).run();break;
+        await releaseLease();break;
       }
       let providerReference:string;let captured:unknown;
+      if(lease.kind==='installer-delivery'||lease.kind==='homeowner-confirmation'){
+        // Both providers re-read consent, context, recipient and the active lease
+        // after asynchronous settings work. Never send from a cancelled/stale row.
+        const current=await db.prepare(`SELECT d.*,p.line_user_id,p.trading_name,p.legal_name_en,l.phone_e164,l.suppressed,l.consent_withdrawn_at,l.purged_at,l.deleted_at,
+          l.submission_mode,l.submission_environment,l.is_test_submission,e.suppressed_at,
+          (SELECT fixed_at FROM installer_test_clock WHERE id=1) AS notification_fixed_at,
+          (SELECT config_json FROM installer_platform_settings WHERE id=1) AS notification_settings
+          FROM installer_outbox o JOIN lead_recipient_deliveries d ON d.id=o.delivery_id JOIN solar_company_partners p ON p.id=d.partner_id
+          JOIN leads l ON l.id=d.lead_id JOIN installer_enquiries e ON e.id=d.enquiry_id WHERE o.id=? AND o.state='sending' AND o.lease_until=?`).bind(item.id,leaseUntil).first<Row>();
+        if(!current)continue;
+        if(current.withdrawal_suppressed||current.suppressed||current.suppressed_at||current.consent_withdrawn_at||current.purged_at||current.deleted_at){await db.prepare("UPDATE installer_outbox SET state='cancelled',lease_until=NULL,updated_at=? WHERE id=? AND state='sending' AND lease_until=?").bind(now,item.id,leaseUntil).run();continue;}
+        if(!notificationContextMatches(current,env)){await markNotificationContextMismatch(db,item.id,'sending',leaseUntil,now);continue;}
+        Object.assign(row,current);
+        // No asynchronous work remains between the final lease/consent snapshot
+        // and provider invocation. Use real time now (or the guarded local clock).
+        const finalSettings=installerSettingsSchema.parse(JSON.parse(String(current.notification_settings)));
+        if(finalSettings.platformPaused||!finalSettings.notificationsEnabled||!withinDeliveryHours(notificationSnapshotTime(current,env),finalSettings)){await releaseLease();break;}
+      }
       if(lease.kind==='installer-delivery'){
         if(!row.line_user_id)throw new Error('line_not_linked');
         const result=await sendEnquiryNotification({to:String(row.line_user_id),reference:`SM-${String(row.id).slice(0,8).toUpperCase()}`,product:'shared_residential',credits:Number(row.credit_cost),trial:row.funding_source==='trial',enquiryUrl:`${env.INSTALLER_BASE_URL}/installers/enquiry/${encodeURIComponent(String(row.id))}`,retryKey:String(row.id)},{...lineConfiguration(env),linkedRecipient:true});
@@ -125,7 +176,8 @@ export async function retryNotification(db:D1Database,id:string,actor:string) {
     WHERE id=? AND kind IN('installer-delivery','homeowner-confirmation') AND state IN('failed','action-required')
     AND EXISTS(SELECT 1 FROM lead_recipient_deliveries d JOIN installer_enquiries e ON e.id=d.enquiry_id JOIN leads l ON l.id=d.lead_id
       WHERE d.id=installer_outbox.delivery_id AND d.enquiry_id=installer_outbox.enquiry_id AND d.withdrawal_suppressed=0 AND e.suppressed_at IS NULL
-      AND l.suppressed=0 AND l.consent_withdrawn_at IS NULL AND l.purged_at IS NULL AND l.deleted_at IS NULL)
+      AND l.suppressed=0 AND l.consent_withdrawn_at IS NULL AND l.purged_at IS NULL AND l.deleted_at IS NULL
+      AND (installer_outbox.kind<>'installer-delivery' OR EXISTS(SELECT 1 FROM solar_company_partners p WHERE p.id=d.partner_id AND p.line_user_id IS NOT NULL)))
     RETURNING id`).bind(now,now,id).first();
   if(!changed)throw new Error('notification_retry_not_allowed');
   await db.prepare('INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor,'installer.retry-notification','installer_platform',id).run();

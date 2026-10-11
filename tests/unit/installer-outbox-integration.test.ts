@@ -8,6 +8,7 @@ import {getPlatformSettings} from '@/lib/installer/settings';
 import {readShareLink,rotateShareLink} from '@/lib/installer/share';
 let fixture:FixtureDatabase;
 beforeEach(async()=>{
+  runtime.INSTALLER_PLATFORM_MODE='local-test';
   vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-11T03:00:00.000Z'));fixture=new FixtureDatabase();runtime.DB=fixture.d1();await seedFixture(runtime.DB);
   const settings=await getPlatformSettings(runtime.DB);await runtime.DB.prepare('UPDATE installer_platform_settings SET config_json=? WHERE id=1').bind(JSON.stringify({...settings,notificationsEnabled:true})).run();
   await runtime.DB.prepare('UPDATE solar_company_partners SET paused=1 WHERE id<>?').bind('synthetic-company-1').run();
@@ -56,7 +57,7 @@ describe('committed enquiry to durable test notification workflow',()=>{
     expect(scalar("SELECT COUNT(*) n FROM installer_outbox WHERE attempts=0 AND state='pending'")).toBe(1);
   });
   it('retains cancellation and provider evidence if withdrawal occurs during LINE send',async()=>{
-    const db=fixture.d1(),lead=await seedLead(db);const allocated=await allocateEnquiry(db,lead.enquiryId,'fixture',['synthetic-company-1']);
+    const db=fixture.d1(),lead=await seedLead(db);fixture.sqlite.prepare("UPDATE leads SET submission_mode='sandbox' WHERE id=?").run(lead.leadId);runtime.INSTALLER_PLATFORM_MODE='sandbox';const allocated=await allocateEnquiry(db,lead.enquiryId,'fixture',['synthetic-company-1']);
     const deliveryId=allocated.allocated[0];
     const env={...runtime,INSTALLER_PLATFORM_MODE:'sandbox',INSTALLER_BASE_URL:'https://sandbox.example.test',OUTBOUND_MESSAGES_ENABLED:'true',LINE_PROVIDER_MODE:'sandbox',LINE_CHANNEL_ACCESS_TOKEN:'synthetic-token',LINE_TEST_RECIPIENTS:JSON.stringify([`U${'a'.repeat(32)}`])};
     vi.mocked(globalThis.fetch).mockImplementationOnce(async()=>{
@@ -70,7 +71,7 @@ describe('committed enquiry to durable test notification workflow',()=>{
     expect(scalar("SELECT COUNT(*) n FROM installer_outbox WHERE kind='homeowner-confirmation' AND state='cancelled'")).toBe(1);
   });
   it('does not revive cancellation when a provider fails after withdrawal',async()=>{
-    const db=fixture.d1(),lead=await seedLead(db);const allocated=await allocateEnquiry(db,lead.enquiryId,'fixture',['synthetic-company-1']);
+    const db=fixture.d1(),lead=await seedLead(db);fixture.sqlite.prepare("UPDATE leads SET submission_mode='sandbox' WHERE id=?").run(lead.leadId);runtime.INSTALLER_PLATFORM_MODE='sandbox';const allocated=await allocateEnquiry(db,lead.enquiryId,'fixture',['synthetic-company-1']);
     const env={...runtime,INSTALLER_PLATFORM_MODE:'sandbox',INSTALLER_BASE_URL:'https://sandbox.example.test',OUTBOUND_MESSAGES_ENABLED:'true',LINE_PROVIDER_MODE:'sandbox',LINE_CHANNEL_ACCESS_TOKEN:'synthetic-token',LINE_TEST_RECIPIENTS:JSON.stringify([`U${'a'.repeat(32)}`])};
     vi.mocked(globalThis.fetch).mockImplementationOnce(async()=>{
       await suppressEnquiry(db,lead.enquiryId,'Withdrawn during provider failure','fixture');throw new Error('synthetic timeout');

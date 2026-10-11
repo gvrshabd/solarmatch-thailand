@@ -2,6 +2,7 @@ import { getPlatformSettings, withinDeliveryHours } from './settings';
 import { auditStatement } from '@/lib/server/audit';
 import { beginJobRun,finishJobRun } from './operations';
 import { installerAllocationNow } from './test-clock';
+import { getRuntimeEnv } from '@/lib/server/runtime';
 
 export type Row = Record<string, string | number | null>;
 export const parseJson = <T>(value: unknown, fallback: T): T => { try { return typeof value === 'string' ? JSON.parse(value) as T : fallback; } catch { return fallback; } };
@@ -12,6 +13,8 @@ export function platformAudit(db:D1Database,actor:string,action:string,id:string
 
 /** The DB trigger is the final authority: debit, slot, outbox and rotation commit together. */
 export async function allocateEnquiry(db:D1Database,enquiryId:string,actor:string,requestedCompanyIds?:string[]) {
+  const mode=getRuntimeEnv().INSTALLER_PLATFORM_MODE;
+  if(mode!=='production'&&mode!=='sandbox'&&mode!=='local-test')return {allocated:[],reason:'platform_unavailable'};
   const settings=await getPlatformSettings(db);
   const allocationTime=await installerAllocationNow(db);
   if(settings.platformPaused||settings.deliveryPaused||!settings.collectionEnabled||!withinDeliveryHours(allocationTime,settings)) return {allocated:[],reason:'paused_or_outside_hours'};
@@ -27,12 +30,16 @@ export async function allocateEnquiry(db:D1Database,enquiryId:string,actor:strin
     try {
       const committed=await db.batch([
         db.prepare(`INSERT INTO lead_recipient_deliveries(id,lead_id,partner_id,consent_version,privacy_notice_version_id,disclosure_purpose,fields_disclosed_json,
-          delivered_at,delivered_by,delivery_method,distribution_expires_at,created_at,updated_at,enquiry_id,product,credit_cost,price_minor,funding_source,available_at,claim_deadline,delivery_channel)
+          delivered_at,delivered_by,delivery_method,distribution_expires_at,created_at,updated_at,enquiry_id,product,credit_cost,price_minor,funding_source,available_at,claim_deadline,delivery_channel,allocation_environment)
           SELECT ?,l.id,?,l.consent_version,l.privacy_notice_version_id,'residential_solar_site_survey_and_quotation',l.disclosed_fields_snapshot_json,
           ?,?,'manual-email',e.request_expires_at,?,?,e.id,'shared_residential',?,?,
-          CASE WHEN a.trial_remaining>0 THEN 'trial' ELSE 'purchased' END,?,?,'portal'
-          FROM installer_enquiries e JOIN leads l ON l.id=e.lead_id JOIN installer_credit_accounts a ON a.company_id=? WHERE e.id=? RETURNING id`)
-          .bind(id,company.id,now,actor,now,now,settings.sharedCredits,settings.sharedCredits*settings.creditValueMinor,now,new Date(allocationTime.getTime()+settings.claimDays*86400000).toISOString(),company.id,enquiryId),
+          CASE WHEN a.trial_remaining>0 THEN 'trial' ELSE 'purchased' END,?,?,'portal',?
+          FROM installer_enquiries e JOIN leads l ON l.id=e.lead_id JOIN installer_credit_accounts a ON a.company_id=? WHERE e.id=? AND (
+          (?='production' AND l.is_test_submission=0 AND l.submission_environment='production' AND COALESCE(l.submission_mode,'production')='production')
+          OR (?='sandbox' AND l.is_test_submission=1 AND l.submission_mode='sandbox')
+          OR (?='local-test' AND l.is_test_submission=1 AND (l.submission_mode='local-test' OR (l.submission_mode IS NULL AND l.submission_environment='private_development_preview')))
+          ) RETURNING id`)
+          .bind(id,company.id,now,actor,now,now,settings.sharedCredits,settings.sharedCredits*settings.creditValueMinor,now,new Date(allocationTime.getTime()+settings.claimDays*86400000).toISOString(),mode,company.id,enquiryId,mode,mode,mode),
         db.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json)
           SELECT ?,?,'installer.allocate','installer_platform',?,? WHERE EXISTS(SELECT 1 FROM lead_recipient_deliveries WHERE id=?)`)
           .bind(crypto.randomUUID(),actor,id,JSON.stringify({enquiryId,companyId:company.id}),id),
@@ -136,10 +143,23 @@ export async function decideClaim(db:D1Database,claimId:string,decision:string,n
   await db.batch([
     db.prepare(`UPDATE installer_claims SET status=?,decision_notes=?,resolved_at=?,resolved_by=? WHERE id=? AND status IN ('submitted','needs-information')`).bind(decision,notes,decision==='needs-information'?null:now,actor,claimId),
     db.prepare(`INSERT OR IGNORE INTO installer_credit_ledger(id,company_id,kind,available_delta,reserved_delta,trial_delta,debt_delta,source_id,idempotency_key,reason,actor,created_at)
-      SELECT ?,c.company_id,'claim-restoration',CASE WHEN d.funding_source='purchased' THEN d.credit_cost ELSE 0 END,0,CASE WHEN d.funding_source='trial' THEN 1 ELSE 0 END,0,c.id,?,'Approved quality claim',?,?
-      FROM installer_claims c JOIN lead_recipient_deliveries d ON d.id=c.delivery_id WHERE c.id=? AND c.status='approved'`)
+      SELECT ?,c.company_id,'claim-restoration',CASE WHEN d.funding_source='purchased' THEN MAX(0,d.credit_cost-a.debt) ELSE 0 END,0,CASE WHEN d.funding_source='trial' THEN 1 ELSE 0 END,
+      CASE WHEN d.funding_source='purchased' THEN -MIN(d.credit_cost,a.debt) ELSE 0 END,c.id,?,'Approved quality claim',?,?
+      FROM installer_claims c JOIN lead_recipient_deliveries d ON d.id=c.delivery_id JOIN installer_credit_accounts a ON a.company_id=c.company_id WHERE c.id=? AND c.status='approved'`)
       .bind(crypto.randomUUID(),`claim:${claimId}`,actor,now,claimId),
     platformAudit(db,actor,'decide-claim',claimId,{decision}),
+  ]);
+}
+/** Purchased adjustments share purchase/restoration debt treatment. */
+export async function adjustPurchasedCredits(db:D1Database,companyId:string,units:number,reason:string,actor:string) {
+  if(!Number.isSafeInteger(units)||units===0||!reason.trim())throw new Error('adjustment_requires_reason');
+  const now=isoNow(),id=crypto.randomUUID();
+  await db.batch([
+    db.prepare(`INSERT INTO installer_credit_ledger(id,company_id,kind,available_delta,debt_delta,source_id,idempotency_key,reason,actor,created_at)
+      SELECT ?,a.company_id,'manual-adjustment',CASE WHEN ?>0 THEN MAX(0,?-a.debt) ELSE ? END,
+      CASE WHEN ?>0 THEN -MIN(?,a.debt) ELSE 0 END,?,?,?,?,? FROM installer_credit_accounts a WHERE a.company_id=?`)
+      .bind(id,units,units,units,units,units,id,`adjustment:${id}`,reason,actor,now,companyId),
+    platformAudit(db,actor,'credit-adjustment',companyId,{units,reason}),
   ]);
 }
 export async function suppressEnquiry(db:D1Database,enquiryId:string,reason:string,actor:string) {

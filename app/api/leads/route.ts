@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { calculateLeadAssessment } from '@/lib/qualification/scoring';
 import { consentSnapshot, publicContactConfiguration, restrictedOperationalContactConfiguration } from '@/lib/server/contact-mode';
 import { verifyAssessmentToken } from '@/lib/server/assessment-token';
-import { auditStatement } from '@/lib/server/audit';
 import { sha256 } from '@/lib/server/crypto';
 import { authenticateRestrictedSiteOwner } from '@/lib/server/private-preview-auth';
 import { getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
@@ -15,6 +14,7 @@ import { phoneProof,limitedJsonBody,RequestTooLarge } from '@/lib/installer/phon
 import { canonicalEnquiryStatements } from '@/lib/installer/enquiries';
 import { localTestContact } from '@/lib/installer/local-collection';
 import {trustedShareAddress} from '@/lib/installer/rate-limit';
+import { submissionContext } from '@/lib/installer/submission-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +44,8 @@ async function enforceRateLimit(request: NextRequest, database: D1Database) {
 }
 
 export async function POST(request: NextRequest) {
-  try { assertPlatformRequest(request); } catch { return jsonError('submissions_unavailable', 503); }
+  let platformMode: string;
+  try { platformMode = assertPlatformRequest(request).mode!; } catch { return jsonError('submissions_unavailable', 503); }
   if (!isSameOrigin(request)) return jsonError('invalid_origin', 403);
   if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return jsonError('invalid_content_type', 415);
   if (Number(request.headers.get('content-length') ?? 0) > 64_000) return jsonError('request_too_large', 413);
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
 
   const database = requireDatabase();
   const settings = await getPlatformSettings(database);
-  if (!settings.collectionEnabled) return jsonError('submissions_unavailable', 503);
+  if (!settings.collectionEnabled || settings.platformPaused) return jsonError('submissions_unavailable', 503);
   if (!await enforceRateLimit(request, database)) return jsonError('rate_limited', 429);
   const release = await getCurrentRelease(database);
   const restrictedIdentity = await authenticateRestrictedSiteOwner(request.headers);
@@ -75,16 +76,17 @@ export async function POST(request: NextRequest) {
     && Boolean(release.live_lead_submissions) && Boolean(release.legal_complete);
   if (!localContact && !restrictedCollectionAllowed && !publicCollectionAllowed) return jsonError('submissions_unavailable', 503);
   if (!contact.enabled || contact.mode === 'disabled') return jsonError('submissions_unavailable', 503);
+  const classification = submissionContext(platformMode, restrictedAccess, contact.operationalDistributionEnabled);
   if (token.releaseId !== release.release_id || token.questionnaireVersionId !== release.questionnaire_version_id || token.ruleVersionId !== release.rule_version_id) return jsonError('assessment_version_expired', 409);
 
   const assessment = calculateLeadAssessment(parsed.data.answers, parseScoringConfiguration(release));
   const phoneDisplay = parsed.data.phone;
   const phoneE164 = normalizeThaiPhone(phoneDisplay);
   const lineId = null;
-  const existing = await database.prepare('SELECT id FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string }>();
-  if (existing) return NextResponse.json({ ok: true, leadId: existing.id, duplicate: true }, { headers: { 'Cache-Control': 'no-store' } });
+  const existing = await database.prepare('SELECT id,is_test_submission,submission_mode,submission_environment FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string; is_test_submission: number; submission_mode: string | null; submission_environment: string }>();
+  if (existing) return NextResponse.json({ ok: true, leadId: existing.id, duplicate: true, testSubmission: Boolean(existing.is_test_submission), submissionMode: existing.submission_mode ?? existing.submission_environment }, { headers: { 'Cache-Control': 'no-store' } });
   const verified = await phoneProof(database, parsed.data.phoneVerificationId, parsed.data.phoneVerificationProof, phoneE164, parsed.data.assessmentToken);
-  if (!verified) return jsonError('phone_verification_required', 403);
+  if (!verified || verified.mode !== platformMode) return jsonError('phone_verification_required', 403);
 
   const leadId = crypto.randomUUID();
   const consentedAt = new Date().toISOString();
@@ -122,7 +124,7 @@ export async function POST(request: NextRequest) {
     'distribution_window_days_snapshot', 'distribution_expires_at', 'recipient_category_snapshot',
     'disclosed_fields_snapshot_json', 'adult_confirmation_version', 'adult_confirmation_text_en',
     'adult_confirmation_text_th', 'adult_confirmed_at', 'privacy_notice_version_id', 'terms_version_id',
-    'cookie_policy_version_id', 'submission_environment', 'is_test_submission', 'distribution_allowed',
+    'cookie_policy_version_id', 'submission_environment', 'submission_mode', 'is_test_submission', 'distribution_allowed',
     'access_restricted_at_submission',
     'suppressed', 'suppression_reason', 'suppressed_at',
   ];
@@ -147,7 +149,7 @@ export async function POST(request: NextRequest) {
     JSON.stringify(contact.sharedFields), contact.adultConfirmationVersionId,
     adultConfirmationText.en, adultConfirmationText.th, consentedAt,
     contact.privacyNoticeVersionId, contact.termsVersionId, contact.cookiePolicyVersionId,
-    'private_development_preview', 1, 1, restrictedAccess ? 1 : 0,
+    classification.environment, classification.mode, classification.testSubmission ? 1 : 0, classification.distributionAllowed ? 1 : 0, restrictedAccess ? 1 : 0,
     0, null, null,
   ];
 
@@ -155,7 +157,9 @@ export async function POST(request: NextRequest) {
     const statements: D1PreparedStatement[] = [
       database.prepare(`INSERT INTO leads (${leadColumns.join(', ')}) SELECT ${leadColumns.map(() => '?').join(', ')}
         WHERE EXISTS(SELECT 1 FROM installer_phone_challenges WHERE id=? AND proof_hash=? AND phone_hash=? AND session_hash=?
-        AND verified_at IS NOT NULL AND consumed_at IS NULL AND expires_at>?)`).bind(...leadValues, parsed.data.phoneVerificationId, verified.proofHash, verified.phoneHash, verified.sessionHash, consentedAt),
+        AND mode=? AND verified_at IS NOT NULL AND consumed_at IS NULL AND expires_at>?)
+        AND EXISTS(SELECT 1 FROM installer_platform_settings WHERE id=1 AND json_extract(config_json,'$.collectionEnabled')=1
+          AND COALESCE(json_extract(config_json,'$.platformPaused'),0)=0) RETURNING id`).bind(...leadValues, parsed.data.phoneVerificationId, verified.proofHash, verified.phoneHash, verified.sessionHash, platformMode, consentedAt),
       database.prepare(`UPDATE installer_phone_challenges SET consumed_at=? WHERE id=? AND consumed_at IS NULL
         AND EXISTS(SELECT 1 FROM leads WHERE id=?)`).bind(consentedAt, parsed.data.phoneVerificationId, leadId),
       database.prepare(`INSERT INTO lead_score_history
@@ -167,25 +171,27 @@ export async function POST(request: NextRequest) {
     // The canonical row is the durable allocation queue. Scheduled jobs (or the
     // same admin queue action locally) process it after commit, without delaying
     // or converting a saved homeowner request into a failed submission.
-    statements.push(...await canonicalEnquiryStatements(database,leadId,phoneE164,answers,settings));
+    statements.push(...await canonicalEnquiryStatements(database,leadId,phoneE164,answers,{ ...settings, submissionMode: classification.mode }));
     if (restrictedAccess && restrictedIdentity) {
-      statements.push(auditStatement(database, {
-        actorEmail: restrictedIdentity.email,
-        action: 'lead.restricted-operational-submitted',
-        entityType: 'lead',
-        entityId: leadId,
-        next: { submissionEnvironment: 'restricted_site_operational', distributionAllowed: true },
-      }));
+      // Rejection at the guarded INSERT must not leave a misleading submission audit.
+      statements.push(database.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json)
+        SELECT ?,?,'lead.restricted-operational-submitted','lead',?,? WHERE EXISTS(SELECT 1 FROM leads WHERE id=?)`)
+        .bind(crypto.randomUUID(), restrictedIdentity.email, leadId,
+          JSON.stringify({ submissionEnvironment: classification.environment, submissionMode: classification.mode, distributionAllowed: classification.distributionAllowed }), leadId));
     }
     const results = await database.batch(statements);
-    if (!results[0]?.meta.changes) return jsonError('phone_verification_required', 403);
+    if (!results[0]?.results.some(row => (row as { id?: string }).id === leadId)) {
+      const current = await getPlatformSettings(database);
+      return !current.collectionEnabled || current.platformPaused ? jsonError('submissions_unavailable', 503) : jsonError('phone_verification_required', 403);
+    }
   } catch (error) {
+    if (error instanceof Error && error.message.includes('installer collection is paused')) return jsonError('submissions_unavailable', 503);
     if (error instanceof Error && error.message.includes('UNIQUE constraint failed: leads.idempotency_key')) {
-      const duplicate = await database.prepare('SELECT id FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string }>();
-      if (duplicate) return NextResponse.json({ ok: true, leadId: duplicate.id, duplicate: true }, { headers: { 'Cache-Control': 'no-store' } });
+      const duplicate = await database.prepare('SELECT id,is_test_submission,submission_mode,submission_environment FROM leads WHERE idempotency_key = ? LIMIT 1').bind(parsed.data.idempotencyKey).first<{ id: string; is_test_submission: number; submission_mode: string | null; submission_environment: string }>();
+      if (duplicate) return NextResponse.json({ ok: true, leadId: duplicate.id, duplicate: true, testSubmission: Boolean(duplicate.is_test_submission), submissionMode: duplicate.submission_mode ?? duplicate.submission_environment }, { headers: { 'Cache-Control': 'no-store' } });
     }
     return jsonError('submission_failed', 500);
   }
 
-  return NextResponse.json({ ok: true, leadId, testSubmission: true }, { status: 201, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
+  return NextResponse.json({ ok: true, leadId, testSubmission: classification.testSubmission, submissionMode: classification.mode }, { status: 201, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
 }

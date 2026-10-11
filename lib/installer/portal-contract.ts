@@ -7,6 +7,7 @@ export type InstallerCompany = {
 export type InstallerDelivery = {
   id: string; enquiryId: string; reference: string; product: string; fundingSource: string;
   creditCost: number; deliveredAt: string; notificationStatus: string; claimDeadline: string;
+  withdrawn: boolean;
   homeownerName: string; phone: string; location: string; requestedAt: string;
   assessment: Record<string, unknown>; qualification: string; outcome: string | null;
 };
@@ -15,7 +16,7 @@ export type InstallerPortalData = {
   company: InstallerCompany | null;
   products: { id: string; nameTh: string; nameEn: string; creditCost: number; enabled: boolean }[];
   packages: { id: string; nameTh: string; nameEn: string; credits: number; amountMinor: number; currency: string; taxLabel: string }[];
-  balance: { available: number; reserved: number; trialRemaining: number };
+  balance: { available: number; reserved: number; trialRemaining: number; debt: number };
   deliveries: InstallerDelivery[];
   orders: { id: string; status: string; amountMinor: number; currency: string; credits: number; createdAt: string; receiptReference: string | null }[];
   ledger: { id: string; kind: string; units: number; reason: string; createdAt: string }[];
@@ -33,4 +34,5 @@ export type InstallerPortalAction =
   | { action: 'create-claim'; deliveryId: string; reason: string; notes: string }
   | { action: 'rotate-share-link' | 'revoke-share-link'; deliveryId: string }
   | { action: 'report-outcome'; deliveryId: string; outcome: string }
-  | { action: 'link-line'; linkRequest?: string };
+  | { action: 'link-line'; linkRequest?: string }
+  | { action: 'unlink-line' };

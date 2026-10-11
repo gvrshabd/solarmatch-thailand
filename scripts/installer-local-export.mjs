@@ -7,18 +7,22 @@ import path from 'node:path';
 // Miniflare export mechanism with the explicitly isolated persistence path.
 const config=JSON.parse(await readFile('.installer-test/preview.jsonc','utf8'));
 const fakeId='00000000-0000-0000-0000-000000000006';
+const snapshotName=process.argv[2]??'installer-recovery-2026-10-11';
+if(!/^installer-[a-z0-9-]{1,80}$/.test(snapshotName))throw new Error('Use a simple private installer snapshot directory name.');
+const sourceName=process.argv[3]??'installer-final-state';
+if(!/^installer-[a-z0-9-]{1,80}$/.test(sourceName))throw new Error('Use a private installer source directory under .wrangler.');
 if(config.name!=='solarmatch-installer-local-test'||config.d1_databases?.[0]?.database_id!==fakeId)throw new Error('Isolated fictitious configuration required.');
 const require=createRequire(import.meta.url);
 const wranglerRequire=createRequire(require.resolve('wrangler/package.json'));
 const {Miniflare}=wranglerRequire('miniflare');
-const source=path.resolve('.wrangler/installer-final-state/v3/d1');
-const directory=path.resolve('.wrangler/installer-recovery-2026-10-11');
+const source=path.resolve('.wrangler',sourceName,'v3/d1');
+const directory=path.resolve('.wrangler',snapshotName);
 const output=path.join(directory,'synthetic-final.sql');
 const mf=new Miniflare({modules:true,script:'export default {}',d1Persist:source,d1Databases:{DATABASE:fakeId}});
 try {
   const db=await mf.getD1Database('DATABASE');
   const counts=await db.prepare('SELECT (SELECT count(*) FROM leads) leads,(SELECT count(*) FROM installer_enquiries) enquiries,(SELECT count(*) FROM lead_recipient_deliveries) deliveries,(SELECT count(*) FROM installer_credit_ledger) ledger,(SELECT count(*) FROM installer_claims) claims,(SELECT count(*) FROM d1_migrations) migrations').first();
-  if(counts.migrations!==13||counts.deliveries<4)throw new Error('Expected populated isolated demo schema is missing.');
+  if(![13,14,15,16].includes(counts.migrations)||counts.deliveries<4)throw new Error('Expected populated isolated demo schema is missing.');
   const dump=await db.prepare('PRAGMA miniflare_d1_export(?,?,?);').bind(false,false).raw();
   const sql=dump[0].join('\n');
   await mkdir(directory,{recursive:true});

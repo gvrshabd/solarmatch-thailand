@@ -78,7 +78,7 @@ export async function verifyPhoneCode(database: D1Database, challengeId: string,
 export async function phoneProof(database: D1Database, id: string, proof: string, phone: string, assessmentToken: string) {
   const bindings = await verificationBindings(phone, assessmentToken);
   const proofHash = await sha256(proof);
-  const row = await database.prepare(`SELECT verified_at FROM installer_phone_challenges WHERE id=? AND proof_hash=? AND phone_hash=? AND session_hash=?
-    AND verified_at IS NOT NULL AND consumed_at IS NULL AND expires_at>?`).bind(id, proofHash, bindings.phoneHash, bindings.sessionHash, new Date().toISOString()).first<{verified_at:string}>();
-  return row ? { ...bindings, proofHash, verifiedAt: row.verified_at } : null;
+  const row = await database.prepare(`SELECT verified_at,mode FROM installer_phone_challenges WHERE id=? AND proof_hash=? AND phone_hash=? AND session_hash=?
+    AND verified_at IS NOT NULL AND consumed_at IS NULL AND expires_at>?`).bind(id, proofHash, bindings.phoneHash, bindings.sessionHash, new Date().toISOString()).first<{verified_at:string;mode:string}>();
+  return row ? { ...bindings, proofHash, verifiedAt: row.verified_at, mode: row.mode } : null;
 }

@@ -3,7 +3,7 @@ import { requireAdminRequest,isAdminError } from '@/lib/server/admin-api';
 import { requireDatabase } from '@/lib/server/runtime';
 import { assertPlatformRequest,platformBody,platformJson } from '@/lib/installer/platform';
 import { getPlatformSettings,installerSettingsSchema,materialTermsChanged } from '@/lib/installer/settings';
-import { allocateEnquiry,processQueue,retryEnquiry,grantTrial,decideClaim,suppressEnquiry,platformAudit,isoNow,type Row } from '@/lib/installer/deliveries';
+import { allocateEnquiry,processQueue,retryEnquiry,grantTrial,decideClaim,suppressEnquiry,platformAudit,isoNow,adjustPurchasedCredits,type Row } from '@/lib/installer/deliveries';
 import { processOutbox,retryNotification } from '@/lib/installer/jobs';
 import { getInstallerOperations } from '@/lib/installer/operations';
 import { reconcileOrder,associateProviderCharge } from '@/lib/installer/payments';
@@ -32,7 +32,8 @@ const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.
       COALESCE(ROUND((SELECT COUNT(*)*1.0 FROM lead_recipient_deliveries WHERE delivery_channel='portal')/NULLIF((SELECT COUNT(*) FROM installer_enquiries),0),2),0) AS averageDeliveriesPerEnquiry,
       (SELECT COUNT(*) FROM installer_claims) AS submittedClaims,
       (SELECT COUNT(*) FROM installer_claims WHERE status='approved') AS approvedClaims,
-      (SELECT COALESCE(SUM(available_delta),0) FROM installer_credit_ledger WHERE kind='claim-restoration') AS restoredPurchasedCredits,
+      (SELECT COALESCE(SUM(available_delta-debt_delta),0) FROM installer_credit_ledger WHERE kind='claim-restoration') AS restoredPurchasedCredits,
+      (SELECT COALESCE(-SUM(debt_delta),0) FROM installer_credit_ledger WHERE kind='claim-restoration') AS repaidPurchasedCreditDebt,
       (SELECT COALESCE(SUM(trial_delta),0) FROM installer_credit_ledger WHERE kind='claim-restoration') AS restoredTrialEntitlements,
       (SELECT COUNT(*) FROM installer_payment_orders WHERE credited_at IS NOT NULL) AS fundedPurchaseOrders,
       (SELECT COUNT(*) FROM (SELECT company_id FROM installer_payment_orders WHERE credited_at IS NOT NULL GROUP BY company_id HAVING COUNT(*)>1)) AS repeatPurchasingCompanies,
@@ -91,7 +92,7 @@ export async function POST(request:Request) {
     }else if(data.action==='decide-claim'){
       if(!data.claimId||!data.decision||!['approved','rejected','needs-information'].includes(data.decision)||!data.notes)throw new Error('claim_decision_requires_reason');await decideClaim(db,data.claimId,data.decision,data.notes,actor);
     }else if(data.action==='adjust-credit'){
-      if(!data.companyId||!data.units||!data.reason)throw new Error('adjustment_requires_reason');await db.batch([db.prepare(`INSERT INTO installer_credit_ledger(id,company_id,kind,available_delta,source_id,idempotency_key,reason,actor,created_at) VALUES(?,?,'manual-adjustment',?,?,?,?,?,?)`).bind(crypto.randomUUID(),data.companyId,data.units,crypto.randomUUID(),crypto.randomUUID(),data.reason,actor,now),platformAudit(db,actor,'credit-adjustment',data.companyId,{units:data.units,reason:data.reason})]);
+      if(!data.companyId||!data.units||!data.reason)throw new Error('adjustment_requires_reason');await adjustPurchasedCredits(db,data.companyId,data.units,data.reason,actor);
     }else if(data.action==='reconcile'){
       const orders=data.orderId?[{id:data.orderId}]:(await db.prepare("SELECT id FROM installer_payment_orders WHERE status IN ('pending','paid','reconciliation-required') ORDER BY updated_at LIMIT 30").all<{id:string}>()).results;
       for(const order of orders)await reconcileOrder(db,null,order.id,request);

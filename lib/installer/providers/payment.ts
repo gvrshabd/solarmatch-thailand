@@ -1,7 +1,7 @@
 import { ProviderError, constantEqual, hmac, parseObject, requireMode, requestJson, safeUrl, unbase64, type ProviderMode } from './common';
 export type PaymentMethod = 'credit_card' | 'promptpay' | 'mobile_banking_bbl' | 'mobile_banking_kbank' | 'mobile_banking_ktb' | 'mobile_banking_bay' | 'mobile_banking_scb' | 'truemoney_jumpapp';
 export interface PaymentConfig { mode: ProviderMode; sandboxEnabled?: boolean; liveEnabled?: boolean; secretKey?: string; publicKey?: string; webhookSecret?: string; activatedMethods?: PaymentMethod[]; activatedCardBrands?: ('Visa' | 'MasterCard')[]; fetch?: typeof fetch; now?: () => number; localEventSecret?: string }
-export interface PaymentOrder { orderId: string; amountMinor: number; currency: 'thb'; description: string; returnUrl: string }
+export interface PaymentOrder { orderId: string; amountMinor: number; currency: 'thb'; description: string; returnUrl: string; method?: PaymentMethod }
 export interface ExpectedPayment { orderId: string; providerOrderId: string; amountMinor: number; currency: 'thb' }
 export interface ProviderPayment { provider: 'omise' | 'local-test'; chargeId: string; providerOrderId: string; amountMinor: number; currency: 'thb'; status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'reversed'; refundedMinor: number; receiptReference: string | null }
 function configured(config: PaymentConfig, write = false) {
@@ -15,16 +15,23 @@ function omise(path: string, config: PaymentConfig, init: RequestInit = {}, writ
   configured(config, write);
   return requestJson(`https://api.omise.co${path}`, { ...init, headers: { Authorization: `Basic ${btoa(`${config.secretKey}:`)}`, 'Omise-Version': '2019-05-29', 'Content-Type': 'application/x-www-form-urlencoded' } }, config.fetch);
 }
+/** Merchant configuration, with cards usable only after card-brand approval. */
+export function enabledPaymentMethods(config: Pick<PaymentConfig,'activatedMethods'|'activatedCardBrands'>): PaymentMethod[] {
+  return [...new Set(config.activatedMethods ?? [])].filter(method => method !== 'credit_card' || !!config.activatedCardBrands?.length);
+}
 export async function createHostedOrder(order: PaymentOrder, config: PaymentConfig) {
   requireMode(config.mode);
   if (!/^[A-Za-z0-9_-]{1,100}$/.test(order.orderId) || !Number.isSafeInteger(order.amountMinor) || order.amountMinor < 100 || order.currency !== 'thb') throw new ProviderError('invalid_order');
   safeUrl(order.returnUrl, config.mode === 'local-test');
+  const methods = enabledPaymentMethods(config);
+  if (order.method && !methods.includes(order.method)) throw new ProviderError('payment_method_unavailable');
   if (config.mode === 'local-test') return { providerOrderId: `local_${order.orderId}`, checkout: null, methods: [] as PaymentMethod[], provider: 'local-test' as const };
   configured(config, true);
   const publicPrefix = config.mode === 'sandbox' ? 'pkey_test_' : 'pkey_live_';
   if (!new RegExp(`^${publicPrefix}[A-Za-z0-9]+$`).test(config.publicKey ?? '')) throw new ProviderError('missing_payment_public_key');
-  if (!config.activatedMethods?.length) throw new ProviderError('payment_methods_unconfigured');
-  return { providerOrderId: order.orderId, checkout: { publicKey: config.publicKey!, amount: order.amountMinor, currency: 'THB', defaultPaymentMethod: config.activatedMethods[0], otherPaymentMethods: config.activatedMethods.slice(1).join(',') }, methods: config.activatedMethods, provider: 'omise' as const };
+  if (!methods.length) throw new ProviderError('payment_methods_unconfigured');
+  const selected = order.method ?? methods[0];
+  return { providerOrderId: order.orderId, checkout: { publicKey: config.publicKey!, amount: order.amountMinor, currency: 'THB', defaultPaymentMethod: selected, otherPaymentMethods: methods.filter(method => method !== selected).join(',') }, methods, provider: 'omise' as const };
 }
 export async function createCharge(order: PaymentOrder, tokenOrSourceId: string, config: PaymentConfig) {
   await createHostedOrder(order, config);

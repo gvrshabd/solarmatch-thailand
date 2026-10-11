@@ -20,11 +20,16 @@ export async function purgeInstallerLeads(db: D1Database, request: Request, lead
  * Privacy redaction remains available when installer collection is switched off. */
 export async function redactInstallerLeads(db:D1Database,leadIds:string[],actor:string) {
   if(!actor||leadIds.length<1||leadIds.length>50)throw new Error('invalid_privacy_redaction');
-  const selected = await db.prepare(`SELECT DISTINCT l.id,l.phone_e164,l.line_id,l.request_fingerprint FROM leads l WHERE l.id IN (${leadIds.map(() => '?').join(',')})
-    OR l.id IN(SELECT el.lead_id FROM installer_enquiry_leads el WHERE el.enquiry_id IN(SELECT enquiry_id FROM installer_enquiry_leads WHERE lead_id IN(${leadIds.map(() => '?').join(',')})))`)
-    .bind(...leadIds,...leadIds).all<{id:string;phone_e164:string|null;line_id:string|null;request_fingerprint:string}>();
+  const selected = await db.prepare(`WITH requested AS (SELECT value AS id FROM json_each(?)), related_enquiries AS (
+    SELECT id FROM installer_enquiries WHERE lead_id IN(SELECT id FROM requested)
+    UNION SELECT enquiry_id FROM installer_enquiry_leads WHERE lead_id IN(SELECT id FROM requested)
+  ) SELECT DISTINCT l.id,l.phone_e164,l.line_id,l.request_fingerprint FROM leads l WHERE l.id IN(SELECT id FROM requested)
+    OR l.id IN(SELECT lead_id FROM installer_enquiry_leads WHERE enquiry_id IN(SELECT id FROM related_enquiries))
+    OR l.id IN(SELECT lead_id FROM installer_enquiries WHERE id IN(SELECT id FROM related_enquiries))`)
+    .bind(JSON.stringify(leadIds)).all<{id:string;phone_e164:string|null;line_id:string|null;request_fingerprint:string}>();
   const now = new Date().toISOString();
   const statements: D1PreparedStatement[] = [];
+  const redactionAudits:D1PreparedStatement[]=[];
   for (const lead of selected.results) {
     // The migration guard aborts the entire D1 batch if ANY related row has a legal hold.
     statements.push(db.prepare(`UPDATE leads SET legal_first_name='[deleted]',legal_last_name='[deleted]',
@@ -38,22 +43,49 @@ export async function redactInstallerLeads(db:D1Database,leadIds:string[],actor:
       raw_score=0,quality_score=1,hard_eligible=0,high_quality=0,suppressed=1,suppressed_at=?,suppression_reason='privacy-redaction',
       distribution_allowed=0,status='deleted',deleted_at=COALESCE(deleted_at,?),purged_at=?,updated_at=? WHERE id=?`)
       .bind(await sha256('purged:'+lead.request_fingerprint),now,now,now,now,lead.id));
+    // Resolve note/export audit IDs before deleting their source records.
+    statements.push(db.prepare(`UPDATE audit_events SET previous_json=NULL,next_json=NULL WHERE
+      entity_id IN(SELECT id FROM lead_notes WHERE lead_id=?)
+      OR entity_id IN(SELECT export_batch_id FROM export_batch_items WHERE lead_id=?)
+      OR entity_id IN(SELECT lead_id||':'||partner_id FROM lead_recipient_deliveries WHERE lead_id=?)`).bind(lead.id,lead.id,lead.id));
     for (const table of ['lead_notes','export_batch_items','lead_export_selections']) statements.push(db.prepare(`DELETE FROM ${table} WHERE lead_id=?`).bind(lead.id));
     statements.push(db.prepare("UPDATE lead_score_history SET explanation_json='{}',reason='privacy-redaction' WHERE lead_id=?").bind(lead.id));
     statements.push(db.prepare("UPDATE lead_status_events SET reason='privacy-redaction' WHERE lead_id=?").bind(lead.id));
     statements.push(db.prepare("UPDATE privacy_rights_requests SET resolution_notes='Personal data redacted; financial delivery records retained',suppression_applied=1,updated_at=? WHERE lead_id=?").bind(now,lead.id));
-    statements.push(db.prepare("UPDATE installer_claims SET notes='[deleted]',decision_notes=CASE WHEN decision_notes IS NULL THEN NULL ELSE '[deleted]' END WHERE delivery_id IN(SELECT id FROM lead_recipient_deliveries WHERE lead_id=?)").bind(lead.id));
+    statements.push(db.prepare("UPDATE installer_claims SET reason='[deleted]',notes='[deleted]',decision_notes=CASE WHEN decision_notes IS NULL THEN NULL ELSE '[deleted]' END WHERE delivery_id IN(SELECT id FROM lead_recipient_deliveries WHERE lead_id=?)").bind(lead.id));
     statements.push(db.prepare("UPDATE lead_recipient_deliveries SET rejection_reason=CASE WHEN rejection_reason IS NULL THEN NULL ELSE '[deleted]' END WHERE lead_id=?").bind(lead.id));
-    statements.push(db.prepare(`UPDATE audit_events SET previous_json=NULL,next_json=NULL WHERE entity_id=?
-      OR entity_id IN(SELECT id FROM lead_recipient_deliveries WHERE lead_id=?)
-      OR entity_id IN(SELECT id FROM privacy_rights_requests WHERE lead_id=?)
-      OR entity_id IN(SELECT id FROM installer_claims WHERE delivery_id IN(SELECT id FROM lead_recipient_deliveries WHERE lead_id=?))`).bind(lead.id,lead.id,lead.id,lead.id));
-    statements.push(db.prepare('UPDATE installer_operational_events SET attribution_json=NULL WHERE enquiry_id IN(SELECT enquiry_id FROM installer_enquiry_leads WHERE lead_id=?)').bind(lead.id));
     statements.push(db.prepare('DELETE FROM installer_phone_challenges WHERE phone_e164=?').bind(lead.phone_e164));
     statements.push(db.prepare('DELETE FROM installer_test_messages WHERE recipient=? OR recipient=? OR id IN(SELECT id FROM installer_outbox WHERE enquiry_id IN(SELECT enquiry_id FROM installer_enquiry_leads WHERE lead_id=?))').bind(lead.phone_e164,lead.line_id,lead.id));
     statements.push(db.prepare('INSERT INTO purge_tombstones(id,entity_type,non_personal_reference_hash,purged_by,reason) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),'lead',await sha256('purged:'+lead.id),actor,'installer-personal-data-redaction'));
-    statements.push(auditStatement(db,{actorEmail:actor,action:'lead.personally-redacted',entityType:'lead',entityId:lead.id,next:{irreversible:true,financialFactsRetained:true}}));
+    redactionAudits.push(auditStatement(db,{actorEmail:actor,action:'lead.personally-redacted',entityType:'lead',entityId:lead.id,next:{irreversible:true,financialFactsRetained:true}}));
   }
+  if(selected.results.length) {
+    const ids=JSON.stringify(selected.results.map(lead=>lead.id));
+    // Resolve canonical enquiries once, including the canonical lead pointer and
+    // duplicate association. Notification reconciliation audits use outbox IDs.
+    const related=`WITH selected_leads AS (SELECT value AS id FROM json_each(?)), enquiries AS (
+      SELECT id FROM installer_enquiries WHERE lead_id IN(SELECT id FROM selected_leads)
+      UNION SELECT enquiry_id FROM installer_enquiry_leads WHERE lead_id IN(SELECT id FROM selected_leads)
+    ), deliveries AS (
+      SELECT id FROM lead_recipient_deliveries WHERE enquiry_id IN(SELECT id FROM enquiries) OR lead_id IN(SELECT id FROM selected_leads)
+    ), notifications AS (
+      SELECT id FROM installer_outbox WHERE enquiry_id IN(SELECT id FROM enquiries) OR delivery_id IN(SELECT id FROM deliveries)
+    )`;
+    statements.push(db.prepare(`${related} UPDATE installer_enquiries SET suppression_reason='privacy-redaction' WHERE id IN(SELECT id FROM enquiries)`).bind(ids));
+    statements.push(db.prepare(`${related} UPDATE installer_outbox SET last_error=CASE WHEN last_error IS NULL THEN NULL ELSE 'privacy-redaction' END WHERE id IN(SELECT id FROM notifications)`).bind(ids));
+    statements.push(db.prepare(`${related} UPDATE installer_operational_events SET attribution_json=NULL WHERE enquiry_id IN(SELECT id FROM enquiries) OR delivery_id IN(SELECT id FROM deliveries)`).bind(ids));
+    statements.push(db.prepare(`${related} DELETE FROM installer_test_messages WHERE id IN(SELECT id FROM notifications)`).bind(ids));
+    statements.push(db.prepare(`${related} UPDATE audit_events SET previous_json=NULL,next_json=NULL WHERE
+      entity_id IN(SELECT id FROM selected_leads) OR entity_id IN(SELECT id FROM enquiries) OR entity_id IN(SELECT id FROM deliveries)
+      OR entity_id IN(SELECT id FROM notifications)
+      OR entity_id IN(SELECT id FROM privacy_rights_requests WHERE lead_id IN(SELECT id FROM selected_leads))
+      OR entity_id IN(SELECT id FROM installer_claims WHERE delivery_id IN(SELECT id FROM deliveries))
+      OR entity_id IN(SELECT id FROM installer_share_tokens WHERE delivery_id IN(SELECT id FROM deliveries))
+      OR entity_id IN(SELECT id FROM installer_operational_events WHERE enquiry_id IN(SELECT id FROM enquiries) OR delivery_id IN(SELECT id FROM deliveries))
+      OR entity_id IN(SELECT id FROM lead_score_history WHERE lead_id IN(SELECT id FROM selected_leads))
+      OR entity_id IN(SELECT id FROM lead_status_events WHERE lead_id IN(SELECT id FROM selected_leads))`).bind(ids));
+  }
+  statements.push(...redactionAudits);
   if (statements.length) await db.batch(statements);
   return { ok: true, purged: selected.results.length, redacted: true, copiesAlreadyExportedRetracted: false };
 }
