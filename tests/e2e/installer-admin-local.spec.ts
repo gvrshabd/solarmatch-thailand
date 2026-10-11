@@ -7,6 +7,35 @@ import {expect,test,type Page} from '@playwright/test';
 test.skip(process.env.INSTALLER_E2E!=='1','Run only with INSTALLER_E2E=1 against the isolated local preview.');
 test.use({trace:'off',screenshot:'off',video:'off'});
 
+// Export only request lifecycle metadata: never bodies, headers, cookies, console
+// message text, input values or token-bearing URLs from an authenticated run.
+const diagnosticRuns=new WeakMap<Page,{events:unknown[];pending:Set<string>}>();
+test.beforeEach(async({page})=>{
+  if(process.env.ADMIN_DIAGNOSTICS!=='1')return;
+  const events:unknown[]=[];
+  const pending=new Set<string>();
+  diagnosticRuns.set(page,{events,pending});
+  const safePath=(url:string)=>{
+    const pathname=new URL(url).pathname;
+    const paths=new Set(['/admin','/admin/','/admin/local-access','/admin/api/session','/admin/api/installer-platform','/admin/api/config','/admin/api/leads','/admin/api/media','/api/assessment/config']);
+    return paths.has(pathname)?pathname:'[asset-or-other]';
+  };
+  page.on('request',request=>{if(safePath(request.url())==='[asset-or-other]')return;const key=`${request.method()} ${safePath(request.url())}`;pending.add(key);events.push({event:'request',key,at:Date.now()});});
+  page.on('response',response=>{if(safePath(response.url())!=='[asset-or-other]')events.push({event:'response',path:safePath(response.url()),status:response.status(),at:Date.now()});});
+  page.on('requestfinished',request=>{pending.delete(`${request.method()} ${safePath(request.url())}`);});
+  page.on('requestfailed',request=>{const key=`${request.method()} ${safePath(request.url())}`;pending.delete(key);events.push({event:'failed',key,at:Date.now()});});
+  page.on('console',message=>{if(message.type()==='error')events.push({event:'console-error',at:Date.now()});});
+  page.on('pageerror',()=>events.push({event:'page-error',at:Date.now()}));
+});
+test.afterEach(async({page},testInfo)=>{
+  const run=diagnosticRuns.get(page);
+  if(run){
+    const summary={project:testInfo.project.name,status:testInfo.status,events:run.events,pending:[...run.pending]};
+    await testInfo.attach('safe-request-lifecycle',{body:JSON.stringify(summary),contentType:'application/json'});
+    console.log('SAFE_ADMIN_LIFECYCLE '+JSON.stringify(summary));
+  }
+});
+
 function localAdminPassword() {
   const vars=readFileSync(path.resolve('.installer-test/.dev.vars'),'utf8');
   const line=vars.split(/\r?\n/u).find(value=>/^\s*LOCAL_ADMIN_PASSWORD\s*=/u.test(value));
@@ -53,9 +82,11 @@ test('isolated admin sign-in loads installer operations and populated company co
   // Read-only action: if CSRF failed open, this still cannot change a company.
   const missingCsrf=await page.evaluate(async()=>{
     const response=await fetch('/admin/api/installer-platform',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'preview-retention'})});
-    return response.status;
+    return {status:response.status,body:await response.json()};
   });
-  expect(missingCsrf).toBe(403);
+  expect(missingCsrf).toEqual({status:403,body:{error:'invalid_request_verification'}});
+  await page.goto('/admin/local-access');
+  await expect(page.getByRole('heading',{name:'Synthetic local test administrator'})).toBeVisible();
 });
 
 test('installer admin panel remains operable at 320px with no serious accessibility violations',async({page})=>{
@@ -82,8 +113,11 @@ test('protected readiness, campaign reports and shutdown export remain read-only
   await page.getByRole('button',{name:'Load campaign report'}).click();
   await expect(page.getByRole('link',{name:'Export campaign CSV'})).toBeVisible();
   await page.getByRole('combobox',{name:'Submission environment',exact:true}).selectOption('local-test');
+  // Changing filters invalidates the displayed report/export until the new snapshot loads.
+  await expect(page.getByRole('link',{name:'Export campaign CSV'})).toHaveCount(0);
   await page.getByRole('button',{name:'Load campaign report'}).click();
   await expect(page.getByRole('region',{name:'Campaign report table'})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Campaign report table'}).getByText('Not recorded',{exact:true}).first()).toBeVisible();
   const csvUrl=await page.getByRole('link',{name:'Export campaign CSV'}).getAttribute('href');
   expect(csvUrl).toContain('submissionMode=local-test');
   const csv=await page.request.get(csvUrl!);expect(csv.ok()).toBe(true);expect(csv.headers()['cache-control']).toBe('no-store');
@@ -98,6 +132,7 @@ test('protected readiness, campaign reports and shutdown export remain read-only
   await expect(page.getByText('company-tax-and-contract-facts',{exact:false})).toBeVisible();
   await page.getByRole('combobox',{name:'Report language',exact:true}).selectOption('th');
   await expect(page.getByRole('heading',{name:'รายงานคำขอจากแคมเปญ'})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Campaign report table'}).getByText('ยังไม่มีบันทึก',{exact:true}).first()).toBeVisible();
   await expect(page.getByRole('button',{name:'คำนวณข้อมูลเพื่อการตรวจสอบ'})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
 });

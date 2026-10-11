@@ -6,9 +6,10 @@ import path from 'node:path';
 const fakeId='00000000-0000-0000-0000-000000000006';
 const config=JSON.parse(readFileSync('.installer-test/preview.jsonc','utf8'));
 if(config.name!=='solarmatch-installer-local-test'||config.d1_databases?.[0]?.database_id!==fakeId)throw new Error('Isolated fictitious configuration required.');
-const restoreName=process.argv[2]??'restore12';
+const restoreName=process.argv[2];
+if(!restoreName)throw new Error('Provide the new disposable restore directory explicitly.');
 if(!/^restore[a-z0-9-]{1,40}$/.test(restoreName))throw new Error('Use a short private restore directory under .wrangler.');
-const sourceName=process.argv[3]??'installer-final-state';
+const sourceName=process.argv[3]??'installer-demo';
 if(!/^installer-[a-z0-9-]{1,80}$/.test(sourceName))throw new Error('Use a private installer source directory under .wrangler.');
 function openLocal(name) {
   const directory=path.resolve('.wrangler',name,'v3/d1/miniflare-D1DatabaseObject');
@@ -21,6 +22,9 @@ const source=openLocal(sourceName),restored=openLocal(restoreName);
 const hash=rows=>createHash('sha256').update(JSON.stringify(rows)).digest('hex');
 try {
   const [a,b]=[source,restored];
+  const expected=readdirSync('migrations').filter(name=>/^\d{4}_.+\.sql$/.test(name)).sort();
+  const applied=a.prepare('SELECT name FROM d1_migrations ORDER BY name').all().map(row=>row.name);
+  if(JSON.stringify(expected)!==JSON.stringify(applied))throw new Error('Source does not have the complete current migration chain.');
   const tableSql="SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT GLOB '_cf_*' ORDER BY name";
   const tables=a.prepare(tableSql).all();
   if(hash(tables)!==hash(b.prepare(tableSql).all()))throw new Error('Restored application table inventory differs.');

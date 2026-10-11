@@ -27,8 +27,8 @@ export function campaignSpendStatements(db:D1Database,input:CampaignSpendInput,a
 export const campaignReportSchema=z.object({fromDay:bangkokDaySchema,toDay:bangkokDaySchema,submissionMode:submissionModeSchema.default('production')})
   .strict().refine(value=>value.fromDay<=value.toDay&&Date.parse(value.toDay)-Date.parse(value.fromDay)<=365*86400000,{message:'ordered_period_maximum_366_days'});
 export type CampaignReportInput=z.input<typeof campaignReportSchema>;
-const metricNames=['incomingRequests','qualifiedEnquiries','rejectedRequests','qualificationUnknownRequests','unsoldEnquiries','unattributedRequests','redactedRequests',
-  'paidDeliveries','paidDeliveryFeeMinor','trialDeliveries','claimRestoredPurchasedCredits','claimRestoredFeeMinorEstimate','trialRestorations','adSpendMinor'] as const;
+const metricNames=['incomingRequests','repeatedSubmissions','qualifiedEnquiries','rejectedRequests','qualificationUnknownRequests','unsoldEnquiries','unattributedRequests','redactedRequests',
+  'paidDeliveries','paidDeliveryFeeMinor','trialDeliveries','claimRestoredPurchasedCredits','claimRestoredFeeMinorEstimate','trialRestorations','adSpendMinor','adSpendRecordCount'] as const;
 export type CampaignMetrics=Record<typeof metricNames[number],number>&{estimatedContributionMinor:number};
 export type CampaignReportRow=CampaignMetrics&{day:string;campaignCode:string;sourceCode:string;mediumCode:string};
 const blankMetrics=():CampaignMetrics=>({...Object.fromEntries(metricNames.map(name=>[name,0])),estimatedContributionMinor:0}) as CampaignMetrics;
@@ -45,14 +45,16 @@ export async function campaignReport(db:D1Database,input:CampaignReportInput) {
   const scope=campaignReportSchema.parse(input),mode=modePredicate('l',scope.submissionMode);
   const period=[scope.fromDay,scope.toDay];
   const campaign="COALESCE(a.campaign_code,'unknown')";
+  const original='(e.id IS NULL OR e.lead_id=l.id)';
   const acquisition=await db.prepare(`SELECT date(l.created_at,'+7 hours') day,${campaign} campaignCode,
-    COUNT(*) incomingRequests,
+    SUM(CASE WHEN ${original} THEN 1 ELSE 0 END) incomingRequests,
+    SUM(CASE WHEN e.id IS NOT NULL AND e.lead_id<>l.id THEN 1 ELSE 0 END) repeatedSubmissions,
     SUM(CASE WHEN e.lead_id=l.id AND a.original_qualified=1 THEN 1 ELSE 0 END) qualifiedEnquiries,
-    SUM(CASE WHEN a.original_qualified=0 THEN 1 ELSE 0 END) rejectedRequests,
-    SUM(CASE WHEN a.lead_id IS NULL THEN 1 ELSE 0 END) qualificationUnknownRequests,
+    SUM(CASE WHEN ${original} AND a.original_qualified=0 THEN 1 ELSE 0 END) rejectedRequests,
+    SUM(CASE WHEN ${original} AND a.lead_id IS NULL THEN 1 ELSE 0 END) qualificationUnknownRequests,
     SUM(CASE WHEN e.lead_id=l.id AND NOT EXISTS(SELECT 1 FROM lead_recipient_deliveries d WHERE d.enquiry_id=e.id AND d.delivery_channel='portal') THEN 1 ELSE 0 END) unsoldEnquiries,
-    SUM(CASE WHEN a.campaign_code IS NULL OR a.campaign_code='unknown' THEN 1 ELSE 0 END) unattributedRequests,
-    SUM(CASE WHEN a.capture_state='redacted' THEN 1 ELSE 0 END) redactedRequests
+    SUM(CASE WHEN ${original} AND (a.campaign_code IS NULL OR a.campaign_code='unknown') THEN 1 ELSE 0 END) unattributedRequests,
+    SUM(CASE WHEN ${original} AND a.capture_state='redacted' THEN 1 ELSE 0 END) redactedRequests
     FROM leads l LEFT JOIN lead_campaign_attribution a ON a.lead_id=l.id
     LEFT JOIN installer_enquiry_leads el ON el.lead_id=l.id LEFT JOIN installer_enquiries e ON e.id=el.enquiry_id
     WHERE ${mode} AND date(l.created_at,'+7 hours') BETWEEN ? AND ? GROUP BY day,campaignCode`).bind(...period).all<Record<string,string|number>>();
@@ -69,7 +71,7 @@ export async function campaignReport(db:D1Database,input:CampaignReportInput) {
     FROM installer_credit_ledger k JOIN installer_claims c ON c.id=k.source_id JOIN lead_recipient_deliveries d ON d.id=c.delivery_id
     JOIN leads l ON l.id=d.lead_id LEFT JOIN lead_campaign_attribution a ON a.lead_id=l.id
     WHERE k.kind='claim-restoration' AND d.delivery_channel='portal' AND ${mode} AND date(k.created_at,'+7 hours') BETWEEN ? AND ? GROUP BY day,campaignCode`).bind(...period).all<Record<string,string|number>>();
-  const spend=await db.prepare(`SELECT spend_day day,campaign_code campaignCode,SUM(amount_minor) adSpendMinor FROM campaign_ad_spend
+  const spend=await db.prepare(`SELECT spend_day day,campaign_code campaignCode,SUM(amount_minor) adSpendMinor,COUNT(*) adSpendRecordCount FROM campaign_ad_spend
     WHERE submission_mode=? AND spend_day BETWEEN ? AND ? GROUP BY day,campaignCode`).bind(scope.submissionMode,...period).all<Record<string,string|number>>();
   // Legacy notes have no safe code/environment association. Do not parse or expose them.
   const legacy=await db.prepare(`SELECT COALESCE(SUM(amount_minor),0) amount FROM installer_operational_events
@@ -93,9 +95,10 @@ export async function campaignReport(db:D1Database,input:CampaignReportInput) {
   }
   totals.estimatedContributionMinor=totals.paidDeliveryFeeMinor-totals.claimRestoredFeeMinorEstimate-totals.adSpendMinor;
   return {scope,rows,totals,unallocatedAllEnvironments:{legacyAdSpendMinor:legacy?.amount??0,paymentReversalCredits:reversals?.credits??0},
-    basis:'Asia/Bangkok event day. Deliveries/restorations use the canonical original submission campaign; requests include rejected and repeated submissions.',
+    basis:'Asia/Bangkok event day. Incoming requests count canonical original or unlinked requests, including rejected/unknown. Repeated submissions are separate, not new acquisitions. Deliveries/restorations use the canonical original submission campaign.',
     qualificationBasis:'Original installer eligibility snapshot when capture enabled; missing snapshots are reported separately, not guessed from mutable rescoring.',
     unsoldBasis:'Original canonical enquiries submitted in this period with no portal delivery as of report time (not a historical end-of-period cohort).',
+    missingCostNotice:'No spend record means advertising cost is unknown, not proven zero. Contribution subtracts only recorded spend and may overstate the result when costs are missing.',
     estimateNotice:'Estimated contribution, not profit or cash settlement. Excludes unallocated legacy spend, payment reversals, provider/SMS/LINE/hosting costs, taxes and overhead. Trial delivery is zero earned fee; credit purchases are not earned delivery income.'};
 }
 export type CampaignReport=Awaited<ReturnType<typeof campaignReport>>;

@@ -19,6 +19,29 @@ test('saved Thai and English estimates remain available when configuration never
   for(const route of pending)await route.abort().catch(()=>{});
 });
 
+test('a refreshed release cannot replace the saved result journey snapshot',async({page})=>{
+  const stored={...operationalConfiguration(),loadingFactSetVersionId:'saved-facts',loadingFacts:[]};
+  await page.addInitScript(({answers,configuration})=>{
+    sessionStorage.setItem('solarmatch:estimate',JSON.stringify(answers));
+    sessionStorage.setItem('solarmatch:assessment-context',JSON.stringify(configuration));
+  },{answers:savedEstimate,configuration:stored});
+  await page.route('**/api/assessment/config',route=>route.fulfill({json:{...stored,releaseId:'different-release',questionnaireVersionId:'different-questionnaire',loadingFactSetVersionId:'replacement-facts'}}));
+  for(const prefix of ['','/en']){
+    await page.goto(`${prefix}/estimate/results`);
+    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:10000});
+    expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:result-view-state')!).factSetVersionId)).toBe('saved-facts');
+  }
+});
+
+test('failed configuration refresh does not block Thai or English results',async({page})=>{
+  await page.addInitScript(answers=>sessionStorage.setItem('solarmatch:estimate',JSON.stringify(answers)),savedEstimate);
+  await page.route('**/api/assessment/config',route=>route.fulfill({status:503,json:{error:'synthetic_unavailable'}}));
+  for(const prefix of ['','/en']){
+    await page.goto(`${prefix}/estimate/results`);
+    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:10000});
+  }
+});
+
 const exactSharedConsent = {
   en: "I consent to [COMPANY_EN], operating SolarMatch, disclosing my name, chosen contact details, property location and relevant assessment answers to up to three participating installation companies serving my area, so they can assess and contact me about this residential solar request using my selected contact method. A new installer may receive my request only within [DISTRIBUTION_DAYS] days after submission. I understand that installers pay SolarMatch for delivered enquiries, that the request is shared, and that I can withdraw this consent at any time by contacting [PRIVACY_EMAIL]. I can receive the free estimate without giving this consent. Details are in the Privacy Notice.",
   th: "ฉันยินยอมให้ [COMPANY_TH] ผู้ดำเนินการ SolarMatch เปิดเผยชื่อ ช่องทางติดต่อที่ฉันเลือก ที่ตั้งทรัพย์สิน และคำตอบแบบประเมินที่เกี่ยวข้องแก่บริษัทติดตั้งที่เข้าร่วมและให้บริการในพื้นที่ของฉันไม่เกินสามบริษัท เพื่อประเมินและติดต่อฉันเกี่ยวกับคำขอโซลาร์สำหรับที่อยู่อาศัยนี้ผ่านวิธีติดต่อที่ฉันเลือก บริษัทติดตั้งรายใหม่จะได้รับคำขอของฉันได้เฉพาะภายใน [DISTRIBUTION_DAYS] วันนับจากวันที่ส่งคำขอ ฉันเข้าใจว่าบริษัทติดตั้งชำระค่าบริการให้ SolarMatch สำหรับคำขอที่ได้รับ คำขออาจถูกส่งให้หลายบริษัท และฉันสามารถถอนความยินยอมนี้ได้ทุกเมื่อโดยติดต่อ [PRIVACY_EMAIL] ฉันสามารถรับผลประเมินฟรีได้โดยไม่ให้ความยินยอมนี้ ดูรายละเอียดได้ในประกาศความเป็นส่วนตัว",

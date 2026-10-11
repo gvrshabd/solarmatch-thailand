@@ -208,7 +208,9 @@ test('question headings, conditional controls, consent, and navigation remain se
   }
 });
 
-test('mobile contact fields stay readable, focusable, and separated from confirmation and actions', async ({ page }) => {
+for (const locale of ['en', 'th'] as const) test(`mobile contact fields stay readable, focusable, and separated from confirmation and actions (${locale})`, async ({ page }) => {
+  const english = locale === 'en';
+  const phone = page.getByRole('textbox', {name: english ? /^Mobile phone number/u : /^หมายเลขโทรศัพท์มือถือ/u});
   await page.route('**/api/assessment/config', async (route) => {
     const response = await route.fetch();
     const configuration = await response.json() as Record<string, unknown> & { contact: Record<string, unknown> };
@@ -223,17 +225,21 @@ test('mobile contact fields stay readable, focusable, and separated from confirm
     await route.fulfill({ response, json: configuration });
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await primeQuestion(page, '/en/estimate', 10, { quoteContactRequested: undefined, quoteConsentAccepted: undefined });
-  await page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' }).click();
+  await primeQuestion(page, english ? '/en/estimate' : '/estimate', 10, { quoteContactRequested: undefined, quoteConsentAccepted: undefined });
+  await page.getByRole('radio', { name: english ? 'Yes, I would like solar companies to contact me' : 'ใช่ ฉันต้องการให้บริษัทโซลาร์ติดต่อ' }).click();
   await page.locator('.quote-consent-check input').check();
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'What number should installers call?' })).toBeVisible();
+  // Deterministically exercise early typing before the delayed heading focus.
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.getByRole('button', { name: english ? 'Continue' : 'ถัดไป', exact: true }).click();
+  await expect(page.getByRole('heading', { name: english ? 'What number should installers call?' : 'ต้องการให้ผู้ติดตั้งโทรติดต่อที่หมายเลขใด?' })).toBeVisible();
 
-  await page.getByLabel('First name').fill('Mobile');
-  await page.getByLabel('Last name').fill('Tester');
-  await page.getByLabel('Mobile phone number').fill('081 234 5678');
-  await page.getByLabel('Mobile phone number').click();
-  await expect(page.getByLabel('Mobile phone number')).toBeFocused();
+  await page.getByLabel(english ? 'First name' : 'ชื่อ', {exact:true}).fill('Mobile');
+  await page.getByLabel(english ? 'Last name' : 'นามสกุล', {exact:true}).fill('Tester');
+  await phone.fill('081 234 5678');
+  await phone.click();
+  await page.clock.runFor(301);
+  await expect(phone).toBeFocused();
   await expect(page.getByLabel('LINE ID')).toHaveCount(0);
 
   const inputGeometry = await page.locator('.contact-form-grid input[type="text"]:visible, .contact-form-grid input[type="tel"]:visible, .contact-form-grid input:not([type]):visible').evaluateAll((elements) => elements.map((element) => {

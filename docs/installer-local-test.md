@@ -2,6 +2,20 @@
 
 Run only against the dedicated local configuration; its database ID is deliberately fictitious. Do not pass `--remote` or deploy this configuration.
 
+## Current focused reliability pass after 055dcf0
+
+The earlier IPv4-only workaround did not resolve the combined timeout. The current fix consumes small rejected request bodies with a strict size/deadline limit before returning the existing 401/403/415. Full sequence coverage is retained, including rejected POST followed by document navigation and a credential-free reduced reproduction. Nothing is fixed by increasing browser timeouts or replacing the sequence with isolated cases. Run the complete sequence against a disposable restored demo:
+
+```powershell
+$env:INSTALLER_E2E = '1'
+$env:PLAYWRIGHT_BASE_URL = 'http://127.0.0.1:3000'
+pnpm exec playwright test tests/e2e/installer-admin-local.spec.ts tests/e2e/installer-request-lifecycle.spec.ts --project=desktop-chromium --project=mobile-chromium --repeat-each=2
+```
+
+For safe request timings only, optionally set `ADMIN_DIAGNOSTICS=1`. The authenticated cases disable traces/screenshots/video and export only allowlisted paths (no query), methods, statuses, pending requests and error counts. Never export raw browser storage, headers, bodies, console text, OTPs or tokens. See `installer-admin-timeout-evidence.txt` and `installer-reliability-test-results.txt` for actual failures, diagnosis, verification and limitations. The sections below record earlier historical runs.
+
+The current export helper defaults to `installer-demo` and verifies exact `0001`–`0018` filenames; the restore-check helper requires an explicit fresh destination. Current private rehearsal: `installer-review-final` exported to `restore-final`, all sixty tables and twenty-five triggers matched. Original demo is untouched. Object rehearsal `objectsreviewfinal` contains one invented object in separate local buckets, not a real contract or real Cloudflare recovery.
+
 Subsequent autonomous preparation extends the chain through `0018` (campaign attribution and operations). Use all eighteen migrations for the new code. The earlier sixteen-migration results below are historical. Admin **Installer operations** now includes campaign reports/spend, local alerts/preflight and read-only shutdown liability review. Use `http://127.0.0.1:3000/admin/local-access` with the existing ignored test password; installer portal is `/installers`, homeowner assessment `/estimate` or `/en/estimate`. Never expose the loopback admin bypass remotely. Keep both campaign flags false, outbound false, all business effects disabled/paused and test clock cleared after exercises.
 
 Current eighteen-migration restore: `.wrangler/installer-prep-final-2026-10-11/synthetic-final.sql`, SHA-256 `4b25519158ad67ad5684ed518813d1384795f90c74007394be8e6d82652713bd`, restored to `.wrangler/restore18prep`. Sixty tables, twenty-five triggers and every row matched at the snapshot; foreign-key, ledger, recipient-cap and portal-consent checks passed. Five leads/enquiries, six deliveries, thirteen ledger entries, two claims and three legal versions were preserved. Subsequent sign-ins add synthetic session/audit rows normally. The SQL, sessions and recovery stores remain private and excluded from review archives. Local object rehearsal `objects18prep` verified an invented object's bytes and content/custom metadata in a separate empty local bucket; this is not real Cloudflare recovery. Run `node scripts/installer-local-safety-check.mjs installer-demo` for a read-only held-state/count check. Review current test history in `installer-autonomous-test-results.txt`.
@@ -117,7 +131,7 @@ Preserve existing `DB`, `MEDIA`, admin Access AUD/team, `ADMIN_EMAILS` and `CSRF
 
 ## Migration, backup and recovery
 
-The eleven additive installer migrations run from `0006` through `0016`; apply the complete sixteen-migration ordered chain to this local database. `0011` adds operation/run tracking and database allocation guards; `0012` contains the isolated test clock; `0013` adds Omise reconciliation timestamps and error codes. New `0014` guards debt-first incoming credits; `0015` adds trusted submission classification, test canonical namespaces and final collection/allocation guards; `0016` adds monotonic company LINE-link generation. These repair migrations are local only. Historical leads stay unverified, historic delivery facts and test labels remain, and no old consent is rewritten. Verification evidence is stored separately from expiring OTP secrets. Never edit a migration after it has been applied to an authoritative environment.
+The thirteen additive installer migrations run from `0006` through `0018`; apply the complete eighteen-migration ordered chain to this local database. `0011` adds operation/run tracking and database allocation guards; `0012` contains the isolated test clock; `0013` adds Omise reconciliation timestamps and error codes. `0014` guards debt-first incoming credits; `0015` adds trusted submission classification, test canonical namespaces and final collection/allocation guards; `0016` adds monotonic company LINE-link generation; `0017` adds campaign capture/spend; `0018` adds scheduler leases and local alerts. These migrations are local only. Historical leads stay unverified, historic delivery facts and test labels remain, and no old consent is rewritten. Verification evidence is stored separately from expiring OTP secrets. Never edit a migration after it has been applied to an authoritative environment.
 
 Before any future production migration, obtain separate approval, export only the SolarMatch D1 database to the established protected backup location, record its Time Travel bookmark and table counts, and inventory SolarMatch private objects. Test restoration and the ordered migrations on a disposable copy. Do not commit backups, read unrelated buckets, or substitute this fake local database ID for production bindings.
 

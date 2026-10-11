@@ -30,6 +30,21 @@ double-debit saved balances. Read-only checks compare all rows/tables/triggers,
 foreign keys, ledger conservation, consent snapshots and lifetime recipient cap.
 All 0001–0018 migrations must be present before running the new application.
 Keep the source demo intact. A Git revert does not undo database migrations.
+The export and restore-check helpers now validate the exact ordered migration
+filenames, not just a lower-bound count. Export defaults to installer-demo;
+restore-check requires the destination explicitly. Older historical examples
+without a destination are no longer the supported current invocation.
+
+Focused review rehearsal (11 October 2026)
+Private export: .wrangler/installer-review-final/synthetic-final.sql
+SHA256: 4b25519158ad67ad5684ed518813d1384795f90c74007394be8e6d82652713bd
+Fresh disposable destination: .wrangler/restore-final
+All sixty tables, every row and twenty-five trigger definitions matched. Foreign
+keys, ledger conservation, lifetime recipient cap and portal consent passed.
+Five leads/enquiries, six deliveries, thirteen ledger entries, two claims, three
+legal versions and eighteen migrations were preserved. Compare before browsing:
+later legitimate test sign-ins add private session/audit records to a test copy.
+The original installer-demo was not reset, reseeded or used for failing tests.
 
 Object backup / rehearsal
 node scripts/installer-local-object-recovery.mjs objectsUNIQUE
@@ -39,6 +54,8 @@ bytes, content/custom metadata, SHA256 and size in private .wrangler storage;
 restores into a distinct empty store, refuses overwrite and verifies bytes and
 metadata. No existing demo/media or real Cloudflare R2 object is touched.
 This is a local rehearsal only, not a real-cloud recovery verification.
+Repeated focused rehearsal objectsreviewfinal passed one invented object,
+checksum/size/content/custom metadata and separate restore; no actual R2 access.
 
 Real R2 procedure still requires authorised execution
 Record only the SolarMatch private bucket inventory and D1 media/contract object

@@ -60,8 +60,11 @@ describe('original acquisition and event-day financial reporting',()=>{
     const repeat=await attributed('+66812345678',ATTRIBUTION_CATALOG[3]);expect(repeat.enquiryId).toBe(first.enquiryId);
     await attributed('+66812345679',ATTRIBUTION_CATALOG[2],false);
     const report=await campaignReport(fixture.d1(),period);
-    expect(report.totals).toMatchObject({incomingRequests:3,qualifiedEnquiries:1,rejectedRequests:1,unsoldEnquiries:2,paidDeliveries:0});
-    expect(report.rows.find(row=>row.campaignCode==='pilot-social')).toMatchObject({incomingRequests:1,qualifiedEnquiries:0});
+    expect(report.totals).toMatchObject({incomingRequests:2,repeatedSubmissions:1,qualifiedEnquiries:1,rejectedRequests:1,unsoldEnquiries:2,paidDeliveries:0});
+    expect(report.rows.find(row=>row.campaignCode==='pilot-social')).toMatchObject({incomingRequests:0,repeatedSubmissions:1,qualifiedEnquiries:0});
+    expect(report.totals.adSpendRecordCount).toBe(0);
+    expect(report.missingCostNotice).toContain('unknown, not proven zero');
+    expect(campaignReportCsv(report)).toContain('"adSpendRecordCount"');
     expect(()=>fixture.sqlite.prepare("UPDATE lead_campaign_attribution SET campaign_code='unknown' WHERE lead_id=?").run(first.leadId)).toThrow('campaign snapshot is immutable');
   });
   it('keeps synthetic contexts separate from production and historical missing capture visible',async()=>{
@@ -81,7 +84,7 @@ describe('original acquisition and event-day financial reporting',()=>{
     await decideClaim(fixture.d1(),claim.id,'approved','Synthetic','fixture');await decideClaim(fixture.d1(),claim.id,'approved','Synthetic','fixture');
     const trialClaim=await createClaim(fixture.d1(),'synthetic-company-2',trialDelivery.allocated[0],'incorrect-contact','Synthetic');await decideClaim(fixture.d1(),trialClaim.id,'approved','Synthetic','fixture');
     const report=await campaignReport(fixture.d1(),period);
-    expect(report.totals).toMatchObject({incomingRequests:3,paidDeliveries:1,paidDeliveryFeeMinor:40000,trialDeliveries:1,claimRestoredPurchasedCredits:2,claimRestoredFeeMinorEstimate:40000,trialRestorations:1,estimatedContributionMinor:0});
+    expect(report.totals).toMatchObject({incomingRequests:2,repeatedSubmissions:1,paidDeliveries:1,paidDeliveryFeeMinor:40000,trialDeliveries:1,claimRestoredPurchasedCredits:2,claimRestoredFeeMinorEstimate:40000,trialRestorations:1,estimatedContributionMinor:0});
     expect(report.rows.find(row=>row.campaignCode==='pilot-social')?.paidDeliveries).toBe(0);
   });
   it('uses explicit Bangkok spend dates, rejects invalid notes/dates, and never projects legacy free text',async()=>{
@@ -89,7 +92,7 @@ describe('original acquisition and event-day financial reporting',()=>{
     await fixture.d1().batch(campaignSpendStatements(fixture.d1(),{campaignCode:'pilot-search',spendDay:'2026-10-11',amountMinor:5000,submissionMode:'local-test'},'synthetic-admin@example.test'));
     fixture.sqlite.prepare("INSERT INTO installer_operational_events(id,event_type,amount_minor,attribution_json,created_at) VALUES('old','ad-spend',9000,?,?)").run(JSON.stringify({campaign:'Somchai 0812345678 =HYPERLINK("private")'}),'2026-10-10T18:00:00Z');
     const report=await campaignReport(fixture.d1(),period);
-    expect(report.totals).toMatchObject({adSpendMinor:5000,estimatedContributionMinor:-5000});
+    expect(report.totals).toMatchObject({adSpendMinor:5000,adSpendRecordCount:1,estimatedContributionMinor:-5000});
     expect(report.unallocatedAllEnvironments.legacyAdSpendMinor).toBe(9000);
     expect(JSON.stringify(report)).not.toContain('0812345678');expect(campaignReportCsv(report)).not.toContain('Somchai');
     for(const value of [{campaignCode:'somchai-0812345678',spendDay:'2026-10-11',amountMinor:1},{campaignCode:'pilot-search',spendDay:'2026-02-30',amountMinor:1},{campaignCode:'pilot-search',spendDay:'2026-10-11',amountMinor:1,reason:'private'}])expect(campaignSpendSchema.safeParse(value).success).toBe(false);
@@ -125,7 +128,7 @@ describe('original acquisition and event-day financial reporting',()=>{
     expect(fixture.sqlite.prepare('SELECT campaign_code,source_code,medium_code,capture_state FROM lead_campaign_attribution').all()).toEqual([
       {campaign_code:null,source_code:null,medium_code:null,capture_state:'redacted'}, {campaign_code:null,source_code:null,medium_code:null,capture_state:'redacted'}]);
     const report=await campaignReport(fixture.d1(),period);
-    expect(report.totals).toMatchObject({incomingRequests:2,qualifiedEnquiries:1,redactedRequests:2,unattributedRequests:2,paidDeliveries:1,paidDeliveryFeeMinor:40000});
+    expect(report.totals).toMatchObject({incomingRequests:1,repeatedSubmissions:1,qualifiedEnquiries:1,redactedRequests:1,unattributedRequests:1,paidDeliveries:1,paidDeliveryFeeMinor:40000});
     expect(report.rows).toHaveLength(1);expect(report.rows[0].campaignCode).toBe('unknown');
   });
   it('CSV guards formulas, quotes, commas and line breaks without converting numeric negative contribution into a formula',()=>{

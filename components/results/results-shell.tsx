@@ -98,6 +98,8 @@ function contactSafeFallback(configuration: PublicAssessmentConfig | null) {
   return {
     ...configuration,
     privatePreview: false,
+    restrictedSiteCollectionEnabled: false,
+    publicCollectionEnabled: false,
     assessmentToken: null,
     assessmentTokenExpiresAt: null,
     liveLeadSubmissions: false,
@@ -105,6 +107,8 @@ function contactSafeFallback(configuration: PublicAssessmentConfig | null) {
       ...configuration.contact,
       enabled: false,
       preview: false,
+      restrictedSiteCollectionEnabled: false,
+      publicCollectionEnabled: false,
       operationalDistributionEnabled: false,
     },
   } satisfies PublicAssessmentConfig;
@@ -139,10 +143,12 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     let initialized = false;
     const finish = (nextConfiguration: PublicAssessmentConfig | null) => {
       if (!active) return;
-      if (initialized) { setConfiguration(nextConfiguration); return; }
+      // Freeze this journey's original release/fact snapshot. A late refresh
+      // must not mix assessment versions or re-authorise contact collection.
+      if (initialized) return;
       initialized = true;
       setAnswers(parsed.data);
-      setConfiguration(nextConfiguration);
+      setConfiguration(contactSafeFallback(nextConfiguration));
       setSelectedFact(storedView?.fact ?? null);
       setLoadingDuration(storedView?.loadingDurationMs);
       setLoadingStartedAt(storedView?.loadingStartedAt);

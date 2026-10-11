@@ -12,6 +12,12 @@ let fixture:FixtureDatabase;
 beforeEach(async()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-11T03:00:00.000Z'));fixture=new FixtureDatabase();runtime.DB=fixture.d1();await seedFixture(runtime.DB);vi.spyOn(globalThis,'fetch').mockRejectedValue(new Error('No external calls permitted'));});
 afterEach(()=>{fixture.close();runtime.DB=undefined;vi.restoreAllMocks();vi.useRealTimers();});
 describe('scheduled job health and overlap preparation',()=>{
+  it('surfaces a latest failed scheduled run even when a recent older success exists',async()=>{
+    fixture.sqlite.prepare("INSERT INTO installer_job_runs(id,job_name,actor,started_at,finished_at,status) VALUES('success','scheduled','fixture','2026-10-11T02:58:00.000Z','2026-10-11T02:58:01.000Z','succeeded'),('failure','scheduled','fixture','2026-10-11T02:59:00.000Z','2026-10-11T02:59:01.000Z','failed')").run();
+    const result=await operations.captureInstallerAlerts(fixture.d1(),{schedulerExpected:true});
+    expect(result.scheduler.state).toBe('failed');expect(result.attentionRequired).toBeGreaterThan(0);
+    expect(result.alerts.openCount).toBe(1);expect(fetch).not.toHaveBeenCalled();
+  });
   it('a second scheduled invocation skips work while the first holds the scheduler lease',async()=>{
     const original=fixture.prepare.bind(fixture);let release=()=>{},signal=()=>{},held=false;
     const blocker=new Promise<void>(resolve=>{release=resolve;});const started=new Promise<void>(resolve=>{signal=resolve;});

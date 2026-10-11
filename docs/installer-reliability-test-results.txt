@@ -1,0 +1,184 @@
+SOLARMATCH FOCUSED RELIABILITY REVIEW — LOCAL EVIDENCE, 11 OCTOBER 2026
+
+Repository: gvrshabd/solarmatch-thailand
+Branch: feature/installer-shared-workflow
+Starting full commit: 055dcf0082e2175ae89ee910e48e782bc1fffa6a
+Independent repair baseline: 43d1304ab9c4222dfb9cdf36ad412e29185cc6e7
+Preserved main: 6567ffc84a9ee4e609591e80da587229c6482384
+Final full commit/archive identity: refreshed package MANIFEST.json.
+
+Package checks actually performed
+Read original MANIFEST, TEST_RESULTS, BEFORE_LEAVING_LOCAL_MODE, implementation,
+remaining-work, provider, operations, recovery and claim/shutdown reports. All
+thirteen declared files matched sizes/SHA256. The 411-entry original source ZIP
+excluded private runtime paths. Regenerating git archive of exact 055dcf0 with
+the same prefix reproduced its byte-for-byte SHA256:
+a2d396a3be49029423a939bde41b2f92b29fc265b5005e05941ddaeecbd06cc4
+Checkout initially clean; full branch/remote/main matched the manifest. Reviewed
+the subsequent changes from 43d1304, not just its independently supplied passing
+test claim. No baseline commit, main history or subsequent legitimate work reset.
+
+Concrete findings and fixes
+1. Combined admin rejected-POST/next-document hang: reproduced repeatedly on a
+   disposable restored populated demo, including a credential-free 401 case.
+   Browser-response consumption, cancel-only cleanup and browser-version change
+   did not fix it. Bounded unread incoming-body cleanup before unchanged admin
+   rejections does. The exact combined sequence and reduced reproduction remain.
+   See installer-admin-timeout-evidence.txt; no timeout/CSRF/origin/auth weakening.
+2. Duplicate canonical submissions inflated incoming acquisition counts. Original
+   or unlinked requests now count once; repeated submissions are separately visible.
+   Rejected/unknown/unsold/direct records and original campaign financial events
+   remain represented. Initial targeted run: three failures/24 passes across the
+   campaign/operations files demonstrated counts and latest failed-job issues.
+3. Missing campaign costs previously looked numerically like recorded zero cost.
+   New spend-record count, explicit unknown-cost notice and bilingual Not recorded
+   table cells prevent that inference.
+   Estimated contribution still subtracts only recorded costs; it is not profit.
+   CSV scope is explicitly derived from displayed scope; changing filters already
+   invalidated the report/export and now has a retained browser assertion.
+4. Latest failed scheduled run inherited healthy from a recent earlier success.
+   It now reports failed, requires attention and enters the existing deduplicated
+   alert. Pauses, closed hours, missed runs, stale queues and owner fencing remain.
+5. Late config responses could replace saved assessment/fact versions on results.
+   Original journey snapshot freezes; results strip collection tokens/activation.
+   Hung, failed and changed-release response cases reach full Thai/English metrics
+   on desktop/mobile without mandatory contact. Calculations/order are unchanged.
+6. Mobile WebKit revealed delayed contact-heading focus stealing input focus.
+   The 300ms timer now respects an already focused user control. The original
+   focus assertion remains; test clock makes early typing across that deadline
+   deterministic and covers both languages. No input, consent or navigation change.
+7. Recovery helpers assumed older stores/counts. Export defaults to the preserved
+   eighteen-migration demo; both helpers compare exact migration filenames. Restore
+   destination is explicit. Current recovery documentation supersedes old examples.
+
+Other reviewed invariants (existing implementation retained)
+- Campaign capture requires both activation/privacy gates; exact catalogue tuples
+  reject PII-shaped values, arbitrary URLs, scripts, unknown combinations and extra
+  fields. No raw query/referrer/contact data enters attribution. CSV formula escaping,
+  strict dates/environment scope, transactional submission/idempotency and canonical
+  privacy redaction remain tested. Credit purchases are not earned delivery fees;
+  paid/trial/restoration/reversal facts remain financially separate.
+- Scheduled ownership/renewal/expiry/overlap and per-item transactions prevent repeated
+  debits/deliveries. Outbox final snapshot retains consent, classification, pause,
+  business hours, recipient/link and lease checks. Alerts contain safe codes/counts,
+  deduplicate, acknowledge separately and resolve/recur without outbound loops.
+- Shutdown report is a SELECT-only consistent snapshot: purchased/trial/promotional/
+  synthetic/unpriced/debt/reversal/refunded values remain separate. It flags ambiguous
+  funding, heterogeneous consumed prices, rounding/tax policy and outstanding claims;
+  calculated amounts do not approve refunds or prove bank return. Ledger reconciliation,
+  no-write/no-provider-call and CSV privacy tests passed unchanged.
+- Existing admin identity/AUD/CSRF/origin boundaries, portal tenant access, original
+  claim deadline, withdrawal suppression and private-link limits remain in the suite.
+
+Final source checks actually run
+- pnpm test: 325 passed in 45 files.
+- pnpm typecheck: passed; repeated after final bilingual test edit.
+- pnpm lint: zero errors, one existing QR <img> advisory at installers/portal.tsx:120.
+- pnpm build normal profile: passed; no deployment.
+- INSTALLER_LOCAL_TEST=true pnpm build: passed; generated name/fictitious database
+  ID checked before starting local preview. Existing middleware deprecation, route
+  classification and plugin timing notices do not imply failed compilation.
+- node --check on changed export/restore/package scripts: passed.
+- git diff --check: passed; Windows line-ending notices informational.
+
+Final browser verification
+- Final combined homeowner/campaign/admin/lifecycle/repaired portal/payment-return
+  run: 101 passed, one pre-existing intentional desktop-only skip (4.7m), zero
+  failures. Compiled public/focus-final candidate, desktop/mobile Chromium, both
+  locales. A subsequent admin-only missing-cost table-label refinement is checked
+  by another complete repeated admin sequence after recompiling the final source;
+  unchanged public flows are not misrepresented as re-executed after that label edit.
+- Final complete mobile WebKit audit: 21/21 passed (2.0m), including Thai/English
+  deadline-controlled contact focus, touch/slider/rotation, consent, geometry,
+  keyboard/reading order, reduced motion and route overflow at 320–768px.
+- Original complete admin sequence plus reduced lifecycle cases, repeated twice on
+  each desktop/mobile project: 16/16 passed together (20.7s). Not isolated replacements.
+  Rebuilt both normal and isolated profiles after the last missing-cost label edit;
+  the complete sixteen-case repeat passed again (19.1s), including English/Thai
+  Not recorded cells, security rejection and immediate following navigation.
+- Connected installer-workflow.spec.ts: 6/6 passed (35.0s) against a fresh separate
+  installer-acceptance store. Actual local signup, captured verification email,
+  recovery, persistent sessions, tenant company state, Thai/English 320px/a11y,
+  homeowner No with zero PII requests, captured SMS proof, saved lead/result and
+  repeat-safe fixture payment. No real email/SMS/LINE/Omise settlement occurred.
+- Mocked repaired portal/payment-return cases exercise compiled bilingual screens,
+  withdrawn/expired claim routes, selected checkout and status polling, debt notices,
+  LINE unlink/reconnect and redaction. They do not prove actual provider acceptance.
+
+Failed runs and investigation limits — retained, not hidden by successful totals
+- Original admin combined 5/1 then 4/2 failures persisted across response-consumption,
+  cancel-only and matched-browser checks; reduced unauthenticated cases failed 2/2.
+  These are real observed failures before the bounded-body fix, not inferred from
+  isolated tests. Specific upstream HTTP implementation cause/production impact was
+  not proven. The application request-lifecycle trigger and local fix were demonstrated.
+- First broader run: 99 passed, one intentional skip, two report-test failures. An
+  added expectation incorrectly assumed the export stayed visible after filters
+  changed; actual existing code cleared the report. Correct assertion verifies it
+  disappears until the new snapshot loads. That correction was made while the first
+  runner retained its already-loaded old test; the failures are retained here. It
+  does not remove report/CSV/privacy/security coverage or mask the original timeout.
+- First complete mobile WebKit: 19 passed/one contact-input focus failure. Narrowed
+  deadline-controlled reproduction failed again before the focus guard. Both the
+  focus expectation and geometry/overflow checks remain, now bilingual/deterministic.
+  A subsequent 21-case run passed the repaired English focus case and 19 other
+  cases, but the new Thai test's partial label query also matched consent and adult
+  checkboxes. The locator now specifies the accessible textbox role/name; no UI
+  label, consent, focus or layout assertion was removed. The final complete rerun
+  passed 21/21; this intermediate 20-pass/one test-locator failure is not hidden.
+- Original package's historical totals and isolated successes are not substituted
+  for any current combined acceptance result. Raw synthetic/auth traces stay private.
+
+Recovery actually performed
+Protected ignored original demo export:
+.wrangler/installer-review-final/synthetic-final.sql
+SHA256 4b25519158ad67ad5684ed518813d1384795f90c74007394be8e6d82652713bd
+Ordered import into a NEW disposable .wrangler/restore-final, checked read-only
+against installer-demo before interacting with that copy. All sixty tables/every
+row and twenty-five trigger definitions match; zero FK/ledger/cap/consent failures.
+Counts preserved: 5 leads, 5 enquiries, 6 deliveries, 13 ledger entries, 2 claims,
+3 legal versions, 18 migrations. Original demo not reseeded/reset/deleted.
+Separate objectsreviewfinal rehearsal: one invented local PDF object; checksum,
+bytes, size, HTTP/custom metadata match in a distinct empty local bucket. No real
+contract, Cloudflare R2 object, remote D1 or Time Travel recovery was tested.
+All private SQL/databases, messages, sessions, keys and browser traces excluded.
+
+Held state and scope
+Original demo, admin-review copy and connected acceptance store checked/returned
+to collectionEnabled=false, paymentsEnabled=false, notificationsEnabled=false,
+deliveryPaused=true, platformPaused=true, fixed_at=NULL. Outbound/provider-live,
+attribution activation/privacy and scheduler-expected switches remain off/absent.
+No push, deployment, remote query/migration, production configuration change,
+purchase, provider send/charge, main change or Milly's operation occurred.
+Existing eighteen migrations reused locally; no new migration added.
+Final preview uses preserved installer-demo on http://127.0.0.1:3000.
+
+Only genuine external prerequisites/owner decisions
+Provider merchant/account verification and supported methods, real payment
+reconciliation/settlement, controlled Thai handset delivery and actual LINE OA
+linking/signed-webhook/recipient delivery; verified email sending domain/inbox;
+separately approved reachable HTTPS test origin (dedicated workers.dev can suffice
+for provider-accepted webhooks/returns/links, without buying a domain); company/
+tax/operator facts and reviewed bilingual consent/company/retention/refund/claim
+policies; approved campaign catalogue/privacy and operational ownership. Existing
+seven-day claim submission and purchased-unused-credit shutdown-refund principle
+are confirmed, not reopened. Omise registration/domain purchase remain deferred.
+No additional launch requirement, redesign or automatic live activation invented.
+
+Exact repeatable commands
+Bundled Node24/pnpm11 runtime; compiled isolated preview; separate stores as above:
+pnpm test
+pnpm typecheck
+pnpm lint
+pnpm build
+INSTALLER_LOCAL_TEST=true pnpm build
+INSTALLER_E2E=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000:
+pnpm exec playwright test tests/e2e/site.spec.ts tests/e2e/campaign-attribution.spec.ts tests/e2e/installer-admin-local.spec.ts tests/e2e/installer-request-lifecycle.spec.ts tests/e2e/installer-repair-portal.spec.ts tests/e2e/installer-payment-return.spec.ts --project=desktop-chromium --project=mobile-chromium
+pnpm exec playwright test tests/e2e/installer-admin-local.spec.ts tests/e2e/installer-request-lifecycle.spec.ts --project=desktop-chromium --project=mobile-chromium --repeat-each=2
+pnpm exec playwright test tests/e2e/installer-workflow.spec.ts --project=desktop-chromium --project=mobile-chromium
+With INSTALLER_E2E unset:
+pnpm exec playwright test tests/e2e/mobile-audit.spec.ts --project=mobile-webkit-audit
+node scripts/installer-local-export.mjs installer-review-final installer-demo
+pnpm exec wrangler d1 execute solarmatch-installer-local-test --local --config .installer-test/preview-ipv4.jsonc --persist-to .wrangler/restore-final --file .wrangler/installer-review-final/synthetic-restore-ordered.sql --json
+node scripts/installer-local-restore-check.mjs restore-final installer-demo
+node scripts/installer-local-object-recovery.mjs objectsreviewfinal
+Use fresh backup/object names on another run; helpers intentionally refuse overwrite.

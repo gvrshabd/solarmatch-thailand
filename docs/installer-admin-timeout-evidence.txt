@@ -1,0 +1,88 @@
+SOLARMATCH COMBINED ADMIN REQUEST-LIFECYCLE EVIDENCE — 11 OCTOBER 2026
+
+Scope
+Local feature/installer-shared-workflow, starting full commit
+055dcf0082e2175ae89ee910e48e782bc1fffa6a. Original production/main untouched.
+All browser investigation used the compiled fictitious local Worker and a
+disposable restore-review copy of the synthetic installer-demo. Final source
+commit identity is recorded in the review package manifest. No private browser
+trace, screenshot, cookie, token, input value, header or console text is exported.
+
+Original complete sequence retained
+tests/e2e/installer-admin-local.spec.ts, desktop and mobile Chromium:
+1. Forged identity header rejected (401); protected admin denies anonymous view;
+   normal loopback local admin login; populated installer/company controls;
+   missing-CSRF read-only POST rejected (403).
+2. Fresh browser context logs in; 320px admin controls, records and axe audit.
+3. Protected report/CSV access, campaign environment scope, shutdown review,
+   local alert capture, preflight, Thai labels and overflow checks.
+Originally the later local-access document request hung after the rejected POST.
+Repeated combined runs gave 5 pass/1 failure, then 4 pass/2 failures. The failure
+was a 30-second document-navigation timeout, not an assertion that auth succeeded.
+One local server response completed only after 35,850ms. During the hang,
+independent HTTP probes still answered /admin/local-access 200, /admin API 401
+and homepage 200 in roughly 140–280ms. Safe browser lifecycle metadata showed
+the next GET pending, no response and no page-error event. The rejected 403
+produced an expected console-error event; its message text was not exported.
+
+Investigations that did NOT fix it
+- Reading the rejected response JSON on the browser side: combined 5/1 and 4/2.
+- Cancelling the incoming request body without consuming it: combined 4/2.
+- Switching system Chrome 154.0.8037.98 to the Playwright-matched Chromium
+  151.0.7922.34: same 4/2 combined result. Browser version alone is not a cause.
+- IPv4 loopback was already explicit. Earlier IPv4-only workaround is insufficient.
+Experimental worker logging, cancellation-only code and alternate-browser config
+were removed. Authentication/origin/CSRF decisions were not changed.
+
+Reduced reproduction
+tests/e2e/installer-request-lifecycle.spec.ts needs no login, credentials,
+authentication cookie, database operation or company selection:
+GET /admin/local-access; POST /admin/api/installer-platform with a small untrusted
+JSON body; assert 401 and safe error body; GET /admin/local-access again.
+Both desktop and mobile cases timed out on the second document before the fix.
+This narrows the trigger to the rejected incoming-body/request lifecycle rather
+than admin state, successful session creation, CSRF token contents, financial
+database locking, populated data or report execution. It does not establish a
+specific upstream Workerd/HTTP-client implementation bug or production impact.
+
+Retained smallest fix
+lib/server/rejected-body.ts discards small unread rejected bodies without parsing,
+logging or acting on them. Cleanup is bounded to 32KiB and 100ms; excessive or
+stalled streams are cancelled without awaiting potentially stalled cancellation.
+lib/server/admin-api.ts invokes it before the SAME 401/403/415 responses.
+No successful handler, identity allowlist, JWT/AUD, session rule, CSRF check,
+origin rule, content acceptance, database action or test timeout was weakened.
+Four unit tests cover small non-JSON input, oversize cancellation, stalled input
+with non-settling cancellation, and absent/already-locked bodies.
+
+Complete verification
+The original six cases plus both reduced cases passed together (8/8, 9.8s) after
+the fix. The original case now also navigates immediately after asserting the
+exact 403 error body; its full security and populated controls remain asserted.
+Observed post-403 next-document responses were approximately 12–23ms in that
+run. A later broader run also showed 403 followed by successful GET in 10ms
+with no pending requests. Final repeated complete-sequence counts, wider suites,
+any unrelated failures and exact commands are in installer-reliability-test-results.txt.
+The rejection-body deadline is bounded server cleanup, not increased browser waits.
+
+Supported repeatable local command (no isolated replacement)
+Stop any other preview using this port; use a compiled INSTALLER_LOCAL_TEST=true
+build and explicit preview-ipv4 config, a freshly restored populated synthetic
+store, all eighteen migrations and its existing private local signing keys.
+pnpm exec wrangler dev --config .installer-test/preview-ipv4.jsonc --local --port 3000 --ip 127.0.0.1 --persist-to .wrangler/restore-review --log-level error
+INSTALLER_E2E=1; PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000
+pnpm exec playwright test tests/e2e/installer-admin-local.spec.ts tests/e2e/installer-request-lifecycle.spec.ts --project=desktop-chromium --project=mobile-chromium --repeat-each=2
+Use separate fresh stores for connected signup/OTP tests; do not weaken abuse
+limits or let enabled synthetic collection contaminate disabled-path tests.
+
+Safe diagnostic mechanism
+Optional ADMIN_DIAGNOSTICS=1 attaches allowlisted method/path/status/timestamp
+events, pending request keys and error counts. Paths have no query or dynamic
+identifiers. Authenticated cases disable raw trace/screenshot/video. Other local
+test artifacts remain private/ignored and are not copied into the package.
+
+Conclusion and limits
+The original combined timeout is resolved in the tested local compiled workflow
+by an evidence-supported application cleanup fix. No production deployment or
+real provider acceptance was attempted. Do not infer production authentication,
+payment settlement, messaging deliverability or real-cloud recovery from this.

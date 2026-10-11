@@ -76,7 +76,13 @@ export function LeadCapture({
 
   useEffect(() => {
     if (!active) return;
-    const timer = window.setTimeout(() => headingRef.current?.focus(), 300);
+    const timer = window.setTimeout(() => {
+      // Announce the new step, but never steal focus from someone already typing.
+      const focused = document.activeElement;
+      if (!focused || focused === document.body || focused === headingRef.current) {
+        headingRef.current?.focus();
+      }
+    }, 300);
     return () => window.clearTimeout(timer);
   }, [active]);
 

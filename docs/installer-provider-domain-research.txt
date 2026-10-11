@@ -1,6 +1,22 @@
 SOLARMATCH PROVIDER / DOMAIN PREPARATION — 11 OCTOBER 2026
 Research only. No domain, account, provider request, payment or message purchased.
 
+HTTPS test-origin clarification, rechecked 11 October 2026
+A purchased custom domain is not inherently needed for HTTPS sandbox exercises.
+Cloudflare supplies a workers.dev hostname for a Worker. A separately approved,
+dedicated SolarMatch test deployment can therefore host the existing payment/LINE
+callback paths, return pages and authentication links with isolated test bindings.
+Provider acceptance/registration of the exact URL, origin/cookie design and access
+controls still need verification. Do not place a browser-only Access login in
+front of a webhook that a provider must reach; keep signature verification intact.
+The loopback admin bypass must never be deployed. No test endpoint was deployed
+or configured during this task. A verified Resend sending domain remains a
+different requirement, not fulfilled merely by having an HTTPS website.
+Official sources rechecked:
+https://developers.cloudflare.com/workers/configuration/routing/workers-dev/
+https://developers.line.biz/en/docs/messaging-api/building-bot/
+https://resend.com/docs/dashboard/domains/introduction
+
 Domain availability and costs
 At 11:03 UTC, Verisign's authoritative .com RDAP returned HTTP404 for:
 https://rdap.verisign.com/com/v1/domain/solarmatchthailand.com

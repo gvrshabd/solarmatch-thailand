@@ -4,7 +4,15 @@ This implementation remains a local/test system. No production deployment, migra
 
 ## Current targeted repair — 11 October 2026
 
-### Subsequent autonomous preparation (same day)
+### Focused reliability review after 055dcf0
+
+This section supersedes the combined-admin limitation in the historical reports below. The rejected-POST/next-document timeout was reproduced on a restored copy of the populated demo, narrowed without authentication or database writes, and repaired by bounded unread-body cleanup at the existing admin rejection boundary. Authentication, CSRF, origin checks, assertions and browser timeouts are unchanged. See `installer-admin-timeout-evidence.txt` for failed attempts, lifecycle timings and supported complete-sequence verification, and `installer-reliability-test-results.txt` for actual final results.
+
+Incoming campaign acquisition counts now exclude repeated canonical submissions (reported separately). Missing spend is explicitly unknown, with a spend-record count in exports; CSV scope is tied to the displayed snapshot and changed filters invalidate it. A latest failed scheduled run no longer inherits a healthy status from an older successful run. Late configuration refreshes cannot replace the saved assessment/fact version or reauthorise contact on results. Recovery helpers check the exact current migration filenames rather than a historical count; restore destinations must be explicit. No new migration, production configuration, provider call, push or deployment is part of this review.
+
+The preserved demo and independent disposable recovery rehearsal retain five leads/enquiries, six deliveries, thirteen ledger entries, two claims, three legal versions and all eighteen migrations. Exact sixty-table rows and twenty-five triggers, financial conservation, foreign keys, consent snapshots and recipient caps passed. A separate invented-object rehearsal is local only, not Cloudflare R2 or production recovery. A purchased domain is not inherently necessary for an authorised HTTPS test endpoint; see the provider/domain research clarification. A subsequently reproduced mobile contact-focus race is fixed by respecting a user who has already focused an input before the heading timer; bilingual deadline-controlled focus coverage is retained. All live effects remain disabled/paused.
+
+### Historical autonomous preparation at 055dcf0 (same day)
 
 The nine-repair baseline was rechecked, not replaced. Additive migrations `0017` and `0018` prepare safe first-party campaign attribution and scheduled operations. Capture requires both `CAMPAIGN_ATTRIBUTION_ENABLED=true` and `CAMPAIGN_ATTRIBUTION_PRIVACY_REVIEWED=true`; both are absent/off. A reviewed draft catalogue permits exact code combinations only. Safe tab-session codes can follow the landing page into the optional final request; no raw query, identifier, referrer, contact data or answers enter analytics. Server capture is part of the guarded final submission batch, immutable across retries, with canonical privacy redaction. Generic `track.ts` remains a no-op; no independent event collector, pixel or tracking provider was introduced.
 

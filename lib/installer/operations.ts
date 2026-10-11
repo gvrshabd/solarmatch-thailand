@@ -51,10 +51,10 @@ export async function getInstallerOperations(db:D1Database,options:InstallerOper
   const ageMinutes=scheduledSuccess?Math.max(0,Math.floor((now.getTime()-Date.parse(scheduledSuccess.finished_at))/60000)):null;
   const active=Boolean(lease&&Date.parse(lease.lease_until)>now.getTime());
   const schedulerState=!options.schedulerExpected?'not-configured':active?'running':settings.platformPaused?'paused':!withinDeliveryHours(now,settings)?'outside-hours':
-    (lease||(scheduled?.status==='running'&&Date.parse(scheduled.started_at)<now.getTime()-600000))?'stale':!scheduledSuccess?'never-run':ageMinutes!==null&&ageMinutes>10?'missed':'healthy';
+    (lease||(scheduled?.status==='running'&&Date.parse(scheduled.started_at)<now.getTime()-600000))?'stale':scheduled?.status==='failed'?'failed':!scheduledSuccess?'never-run':ageMinutes!==null&&ageMinutes>10?'missed':'healthy';
   const queueActionable=!settings.platformPaused&&settings.collectionEnabled&&!settings.deliveryPaused&&withinDeliveryHours(now,settings);
   const attentionRequired=Number(counts?.failedAllocationCount??0)+Number(counts?.failedNotificationsCount??0)+Number(counts?.failedReconciliationCount??0)+Number(counts?.staleJobRuns??0)
-    +(queueActionable?Number(queue?.staleCount??0):0)+(['missed','never-run','stale'].includes(schedulerState)?1:0)+Number(notificationProblems?.cancelledAfterAcceptance??0);
+    +(queueActionable?Number(queue?.staleCount??0):0)+(['missed','never-run','stale','failed'].includes(schedulerState)?1:0)+Number(notificationProblems?.cancelledAfterAcceptance??0);
   return {...counts,queueAgeMinutes,attentionRequired,lastRun:recent.results[0]??null,lastSuccessfulRun:lastSuccess,recentRuns:recent.results,
     scheduler:{expected:Boolean(options.schedulerExpected),state:schedulerState,lastStartedAt:scheduled?.started_at??null,lastCompletedAt:scheduledSuccess?.finished_at??null,ageMinutes,activeLeaseUntil:active?lease!.lease_until:null},
     queue:{dueCount:Number(queue?.dueCount??0),staleCount:Number(queue?.staleCount??0),expiredLeaseCount:Number(queue?.expiredLeaseCount??0),actionable:queueActionable},
@@ -66,7 +66,7 @@ const alertCodes=['scheduler_missed','queue_stale','allocation_failed','notifica
 export async function captureInstallerAlerts(db:D1Database,options:InstallerOperationsOptions={}) {
   const health=await getInstallerOperations(db,options),at=(options.now??new Date()).toISOString();
   const problems:Record<typeof alertCodes[number],Record<string,number>>={
-    scheduler_missed:{count:['missed','never-run','stale'].includes(health.scheduler.state)?1:0},
+    scheduler_missed:{count:['missed','never-run','stale','failed'].includes(health.scheduler.state)?1:0},
     queue_stale:{count:health.queue.actionable?health.queue.staleCount:0},
     allocation_failed:{count:Number(health.failedAllocationCount??0)},
     notification_attention:{count:health.notificationProblems.failed+health.notificationProblems.actionRequired+health.notificationProblems.ambiguousSms+health.notificationProblems.cancelledAfterAcceptance},

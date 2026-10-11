@@ -25,6 +25,9 @@ Protected admin review
   scheduler is deliberately approved and deployed. Missing runs are diagnostic
   after ten minutes; intentionally paused and closed-hour periods do not produce
   missed-run or stale-queue alerts. These thresholds are not retention policies.
+  A latest failed scheduled invocation now reports failed rather than inheriting
+  healthy from an earlier success; it requires attention and participates in the
+  existing deduplicated scheduler alert. Paused/closed-hour priority is retained.
 - Due queue older than thirty minutes, allocation failures, notification action
   required, ambiguous SMS, accepted-after-cancellation evidence and payment
   failure/manual association are shown separately. Age does not prove send or sale.

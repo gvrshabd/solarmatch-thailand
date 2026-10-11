@@ -14,8 +14,10 @@ Smallest owner inputs/actions still needed
 2. Approve the campaign catalogue and functional tab-session storage/disclosures.
    CAMPAIGN_ATTRIBUTION_ENABLED and CAMPAIGN_ATTRIBUTION_PRIVACY_REVIEWED stay false
    until approval. No pixel or general anonymous tracker is necessary.
-3. When ready, choose/register ONE domain and supply an approved HTTPS sandbox
-   origin. Purchase/configuration are deferred. Keep /installers, not a new subdomain.
+3. Supply a separately approved reachable HTTPS sandbox origin. A dedicated
+   Cloudflare test address may suffice for webhooks/returns/signed links if the
+   provider accepts it; purchasing a domain is not inherently required for those
+   tests. Domain purchase remains deferred. Keep /installers, not a new subdomain.
 4. Complete Omise merchant/test-method/settlement setup later; privately supply
    matching test credentials and webhook signing secret, then provider acceptance.
    No PayPal, new charge, automatic refund or live activation is prepared by consent.

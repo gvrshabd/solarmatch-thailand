@@ -1,8 +1,10 @@
 # Installer launch decisions and activation
 
-This is a prelaunch local implementation. Code completion means the guarded path exists; it does not mean an account, legal term, delivery route, bank settlement or deployment has been approved. The provider gates and protected local test steps are in [provider setup](INSTALLER_PROVIDER_SETUP.md) and [local testing](installer-local-test.md). Current repair passed 256 unit tests, typecheck, lint and both builds. Broad browsers had 156 passes, 16 intentional skips and one Safari navigation timeout; the identical case passed alone on rerun. Separate installer/admin acceptance passed six/four cases. The final sixteen-migration synthetic restore passed 55 tables and 23 triggers. No live operation is authorised by these results; collection, payments, outbound messaging and automatic allocation remain disabled.
+This is a prelaunch local implementation. Code completion means the guarded path exists; it does not mean an account, legal term, delivery route, bank settlement or deployment has been approved. The provider gates and protected local test steps are in [provider setup](INSTALLER_PROVIDER_SETUP.md) and [local testing](installer-local-test.md). The independently verified repair baseline had 256 passing unit tests and a sixteen-migration restore; those are historical, not the current review totals. Current focused evidence is in `installer-reliability-test-results.txt`. No live operation is authorised by any local result; collection, payments, outbound messaging and automatic allocation remain disabled.
 
 ## 1. Fixed and locally verified
+
+The focused review after 055dcf0 resolves the previously documented combined admin timeout with bounded rejection-body cleanup, retaining full combined coverage. It also fixes repeated acquisition counts, failed-scheduler visibility and stale results-configuration replacement. Missing advertising costs are unknown rather than a proven zero. Current exact test evidence and failed-run history are in `installer-reliability-test-results.txt` and `installer-admin-timeout-evidence.txt`; earlier counts below are historical, not the current acceptance result. Recovery now validates the exact eighteen-migration chain. No additional launch requirement or unrelated feature was introduced.
 
 ### Autonomous preparation after the repair baseline
 
@@ -19,6 +21,18 @@ Further reproduced route/boundary gaps were repaired within the same scope: with
 The current ordered schema has eighteen migrations. Earlier repair migrations `0014`–`0016` protect debt-first credits, final submission/allocation classification and LINE-link generation. New `0017` adds privacy-gated campaign attribution/spend; `0018` adds scheduler leases and local alerts. They are additive and local only; historical migration labels, recipient slots and consent facts are preserved. No remote database was read or migrated.
 
 ## 2. Awaiting provider and production acceptance
+
+A purchased domain is **not** a prerequisite for every HTTPS integration test.
+A separately authorised dedicated Cloudflare `workers.dev` test hostname can
+provide HTTPS for LINE webhooks, signed invitation links, Omise callbacks/returns
+and sandbox authentication links, subject to provider acceptance of that exact
+URL and a reviewed origin/cookie/Access design. Use isolated test bindings and
+provider test credentials, never the production deployment or loopback bypass.
+Webhooks must be reachable by the provider without an interactive Access login;
+authenticate them with the existing signature checks. No test Worker was deployed.
+Resend sender-domain verification is a separate prerequisite for its configured
+email transport; owning a web hostname does not verify an email sending domain.
+See the official-source clarification in `installer-provider-domain-research.txt`.
 
 Retain the existing launch tasks: provider credentials and sender/domain ownership; Omise merchant methods, authorised return/reconciliation/reversal and bank settlement; controlled Thai SMS handset delivery and provider delivery evidence; LINE Official Account linking/unlinking, signed webhooks, retry behavior and device testing; production authentication/Cloudflare metadata acceptance; scheduled processing/alert ownership; and SolarMatch-only backup, object inventory, restore and migration rehearsal on a protected disposable copy. Mocked transports and compiled local pages do not establish deliverability, settlement or production acceptance.
 
