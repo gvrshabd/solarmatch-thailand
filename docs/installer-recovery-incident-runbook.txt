@@ -1,0 +1,62 @@
+SOLARMATCH LOCAL RECOVERY / INCIDENT RUNBOOK — REVIEW BEFORE REAL USE
+
+Only the fictitious isolated local binding is used in these examples. Never add
+--remote or deploy its config. Production recovery requires separate authorisation,
+protected backups, operator/legal review and actual SolarMatch-only identifiers.
+
+Pause / incident procedure
+Use the existing authenticated, CSRF-protected installer settings controls to set
+platformPaused=true, collectionEnabled=false, paymentsEnabled=false,
+deliveryPaused=true, notificationsEnabled=false. Keep outbound false. Pausing
+does not recall a provider call already in flight or refund a payment. Preserve
+original enquiry availability/claim deadlines and financial records. Inspect job
+health, due/stale queues, ambiguous provider acceptance and reconciliation errors.
+Do not blindly resend ambiguous SMS or recreate an uncertain payment attempt.
+Resolve evidence via the existing admin controls, not by editing ledger rows.
+Capture/acknowledge local safe-code alerts; acknowledgement does not resolve them.
+Verify balances, consent, recipient caps and mode isolation before resuming any
+separately approved gate. Resume gates independently, never by copying demo settings.
+
+Synthetic D1 backup / restore (stop preview before snapshot)
+node scripts/installer-local-export.mjs installer-UNIQUE-backup installer-demo
+The helper requires the fictitious binding and a populated synthetic store; it
+refuses to overwrite a different snapshot. Its private .wrangler directory holds
+raw export and synthetic-restore-ordered.sql plus printed checksum/counts.
+Restore in a new short .wrangler/restoreNAME directory using:
+pnpm exec wrangler d1 execute solarmatch-installer-local-test --local --config .installer-test/wrangler.jsonc --persist-to .wrangler/restoreNAME --file .wrangler/installer-UNIQUE-backup/synthetic-restore-ordered.sql
+node scripts/installer-local-restore-check.mjs restoreNAME installer-demo
+Create all tables/data before reenabling financial triggers; unordered replay can
+double-debit saved balances. Read-only checks compare all rows/tables/triggers,
+foreign keys, ledger conservation, consent snapshots and lifetime recipient cap.
+All 0001–0018 migrations must be present before running the new application.
+Keep the source demo intact. A Git revert does not undo database migrations.
+
+Object backup / rehearsal
+node scripts/installer-local-object-recovery.mjs objectsUNIQUE
+Creates a NEW isolated synthetic source and separate restore bucket using local
+Miniflare. Writes one invented non-contract PDF fixture, captures inventory,
+bytes, content/custom metadata, SHA256 and size in private .wrangler storage;
+restores into a distinct empty store, refuses overwrite and verifies bytes and
+metadata. No existing demo/media or real Cloudflare R2 object is touched.
+This is a local rehearsal only, not a real-cloud recovery verification.
+
+Real R2 procedure still requires authorised execution
+Record only the SolarMatch private bucket inventory and D1 media/contract object
+references. Export objects and safe metadata into access-controlled encrypted
+backup, with manifest key/size/hash and timestamp; do not export credentials.
+Restore to a separately approved private destination, no public ACL or overwrite
+of live objects. Verify every checksum/content/custom metadata and associated D1
+references before switching. Contracts belong to companies, not automatically to
+purged homeowners. Honour legal holds and approved retention/backup deletion.
+No automatic object deletion or claim of restoring intentionally purged PII.
+
+Morning/repeat/overlap job checks
+Inactive deployment example has crons:[]; no production schedule exists. A future
+approved once-per-minute schedule processes eligible due records at09:00Bangkok
+without changing request timestamps, stopping at17:00. Scheduler ownership uses
+wall clock; test clock affects local allocation only. Parallel triggers return
+already_running while a lease is active. Expired takeover and old-owner fencing
+preserve per-item funding/recipient/idempotency checks. Read-only health requires
+INSTALLER_SCHEDULER_EXPECTED=true only after an actual approved scheduler exists.
+Use synthetic service tests for morning, missed runs, repeats, fairness, caps and
+lease loss. Preserve paused/closed-hours diagnostics and queued work on resumption.

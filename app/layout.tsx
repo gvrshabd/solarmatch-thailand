@@ -4,6 +4,7 @@ import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { LanguageDocumentSync } from '@/components/site/language-document-sync';
 import { PublicDesignShell } from '@/components/site/public-design-shell';
+import { CampaignCapture } from '@/components/site/campaign-capture';
 import { siteConfig } from '@/config/site';
 import './globals.css';
 import './terrace.css';
@@ -61,6 +62,7 @@ export default function RootLayout({
         className={`${anuphan.variable} ${notoSansThai.variable} ${manrope.variable} antialiased`}
       >
         <LanguageDocumentSync />
+        <CampaignCapture />
         <PublicDesignShell>
           <SiteHeader />
           <div id="main-content" tabIndex={-1}>{children}</div>

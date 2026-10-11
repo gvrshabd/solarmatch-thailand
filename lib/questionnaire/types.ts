@@ -97,6 +97,7 @@ export type PublicContactConfiguration = {
 };
 
 export type PublicAssessmentConfig = {
+  attribution?: import('@/lib/analytics/attribution').PublicAttributionConfig;
   privatePreview: boolean;
   accessRestrictedSession: boolean;
   restrictedSiteCollectionEnabled: boolean;

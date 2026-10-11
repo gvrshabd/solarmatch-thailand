@@ -5,7 +5,7 @@ import { verifyAssessmentToken } from '@/lib/server/assessment-token';
 import { sha256 } from '@/lib/server/crypto';
 import { authenticateRestrictedSiteOwner } from '@/lib/server/private-preview-auth';
 import { getCurrentRelease, parseScoringConfiguration } from '@/lib/server/releases';
-import { requireDatabase } from '@/lib/server/runtime';
+import { requireDatabase, getRuntimeEnv } from '@/lib/server/runtime';
 import { leadSchema, normalizeThaiPhone } from '@/lib/validation/lead';
 import { contactLaunchReviewCopy } from '@/config/legal-review';
 import { assertPlatformRequest } from '@/lib/installer/platform';
@@ -15,6 +15,7 @@ import { canonicalEnquiryStatements } from '@/lib/installer/enquiries';
 import { localTestContact } from '@/lib/installer/local-collection';
 import {trustedShareAddress} from '@/lib/installer/rate-limit';
 import { submissionContext } from '@/lib/installer/submission-context';
+import { submissionAttributionStatements } from '@/lib/analytics/submission-attribution';
 
 export const dynamic = 'force-dynamic';
 
@@ -172,6 +173,12 @@ export async function POST(request: NextRequest) {
     // same admin queue action locally) process it after commit, without delaying
     // or converting a saved homeowner request into a failed submission.
     statements.push(...await canonicalEnquiryStatements(database,leadId,phoneE164,answers,{ ...settings, submissionMode: classification.mode }));
+    statements.push(...submissionAttributionStatements(database,leadId,parsed.data.attribution,getRuntimeEnv(),{
+      submissionMode:classification.mode,
+      originalQualified:(settings.ownerRequired===false||answers.ownershipStatus==='owner')
+        && (answers.airConditionerCount??0)>=settings.minimumAcUnits && assessment.qualityScore>=settings.minimumQuality
+        && answers.quoteContactRequested && consent.thirdPartyDisclosureAuthorized,
+    }));
     if (restrictedAccess && restrictedIdentity) {
       // Rejection at the guarded INSERT must not leave a misleading submission audit.
       statements.push(database.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json)

@@ -1,11 +1,14 @@
 import { z } from 'zod';
 import { requireAdminRequest,isAdminError } from '@/lib/server/admin-api';
-import { requireDatabase } from '@/lib/server/runtime';
+import { requireDatabase, getRuntimeEnv } from '@/lib/server/runtime';
 import { assertPlatformRequest,platformBody,platformJson } from '@/lib/installer/platform';
 import { getPlatformSettings,installerSettingsSchema,materialTermsChanged } from '@/lib/installer/settings';
 import { allocateEnquiry,processQueue,retryEnquiry,grantTrial,decideClaim,suppressEnquiry,platformAudit,isoNow,adjustPurchasedCredits,type Row } from '@/lib/installer/deliveries';
 import { processOutbox,retryNotification } from '@/lib/installer/jobs';
-import { getInstallerOperations } from '@/lib/installer/operations';
+import { getInstallerOperations, captureInstallerAlerts, acknowledgeInstallerAlert } from '@/lib/installer/operations';
+import { reportInstallerLaunchPreflight } from '@/lib/installer/launch-preflight';
+import { campaignReport, campaignReportCsv, campaignSpendStatements, campaignSpendSchema } from '@/lib/analytics/campaign-report';
+import { getShutdownLiabilityReport, shutdownLiabilityCsv } from '@/lib/installer/shutdown-liabilities';
 import { reconcileOrder,associateProviderCharge } from '@/lib/installer/payments';
 import {reviewEnquiry} from '@/lib/installer/review';
 import {previewRetention} from '@/lib/installer/privacy';
@@ -15,6 +18,24 @@ export const dynamic='force-dynamic';
 const input=z.object({action:z.enum(['approve-company','record-company-contract','set-company-preferences','connect-local-line-preview','set-local-test-clock','grant-trial','allocate','retry-enquiry','process-queue','retry-outbox','retry-notification','reconcile-notification','decide-claim','adjust-credit','save-settings','reconcile','associate-provider-charge','pause-company','suppress-enquiry','record-ad-spend','acknowledge-privacy-notification','review-enquiry','preview-retention']),companyId:z.string().uuid().optional(),approve:z.boolean().optional(),enquiryId:z.string().max(100).optional(),companyIds:z.array(z.string().trim().min(1).max(100)).max(3).optional(),claimId:z.string().uuid().optional(),decision:z.enum(['approved','rejected','needs-information','same-project','distinct-project','reject']).optional(),leadId:z.string().uuid().optional(),notes:z.string().trim().max(2000).optional(),units:z.number().int().min(-10000).max(10000).optional(),reason:z.string().trim().min(3).max(1000).optional(),settings:installerSettingsSchema.optional(),orderId:z.string().uuid().optional(),chargeId:z.string().trim().min(8).max(120).optional(),paused:z.boolean().optional(),amountMinor:z.number().int().positive().max(100000000).optional(),outboxId:z.string().max(100).optional(),outcome:z.enum(['accepted','not-sent']).optional(),providerReference:z.string().trim().max(100).optional(),registrationNumber:z.string().trim().min(3).max(100).optional(),privacyNoticeUrl:z.string().url().max(500).optional(),contractEffectiveDate:z.iso.date().optional(),contractExpiryDate:z.iso.date().optional(),fixedAt:z.iso.datetime().nullable().optional(),minimumBill:z.number().int().min(0).max(100000000).optional(),propertyTypes:z.array(z.enum(['detached-home','semi-detached-home','townhouse','large-home','other-residential'])).min(1).max(5).optional()}).strict();
 export async function GET(request:Request) {
   const identity=await requireAdminRequest(request);if(isAdminError(identity))return identity;
+  const query=new URL(request.url).searchParams;
+  if(query.has('report')){
+    try{
+      assertPlatformRequest(request);const db=requireDatabase();
+      let report:unknown,csv:string;
+      if(query.get('report')==='campaign'){
+        const today=new Date(Date.now()+7*3600000).toISOString().slice(0,10);
+        const result=await campaignReport(db,{fromDay:query.get('fromDay')??today,toDay:query.get('toDay')??today,
+          submissionMode:(query.get('submissionMode')??'production') as 'production'});
+        report=result;csv=campaignReportCsv(result);
+      }else if(query.get('report')==='shutdown'){
+        const result=await getShutdownLiabilityReport(db);report=result;csv=shutdownLiabilityCsv(result);
+      }else return platformJson({error:'unknown_report'},400);
+      if(query.get('format')==='csv')return new Response('\uFEFF'+csv,{headers:{'Content-Type':'text/csv; charset=utf-8',
+        'Content-Disposition':`attachment; filename="solarmatch-${query.get('report')}-review.csv"`,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+      return platformJson(report);
+    }catch{return platformJson({error:'report_unavailable_check_period_and_environment'},400);}
+  }
   try{assertPlatformRequest(request);const db=requireDatabase();const settings=await getPlatformSettings(db);
 const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.debt FROM solar_company_partners p LEFT JOIN installer_credit_accounts a ON a.company_id=p.id ORDER BY p.created_at DESC LIMIT 200',enquiries:`SELECT e.*,(SELECT o.attribution_json FROM installer_operational_events o WHERE o.enquiry_id=e.id AND o.event_type='qualification-evaluated' AND json_extract(o.attribution_json,'$.sourceLeadId')=e.lead_id ORDER BY o.created_at DESC,o.rowid DESC LIMIT 1) AS qualification_snapshot FROM installer_enquiries e ORDER BY e.created_at DESC LIMIT 200`,deliveries:'SELECT * FROM lead_recipient_deliveries ORDER BY created_at DESC LIMIT 200',orders:'SELECT id,company_id,amount_minor,credits,status,provider,provider_order_id,last_reconciliation_at,reconciliation_error_code,created_at FROM installer_payment_orders ORDER BY created_at DESC LIMIT 200',claims:'SELECT * FROM installer_claims ORDER BY submitted_at DESC LIMIT 200',ledger:'SELECT * FROM installer_credit_ledger ORDER BY created_at DESC LIMIT 200',outbox:'SELECT id,delivery_id,company_id,kind,state,attempts,last_error,created_at FROM installer_outbox ORDER BY created_at DESC LIMIT 200'};
     const tables:Record<string,unknown>={};for(const [key,sql] of Object.entries(queries))tables[key]=(await db.prepare(sql).all()).results;
@@ -44,14 +65,18 @@ const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.
       (SELECT COALESCE(SUM(price_minor),0) FROM lead_recipient_deliveries d WHERE delivery_channel='portal' AND funding_source='purchased' AND NOT EXISTS(SELECT 1 FROM installer_claims c WHERE c.delivery_id=d.id AND c.status='approved')) AS earnedServiceFeesMinor,
       (SELECT COALESCE(SUM(available*?),0) FROM installer_credit_accounts) AS nominalAvailableCreditValueMinor,
       NULL AS verifiedBankSettlementMinor,
-      (SELECT COALESCE(SUM(amount_minor),0) FROM installer_operational_events WHERE event_type='ad-spend') AS adSpendMinor,
+      ((SELECT COALESCE(SUM(amount_minor),0) FROM installer_operational_events WHERE event_type='ad-spend')+(SELECT COALESCE(SUM(amount_minor),0) FROM campaign_ad_spend)) AS adSpendMinor,
       (SELECT COUNT(*) FROM installer_outbox WHERE state IN ('failed','needs-reconciliation','action-required')) AS attentionRequired`).bind(settings.creditValueMinor).first();
-    return platformJson({settings,...tables,summary,operations:await getInstallerOperations(db)});
+    return platformJson({settings,...tables,summary,operations:await getInstallerOperations(db,{schedulerExpected:getRuntimeEnv().INSTALLER_SCHEDULER_EXPECTED==='true'}),preflight:reportInstallerLaunchPreflight(getRuntimeEnv(),settings)});
   }catch{return platformJson({error:'installer_platform_unavailable'},503);}
 }
 export async function POST(request:Request) {
   const identity=await requireAdminRequest(request,{csrf:true});if(isAdminError(identity))return identity;
-  try{const data=input.parse(await platformBody(request));const db=requireDatabase();const actor=identity.email;const now=isoNow();
+  try{const data=input.extend({action:z.enum([...input.shape.action.options,'capture-alerts','ack-operation-alert']),
+    campaignCode:campaignSpendSchema.shape.campaignCode.optional(),spendDay:campaignSpendSchema.shape.spendDay.optional(),
+    submissionMode:campaignSpendSchema.shape.submissionMode.optional(),alertId:z.string().uuid().optional()}).parse(await platformBody(request));const db=requireDatabase();const actor=identity.email;const now=isoNow();
+    if(data.action==='capture-alerts')return platformJson(await captureInstallerAlerts(db,{schedulerExpected:getRuntimeEnv().INSTALLER_SCHEDULER_EXPECTED==='true'}));
+    if(data.action==='ack-operation-alert'){if(!data.alertId)throw new Error('alert_required');await acknowledgeInstallerAlert(db,data.alertId,actor);return platformJson({ok:true});}
     if(data.action==='save-settings'){
       if(data.settings){const previous=await getPlatformSettings(db);if(materialTermsChanged(previous,data.settings)&&previous.termsVersion===data.settings.termsVersion)throw new Error('new_terms_version_required');if(previous.termsVersion!==data.settings.termsVersion&&await db.prepare("SELECT id FROM installer_settings_revisions WHERE json_extract(config_json,'$.termsVersion')=? LIMIT 1").bind(data.settings.termsVersion).first())throw new Error('terms_version_already_used');}
       if(!data.settings)throw new Error('missing_settings');const json=JSON.stringify(data.settings);
@@ -110,7 +135,8 @@ export async function POST(request:Request) {
       const settings=await getPlatformSettings(db);if(!settings.retentionDays)throw new Error('retention_policy_required');
       const preview=await previewRetention(db,request,settings.retentionDays);return platformJson({retentionDays:settings.retentionDays,preview:preview.results,previewOnly:true});
     }else if(data.action==='record-ad-spend'){
-      if(!data.amountMinor||!data.reason)throw new Error('spend_requires_reason');await db.batch([db.prepare("INSERT INTO installer_operational_events(id,event_type,amount_minor,attribution_json,created_at) VALUES(?,'ad-spend',?,?,?)").bind(crypto.randomUUID(),data.amountMinor,JSON.stringify({campaign:data.reason}),now),platformAudit(db,actor,'ad-spend','manual',{amountMinor:data.amountMinor})]);
+      if(!data.amountMinor||!data.campaignCode||!data.spendDay)throw new Error('structured_campaign_and_date_required');
+      await db.batch(campaignSpendStatements(db,{amountMinor:data.amountMinor,campaignCode:data.campaignCode,spendDay:data.spendDay,submissionMode:data.submissionMode??'production'},actor));
     }else if(data.action==='acknowledge-privacy-notification'){
       if(!data.outboxId||!data.notes)throw new Error('notification_evidence_required');
       const changed=await db.batch([

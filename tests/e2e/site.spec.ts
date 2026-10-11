@@ -1,4 +1,4 @@
-import { expect, test, type Page, type TestInfo } from '@playwright/test';
+import { expect, test, type Page, type TestInfo, type Route } from '@playwright/test';
 import { initialQuestionnaire } from '../../config/assessment';
 
 const savedEstimate = {
@@ -6,6 +6,18 @@ const savedEstimate = {
   ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning', 'pump', 'home-office-equipment'], airConditionerCount: 5,
   roofMaterial: 'concrete-tile', shade: 'almost-none', quoteContactRequested: false, roofDirection: 'south-group', roofSlope: 'gentle', electricityPhase: 'single',
 };
+
+test('saved Thai and English estimates remain available when configuration never responds',async({page})=>{
+  const pending:Route[]=[];
+  await page.route('**/api/assessment/config',route=>{pending.push(route);});
+  await page.addInitScript(answers=>sessionStorage.setItem('solarmatch:estimate',JSON.stringify(answers)),savedEstimate);
+  for(const prefix of ['','/en']){
+    await page.goto(`${prefix}/estimate/results`);
+    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:10000});
+    await expect(page.getByText(prefix?'Simple payback (first-year basis)':'ระยะคืนทุนอย่างง่าย (อิงปีแรก)')).toBeVisible();
+  }
+  for(const route of pending)await route.abort().catch(()=>{});
+});
 
 const exactSharedConsent = {
   en: "I consent to [COMPANY_EN], operating SolarMatch, disclosing my name, chosen contact details, property location and relevant assessment answers to up to three participating installation companies serving my area, so they can assess and contact me about this residential solar request using my selected contact method. A new installer may receive my request only within [DISTRIBUTION_DAYS] days after submission. I understand that installers pay SolarMatch for delivered enquiries, that the request is shared, and that I can withdraw this consent at any time by contacting [PRIVACY_EMAIL]. I can receive the free estimate without giving this consent. Details are in the Privacy Notice.",

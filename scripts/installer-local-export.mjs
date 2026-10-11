@@ -22,7 +22,7 @@ const mf=new Miniflare({modules:true,script:'export default {}',d1Persist:source
 try {
   const db=await mf.getD1Database('DATABASE');
   const counts=await db.prepare('SELECT (SELECT count(*) FROM leads) leads,(SELECT count(*) FROM installer_enquiries) enquiries,(SELECT count(*) FROM lead_recipient_deliveries) deliveries,(SELECT count(*) FROM installer_credit_ledger) ledger,(SELECT count(*) FROM installer_claims) claims,(SELECT count(*) FROM d1_migrations) migrations').first();
-  if(![13,14,15,16].includes(counts.migrations)||counts.deliveries<4)throw new Error('Expected populated isolated demo schema is missing.');
+  if(![13,14,15,16,17,18].includes(counts.migrations)||counts.deliveries<4)throw new Error('Expected populated isolated demo schema is missing.');
   const dump=await db.prepare('PRAGMA miniflare_d1_export(?,?,?);').bind(false,false).raw();
   const sql=dump[0].join('\n');
   await mkdir(directory,{recursive:true});

@@ -136,8 +136,11 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     const signature = answerSignature(parsed.data);
     const storedView = readResultViewState(signature);
     const storedConfiguration = readAssessmentContext();
+    let initialized = false;
     const finish = (nextConfiguration: PublicAssessmentConfig | null) => {
       if (!active) return;
+      if (initialized) { setConfiguration(nextConfiguration); return; }
+      initialized = true;
       setAnswers(parsed.data);
       setConfiguration(nextConfiguration);
       setSelectedFact(storedView?.fact ?? null);
@@ -147,11 +150,19 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       else setJourney('preparing');
       setReady(true);
     };
-    fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
+    // The estimate is already available locally. A hung configuration refresh
+    // must not hold the result hostage after a saved or declined request.
+    if (storedConfiguration) queueMicrotask(() => finish(contactSafeFallback(storedConfiguration)));
+    const controller = new AbortController();
+    // Direct result visits may have answers but no fact/configuration snapshot.
+    // Give that configuration a short bounded chance, never an unlimited wait.
+    const timeout = window.setTimeout(() => { finish(contactSafeFallback(storedConfiguration)); controller.abort(); }, 1500);
+    fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store', signal: controller.signal })
       .then(async (response) => response.ok ? response.json() as Promise<PublicAssessmentConfig> : contactSafeFallback(storedConfiguration))
       .then(finish)
-      .catch(() => finish(contactSafeFallback(storedConfiguration)));
-    return () => { active = false; };
+      .catch(() => finish(contactSafeFallback(storedConfiguration)))
+      .finally(() => window.clearTimeout(timeout));
+    return () => { active = false; window.clearTimeout(timeout); controller.abort(); };
   }, []);
 
   const result = useMemo(() => answers ? calculateEstimate(answers) : null, [answers]);

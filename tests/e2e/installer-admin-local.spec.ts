@@ -70,3 +70,34 @@ test('installer admin panel remains operable at 320px with no serious accessibil
   const blocking=audit.violations.filter(violation=>['serious','critical'].includes(violation.impact??''));
   expect(blocking.map(({id,nodes})=>({id,targets:nodes.map(node=>node.target)}))).toEqual([]);
 });
+
+test('protected readiness, campaign reports and shutdown export remain read-only review surfaces',async({page,request})=>{
+  for(const report of ['campaign','shutdown']){
+    const denied=await request.get(`/admin/api/installer-platform?report=${report}&format=csv`);
+    expect(denied.status()).toBe(401);
+  }
+  await signIn(page);
+  await page.getByRole('navigation',{name:'Administration sections'}).getByRole('button',{name:'Installer operations'}).click();
+  await expect(page.getByRole('button',{name:'Record operation'})).toBeEnabled();
+  await page.getByRole('button',{name:'Load campaign report'}).click();
+  await expect(page.getByRole('link',{name:'Export campaign CSV'})).toBeVisible();
+  await page.getByRole('combobox',{name:'Submission environment',exact:true}).selectOption('local-test');
+  await page.getByRole('button',{name:'Load campaign report'}).click();
+  await expect(page.getByRole('region',{name:'Campaign report table'})).toBeVisible();
+  const csvUrl=await page.getByRole('link',{name:'Export campaign CSV'}).getAttribute('href');
+  expect(csvUrl).toContain('submissionMode=local-test');
+  const csv=await page.request.get(csvUrl!);expect(csv.ok()).toBe(true);expect(csv.headers()['cache-control']).toBe('no-store');
+  expect(await csv.text()).not.toMatch(/legal_first_name|phone_number|assessment_answers|provider_order_id/);
+  await page.getByRole('button',{name:'Calculate review snapshot'}).click();
+  await expect(page.getByRole('region',{name:'Shutdown liability table'})).toBeVisible();
+  await expect(page.getByText('Provider reconciliation remains required.',{exact:false})).toBeVisible();
+  await expect(page.getByRole('button',{name:/approve refund|send refund|activate|send alert/iu})).toHaveCount(0);
+  await page.getByRole('button',{name:'Capture / resolve local health alerts'}).click();
+  await expect(page.getByRole('button',{name:'Capture / resolve local health alerts'})).toBeEnabled();
+  await page.getByText('Configuration preflight (names only)',{exact:true}).click();
+  await expect(page.getByText('company-tax-and-contract-facts',{exact:false})).toBeVisible();
+  await page.getByRole('combobox',{name:'Report language',exact:true}).selectOption('th');
+  await expect(page.getByRole('heading',{name:'รายงานคำขอจากแคมเปญ'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'คำนวณข้อมูลเพื่อการตรวจสอบ'})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+});

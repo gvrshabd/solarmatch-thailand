@@ -50,6 +50,7 @@ export async function redactInstallerLeads(db:D1Database,leadIds:string[],actor:
       OR entity_id IN(SELECT lead_id||':'||partner_id FROM lead_recipient_deliveries WHERE lead_id=?)`).bind(lead.id,lead.id,lead.id));
     for (const table of ['lead_notes','export_batch_items','lead_export_selections']) statements.push(db.prepare(`DELETE FROM ${table} WHERE lead_id=?`).bind(lead.id));
     statements.push(db.prepare("UPDATE lead_score_history SET explanation_json='{}',reason='privacy-redaction' WHERE lead_id=?").bind(lead.id));
+    statements.push(db.prepare("UPDATE lead_campaign_attribution SET campaign_code=NULL,source_code=NULL,medium_code=NULL,capture_state='redacted' WHERE lead_id=?").bind(lead.id));
     statements.push(db.prepare("UPDATE lead_status_events SET reason='privacy-redaction' WHERE lead_id=?").bind(lead.id));
     statements.push(db.prepare("UPDATE privacy_rights_requests SET resolution_notes='Personal data redacted; financial delivery records retained',suppression_applied=1,updated_at=? WHERE lead_id=?").bind(now,lead.id));
     statements.push(db.prepare("UPDATE installer_claims SET reason='[deleted]',notes='[deleted]',decision_notes=CASE WHEN decision_notes IS NULL THEN NULL ELSE '[deleted]' END WHERE delivery_id IN(SELECT id FROM lead_recipient_deliveries WHERE lead_id=?)").bind(lead.id));

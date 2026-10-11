@@ -39,9 +39,13 @@ try {
       OR a.trial_remaining<>(SELECT COALESCE(SUM(trial_delta),0) FROM installer_credit_ledger WHERE company_id=a.company_id)
       OR a.debt<>(SELECT COALESCE(SUM(debt_delta),0) FROM installer_credit_ledger WHERE company_id=a.company_id)`).get();
     if(mismatch.total!==0)throw new Error('Financial ledger conservation failed.');
+    const invalidRecipients=db.prepare(`SELECT COUNT(*) total FROM (SELECT enquiry_id,COUNT(DISTINCT partner_id) n FROM lead_recipient_deliveries WHERE delivery_channel='portal' GROUP BY enquiry_id HAVING n>3)`).get();
+    if(invalidRecipients.total!==0)throw new Error('Lifetime recipient cap failed.');
+    const missingConsent=db.prepare(`SELECT COUNT(*) total FROM lead_recipient_deliveries d JOIN leads l ON l.id=d.lead_id WHERE d.delivery_channel='portal' AND (d.consent_version IS NULL OR d.privacy_notice_version_id IS NULL OR l.consent_text_en IS NULL OR l.consent_text_th IS NULL)`).get();
+    if(missingConsent.total!==0)throw new Error('Historic portal consent evidence missing.');
   }
   const triggerSql="SELECT name,sql FROM sqlite_master WHERE type='trigger' ORDER BY name";
   const [triggersA,triggersB]=[a.prepare(triggerSql).all(),b.prepare(triggerSql).all()];
   if(hash(triggersA)!==hash(triggersB))throw new Error('Restored safety triggers differ.');
-  console.log(JSON.stringify({passed:true,tablesCompared:tables.length,triggersCompared:triggersA.length,counts,foreignKeyViolations:0,ledgerMismatches:0,syntheticOnly:true,comparisonReadOnly:true}));
+  console.log(JSON.stringify({passed:true,tablesCompared:tables.length,triggersCompared:triggersA.length,counts,foreignKeyViolations:0,ledgerMismatches:0,recipientCapViolations:0,missingPortalConsentSnapshots:0,syntheticOnly:true,comparisonReadOnly:true}));
 }finally{source.close();restored.close();}

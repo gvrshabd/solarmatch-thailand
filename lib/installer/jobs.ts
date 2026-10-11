@@ -7,6 +7,7 @@ import { ProviderError } from './providers/common';
 import { beginJobRun,finishJobRun } from './operations';
 import { reconcilePendingPayments } from './payments';
 import { installerAllocationNow } from './test-clock';
+import {acquireSchedulerLease,renewSchedulerLease,releaseSchedulerLease,schedulerLeaseCurrent} from './scheduler-lease';
 export function assertInstallerJobEnvironment(env:SolarMatchRuntimeEnv) {
   let base:URL;try{base=new URL(env.INSTALLER_BASE_URL??'');}catch{throw new Error('platform_unavailable');}
   const loopback=['localhost','127.0.0.1','[::1]'].includes(base.hostname);
@@ -43,18 +44,18 @@ function notificationSnapshotTime(row:Row,env:SolarMatchRuntimeEnv) {
   assertInstallerJobEnvironment(env);
   const date=new Date(String(row.notification_fixed_at));if(!Number.isFinite(date.getTime()))throw new Error('invalid_test_clock');return date;
 }
-export async function processOutbox(db:D1Database,env:SolarMatchRuntimeEnv=getRuntimeEnv()) {
+export async function processOutbox(db:D1Database,env:SolarMatchRuntimeEnv=getRuntimeEnv(),schedulerToken?:string) {
   assertInstallerJobEnvironment(env);
   const runId=await beginJobRun(db,'notifications','notification-worker');
   try {
-    const result=await processOutboxItems(db,env);
+    const result=await processOutboxItems(db,env,schedulerToken);
     await finishJobRun(db,runId,result,result.failed?'notification_items_failed':undefined);
     return result;
   } catch(error) {
     await finishJobRun(db,runId,{processed:0},'notification_run_failed');throw error;
   }
 }
-async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
+async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv,schedulerToken?:string) {
   const settings=await getPlatformSettings(db);if(settings.platformPaused||!settings.notificationsEnabled)return {processed:0,failed:0};
   if(!['local-test','sandbox','production'].includes(env.INSTALLER_PLATFORM_MODE??''))throw new Error('platform_unavailable');
   if(env.INSTALLER_PLATFORM_MODE!=='local-test'&&env.OUTBOUND_MESSAGES_ENABLED!=='true')return {processed:0,failed:0};
@@ -66,6 +67,7 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
   const due=await db.prepare(`SELECT id FROM installer_outbox WHERE state IN ('pending','failed') AND attempts<8 AND julianday(next_attempt_at)<=julianday(?) ORDER BY created_at LIMIT 30`).bind(dispatchNow).all<{id:string}>();
   let processed=0,failed=0;
   for(const item of due.results){
+    if(schedulerToken&&!await schedulerLeaseCurrent(db,schedulerToken))break;
     const dispatchTime=await installerAllocationNow(db),now=dispatchTime.toISOString(),leaseUntil=new Date(dispatchTime.getTime()+120000).toISOString();
     if(!withinDeliveryHours(dispatchTime,settings))break;
     const previous=await db.prepare(`SELECT o.state,d.allocation_environment,l.submission_mode,l.submission_environment,l.is_test_submission
@@ -96,9 +98,10 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
         const current=await db.prepare(`SELECT d.*,p.line_user_id,p.trading_name,p.legal_name_en,l.phone_e164,l.suppressed,l.consent_withdrawn_at,l.purged_at,l.deleted_at,
           l.submission_mode,l.submission_environment,l.is_test_submission,e.suppressed_at,
           (SELECT fixed_at FROM installer_test_clock WHERE id=1) AS notification_fixed_at,
-          (SELECT config_json FROM installer_platform_settings WHERE id=1) AS notification_settings
+          (SELECT config_json FROM installer_platform_settings WHERE id=1) AS notification_settings,
+          (SELECT lease_until FROM installer_scheduler_leases WHERE name='scheduled' AND owner_token=?) AS scheduler_lease_until
           FROM installer_outbox o JOIN lead_recipient_deliveries d ON d.id=o.delivery_id JOIN solar_company_partners p ON p.id=d.partner_id
-          JOIN leads l ON l.id=d.lead_id JOIN installer_enquiries e ON e.id=d.enquiry_id WHERE o.id=? AND o.state='sending' AND o.lease_until=?`).bind(item.id,leaseUntil).first<Row>();
+          JOIN leads l ON l.id=d.lead_id JOIN installer_enquiries e ON e.id=d.enquiry_id WHERE o.id=? AND o.state='sending' AND o.lease_until=?`).bind(schedulerToken??null,item.id,leaseUntil).first<Row>();
         if(!current)continue;
         if(current.withdrawal_suppressed||current.suppressed||current.suppressed_at||current.consent_withdrawn_at||current.purged_at||current.deleted_at){await db.prepare("UPDATE installer_outbox SET state='cancelled',lease_until=NULL,updated_at=? WHERE id=? AND state='sending' AND lease_until=?").bind(now,item.id,leaseUntil).run();continue;}
         if(!notificationContextMatches(current,env)){await markNotificationContextMismatch(db,item.id,'sending',leaseUntil,now);continue;}
@@ -106,7 +109,7 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
         // No asynchronous work remains between the final lease/consent snapshot
         // and provider invocation. Use real time now (or the guarded local clock).
         const finalSettings=installerSettingsSchema.parse(JSON.parse(String(current.notification_settings)));
-        if(finalSettings.platformPaused||!finalSettings.notificationsEnabled||!withinDeliveryHours(notificationSnapshotTime(current,env),finalSettings)){await releaseLease();break;}
+        if((schedulerToken&&(!current.scheduler_lease_until||Date.parse(String(current.scheduler_lease_until))<=Date.now()))||finalSettings.platformPaused||!finalSettings.notificationsEnabled||!withinDeliveryHours(notificationSnapshotTime(current,env),finalSettings)){await releaseLease();break;}
       }
       if(lease.kind==='installer-delivery'){
         if(!row.line_user_id)throw new Error('line_not_linked');
@@ -149,10 +152,18 @@ async function processOutboxItems(db:D1Database,env:SolarMatchRuntimeEnv) {
 export async function runInstallerJobs(env:SolarMatchRuntimeEnv=getRuntimeEnv()) {
   if(!env.DB||!['local-test','sandbox','production'].includes(env.INSTALLER_PLATFORM_MODE??''))return;
   assertInstallerJobEnvironment(env);
-  const runId=await beginJobRun(env.DB,'scheduled','scheduled-worker');
+  const token=await acquireSchedulerLease(env.DB);
+  if(!token)return {skipped:'already_running' as const};
+  let runId:string|undefined;
   try {
-  const allocation=await processQueue(env.DB,'scheduled-worker');const notifications=await processOutbox(env.DB,env);
+  runId=await beginJobRun(env.DB,'scheduled','scheduled-worker');
+  await renewSchedulerLease(env.DB,token);
+  const allocation=await processQueue(env.DB,'scheduled-worker');
+  await renewSchedulerLease(env.DB,token);
+  const notifications=await processOutbox(env.DB,env,token);
+  await renewSchedulerLease(env.DB,token);
   const reconciliation=await reconcilePendingPayments(env.DB,new Request(env.INSTALLER_BASE_URL!));
+  await renewSchedulerLease(env.DB,token);
   const allocationFailures=allocation.filter(item=>item.reason==='allocation_failed').length;
   const allocationClock=(await installerAllocationNow(env.DB)).toISOString();
   await env.DB.batch([
@@ -164,7 +175,9 @@ export async function runInstallerJobs(env:SolarMatchRuntimeEnv=getRuntimeEnv())
   await finishJobRun(env.DB,runId,{completed:true,allocationItems:allocation.length,allocationFailures,notifications:notifications.processed,notificationFailures:notifications.failed,reconciled:reconciliation.reconciled,reconciliationFailures:reconciliation.failed},
     allocationFailures||notifications.failed||reconciliation.failed?'scheduled_items_require_attention':undefined);
   } catch(error) {
-    await finishJobRun(env.DB,runId,{completed:false},'scheduled_run_failed');throw error;
+    if(runId)await finishJobRun(env.DB,runId,{completed:false},error instanceof Error&&error.message==='scheduler_lease_lost'?'scheduler_lease_lost':'scheduled_run_failed');throw error;
+  } finally {
+    await releaseSchedulerLease(env.DB,token);
   }
 }
 /** Controlled retry never resets an ambiguous SMS send or changes delivery billing. */

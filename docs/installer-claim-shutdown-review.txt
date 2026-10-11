@@ -1,0 +1,128 @@
+SolarMatch claim review and shutdown accounting — internal review only
+11 October 2026
+
+Confirmed owner decisions
+
+The operating company will be the owner's father's private limited company.
+Exact legal identity, registration, tax details and lawyer-approved wording remain
+unavailable. The current architecture remains /installers; domain and merchant
+registration are deferred.
+
+The invalid-enquiry claim SUBMISSION window is seven days from recorded original
+availability in the receiving company's portal. The owner reviews evidence and
+determines eligibility. An approved claim restores credits. This is not an
+automatic seven-day cash-refund guarantee. Investigation can continue after a
+timely submission. Restoration never reopens the lifetime three-company slot.
+
+Unused purchased credits should be refunded if SolarMatch shuts down. No shutdown
+refund deadline, credit expiry, payment channel or new eligibility term has been
+decided by this preparation. No refund is approved or executed by the report.
+
+Seven-day claim review using the existing protected admin flow
+
+1. Confirm the company, delivery reference, funding source, original available_at,
+   recorded claim_deadline and submitted_at. Current claimDays must agree with the
+   confirmed seven-day submission policy before launch. Preserve original facts;
+   do not reset deadlines on notification retries, viewing or withdrawal.
+2. Verify company-scoped submission and timely receipt. Withdrawal retains the
+   redacted financial record and claim route; it does not restore homeowner data
+   access or staff links. Read evidence only through the authorised admin review.
+3. Review the supplied reason and evidence. No answer or no resulting sale alone
+   does not establish invalidity. Detailed eligibility/evidence rules still need
+   owner and legal review; do not invent automatic rejection/approval rules.
+4. Use the existing decide-claim action: needs-information, approved or rejected,
+   with the required administrative rationale. Requesting evidence does not create
+   a new seven-day cash-refund period. Avoid unnecessary homeowner personal data
+   in administrative notes; immutable financial ledger reasons must be nonpersonal.
+5. Verify approved purchased restoration repays any existing purchased-credit debt
+   first, with only the remainder becoming available. Trial restoration remains a
+   trial entitlement. Confirm one-time ledger issuance and unchanged recipient
+   slots. Repeat approval must not create another restoration.
+6. Communicate the reasoned decision using the reviewed Thai/English wording after
+   separate approval. No customer or provider message was sent during preparation.
+
+Shutdown accounting and manual refund preparation
+
+1. Use separately authorised shutdown controls to stop collection, purchases,
+   allocation and referral messaging. Preserve calculator results, claim access,
+   necessary record access and the original claim submission deadlines. This
+   document does not execute those controls or promise ongoing service duration.
+2. Preserve a protected financial snapshot and export, respecting legal holds and
+   retention requirements. Resolve outstanding claims, reservations, ambiguous
+   charge attempts and provider reconciliation errors through the protected admin
+   flow. Do not create another payment to resolve an uncertain existing charge.
+3. Generate getShutdownLiabilityReport and shutdownLiabilityCsv from the financial
+   snapshot. They perform SELECT-only reads of accounts, immutable ledger, orders,
+   claims and delivery funding facts. No provider call, ledger change, approval or
+   refund execution occurs. They include archived companies' financial accounts.
+4. Review available/reserved credits, trial entitlements, promotional/unpriced
+   adjustments, test/fixture sources, reversal debt and provider-recorded prior
+   refunds separately. Synthetic calculations are excluded from live-money totals.
+   Current settings' nominal credit price is not historical payment evidence.
+5. The report calculates historical paid value only where evidence establishes the
+   relevant unused purchased units and price. If every remaining evidenced purchase
+   is unused, it can sum retained paid amounts even at different historical prices.
+   With partial consumption and different historical prices, the existing fungible
+   ledger has no debit-to-purchase-lot allocation: no FIFO or average-cost policy is
+   assumed. Mixed promotional/manual/test funding, fractional minor units and
+   nonproportional partial refunds are flagged for review rather than assigned an
+   invented exact refund. Review-required companies make totals incomplete.
+6. Reconcile each original order and recorded refund with later authorised provider
+   evidence and settlement/bank records. A stored provider refund amount is not proof
+   that a bank has returned money. Do not double-refund previously processed sums.
+   Debt is displayed for review, not automatically netted against a cash refund.
+7. Maintain a separately approved refund register: company/order references,
+   calculation and supporting snapshot, owner approval/amount/date, execution
+   reference/status and evidence that money was returned. These are distinct states.
+   This code introduces no approval register or refund executor; an authoritative
+   tracking workflow and payment method need approval before actual refunds.
+8. After separately authorised manual execution, reconcile provider evidence using
+   the existing guarded service, confirm ledger conservation and retain necessary
+   audit evidence. Repeat handling must not pay or restore credit twice. Customer
+   notices, payment instructions and any deadline remain future approved work.
+
+Draft English wording — REVIEW ONLY, not published launch terms
+
+Submit an invalid-enquiry claim within seven days of the enquiry first becoming
+available in your company's SolarMatch portal. We review the evidence and decide
+whether the claim is eligible. Approved claims restore the applicable credits;
+review may finish after the submission window. Credit restoration is different
+from a cash refund and does not reopen a recipient slot. Withdrawal retains claim
+access to a redacted financial record and revokes access to homeowner information.
+
+If SolarMatch closes permanently, unused purchased credits will be refunded.
+The refund calculation, approval and evidence that money has been returned are
+separate steps. The detailed process and final reviewed terms will be confirmed
+before commercial launch. This draft sets no refund deadline or credit expiry.
+
+ร่างภาษาไทย — สำหรับทบทวนเท่านั้น ยังไม่ใช่ข้อกำหนดที่เผยแพร่
+
+กรุณายื่นคำร้องสำหรับคำขอที่ไม่ถูกต้องภายในเจ็ดวันนับจากวันที่คำขอนั้นพร้อมใช้
+เป็นครั้งแรกในพอร์ทัล SolarMatch ของบริษัทของท่าน เราจะตรวจสอบหลักฐานและ
+พิจารณาสิทธิ์ตามคำร้อง คำร้องที่อนุมัติจะได้รับการคืนเครดิตตามแหล่งเครดิตเดิม
+การตรวจสอบอาจเสร็จสิ้นภายหลังพ้นกำหนดยื่นคำร้อง การคืนเครดิตแตกต่างจากการ
+คืนเงินสด และไม่เปิดโควตาบริษัทผู้รับใหม่ หากมีการถอนความยินยอม บริษัทจะยัง
+ยื่นคำร้องผ่านบันทึกทางการเงินที่ปกปิดข้อมูลได้ แต่ไม่สามารถเข้าถึงข้อมูล
+ส่วนบุคคลของเจ้าของบ้านได้อีก
+
+หาก SolarMatch ปิดกิจการอย่างถาวร จะคืนเงินสำหรับเครดิตที่ซื้อและยังไม่ได้ใช้
+การคำนวณยอดคืนเงิน การอนุมัติ และหลักฐานว่าเงินถูกส่งคืนแล้วเป็นขั้นตอนที่
+แยกจากกัน รายละเอียดขั้นตอนและข้อกำหนดฉบับทบทวนจะยืนยันก่อนเปิดให้บริการ
+เชิงพาณิชย์ ร่างนี้ไม่ได้กำหนดระยะเวลาคืนเงินหรือวันหมดอายุเครดิต
+
+Missing decisions or evidence — not treated as completed
+
+- Exact company identity, registration/address/contact facts and lawyer-reviewed
+  Thai/English wording; tax/VAT, invoices and any tax treatment of refunds.
+- Final claim evidence/eligibility rules, authorised review owner and escalation.
+- Credit expiry (no rule invented), retention/legal holds and backup deletion.
+- Approved shutdown notices, refund channel, approval register, reconciliation
+  ownership and any lawful deadline; no deadline is assumed here.
+- Purchase-lot allocation or owner-approved resolution for heterogeneous historical
+  prices, mixed promotional/manual credits and fractional/nonproportional refunds.
+  The existing report deliberately identifies these missing accounting facts.
+- Omise merchant approval, methods, test/live credentials, callbacks, bank settlement
+  and provider refund acceptance. No merchant account or real payment was accessed.
+- Domain and verified email sender; LINE OA Messaging API/channel acceptance;
+  Thai SMS acceptance, scheduling/alerts and production backup/object recovery.
+  Their absence does not prevent read-only synthetic accounting verification.

@@ -1,0 +1,55 @@
+BEFORE LEAVING LOCAL MODE — SOLARMATCH ONLY
+
+No push, deployment, remote migration, provider send, charge or DNS change is
+authorised by this checklist. Main and production configuration remain unchanged.
+Local work is on feature/installer-shared-workflow. Review package records commit,
+tests/diffs/hashes. Preserve populated stores and ignored private configuration.
+
+Smallest owner inputs/actions still needed
+1. Supply the real operating-company identity/contact/address/registration and
+   tax/VAT/invoice facts for the father's private limited company. Have qualified
+   reviewers approve Thai/English consent, company agreement, age/authority,
+   retention/holds, backup deletion, expiry and detailed claim/refund process.
+   Seven-day claim submission and shutdown refund principle are already confirmed.
+2. Approve the campaign catalogue and functional tab-session storage/disclosures.
+   CAMPAIGN_ATTRIBUTION_ENABLED and CAMPAIGN_ATTRIBUTION_PRIVACY_REVIEWED stay false
+   until approval. No pixel or general anonymous tracker is necessary.
+3. When ready, choose/register ONE domain and supply an approved HTTPS sandbox
+   origin. Purchase/configuration are deferred. Keep /installers, not a new subdomain.
+4. Complete Omise merchant/test-method/settlement setup later; privately supply
+   matching test credentials and webhook signing secret, then provider acceptance.
+   No PayPal, new charge, automatic refund or live activation is prepared by consent.
+5. Identify the exact SolarMatch LINE OA and provider ownership, complete Messaging
+   API setup if needed, and securely configure its channel/test webhook. Existing
+   browser inspection timed out. Obtain the U-prefixed recipient by signed linking;
+   a username is not enough. No approved HTTPS endpoint/free allowance verified.
+6. Verify Resend sending domain/sender and provide a controlled email test inbox.
+   None supplied; no email sent. Verify actual Twilio account/trial rules, Thai
+   registered sender/URLs and free test eligibility for the owner destination.
+   Existing custom-body adapter mocks do not establish trial or Thai deliverability.
+7. Approve operational ownership, private backups/restore and external alert routing.
+   Local deduplicated alerts do not notify anyone. Cron example remains empty;
+   INSTALLER_SCHEDULER_EXPECTED stays false until a real schedule is approved.
+8. Separately authorise migration/deployment. Back up only SolarMatch production;
+   rehearse 0001–0018 on a protected copy. Never use fictitious local config remotely.
+   Preserve historical data/consent/recipient slots and admin Access. Reverify
+   auth-cookie/origin design, production edge metadata, provider acceptance and
+   live settlement. A Git revert does not undo a D1 migration.
+9. Activate independently only after approval: collection, purchases, allocation,
+   notifications, provider live flags, outbound and optional campaign capture.
+   Do not copy synthetic fixtures or enable every gate together. No Milly's action.
+
+Final held state
+collectionEnabled=false; paymentsEnabled=false; notificationsEnabled=false;
+deliveryPaused=true; platformPaused=true; OUTBOUND_MESSAGES_ENABLED=false;
+all live-provider flags off; no cron; both campaign flags false;
+installer_test_clock.fixed_at=NULL.
+
+Local viewing
+http://127.0.0.1:3000/admin/local-access (existing ignored local admin password)
+http://127.0.0.1:3000/installers (synthetic account from installer-demo-local.md)
+http://127.0.0.1:3000/estimate
+http://127.0.0.1:3000/en/estimate
+Preview is local/test only, not production. Captures and recovery rehearsals do
+not prove real provider acceptance. A computer shutdown stops the preview but
+the committed source, private persistent demo and protected backups remain.

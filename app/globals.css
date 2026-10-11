@@ -19,6 +19,13 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+/* Long operational reports need immediate, predictable control/focus scrolling. */
+html:has(.admin-dashboard) { scroll-behavior: auto; }
+.installer-readiness-panel { display: grid; gap: 16px; min-width: 0; }
+.installer-readiness-panel > * { min-width: 0; }
+.installer-readiness-panel dl, .installer-readiness-panel li { overflow-wrap: anywhere; }
+.installer-readiness-panel dd { margin-inline-start: 0; }
+.installer-readiness-panel > button, .installer-readiness-panel > a { justify-self: start; max-width: 100%; }
 body {
   margin: 0;
   background: var(--ivory);

@@ -1,0 +1,114 @@
+SOLARMATCH AUTONOMOUS PREPARATION — LOCAL VERIFICATION, 11 OCTOBER 2026
+
+Repository: gvrshabd/solarmatch-thailand
+Branch: feature/installer-shared-workflow
+Starting commit: 43d1304ab9c4222dfb9cdf36ad412e29185cc6e7
+Preserved main: 6567ffc84a9ee4e609591e80da587229c6482384
+Final commit/source ZIP identity is in the generated MANIFEST.json.
+
+Scope and final safeguards
+No push, deployment, remote migration, production data operation, domain purchase,
+provider send/charge/refund, public activation or Milly's action occurred.
+All integration exercises use synthetic identities and captured/mocked transport.
+Real provider delivery/settlement, Cloudflare recovery and launch approval remain
+unverified. Local installer mode is not a public deployment configuration.
+
+Final source checks
+- Full unit/service suite: 320 passed in 44 files (final run 18:33 Bangkok).
+  Covers prior nine fixes plus campaign validation/reporting/redaction, scheduler
+  overlap/expiry/fencing, missed health/deduplicated alerts/preflight and shutdown
+  evidence accounting. Includes concurrency, idempotency and retained ledger tests.
+- Typecheck: passed.
+- Lint: zero errors; existing QR <img> advisory in installers/portal.tsx retained.
+- Normal production build: passed. Building did not deploy.
+- Isolated INSTALLER_LOCAL_TEST=true build: passed, fictitious DB ID verified.
+  Final builds include the results-refresh repair. Existing middleware deprecation
+  and plugin timing notices are not reported as source errors.
+- Diff whitespace check: passed; Windows LF/CRLF notices are informational.
+
+Browser acceptance (compiled loopback preview, desktop/mobile Chromium)
+- Combined bilingual homeowner + repaired portal/payment-return run: 81 passed,
+  one intentional skip. This preceded the final results-refresh repair.
+- Final affected homeowner suite: 43 passed, one intentional desktop-only skip,
+  on held installer-demo. Includes both locales, loading facts, direct/saved
+  result fallback, contact No/Yes fixtures, consent, transitions and recalculation.
+- Final mobile WebKit audit: 20 passed (2.0m), including Thai/English routes,
+  320–768px layouts, touch targets, slider/navigation separation, conditional
+  fields, contact layout, rotation, metrics/charts/tables and reduced motion.
+- Safe campaign landing-to-calculator and actual default-off capture: 6 passed.
+- New admin report/preflight/CSV/read-only liability controls and original 320px
+  accessibility checks: 4 passed. Includes Thai labels, authenticated exports,
+  CSV PII-field exclusions, no refund action and no page overflow.
+- Original forged identity/401, real local admin login, company selector and
+  missing-CSRF/403 checks: desktop passed; mobile passed alone after preview
+  restart. Combined ordering still times out on the later mobile API request.
+- Connected real local signup/recovery, optional homeowner No/OTP/final request,
+  synthetic repeat-safe payment run: initial 5 passed / 1 failed. The desktop
+  request was saved (201) but results stalled on configuration refresh.
+  That reproduced defect was fixed; identical failing case passed (14.8s) with
+  unchanged assertions and timeouts. The other five previously passing cases
+  were not endlessly rerun. No real SMS, email or payment was involved.
+- New deliberately stalled configuration test: 2 passed, each exercising both
+  Thai and English saved estimates. Results no longer wait for that network call.
+
+Failures, skips and limitations — not hidden by totals
+The initial unit run had a historical 0014 fixture missing the new operations
+table; its fixture now applies the complete current migration chain. No service
+assertion was relaxed. Final full unit runs passed 320/320.
+Early new browser fixtures used a route.fetch callback that outlived a page and
+an imprecise label query. Fixtures now reuse one retrieved synthetic configuration
+and target the actual accessible combobox. Expectations were not removed.
+A reproduced mobile report click interception was repaired with scoped immediate
+admin scrolling and contained grid/overflow layout; final reports/320px pass.
+Combined admin sequences continue to show an order-dependent local Workerd
+timeout after a preceding rejected-CSRF request. An isolated restarted mobile
+security case and both 320px/report cases pass. No speculative auth rewrite,
+force click, increased timeout or weakened security assertion was retained.
+This local limitation is not proven to be a production defect or resolved.
+The complete historical 173-case broad suite was not unnecessarily rerun; only
+affected suites and the focused mobile/Safari audit were selected.
+An intermediate homeowner rerun mistakenly used the just-seeded connected-test
+store with collection enabled, rather than the documented disabled fixture. It
+was stopped after a quote-decision expectation failed; the fixture controls were
+restored and final general tests use the held populated demo. The same run exposed
+a direct-results loading-fact regression in the initial immediate-fallback repair:
+with no saved configuration, the loading screen started before sources arrived.
+The final repair waits up to 1.5 seconds only in that missing-snapshot case and
+still initializes immediately from a saved snapshot. Existing fact/reference and
+stalled-network assertions are retained, not weakened.
+
+Migration and recovery evidence
+All eighteen migrations applied to a new empty synthetic installer-preprun store.
+Existing populated installer-demo upgraded additively after a private backup.
+Original demo: 5 leads, 5 enquiries, 6 deliveries, 13 ledger entries, 2 claims,
+3 legal versions; preserved. Other prior demo stores were not reset/overwritten.
+Final schema export: .wrangler/installer-prep-final-2026-10-11/synthetic-final.sql
+SHA256: 4b25519158ad67ad5684ed518813d1384795f90c74007394be8e6d82652713bd
+Ordered restore: .wrangler/restore18prep, a fresh separate local destination.
+60 tables/every row and 25 trigger definitions matched at the snapshot.
+Foreign-key violations 0; ledger mismatches 0; lifetime recipient-cap violations
+0; missing portal consent snapshots 0. Later sign-ins create normal synthetic
+session/audit rows. Raw SQL/runtime keys/captures are private and not packaged.
+Local object recovery objects18prep: one invented PDF fixture restored to a
+distinct empty local bucket; byte SHA256, size, content/custom metadata passed.
+No real R2 inventory/export/restore occurred.
+
+Provider/computer evidence
+Existing LINE OA tab selection failed twice with browser-control timeout; no OA
+identity/API setup/U-prefixed recipient was verified. Do not infer a recipient
+from shabdsingh. No approved external HTTPS sandbox origin or verified sender
+domain/inbox exists. Twilio actual free coverage/Thai sender/custom-template
+acceptance is not established. All actual message channels sent ZERO messages.
+Omise merchant verification and domain purchase remain intentionally deferred.
+Current primary domain/SMS sources, dated prices/availability caveats and exact
+provider activation steps are in the accompanying research/setup documents.
+
+Final held-state readback: passed for installer-demo and installer-preprun.
+collectionEnabled=false; paymentsEnabled=false; notificationsEnabled=false;
+deliveryPaused=true; platformPaused=true; fixed_at=NULL. Preview/private outbound,
+all live-provider flags, scheduler-expected and both campaign flags are off/absent.
+Actual public configuration: attribution enabled=false/catalog empty; contact
+enabled=false; liveLeadSubmissions=false. Main and production config unchanged.
+Review package is generated only from a clean locally committed Git archive;
+fictitious test configs/examples are included but ignored runtime keys, SQL,
+messages, sessions, bearer links, screenshots and test traces are excluded.

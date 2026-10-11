@@ -1,6 +1,6 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import type {SolarMatchRuntimeEnv} from '@/lib/server/runtime';
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import type {SQLInputValue} from 'node:sqlite';
 const runtime=vi.hoisted(()=>({INSTALLER_PLATFORM_MODE:'local-test',INSTALLER_BASE_URL:'http://localhost:3000',PHONE_VERIFICATION_SECRET:'synthetic-phone-secret-more-than-thirty-two'}));
 vi.mock('@/lib/server/runtime',()=>({getRuntimeEnv:()=>runtime}));
@@ -41,7 +41,9 @@ describe('outbox tenant consent and environment boundary',()=>{
       copy('installer_enquiries',fixture.sqlite.prepare('SELECT * FROM installer_enquiries WHERE id=?').get(lead.enquiryId)!);
       copy('installer_enquiry_leads',fixture.sqlite.prepare('SELECT * FROM installer_enquiry_leads WHERE lead_id=?').get(lead.leadId)!);
       copy('lead_recipient_deliveries',fixture.sqlite.prepare('SELECT * FROM lead_recipient_deliveries WHERE id=?').get(lead.deliveryId)!);
-      old.sqlite.exec(readFileSync('migrations/0015_installer_submission_boundaries.sql','utf8'));old.sqlite.exec(readFileSync('migrations/0016_installer_line_link_generation.sql','utf8'));
+      // Upgrade the historical data to the entire current schema before running
+      // current workers. New additive tables must not erase its NULL context.
+      for(const file of readdirSync('migrations').filter(name=>name.endsWith('.sql')).sort().slice(14))old.sqlite.exec(readFileSync(`migrations/${file}`,'utf8'));
       expect(old.sqlite.prepare('SELECT allocation_environment FROM lead_recipient_deliveries').get()?.allocation_environment).toBeNull();
       expect((await processOutbox(old.d1(),environment(mode))).processed).toBe(mode==='local-test'?2:0);expect(fetch).not.toHaveBeenCalled();
       expect(old.sqlite.prepare('SELECT count(*) n FROM installer_outbox WHERE attempts=0').get()?.n).toBe(mode==='local-test'?0:2);

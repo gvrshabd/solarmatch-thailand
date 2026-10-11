@@ -1,0 +1,99 @@
+SOLARMATCH PROVIDER / DOMAIN PREPARATION — 11 OCTOBER 2026
+Research only. No domain, account, provider request, payment or message purchased.
+
+Domain availability and costs
+At 11:03 UTC, Verisign's authoritative .com RDAP returned HTTP404 for:
+https://rdap.verisign.com/com/v1/domain/solarmatchthailand.com
+https://rdap.verisign.com/com/v1/domain/solarmatchth.com
+https://rdap.verisign.com/com/v1/domain/solarmatch-installers.com
+This indicates no registration record at that time, not guaranteed availability,
+ordinary pricing, trademark clearance or a reserved purchase. Recheck at checkout.
+
+Prefer one owner-approved domain for homeowners and /installers. The longer
+solarmatchthailand.com is explicit; solarmatchth.com is shorter. The hyphenated
+installer-only name is less suitable for the combined service. No name selected.
+
+Published non-premium USD per-year comparison, reviewed on this date:
+Porkbun: first year $11.08, renewal $11.08; listed prices include ICANN/other fees.
+Namecheap: first year sale $10.98, renewal $18.48, plus listed $0.20 ICANN fee
+where applicable. A $6.79 new-customer promotion is conditional, not assumed.
+Cloudflare: registry/ICANN cost with no markup for registration and renewal.
+Exact .com first/renewal dollar quotes were not available in the public docs;
+obtain the name-specific dashboard quote later. Cloudflare nameservers are required.
+Tax, currency/card conversion, premium-name and future renewal changes may differ;
+these are published rates, not an actual checkout offer for the candidate names.
+No paid hosting, email or certificate add-on is required by this research.
+Sources:
+https://porkbun.com/products/domains
+https://www.namecheap.com/domains/registration/gtld/com/
+https://developers.cloudflare.com/registrar/
+https://developers.cloudflare.com/registrar/get-started/register-domain/
+
+Current Thai SMS requirements and test limits
+Twilio's Thailand guideline requires registered sender IDs and registration of
+full-length URLs with the sender; shortened URLs cannot be allowlisted. Obtain
+provider approval for SolarMatch's exact purpose, Thai text and any URL before
+handset tests. Do not infer permission from an API accepted/queued response.
+Current new-console trials restrict SMS to the registration country and verified
+recipients, expire after30days, and use predefined SMS templates rather than
+arbitrary custom message bodies. Legacy trial behavior may differ; verify the
+actual account, country and allowance. New-console users cannot create legacy
+test credentials; old test credentials simulate API calls without handset delivery.
+Sources:
+https://www.twilio.com/en-us/guidelines/th/sms
+https://www.twilio.com/docs/usage/trials
+https://www.twilio.com/docs/usage/tutorials/how-to-use-your-free-trial-account
+https://www.twilio.com/docs/iam/test-credentials
+
+No actual SMS sent. An eligible configured account, verified destination and free
+allowance were not established. Use local captures. If approved later, use only
+the owner's supplied destination, at most three synthetic tests, with existing
+free coverage; do not upgrade, buy a number or enable global outbound to do it.
+
+LINE account inspection and HTTPS blocker
+The connected browser listed an existing Official Account Manager tab, but both
+attempts to bind it failed: 10-second CDP Emulation.setFocusEmulationEnabled
+timeout. No visible account identity or Messaging API settings were inspected.
+No token was read/generated and no ownership, provider or webhook was changed.
+No suitable authorised deployed HTTPS sandbox endpoint is available here.
+Localhost is not a LINE webhook destination; do not select the undeployed
+production route. Owner must identify the SolarMatch OA/provider ownership,
+enable Messaging API themselves if absent, and supply approved HTTPS test origin.
+Do not mistake a LINE username for a Messaging API U-prefixed user ID. Obtain
+the ID from a signature-verified event and complete the existing linking flow.
+No LINE messages sent; recipient and free allowance were not verified.
+https://developers.line.biz/en/docs/messaging-api/getting-started/
+https://developers.line.biz/en/docs/messaging-api/linking-accounts/
+
+Exact later account/configuration steps (no values in this document)
+1. Omise: owner registers the real company/merchant when ready. In its test
+   dashboard enable only approved test methods and Visa/MasterCard brands; store
+   test public/secret keys in ignored configuration. Configure the deployed test
+   webhook at [APPROVED_HTTPS_TEST_ORIGIN]/api/installer/webhooks/payment and store
+   its signing secret. Return URL is /installers/payment with the app's order and
+   language parameters. Test each chosen method, authenticated provider reads,
+   duplicate/missing callbacks, delayed returns and refund/reversal reconciliation.
+   Check settlement separately before explicit live approval. Never mix test/live.
+   Names: OMISE_PUBLIC_KEY, OMISE_SECRET_KEY, OMISE_WEBHOOK_SECRET,
+   OMISE_PROVIDER_MODE, OMISE_LIVE_ENABLED, INSTALLER_BASE_URL.
+2. LINE: correct OA Manager Settings > Messaging API, then matching Developer
+   Console channel. Confirm ownership with the company; do not guess a provider.
+   Store LINE_CHANNEL_SECRET and LINE_CHANNEL_ACCESS_TOKEN privately. Later set
+   the HTTPS /api/installer/webhooks/line URL and verify it; enable webhook use
+   only on the approved test channel after acceptance. Verify follow/LINK signed
+   invitation, company-owner confirmation, accountLink nonce, unlink/replay and
+   reconnect. Sandbox allowlist is LINE_TEST_RECIPIENTS, not a typed username.
+   Keep LINE_PROVIDER_MODE off and LINE_LIVE_ENABLED false until authorised.
+3. Resend: owner-approved domain and DNS sender verification are missing. Later
+   verify the domain, record AUTH_EMAIL_FROM and AUTH_EMAIL_PROVIDER_TOKEN securely,
+   test approved inbox recovery/registration with HTTPS origin and matching mode.
+   No email destination supplied: do not infer one or send now. Captures work.
+4. Twilio: verify actual console type, Thailand eligibility, allowance, destination,
+   registered sender/service and message use case. Legacy test-only credentials
+   use SMS_CREDENTIALS_ARE_TEST true and magic sender; no real SMS. Application
+   custom SMS cannot be claimed validated by predefined new-console trial content.
+   Keep SMS_PROVIDER_MODE off and SMS_LIVE_ENABLED false until separate approval.
+
+All provider modes/live flags, OUTBOUND_MESSAGES_ENABLED, purchases and collection
+remain held. HTTPS callback setup, signature checks and mocks are code preparation,
+not successful external delivery, merchant approval or bank settlement.

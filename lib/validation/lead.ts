@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { estimateAnswersSchema } from './estimate';
+import { attributionSchema } from '@/lib/analytics/attribution';
 
 export const thaiPhonePattern = /^(?:\+66|0)[689][0-9]{8}$/u;
 
@@ -24,6 +25,7 @@ export const leadSchema = z.object({
   idempotencyKey: z.string().uuid(),
   website: z.string().max(0).optional(),
   answers: estimateAnswersSchema,
+  attribution: attributionSchema.optional(),
 }).strict().superRefine((value, context) => {
   if (!value.answers.quoteContactRequested || !value.answers.quoteConsentAccepted) {
     context.addIssue({ code: 'custom', path: ['answers', 'quoteContactRequested'], message: 'contact_request_and_consent_required' });

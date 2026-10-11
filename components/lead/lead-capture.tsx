@@ -7,6 +7,7 @@ import { LegalText } from '@/components/content/legal-text';
 import { contactLaunchReviewCopy } from '@/config/legal-review';
 import { contactReviewCopy } from '@/config/contact-review';
 import { track } from '@/lib/analytics/track';
+import { currentBrowserCampaign } from '@/lib/analytics/browser-attribution';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 import type { PublicAssessmentConfig } from '@/lib/questionnaire/types';
 import { leadSchema, thaiPhonePattern } from '@/lib/validation/lead';
@@ -136,6 +137,7 @@ export function LeadCapture({
     }
     if (!verificationProof) { setSubmissionError(english?'Verify your phone number with the SMS code first.':'กรุณายืนยันหมายเลขโทรศัพท์ด้วยรหัส SMS ก่อน'); return; }
     const payload = {
+      attribution: currentBrowserCampaign(configuration.attribution),
       legalFirstName: fields.legalFirstName,
       legalLastName: fields.legalLastName,
       phone: fields.phone,

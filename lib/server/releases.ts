@@ -10,6 +10,8 @@ import { publicContactConfiguration, restrictedOperationalContactConfiguration, 
 import { createAssessmentToken } from './assessment-token';
 import { requireDatabase } from './runtime';
 import { localTestContact } from '@/lib/installer/local-collection';
+import { publicAttributionConfig } from '@/lib/analytics/attribution';
+import { getRuntimeEnv } from './runtime';
 
 const seedActor = 'system:initial-migration';
 const questionnaireId = legacyQuestionnaireV1.id;
@@ -818,6 +820,7 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
   const loadingFacts = await getPublishedLoadingFacts(loadingFactSetVersionId);
   return {
     privatePreview: Boolean(localContact),
+    attribution: publicAttributionConfig(getRuntimeEnv()),
     accessRestrictedSession,
     restrictedSiteCollectionEnabled: configuredContact.restrictedSiteCollectionEnabled,
     publicCollectionEnabled: configuredContact.publicCollectionEnabled,

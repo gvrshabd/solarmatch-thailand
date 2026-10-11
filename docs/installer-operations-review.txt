@@ -1,0 +1,50 @@
+INSTALLER OPERATIONS REVIEW — LOCAL PREPARATION, NOT ACTIVATION
+
+The deployment example remains fictitious and inactive. Production wrangler
+configuration is unchanged. Do not enable its commented cron, live flags,
+collection, payment, notification or delivery gates from this document.
+
+Prepared implementation
+- Scheduled invocation obtains a ten-minute wall-clock ownership lease before
+  recording a run or doing allocation/reconciliation work. A valid overlapping
+  invocation returns already_running and spends no retry attempt or credit.
+- Ownership renews between bounded stages. Expired ownership cannot be renewed;
+  an old owner cannot delete a replacement lease. Allocation retains existing
+  per-enquiry leases and transactional distinct-recipient/ledger constraints.
+- Notification dispatch rechecks ownership in the same final snapshot as the
+  outbox lease, consent, classification, company link, settings and local clock.
+  There is no async gap after that snapshot before the provider invocation.
+  Ownership loss before dispatch releases the attempt unchanged. An already
+  in-flight accepted provider request cannot be recalled; its evidence is retained.
+- Payment reconciliation remains bounded provider reads with ledger idempotency;
+  it never creates a charge or automatically repeats ambiguous authorization.
+
+Protected admin review
+- Last successful scheduled run is separate from successful manual allocation or
+  notification work. INSTALLER_SCHEDULER_EXPECTED must remain false until an actual
+  scheduler is deliberately approved and deployed. Missing runs are diagnostic
+  after ten minutes; intentionally paused and closed-hour periods do not produce
+  missed-run or stale-queue alerts. These thresholds are not retention policies.
+- Due queue older than thirty minutes, allocation failures, notification action
+  required, ambiguous SMS, accepted-after-cancellation evidence and payment
+  failure/manual association are shown separately. Age does not prove send or sale.
+- The explicit capture control records deduplicated alerts containing safe codes and
+  numerical counts only. No alert sender, webhook or external endpoint exists.
+  Acknowledge records review, not resolution; persistent problems stay visible.
+  Clearing a condition resolves its alert; recurrence creates a new record.
+- Read-only launch preflight returns variable names and review categories, never
+  values or secrets. Configuration presence is not verification or launch approval.
+  Owner/legal/provider/deployment review remains explicitly blocked.
+
+Before any separately authorised launch
+Confirm installer origin, auth and cookie design including INSTALLER_BASE_URL;
+review cron delivery, missed-trigger recovery and local-only alert-routing limits;
+rehearse failures and provider acceptance ambiguity in approved sandbox; review
+credentials and settlement, Thai SMS delivery/consent, LINE Official Account and
+webhook configuration, company facts, tax, retention, purchased-credit/restoration
+and cash-refund policies. Review private backup/restore and access controls. A
+separate approval/design is required for external alert routing; local capture is
+not a claim that anybody has been notified.
+
+No production cron, provider request, refund, deployment or remote mutation was
+authorised or performed by this preparation.
