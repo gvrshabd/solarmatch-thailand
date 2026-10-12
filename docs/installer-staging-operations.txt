@@ -1,5 +1,8 @@
 SOLARMATCH ISOLATED HTTPS STAGING — 12 OCTOBER 2026
 
+CURRENT CONTINUATION: the initial preparation/hold narrative below is historical.
+Use the completed Access/LINE continuation at the end for the current state.
+
 Scope: feature/installer-shared-workflow only. Never target main, production
 bindings, solarmatch-thailand, Milly's, or a production/customer database.
 
@@ -166,3 +169,82 @@ and an empty private R2 bucket were used. Free-tier quota exhaustion must stop t
 test, not select a paid plan. Do not infer free provider messaging entitlement;
 confirm LINE quota before any of the three real pushes. A purchased domain is not
 needed for this verified workers.dev HTTPS address.
+
+CONFIRMED CONTINUATION — 12 OCTOBER 2026
+The owner confirmed both at-action security requests. Three NEW staging-only
+Access applications are saved. Root and admin use the dedicated Allow policy
+69cb9a13-92a6-4379-b8d0-e8179039de47, Include Emails exactly the verified owner
+deluxejahseh@gmail.com, six-hour application sessions, no Everyone allow rule.
+Root app: 4be8555b-7811-41db-bde0-810d9bec442d.
+Admin app: a724f1ef-7b27-4f19-9a59-a08eebf760bd.
+Exact webhook app: 522e10d9-ccc2-464e-a48f-c18b9a48bce6, dedicated Bypass/Everyone
+policy ee2a7ced-8a34-4200-81d0-15d982b9ee8d. Cloudflare path matching can also
+bypass descendants; the Worker independently rejects slash/child paths (403).
+Only the exact POST endpoint runs the raw-body signature-verified webhook.
+The staging site/admin AUDs shown in the dashboard are in staging/wrangler.jsonc.
+No production audience/application/policy was changed. The existing team domain
+is shared account infrastructure, not a Milly's resource modification.
+Wrangler's Access listing returned an empty list despite the saved dashboard apps.
+The helper now stops on an unavailable/empty listing instead of overwriting
+recorded provenance with false pending entries. Browser-observed IDs are retained
+privately; do not use an empty OAuth listing as proof that applications are absent.
+
+One Messaging API long-lived token was issued (not reissued) with owner approval
+and stored only in the ignored private secret bundle and the new staging Worker.
+Eight secret bindings are installed. No token value was printed or committed.
+LINE bot identity returned Solar Match / @944yqdue. Quota API: limited 300,
+totalUsage=0 before any phone test. The original endpoint was blank and the original
+Use webhook was false. Exact staging URL saved; LINE's own Verify showed Success;
+Use webhook is now true. Redelivery/error aggregation remain false. Greeting and
+auto-reply remain enabled and unchanged: do not begin the message exercise until
+those automatic responses are deliberately disabled/restored for the strict cap.
+The existing channel secret and provider assignment were not rotated/changed.
+The additional webhook-info API probe returned 404; dashboard saved state and
+LINE Verify, not that unsupported probe, are the verification evidence.
+
+Protected inspection URLs (owner Cloudflare sign-in, then native installer login):
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/installers
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/admin
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/estimate
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/en/estimate
+Installer credentials remain .wrangler/installer-staging-management/owner-account.json.
+Existing Cloudflare identity sign-in succeeded, with no cookie/token extraction;
+native installer sign-in succeeded and admin displayed the synthetic records.
+Initial authenticated HTML lacked CSS/JS: run_worker_first routed build assets
+to vinext instead of the static binding. Staging wrapper now sends known static
+paths to ASSETS only AFTER signed Access verification. Browser hydration, language
+controls, sign-in and admin records work after redeployment. No production entry
+or configuration was altered by this staging-only repair.
+
+Final staging version b59e4987-fbb9-4ce1-a1b1-683d253e3f6c, deployment
+30dc07cc-7beb-4dda-b91a-e2096e399faa (100%). No new migration in this continuation.
+Collection/payments/notifications false; allocation/platform paused; company paused;
+OUTBOUND_MESSAGES_ENABLED=false, clock NULL, no scheduling. Zero message slots,
+zero deliveries, one fixture ledger row, two synthetic leads/enquiries, four
+non-cash credits. Real LINE account linking, receipt, unlink/reconnection and
+remote delivery/charge replay are NOT completed by an empty signed webhook test.
+
+Next owner-assisted session, within real Bangkok 09:00–17:00:
+Do not send LINK yet while sending is held off. Open https://line.me/R/ti/p/@944yqdue
+only when the controlled session is ready. Confirm the developer-owner ID matches
+the actual signed phone interaction. Enable only the necessary staging send gate
+and notification/allocation controls, with the company/collection/payment holds
+managed separately. The guarded deploy helper intentionally rejects an outbound-
+enabled config; any temporary staging override must be explicitly target-checked,
+then restored and redeployed with the held config before handoff. No public clock.
+Invitation, one labelled synthetic notification and reconnection invitation consume
+the three push slots. Wait for signed accountLink before any enquiry push. Record
+API acceptance separately from owner receipt. Then verify unlink suppresses queued
+notifications and replay does not add a charge/recipient; use mocks beyond the cap.
+
+LINE restoration / staging removal:
+Pause application sending first. In this exact channel's Messaging API settings,
+turn Use webhook OFF, Edit URL back to the originally blank value if the console
+permits; if blank cannot be saved, keep Use webhook OFF and document the inactive
+staging URL. Keep redelivery/error aggregation OFF and original greetings/auto-
+replies ON. A newly issued token has no prior value to restore: leave unused with
+outbound held off, or have the owner revoke it through the provider's supported
+control after confirming no other consumer; do not reissue to pretend restoration.
+Delete only the three recorded staging Access applications/two dedicated policies
+and exact staging Worker/D1/R2 after separate destructive approval. Never delete
+the production reusable owner policy, shared team domain or unrelated resources.

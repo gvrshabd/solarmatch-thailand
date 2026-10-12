@@ -17,7 +17,14 @@ const stagingWorker = {
     }else if(!await stagingIdentity(request,env)){
       return new Response('Access denied',{status:403,headers});
     }
-    let response=await application.fetch(request,env,context);
+    // run_worker_first keeps assets private, but vinext's route entry does not
+    // serve build assets directly. Only fetch the asset binding AFTER Access
+    // verification; otherwise authenticated HTML has no CSS/hydration.
+    const pathname=new URL(request.url).pathname;
+    const assetPath=pathname.startsWith('/_next/static/')||pathname.startsWith('/images/')||['/favicon.svg','/og.png','/llms.txt'].includes(pathname);
+    let response=assetPath&&env.ASSETS
+      ? await env.ASSETS.fetch(request)
+      : await application.fetch(request,env,context);
     if(response.headers.get('Content-Type')?.includes('text/html')){
       response=new HTMLRewriter().on('body',{element(element){element.prepend('<aside role="note" style="padding:10px 16px;background:#153d32;color:#fff;text-align:center;font:14px system-ui">SolarMatch HTTPS staging — synthetic test data only. เว็บไซต์ทดสอบ SolarMatch — ใช้ข้อมูลจำลองเท่านั้น</aside>',{html:true});}}).transform(response);
     }

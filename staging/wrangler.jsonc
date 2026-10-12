@@ -15,9 +15,9 @@
   "vars": {
     "INSTALLER_PLATFORM_MODE": "sandbox",
     "INSTALLER_BASE_URL": "https://solarmatch-installer-staging.deluxejahseh.workers.dev",
-    "STAGING_ACCESS_AUD": "",
+    "STAGING_ACCESS_AUD": "5534610d52401d48b3ef59bf43e5d34d8bde9d2d8ed23260358dc97ccd8b1da3",
     "ACCESS_TEAM_DOMAIN": "https://millys.cloudflareaccess.com",
-    "ACCESS_AUD": "",
+    "ACCESS_AUD": "808ccd628d4d8d7d225c89a328ccf9f3517b0a583b5c767c07ff1b53024e4371",
     "INSTALLER_TEST_CLOCK_ENABLED": "false",
     "INSTALLER_SCHEDULER_EXPECTED": "false",
     "OUTBOUND_MESSAGES_ENABLED": "false",

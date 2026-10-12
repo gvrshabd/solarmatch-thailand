@@ -4,8 +4,10 @@ import {DatabaseSync} from 'node:sqlite';
 import {readdirSync,readFileSync} from 'node:fs';
 import {unstable_splitSqlQuery} from 'wrangler';
 import {triggerSafeStatement} from '../../scripts/installer-staging-migration-transport.mjs';
+import stagingWorker from '../../staging/worker';
 const verify=vi.hoisted(()=>vi.fn());
 vi.mock('jose',()=>({jwtVerify:verify,createRemoteJWKSet:vi.fn(()=>({}))}));
+vi.mock('../../worker',()=>({default:{fetch:vi.fn(()=>new Response('Application route'))}}));
 const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 const env:StagingAccessEnv={INSTALLER_PLATFORM_MODE:'sandbox',INSTALLER_BASE_URL:origin,STAGING_ACCESS_AUD:'staging-site',ACCESS_AUD:'staging-admin',ACCESS_TEAM_DOMAIN:'https://team.example.test',ADMIN_EMAILS:'owner@example.test'};
 beforeEach(()=>{verify.mockReset();});
@@ -29,6 +31,23 @@ it('verifies issuer and the separate staging audiences before accepting exact ow
   verify.mockResolvedValue({payload:{email:'owner@example.test'}});
   expect(await stagingIdentity(new Request(origin,{headers:{'cf-access-jwt-assertion':'fixture'}}),env)).toBe(true);
   expect(verify.mock.calls[0][2]).toEqual({issuer:'https://team.example.test',audience:['staging-site','staging-admin']});
+});
+it('serves build CSS/JS through the private asset binding only after verified Access',async()=>{
+  const fetchAsset=vi.fn(async()=>new Response('/* fixture asset */',{headers:{'Content-Type':'text/css'}}));
+  const assetEnv={...env,ASSETS:{fetch:fetchAsset} as unknown as Fetcher};
+  const context={} as ExecutionContext;
+  const url=origin+'/_next/static/css/fixture.css';
+  expect((await stagingWorker.fetch(new Request(url),assetEnv,context)).status).toBe(403);
+  expect(fetchAsset).not.toHaveBeenCalled();
+  verify.mockResolvedValue({payload:{email:'owner@example.test'}});
+  const response=await stagingWorker.fetch(new Request(url,{headers:{'cf-access-jwt-assertion':'fixture'}}),assetEnv,context);
+  expect(response.status).toBe(200);
+  expect(response.headers.get('Content-Type')).toBe('text/css');
+  expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+  expect(await response.text()).toBe('/* fixture asset */');
+  expect(fetchAsset).toHaveBeenCalledTimes(1);
+  await stagingWorker.fetch(new Request(origin+'/admin',{headers:{'cf-access-jwt-assertion':'fixture'}}),assetEnv,context);
+  expect(fetchAsset).toHaveBeenCalledTimes(1);
 });
 it('applies the complete unchanged migration chain through the staging transport',()=>{
   const original=new DatabaseSync(':memory:'),transport=new DatabaseSync(':memory:');

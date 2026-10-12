@@ -86,6 +86,10 @@ async function prepare(){
   let state;
   try{state=await stagingState();}catch(error){if(error.code!=='ENOENT')throw error;}
   const apps=await cloudflare(accountPath('access/apps'));
+  // This OAuth scope can return an empty list even while dashboard applications
+  // exist. Do not overwrite recorded identity/provenance with false "pending"
+  // results. Read exact staging IDs/AUDs in the authenticated dashboard instead.
+  if(!Array.isArray(apps)||apps.length===0)throw Error('Access application listing is unavailable/empty; verify staging applications in the dashboard before recording audiences.');
   const definitions=[
     {key:'site',name:'SolarMatch installer staging — owner only',domain:new URL(origin).hostname},
     {key:'admin',name:'SolarMatch installer staging — admin',domain:`${new URL(origin).hostname}/admin*`},

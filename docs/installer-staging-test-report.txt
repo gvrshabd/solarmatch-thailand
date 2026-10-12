@@ -1,5 +1,8 @@
 SOLARMATCH HTTPS STAGING PREPARATION — ACTUAL EVIDENCE, 12 OCTOBER 2026
 
+The original preparation evidence below is retained. The continuation at the end
+supersedes its pending Access/token/webhook state, not its historical failures.
+
 Starting feature commit: 5ed9378d0f70b06094dceebe41a0b607cc588290, clean checkout.
 Preserved main: 6567ffc84a9ee4e609591e80da587229c6482384.
 Repository origin verified gvrshabd/solarmatch-thailand. No push/main modification.
@@ -103,3 +106,66 @@ Deferred/not authorised: production deployment or migration, main/push, plan
 upgrade/purchase/domain/DNS, merchant/payment/SMS/email activation and real customer
 data. No Milly's resource operation was targeted. No deletion occurred.
 Pause/resume/removal and exact continuation are in installer-staging-operations.txt.
+
+CONTINUATION — ACTUAL CHECKS, 12 OCTOBER 2026
+Owner approval received for staging-only Access apps and token creation. Root and
+admin applications saved with exact-email policy and six-hour sessions; webhook
+has a separate exact destination and Bypass policy. Dedicated IDs recorded in
+operations.txt. Dashboard policy detail verified Emails / exact owner / Allow.
+No production application/policy/AUD, main or Milly's resource was changed.
+OAuth app listing returned []; prepare had falsely recorded pending after saves.
+The helper now stops before overwriting state when listing is empty/unavailable.
+Dashboard-proven IDs/audiences are recorded privately/configured, not invented.
+
+Token issued once, privately installed as eighth staging secret. Actual bot info
+Solar Match/@944yqdue, limited quota 300, consumption zero. Unsupported webhook
+info probe 404 is retained as a failed check, not called successful.
+LINE dashboard exact webhook saved, Verify returned Success, Use webhook true;
+redelivery/error aggregation false. Greeting/auto-reply unchanged/on. No push.
+Screenshots in ignored management directory contain no access token/channel secret.
+
+Anonymous HTTPS root/en/installers/admin/config/favicon redirect to Access (302).
+Signed empty events 200; invalid signature 400. Slash/child webhook paths 403:
+Cloudflare's path matching can bypass descendants but the Worker does not exempt
+them. No other API/data route was exposed. Three-message budget remains zero.
+
+An authenticated browser check found CSS and JavaScript not served while HTML
+loaded: the language button was inert, native form reloaded, zero auth sessions.
+This was NOT a password/session defect. Staging run_worker_first sent build assets
+into vinext routing. Explicit private static ASSETS delivery after Access checking
+fixed it. Regression test verifies unauthorized asset denial/no binding call,
+authorized CSS content/type/private headers, and no admin route asset interception.
+Root production Worker entry is unchanged. No authentication bypass was introduced.
+After repair: Cloudflare owner sign-in succeeded; English/Thai portal language
+control worked; native synthetic installer login succeeded; four fixture credits
+and company Paused displayed. Company LINE controls are available, Not connected.
+Staging /admin authenticated separately and Installer operations loaded one company,
+two enquiries, zero deliveries/orders/outbox, one ledger row and held controls.
+
+English calculator: Bangkok/Bang Rak district search, bill 4800, within-three-month
+intent, new system, detached owner, high daytime use, four installed ACs, almost no
+shade, concrete tiles; No-contact path, loading fact and full result passed.
+Result: approx monthly reduction 1295, 3.5kWp, planning price 140000, payback 9.9,
+25-year savings approx190000. Thai language switch preserved these same values.
+This is one complete English journey plus Thai result/language parity, not a claim
+of two independent full journeys or a complete mobile/E2E run in this continuation.
+No PII entered/submitted, no additional lead written. Calculation logic unchanged.
+
+336/336 unit tests / 47 files passed after the asset fix; typecheck passed; staging
+production build passed. Lint zero errors, existing portal QR img advisory. The
+final known-static-path extension and documentation received final lint/typecheck
+and complete test recheck before commit: 336/336, 47 files, 7.46s; typecheck passed;
+lint zero errors/one existing advisory; diff whitespace check passed. Tracked-source
+scan found no staging secret, generated password or private LINE recipient ID.
+Deployment 30dc07cc-7beb-4dda-b91a-e2096e399faa, 100% version
+b59e4987-fbb9-4ce1-a1b1-683d253e3f6c. Bindings are dedicated staging names/IDs.
+Remote final read: leads2/enquiries2, deliveries0, ledger1, budget slots0, clockNULL,
+collection0/payments0/notifications0/platformPaused1/deliveryPaused1. One native
+installer session exists after login. R2 managed public-domain enabled=false.
+No migration ran in this continuation; the existing 18-name staging chain remains.
+
+STILL PENDING: actual phone friend/LINK/invitation/accountLink; one business-hours
+synthetic push and owner receipt; unlink queued suppression/reconnection and remote
+financial/replay exercise. Cannot be claimed from mocks/signature verification.
+Current real time before 09:00 Bangkok; no clock override/hours bypass. All sending
+and money controls remain off; owner can inspect protected staging. No Git push.
