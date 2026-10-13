@@ -1,5 +1,7 @@
 # Installer launch decisions and activation
 
+Publication update, 14 October 2026: [current evidence](installer-publication-2026-10-14.txt) supersedes the historical local-only/staging-unavailable statements below. The existing protected HTTPS staging, owner Access and signed LINE webhook verification are complete; staging is refreshed and production's eighteen-migration chain is verified with historical data preserved. Real LINE linking/receipt, email/SMS deliverability, payment acceptance/settlement, company/legal policies and activation remain separate pending work. No business operation is enabled by publication.
+
 This is a prelaunch local implementation. Code completion means the guarded path exists; it does not mean an account, legal term, delivery route, bank settlement or deployment has been approved. The provider gates and protected local test steps are in [provider setup](INSTALLER_PROVIDER_SETUP.md) and [local testing](installer-local-test.md). The independently verified repair baseline had 256 passing unit tests and a sixteen-migration restore; those are historical, not the current review totals. Current focused evidence is in `installer-reliability-test-results.txt`. No live operation is authorised by any local result; collection, payments, outbound messaging and automatic allocation remain disabled.
 
 ## 1. Fixed and locally verified

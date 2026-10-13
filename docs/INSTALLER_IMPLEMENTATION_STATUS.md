@@ -1,5 +1,7 @@
 # Installer platform implementation and launch decisions
 
+Publication update, 14 October 2026: see [publication evidence](installer-publication-2026-10-14.txt) for the completed feature review, current builds/browser checks, existing protected staging deployment and verified production migration preparation. Operations remain disabled. The local-only statements and test totals below describe their dated historical runs; they are not the current deployment status. Current deployment/commit receipts are supplied with the publication handoff.
+
 This implementation remains a local/test system. No production deployment, migration, customer collection, payments, messaging, DNS changes or merchant activation were performed. Existing public calculator and internal admin remain in this repository and share the database architecture.
 
 ## Current targeted repair — 11 October 2026

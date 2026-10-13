@@ -12,6 +12,7 @@ export function InstallerPortal({ deliveryId }: { deliveryId?: string }) {
   const [data, setData] = useState<InstallerPortalData | null>(null);
   const [view, setView] = useState<View>('overview');
   const [loaded, setLoaded] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'recovery' | 'reset'>('login');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -34,6 +35,8 @@ export function InstallerPortal({ deliveryId }: { deliveryId?: string }) {
   }, []);
   async function load() {
     const response = await fetch('/api/installer/portal' + (deliveryId ? '?deliveryId=' + encodeURIComponent(deliveryId) : ''), { cache: 'no-store', credentials: 'same-origin' });
+    if (response.status === 503) { setData(null); setUnavailable(true); setLoaded(true); return; }
+    setUnavailable(false);
     if (response.status === 401) { setData(null); setLoaded(true); return; }
     if (!response.ok) throw new Error(t('ระบบพอร์ทัลยังไม่พร้อม กรุณาลองใหม่ภายหลัง', 'The portal is unavailable. Please try again later.'));
     setData(await response.json()); setLoaded(true);
@@ -45,7 +48,7 @@ export function InstallerPortal({ deliveryId }: { deliveryId?: string }) {
     const invitation = params.get('linkRequest');
     if (invitation) { params.delete('linkRequest'); window.history.replaceState({}, '', window.location.pathname + (params.size ? '?' + params.toString() : '')); queueMicrotask(() => setLineRequest(invitation)); }
     queueMicrotask(() => { setEn(params.get('lang') === 'en'); if (params.has('token')) setAuthMode('reset'); });
-    queueMicrotask(() => { void load().catch((error: Error) => { setMessage(error.message); setLoaded(true); }); });
+    queueMicrotask(() => { void load().catch((error: Error) => { setMessage(error.message); setUnavailable(true); setLoaded(true); }); });
     const back = () => { const params = new URLSearchParams(window.location.search); const value = params.get('view'); setView(['overview', 'inbox', 'credits', 'profile', 'terms', 'claims'].includes(value || '') ? value as View : 'overview'); setEn(params.get('lang') === 'en'); };
     window.addEventListener('popstate', back);
     return () => window.removeEventListener('popstate', back);
@@ -126,6 +129,10 @@ export function InstallerPortal({ deliveryId }: { deliveryId?: string }) {
     window.requestAnimationFrame(() => { document.getElementById('installer-page-title')?.focus(); });
   };
   const title = deliveryId ? t('รายละเอียดคำขอ', 'Enquiry details') : ({ overview: t('ภาพรวมของคุณ', 'Your workspace'), inbox: t('คำขอจากเจ้าของบ้าน', 'Your enquiries'), credits: t('เครดิต', 'Credits'), profile: t('บัญชีบริษัท', 'Your company'), claims: t('คำร้องคืนเครดิต', 'Credit claims'), terms: t('ข้อตกลงผู้ติดตั้ง', 'Installer terms') })[view];
+  if (loaded && unavailable) return <main className="installer-shell installer-signed-out" lang={en ? 'en' : 'th'}>
+    <header className="installer-header"><a href={'/installers?lang=' + (en ? 'en' : 'th')} className="installer-brand"><PortalBrand /></a><div className="installer-header-actions"><button aria-label={en ? 'Switch to Thai' : 'Switch to English'} onClick={() => { setEn(!en); const url = new URL(window.location.href); url.searchParams.set('lang', en ? 'th' : 'en'); window.history.replaceState({}, '', url); }}>{en ? 'ไทย' : 'English'}</button></div></header>
+    <div className="installer-content"><section className="installer-card"><p className="installer-eyebrow">SOLARMATCH FOR INSTALLERS</p><h1>{t('พอร์ทัลผู้ติดตั้งยังไม่เปิดให้บริการ', 'The installer portal is not open yet')}</h1><p role="status">{t('ขณะนี้ยังไม่เปิดรับสมัครบัญชีบริษัทหรือซื้อเครดิต คุณยังสามารถใช้เครื่องคำนวณโซลาร์สำหรับเจ้าของบ้านได้โดยไม่ต้องให้ข้อมูลติดต่อ', 'Company registration and credit purchases are currently unavailable. You can still use the homeowner solar calculator without providing contact details.')}</p><a className="button button-primary" href={en ? '/en/estimate' : '/estimate'}>{t('ไปที่เครื่องคำนวณโซลาร์', 'Open the solar calculator')}</a></section></div>
+  </main>;
   return <main className={'installer-shell' + (data ? ' installer-workspace' : ' installer-signed-out')} lang={en ? 'en' : 'th'}>
     <a className="installer-skip" href="#installer-content">{t('ข้ามไปเนื้อหา', 'Skip to content')}</a>
     <header className="installer-header"><a href={'/installers?lang=' + (en ? 'en' : 'th')} className="installer-brand"><PortalBrand /></a>{data && <div className="installer-company-heading"><span className="installer-avatar" aria-hidden="true">{Array.from(data.company?.name || data.session.user.name)[0]}</span><div><strong>{data.company?.name || data.session.user.name}</strong><small>{data.company ? statusLabel(data.company.approvalStatus, en) + ' · ' + (data.company.paused ? t('พักรับคำขอ', 'Deliveries paused') : t('ตั้งค่ารับคำขอแล้ว', 'Delivery preferences saved')) : t('ตั้งค่าบริษัทของคุณ', 'Set up your company')}</small></div></div>}<div className="installer-header-actions"><a href={en ? '/en' : '/'}>{t('สำหรับเจ้าของบ้าน', 'Homeowner website')}</a><button aria-label={en ? 'Switch to Thai' : 'Switch to English'} onClick={() => { setEn(!en); const url = new URL(window.location.href); url.searchParams.set('lang', en ? 'th' : 'en'); window.history.replaceState({}, '', url); }}>{en ? 'ไทย' : 'English'}</button></div></header>

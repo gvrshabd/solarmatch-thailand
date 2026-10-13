@@ -1,18 +1,35 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "solarmatch-thailand",
+  "account_id": "e364d5c7864e07143bd229b367b95637",
   "main": "dist/server/index.js",
   "compatibility_date": "2026-05-22",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "ACCESS_TEAM_DOMAIN": "https://millys.cloudflareaccess.com",
     "ACCESS_AUD": "b717abfa537a10f8817266c0b9fdab777a99154fbdc53679e88e067151e7bccd",
-    "PRIVATE_SITE_ACCESS_AUD": "633047706f0772daa15ccba333afda4b2da9352e26a61c20259c9698ebb6af6e"
+    "PRIVATE_SITE_ACCESS_AUD": "633047706f0772daa15ccba333afda4b2da9352e26a61c20259c9698ebb6af6e",
+    "INSTALLER_PLATFORM_MODE": "off",
+    "INSTALLER_BASE_URL": "https://solarmatch-thailand.deluxejahseh.workers.dev",
+    "INSTALLER_TEST_CLOCK_ENABLED": "false",
+    "INSTALLER_SCHEDULER_EXPECTED": "false",
+    "OUTBOUND_MESSAGES_ENABLED": "false",
+    "CAMPAIGN_ATTRIBUTION_ENABLED": "false",
+    "CAMPAIGN_ATTRIBUTION_PRIVACY_REVIEWED": "false",
+    "AUTH_EMAIL_PROVIDER_MODE": "off",
+    "AUTH_EMAIL_LIVE_ENABLED": "false",
+    "SMS_PROVIDER_MODE": "off",
+    "SMS_LIVE_ENABLED": "false",
+    "OMISE_PROVIDER_MODE": "off",
+    "OMISE_LIVE_ENABLED": "false",
+    "LINE_PROVIDER_MODE": "off",
+    "LINE_LIVE_ENABLED": "false"
   },
   "assets": {
     "directory": "dist/client",
     "binding": "ASSETS"
   },
+  "triggers": { "crons": [] },
   "d1_databases": [
     {
       "binding": "DB",

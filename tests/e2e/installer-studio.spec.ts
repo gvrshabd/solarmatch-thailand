@@ -2,6 +2,14 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import type { InstallerPortalData } from '../../lib/installer/portal-contract';
 
+for (const lang of ['en', 'th']) test(`disabled installer service hides registration and recovery (${lang})`, async ({ page }) => {
+  await page.route('**/api/installer/portal*', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'portal_unavailable' }) }));
+  await page.goto(`/installers?lang=${lang}`);
+  await expect(page.getByRole('heading', { name: lang === 'en' ? 'The installer portal is not open yet' : 'พอร์ทัลผู้ติดตั้งยังไม่เปิดให้บริการ' })).toBeVisible();
+  await expect(page.locator('form')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: lang === 'en' ? 'Open the solar calculator' : 'ไปที่เครื่องคำนวณโซลาร์' })).toHaveAttribute('href', lang === 'en' ? '/en/estimate' : '/estimate');
+});
+
 // Deliberately synthetic API fixtures: no account, messages or payment side effects.
 const fixture = (): InstallerPortalData => ({
   session: { user: { id: 'studio-owner', name: 'Synthetic owner', email: 'studio@example.test', emailVerified: true } },

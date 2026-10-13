@@ -83,6 +83,8 @@ Keep the preview running while the second terminal runs Playwright. Stop it befo
 
 For a genuinely fresh synthetic run, choose a new directory under `.wrangler` and use that same `--persist-to` directory for migrations, the preview and any local SQL commands. An earlier isolated installer verification used `.wrangler/installer-final-state`. This leaves earlier local fixtures intact and avoids weakening or clearing application abuse limits.
 
+On Windows, keep the full SQLite filename below 260 characters, including this checkout's path and Miniflare's 64-character database filename. Use a short store name such as `installer-pubfix`. A longer review-store name reproduced `unable to open database file` in SQLite and Miniflare internal errors; the same unchanged data and compiled workflow passed from the shorter path. Stop the source preview before copying a store, or use the documented ordered export/restore. Do not treat a failed database open as a reason to increase browser timeouts.
+
 ### Repair verification: Windows loopback and separate fixture stores
 
 The repair run encountered order-dependent navigation timeouts using `localhost` in the existing combined admin browser suite. Changing readiness waits or cancelling rejected request bodies did not resolve them; those speculative application/test changes were removed. The four unchanged admin checks subsequently passed with the explicit IPv4 origin/config below. This is an observed local workaround, not a claim about production network behavior or a proven root cause. It preserves origin checks, authentication, CSRF assertions, timeouts and all test coverage.

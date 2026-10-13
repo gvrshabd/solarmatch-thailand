@@ -1,0 +1,148 @@
+SOLARMATCH INSTALLER PUBLICATION — 14 OCTOBER 2026 (ASIA/BANGKOK)
+
+Scope and preparation
+Repository: gvrshabd/solarmatch-thailand.
+Candidate: feature/installer-shared-workflow, containing eeca464 and a58b9d1.
+Previous main: 6567ffc84a9ee4e609591e80da587229c6482384.
+Previous production Worker version: 14349a5d-9648-4966-9c01-71a45a92681d.
+Previous deployment: 1dfdd862-0779-4115-b958-5d2b62346582.
+No main protection or GitHub Actions workflow exists. Existing Cloudflare Builds
+uses main / pnpm run build / npx wrangler deploy; non-production branches use
+npx wrangler versions upload. No build environment variables are configured.
+Publication is authorised; commercial activation is not.
+
+Release changes
+Installer 503 responses now show an explicit Thai/English prelaunch state rather
+than account creation/recovery forms that cannot complete with email disabled.
+The calculator remains available. Production has explicit off/false environment
+gates, its own origin, original D1/R2 bindings and admin AUD, and no cron.
+No staging secret/configuration or local-test binding is used in production.
+
+Backup and migration preparation
+Correct production D1: solarmatch-thailand-admin,
+61d0704e-5c1f-4bf6-bf58-32dbe07e9f65.
+Protected ignored backup directory: .wrangler/production-release-2026-10-14.
+production-before.sql: 613800 bytes, SHA256
+8295a6cfc46ea23468cdc094aeb03f179aa4fcfe73737e5e97b44e1329515bff.
+production-before.sql.dpapi: Windows CurrentUser DPAPI encryption, verified by
+decrypting and comparing SHA256. Directory ACL restricts access to the owner.
+Keep the encrypted file and this Windows user's recovery/access context together;
+the private SQL remains restricted for rehearsal. Neither is committed.
+Time Travel bookmark:
+000000b0-00000000-00005103-f26dd7a2bf8ea7b6df3b6aabf54d99cd.
+Pre-release counts: leads 7, media 0, legal versions 3, audit events 9,
+recipient deliveries 0, partners 0. Current public release residential-release-v8
+has live_lead_submissions=0. Historical column fingerprints are stored privately.
+Pending migration files: 0006 through 0018, thirteen files.
+Full exported-database rehearsal preserves 29 historical tables/column values,
+produces 60 application tables, passes foreign-key and integrity checks.
+Original source and the staging-tested CASE/RAISE trigger transport produce the
+same data (new seed creation timestamps excluded from transport comparison).
+Original migration files remain unchanged. Source/transport hashes are recorded
+in private rehearsal.json; migration filenames retain their original identities.
+No synthetic database, user, enquiry, transaction or credit is imported remotely.
+
+Verification history (retain failures)
+336 unit/service tests pass; typecheck passes; lint has zero errors and one
+existing provider QR-image advisory. Isolated compiled build passes.
+90 installer UI cases pass on desktop Chromium, mobile Chromium and mobile
+WebKit, including the new disabled-account behavior, Thai/English, axe and widths.
+Initial disposable copy used a 265-character SQLite path: six admin cases failed
+with database-open errors, while the original store and extended Windows path
+could open the same data. No application or assertion change hid this failure.
+Rerunning at the supported short path restores database access.
+Next combined run: 13 pass / one campaign-cost assertion fails. Its report used
+the current date, while preserved fixtures are dated October 11; the later mobile
+case passes after new synthetic current-day requests. The test now selects the
+fixture's October reporting period explicitly. Missing-cost assertions, original
+combined sequence, security checks and timeout values remain intact.
+Private failed-run evidence: test-results/publication-admin and publication-real.
+Successful-run evidence and final results are appended below after execution.
+The shortened-path combined admin/account/contact suite passes all fourteen
+cases on desktop/mobile, including real local auth and synthetic phone/payment
+paths. Final unit/type/lint recheck passes 336 tests / 47 files, typecheck and
+zero lint errors (the existing QR advisory remains).
+Broad homeowner checks then reproduce two configuration fetches on initial mount,
+before Test consent/contact interaction. Existing exact-one-fetch assertions fail.
+A credential-free probe confirms both requests occur during opening. An attempted
+per-instance request cache did not resolve it and was removed. A full source
+search identifies the separate global CampaignCapture fetch. It now requests
+configuration only when campaign parameters or previously stored attribution
+exist; ordinary visits leave the calculator's one request intact. Existing
+attribution gates/catalog validation and every test assertion remain unchanged.
+Final compiled verification is required before publication.
+
+Final verification / production preparation
+Probe after the CampaignCapture fix: exactly one configuration request during
+opening/contact preview. Final affected homeowner/campaign suite: 61 pass,
+one existing desktop-only skip, 3.5 minutes. The original exact-count, consent,
+zero-PII/no-submit, stale/failed config, real calculations and bilingual assertions
+pass unchanged. Broad prior run: 125 pass, six contact count failures now resolved,
+six intentional project/desktop skips; includes full mobile Safari geometry audit.
+Installer UI: 90 pass; full admin/auth/contact sequence: 14 pass. The suites use
+synthetic local data or intercepted fixtures; they do not prove provider delivery.
+Final unit/service recheck: 336 pass / 47 files; typecheck and lint pass with the
+existing one QR advisory. Normal production, protected staging and isolated local
+builds pass. Production artifact name, D1 ID, R2 bucket, own origin, mode off,
+outbound false, absence of staging/local-admin vars and absent cron are checked.
+Staging updated to version 62f1effd-9a85-448d-a37c-72bb5f0df26b,
+deployment d27947db-2d94-4969-be0f-993c00ee0d84.
+Cloudflare owner authentication and rendered Thai/English sign-in/language switch
+work. Existing installer session expired; a current authenticated populated portal
+check still needs the owner's existing synthetic account login. No session/token
+was copied or exported. Prior authenticated staging evidence remains historical.
+Staging post-check: two synthetic leads/enquiries, one ledger row, no deliveries,
+orders or outbox, all holds true/false as intended, clock NULL. Anonymous pages,
+admin and static assets redirect to Access; unsigned LINE POST is rejected without
+an Access redirect. Existing signed webhook verification is already completed;
+real account linking/device message acceptance remains pending.
+Production migrations 0006–0018 applied under their original filenames; all
+eighteen applied names match the source chain. Settings are explicitly held and
+recorded in a new settings revision. Historical column fingerprints match for
+all checked lead, legal, release, consent, notes, partner, media and audit records.
+Post-migration counts remain 7 leads / 0 media / 3 legal / 9 audits / 0 deliveries.
+Installer enquiry rows: seven legitimate historic lead backfills from the existing
+migration, not synthetic seeds. Installer users/orders/ledger/outbox: all zero.
+No data reset or configuration publication/collection activation occurred.
+The final GitHub revision and production deployment receipt are reported in chat
+and retained privately under .wrangler/production-release-2026-10-14 after deploy.
+
+Recovery prepared before production changes
+For a critical application regression, use the existing Worker rollback command
+on solarmatch-thailand to version 14349a5d-9648-4966-9c01-71a45a92681d, or
+create a normal revert commit covering the publication commits after previous
+main 6567ffc, then push main normally through the existing build pipeline.
+Never reset or force-push main. Retain additive database schema and held settings.
+A code/Worker rollback does not undo database migrations and normally needs no
+database restore. Only for demonstrated data damage, stop writes, verify the
+exact production identity and restore the recorded Time Travel bookmark using
+Cloudflare's recovery workflow, or restore the verified backup to a disposable
+database first and validate historical rows, consent and finance before switching.
+Do not automatically reverse triggers/migrations or restore staging/demo data.
+Permanently purged personal information is not recoverable by application rollback.
+
+Operational state required throughout publication
+Collection false; payments false; notifications false; platform paused;
+allocation/delivery paused; attribution false; outbound LINE/SMS/email false;
+all live provider switches false; test clock NULL; cron absent.
+Production installer authentication off; secure public registration unavailable.
+Protected staging retains its separate database/bucket, synthetic records, owner
+Access, LINE webhook destination and provider credentials. No credential rotation.
+
+Genuine remaining external/business work
+Real LINE account link/message/unlink/reconnect on an authorised handset remains
+untested; signed webhook verification and staging creation are already completed.
+Verify sender/domain and email delivery/recovery; Thai SMS provider/handset delivery;
+Omise merchant approval, selected payment methods, reversal/refund reconciliation
+and bank settlement. None is established by synthetic or mocked tests.
+Supply company/registration/address/contact/tax facts and lawyer-approved policies,
+retention/backup periods, freshness/duplicate and authority thresholds, claim
+evidence rules, staff-link policy, credit expiry and detailed shutdown-refund process.
+Fixed decisions remain: credit ฿200; shared enquiry two credits; lifetime cap three
+companies; two approved trials; seven-day claim submission; approved claims restore
+credits; unused purchased credits refundable on closure subject to final treatment;
+referral hours 09:00–17:00 daily Asia/Bangkok. No exclusive/factory product.
+Automatic provider refund execution, tax invoicing, large-history pagination,
+team administration and SMS delivery-status callback are deferred, not required
+to publish the disabled application. Configure scheduling and alert ownership
+only in a later separately approved activation.

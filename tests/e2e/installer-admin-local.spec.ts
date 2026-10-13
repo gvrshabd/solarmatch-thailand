@@ -110,6 +110,10 @@ test('protected readiness, campaign reports and shutdown export remain read-only
   await signIn(page);
   await page.getByRole('navigation',{name:'Administration sections'}).getByRole('button',{name:'Installer operations'}).click();
   await expect(page.getByRole('button',{name:'Record operation'})).toBeEnabled();
+  // The preserved review demo is dated October 2026. Select its reporting
+  // period explicitly instead of relying on the browser's current day.
+  await page.getByLabel('From Bangkok day').fill('2026-10-01');
+  await page.getByLabel('Through Bangkok day').fill('2026-10-31');
   await page.getByRole('button',{name:'Load campaign report'}).click();
   await expect(page.getByRole('link',{name:'Export campaign CSV'})).toBeVisible();
   await page.getByRole('combobox',{name:'Submission environment',exact:true}).selectOption('local-test');
