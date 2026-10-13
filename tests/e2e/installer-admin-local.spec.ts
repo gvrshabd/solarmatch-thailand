@@ -102,6 +102,25 @@ test('installer admin panel remains operable at 320px with no serious accessibil
   expect(blocking.map(({id,nodes})=>({id,targets:nodes.map(node=>node.target)}))).toEqual([]);
 });
 
+test('prelaunch read-only admin shows accurate holds and reports with operational writes disabled',async({page})=>{
+  let writes=0;
+  await page.route('**/admin/api/installer-platform*',async route=>{
+    if(route.request().method()==='POST'){writes++;return route.continue();}
+    if(new URL(route.request().url()).search)return route.continue();
+    const response=await route.fetch();const data=await response.json();
+    return route.fulfill({response,json:{...data,readOnly:true}});
+  });
+  await signIn(page);
+  await page.getByRole('navigation',{name:'Administration sections'}).getByRole('button',{name:'Installer operations'}).click();
+  await expect(page.getByText('Prelaunch: records and read-only reports are available. Installer changes and operational jobs remain disabled.',{exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Processing health'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Record operation'})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Capture / resolve local health alerts'})).toBeDisabled();
+  await page.getByRole('button',{name:'Calculate review snapshot'}).click();
+  await expect(page.getByRole('region',{name:'Shutdown liability table'})).toBeVisible();
+  expect(writes).toBe(0);
+});
+
 test('protected readiness, campaign reports and shutdown export remain read-only review surfaces',async({page,request})=>{
   for(const report of ['campaign','shutdown']){
     const denied=await request.get(`/admin/api/installer-platform?report=${report}&format=csv`);

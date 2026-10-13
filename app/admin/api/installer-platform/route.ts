@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { requireAdminRequest,isAdminError } from '@/lib/server/admin-api';
 import { requireDatabase, getRuntimeEnv } from '@/lib/server/runtime';
-import { assertPlatformRequest,platformBody,platformJson } from '@/lib/installer/platform';
+import { assertAdminPlatformReadRequest,assertPlatformRequest,platformBody,platformJson } from '@/lib/installer/platform';
 import { getPlatformSettings,installerSettingsSchema,materialTermsChanged } from '@/lib/installer/settings';
 import { allocateEnquiry,processQueue,retryEnquiry,grantTrial,decideClaim,suppressEnquiry,platformAudit,isoNow,adjustPurchasedCredits,type Row } from '@/lib/installer/deliveries';
 import { processOutbox,retryNotification } from '@/lib/installer/jobs';
@@ -21,7 +21,7 @@ export async function GET(request:Request) {
   const query=new URL(request.url).searchParams;
   if(query.has('report')){
     try{
-      assertPlatformRequest(request);const db=requireDatabase();
+      assertAdminPlatformReadRequest(request);const db=requireDatabase();
       let report:unknown,csv:string;
       if(query.get('report')==='campaign'){
         const today=new Date(Date.now()+7*3600000).toISOString().slice(0,10);
@@ -36,7 +36,7 @@ export async function GET(request:Request) {
       return platformJson(report);
     }catch{return platformJson({error:'report_unavailable_check_period_and_environment'},400);}
   }
-  try{assertPlatformRequest(request);const db=requireDatabase();const settings=await getPlatformSettings(db);
+  try{const access=assertAdminPlatformReadRequest(request);const db=requireDatabase();const settings=await getPlatformSettings(db);
 const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.debt FROM solar_company_partners p LEFT JOIN installer_credit_accounts a ON a.company_id=p.id ORDER BY p.created_at DESC LIMIT 200',enquiries:`SELECT e.*,(SELECT o.attribution_json FROM installer_operational_events o WHERE o.enquiry_id=e.id AND o.event_type='qualification-evaluated' AND json_extract(o.attribution_json,'$.sourceLeadId')=e.lead_id ORDER BY o.created_at DESC,o.rowid DESC LIMIT 1) AS qualification_snapshot FROM installer_enquiries e ORDER BY e.created_at DESC LIMIT 200`,deliveries:'SELECT * FROM lead_recipient_deliveries ORDER BY created_at DESC LIMIT 200',orders:'SELECT id,company_id,amount_minor,credits,status,provider,provider_order_id,last_reconciliation_at,reconciliation_error_code,created_at FROM installer_payment_orders ORDER BY created_at DESC LIMIT 200',claims:'SELECT * FROM installer_claims ORDER BY submitted_at DESC LIMIT 200',ledger:'SELECT * FROM installer_credit_ledger ORDER BY created_at DESC LIMIT 200',outbox:'SELECT id,delivery_id,company_id,kind,state,attempts,last_error,created_at FROM installer_outbox ORDER BY created_at DESC LIMIT 200'};
     const tables:Record<string,unknown>={};for(const [key,sql] of Object.entries(queries))tables[key]=(await db.prepare(sql).all()).results;
     const summary=await db.prepare(`SELECT (SELECT COUNT(*) FROM leads) AS rawSubmissionRecords,
@@ -67,7 +67,7 @@ const queries={companies:'SELECT p.*,a.available,a.reserved,a.trial_remaining,a.
       NULL AS verifiedBankSettlementMinor,
       ((SELECT COALESCE(SUM(amount_minor),0) FROM installer_operational_events WHERE event_type='ad-spend')+(SELECT COALESCE(SUM(amount_minor),0) FROM campaign_ad_spend)) AS adSpendMinor,
       (SELECT COUNT(*) FROM installer_outbox WHERE state IN ('failed','needs-reconciliation','action-required')) AS attentionRequired`).bind(settings.creditValueMinor).first();
-    return platformJson({settings,...tables,summary,operations:await getInstallerOperations(db,{schedulerExpected:getRuntimeEnv().INSTALLER_SCHEDULER_EXPECTED==='true'}),preflight:reportInstallerLaunchPreflight(getRuntimeEnv(),settings)});
+    return platformJson({readOnly:access.readOnly,settings,...tables,summary,operations:await getInstallerOperations(db,{schedulerExpected:getRuntimeEnv().INSTALLER_SCHEDULER_EXPECTED==='true'}),preflight:reportInstallerLaunchPreflight(getRuntimeEnv(),settings)});
   }catch{return platformJson({error:'installer_platform_unavailable'},503);}
 }
 export async function POST(request:Request) {

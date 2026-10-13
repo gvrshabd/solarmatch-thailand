@@ -107,6 +107,32 @@ No data reset or configuration publication/collection activation occurred.
 The final GitHub revision and production deployment receipt are reported in chat
 and retained privately under .wrangler/production-release-2026-10-14 after deploy.
 
+Live acceptance and corrective admin read-only patch
+Initial main publication 8db7256754f113267bad02198ec3bc7c9b9a0143 succeeded through
+Cloudflare Builds a8f8e75c-0b26-4907-a9a2-34d03505e93d, deployment
+feebe627-4c98-4a4c-98e5-98e2e2c92db1 / version
+de5c5a1f-a80a-4a84-9edf-9d7fe0c87c99.
+Actual public Thai/English calculator journeys pass on desktop and mobile (two
+tests, each covering both locales), without providing/submitting personal data.
+Installer prelaunch pages pass real desktop/mobile axe and overflow checks; all
+assets load. Public registration/leads/phone endpoints return 503; fixtures 404.
+Authenticated production admin loads seven lead rows. Its installer tab revealed
+the mode-off guard blocked authenticated read-only records/reports. This is a live
+acceptance defect, not hidden by the successful local-test-mode runs.
+Correction: only already-authenticated admin GETs on the configured HTTPS origin
+may read records/health/campaign/shutdown reports while mode off. Existing admin
+JWT/email, public access, CSRF and operational POST guards remain unchanged.
+The response declares readOnly=true; admin operational writes/alert buttons are
+disabled, and status labels wait for authoritative settings. Production platform
+mode remains off; no registration or provider switch is enabled.
+New service tests cover off-mode reads, both reports, authentication, wrong origins
+and denied writes. Full suite: 343 pass / 48 files. Typecheck passes after correcting
+the test's Response.json unknown type; lint zero errors / existing QR advisory.
+Complete admin/auth/contact rerun: 16 pass on desktop/mobile, including two new
+read-only UI tests. Original combined timeout coverage/assertions remain intact.
+Isolated and staging builds pass; final staging version
+b38a15a0-22c5-438d-83c8-698413ed2cd1. No further migration or remote settings write.
+
 Recovery prepared before production changes
 For a critical application regression, use the existing Worker rollback command
 on solarmatch-thailand to version 14349a5d-9648-4966-9c01-71a45a92681d, or

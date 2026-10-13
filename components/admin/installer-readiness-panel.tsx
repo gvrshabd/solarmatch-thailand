@@ -6,7 +6,7 @@ import type {ShutdownLiabilityReport} from '@/lib/installer/shutdown-liabilities
 type Row=Record<string,unknown>;
 const display=(value:unknown)=>value==null?'—':typeof value==='object'?JSON.stringify(value):String(value);
 const thb=(minor:number)=>new Intl.NumberFormat('en',{style:'currency',currency:'THB'}).format(minor/100);
-export function InstallerReadinessPanel({csrfToken,operations,preflight,refresh}:{csrfToken:string;operations?:Row;preflight?:Row;refresh:()=>Promise<void>}){
+export function InstallerReadinessPanel({csrfToken,operations,preflight,refresh,readOnly=false}:{csrfToken:string;operations?:Row;preflight?:Row;refresh:()=>Promise<void>;readOnly?:boolean}){
   const [thai,setThai]=useState(false);
   const t=(en:string,th:string)=>thai?th:en;
   const [fromDay,setFromDay]=useState(()=>new Date(Date.now()+7*3600000).toISOString().slice(0,10));
@@ -21,7 +21,7 @@ export function InstallerReadinessPanel({csrfToken,operations,preflight,refresh}
     }catch(caught){setError(caught instanceof Error?caught.message:'Report unavailable.');}finally{setBusy(false);}
   }
   async function operation(action:'capture-alerts'|'ack-operation-alert',alertId?:string){
-    if(busy)return;setBusy(true);setError('');
+    if(busy||readOnly)return;setBusy(true);setError('');
     try{const response=await fetch('/admin/api/installer-platform',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({action,alertId})});
       if(!response.ok)throw new Error('Health operation refused.');await refresh();
     }catch(caught){setError(caught instanceof Error?caught.message:'Operation refused.');}finally{setBusy(false);}
@@ -34,8 +34,8 @@ export function InstallerReadinessPanel({csrfToken,operations,preflight,refresh}
     <p>{t('These checks do not establish provider delivery, legal approval or launch readiness. Alerts are local records only; no external alert is sent.','การตรวจสอบนี้ไม่ใช่การยืนยันการส่งจากผู้ให้บริการ การอนุมัติทางกฎหมาย หรือความพร้อมเปิดใช้งานจริง การแจ้งเตือนบันทึกไว้ในระบบทดสอบเท่านั้น ไม่มีการส่งออกไปภายนอก')}</p>
     <dl>{['scheduler','queue','notificationProblems','reconciliationTasks'].map(key=><div key={key}><dt>{key}</dt><dd>{display(operations?.[key])}</dd></div>)}</dl>
     <details><summary>{t('Configuration preflight (names only)','ตรวจสอบการตั้งค่าก่อนใช้งาน (แสดงเฉพาะชื่อ)')}</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(preflight??{},null,2)}</pre></details>
-    <button type="button" className="admin-button secondary" disabled={busy||!csrfToken} onClick={()=>void operation('capture-alerts')}>{t('Capture / resolve local health alerts','บันทึก / ตรวจสอบสถานะการแจ้งเตือนในระบบทดสอบ')}</button>
-    <ul>{alerts.map(alert=><li key={String(alert.id)}>{display(alert.code)} · {display(alert.status)} · {display(alert.counts_json)} {alert.status==='open'&&<button className="admin-button secondary" type="button" disabled={busy||!csrfToken} onClick={()=>void operation('ack-operation-alert',String(alert.id))}>Acknowledge {display(alert.code)}</button>}</li>)}</ul>
+    <button type="button" className="admin-button secondary" disabled={busy||!csrfToken||readOnly} onClick={()=>void operation('capture-alerts')}>{t('Capture / resolve local health alerts','บันทึก / ตรวจสอบสถานะการแจ้งเตือนในระบบทดสอบ')}</button>
+    <ul>{alerts.map(alert=><li key={String(alert.id)}>{display(alert.code)} · {display(alert.status)} · {display(alert.counts_json)} {alert.status==='open'&&<button className="admin-button secondary" type="button" disabled={busy||!csrfToken||readOnly} onClick={()=>void operation('ack-operation-alert',String(alert.id))}>Acknowledge {display(alert.code)}</button>}</li>)}</ul>
     <h3>{t('Campaign acquisition report','รายงานคำขอจากแคมเปญ')}</h3>
     <p>{t('Aggregate safe campaign codes only. Incoming requests include rejected, unsold and unattributed requests. Trial deliveries and credit purchases are not earned service fees.','สรุปเฉพาะรหัสแคมเปญที่กำหนดไว้ คำขอทั้งหมดรวมคำขอที่ไม่ผ่านเกณฑ์ ยังไม่มีผู้รับ และไม่ทราบแหล่งที่มา การส่งคำขอทดลองและการซื้อเครดิตไม่ถือเป็นรายได้ค่าบริการที่เกิดขึ้นแล้ว')}</p>
     <div className="admin-media-form"><label>{t('From Bangkok day','เริ่มวันที่ (เวลากรุงเทพฯ)')}<input type="date" value={fromDay} onChange={event=>{setFromDay(event.target.value);setCampaign(null);}}/></label><label>{t('Through Bangkok day','ถึงวันที่ (เวลากรุงเทพฯ)')}<input type="date" value={toDay} onChange={event=>{setToDay(event.target.value);setCampaign(null);}}/></label>

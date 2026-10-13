@@ -5,7 +5,7 @@ import { InstallerReadinessPanel } from './installer-readiness-panel';
 
 type Row = Record<string, unknown>;
 type Collection = 'companies' | 'enquiries' | 'deliveries' | 'orders' | 'claims' | 'ledger' | 'outbox';
-type Payload = Record<Collection, Row[]> & { settings: Record<string, unknown>; summary: Record<string, unknown>; operations?: Record<string, unknown>; preflight?:Row; preview?:Row[];retentionDays?:number };
+type Payload = Record<Collection, Row[]> & { readOnly?: boolean; settings: Record<string, unknown>; summary: Record<string, unknown>; operations?: Record<string, unknown>; preflight?:Row; preview?:Row[];retentionDays?:number };
 type Action = 'approve-company' | 'record-company-contract' | 'set-company-preferences' | 'grant-trial' | 'allocate' | 'retry-enquiry' | 'process-queue' | 'retry-outbox' | 'retry-notification' | 'reconcile-notification' | 'decide-claim' | 'adjust-credit' | 'save-settings' | 'reconcile' | 'associate-provider-charge' | 'pause-company' | 'suppress-enquiry' | 'record-ad-spend' | 'acknowledge-privacy-notification' | 'review-enquiry' | 'preview-retention';
 const sections: Collection[] = ['companies', 'enquiries', 'deliveries', 'orders', 'claims', 'ledger', 'outbox'];
 const visibleColumns: Record<Collection, string[]> = {
@@ -67,6 +67,7 @@ export function InstallerPlatformPanel({ csrfToken, setMessage }: { csrfToken: s
     return () => controller.abort();
   }, []);
   async function submit(event: React.FormEvent<HTMLFormElement>) {
+    if(data?.readOnly){event.preventDefault();return;}
     event.preventDefault(); if (!csrfToken || busy) return;
     setBusy(true); setError('');
     try {
@@ -100,10 +101,11 @@ export function InstallerPlatformPanel({ csrfToken, setMessage }: { csrfToken: s
   return <section className="admin-section">
     <div className="admin-section-heading"><div><h2>Installer operations</h2><p>Shared residential enquiries, company approvals, credits and provider reconciliation. Enquiry availability in the portal starts the draft claim window{data ? ` (${String(data.settings.claimDays)} days under current settings)` : ''}.</p></div><button className="admin-button secondary" type="button" disabled={busy} onClick={() => void load()}>Refresh</button></div>
     {error && <p className="admin-alert error" role="alert">{error}</p>}
-    <InstallerReadinessPanel csrfToken={csrfToken} operations={data?.operations} preflight={data?.preflight} refresh={load}/>
+    {data?.readOnly&&<p role="status">Prelaunch: records and read-only reports are available. Installer changes and operational jobs remain disabled.</p>}
+    <InstallerReadinessPanel csrfToken={csrfToken} operations={data?.operations} preflight={data?.preflight} refresh={load} readOnly={data?.readOnly}/>
     {data && <div className="admin-stats">{Object.entries(data.summary ?? {}).filter(([,value]) => typeof value === 'number').map(([key,value]) => <article key={key}><span>{key.replaceAll('_',' ')}</span><strong>{String(value)}</strong></article>)}</div>}
     {data?.operations && <section><h3>Processing health</h3><div className="admin-stats">{Object.entries(data.operations).filter(([,value])=>typeof value==='number'||typeof value==='string').map(([key,value])=><article key={key}><span>{key.replaceAll(/([A-Z])/gu,' $1')}</span><strong>{cell(value)}</strong></article>)}</div><details><summary>Recent processing runs</summary><pre>{JSON.stringify(data.operations.recentRuns??[],null,2)}</pre></details></section>}
-    <p className="admin-guardrail-note">Global pause: {data?.settings?.platformPaused ? 'ON' : 'off'} · Collection: {data?.settings?.collectionEnabled ? 'on' : 'off'} · Allocation: {data?.settings?.deliveryPaused ? 'paused' : 'available'} · Notifications: {data?.settings?.notificationsEnabled ? 'on' : 'off'} · Payments: {data?.settings?.paymentsEnabled ? 'on' : 'off'}. Change these independently in validated business settings below.</p>
+    {data&&<p className="admin-guardrail-note">Global pause: {data.settings.platformPaused ? 'ON' : 'off'} · Collection: {data.settings.collectionEnabled ? 'on' : 'off'} · Allocation: {data.settings.deliveryPaused ? 'paused' : 'available'} · Notifications: {data.settings.notificationsEnabled ? 'on' : 'off'} · Payments: {data.settings.paymentsEnabled ? 'on' : 'off'}.{!data.readOnly&&' Change these independently in validated business settings below.'}</p>}
     <p className="admin-guardrail-note">Trial grants are restricted to {data ? String(data.settings.trialDeliveries) : 'the configured number of'} shared residential enquiries per approved company. Credit restorations do not reopen recipient slots. Payment capture, unused credits and earned enquiry fees are separate records. Available credit value uses the current nominal credit price; it is not a historical cash liability calculation. Bank settlement is unverified unless independently reconciled.</p>
     <form className="admin-media-form" onSubmit={event => void submit(event)}>
       <label>Operation<select value={action} onChange={event => setAction(event.target.value as Action)}>
@@ -128,7 +130,7 @@ export function InstallerPlatformPanel({ csrfToken, setMessage }: { csrfToken: s
       {action === 'associate-provider-charge' && <><label>Ambiguous Omise order<select required value={orderId} onChange={event => setOrderId(event.target.value)}><option value="">Select order</option>{data?.orders?.filter(row=>row.provider==='omise'&&['authorizing','reconciliation-required'].includes(String(row.status))&&!row.provider_order_id).map(row=><option value={String(row.id)} key={String(row.id)}>{cell(row.id)} · {cell(row.status)}</option>)}</select></label><label>Verified Omise charge ID<input required value={chargeId} onChange={event=>setChargeId(event.target.value)} /></label><p>The provider is queried and its amount, currency and order status checked before any credit is issued. Record the independent review evidence below.</p></>}
       {action === 'associate-provider-charge' && <label>Independent provider reconciliation evidence<textarea required minLength={20} maxLength={1000} value={reason} onChange={event=>setReason(event.target.value)} /></label>}
       {action === 'save-settings' && <label>Business settings JSON<textarea rows={18} required spellCheck={false} value={settings} onChange={event => setSettings(event.target.value)} /><small>Server validates settings and records their history. Real collection, live payments and outbound messages remain separately gated.</small></label>}
-      <button className="admin-button" type="submit" disabled={busy || !csrfToken || !data}>{busy ? 'Recording…' : 'Record operation'}</button>
+      <button className="admin-button" type="submit" disabled={busy || !csrfToken || !data || data.readOnly}>{busy ? 'Recording…' : 'Record operation'}</button>
     </form>
     {retentionPreview&&<section><h3>Retention preview only</h3><p>{retentionPreview.length} candidate records; maximum 100 shown. Nothing was deleted.</p><table className="admin-table"><thead><tr><th>Lead reference</th><th>Original request date</th></tr></thead><tbody>{retentionPreview.map(row=><tr key={String(row.id)}><td>{cell(row.id)}</td><td>{cell(row.created_at)}</td></tr>)}</tbody></table></section>}
     <nav className="admin-tabs" aria-label="Installer records">{sections.map(value => <button type="button" key={value} className={section === value ? 'active' : ''} onClick={() => setSection(value)}>{value} ({data?.[value]?.length ?? 0})</button>)}</nav>
