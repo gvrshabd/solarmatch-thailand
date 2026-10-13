@@ -132,6 +132,10 @@ Complete admin/auth/contact rerun: 16 pass on desktop/mobile, including two new
 read-only UI tests. Original combined timeout coverage/assertions remain intact.
 Isolated and staging builds pass; final staging version
 b38a15a0-22c5-438d-83c8-698413ed2cd1. No further migration or remote settings write.
+Final live screenshot inspection also identifies a CSS specificity conflict on
+the prelaunch calculator link: forest text on a forest background. A scoped
+installer primary-link selector restores white text. Automated axe reported no
+violation on that link, so the visual/computed-style check is retained separately.
 
 Recovery prepared before production changes
 For a critical application regression, use the existing Worker rollback command
