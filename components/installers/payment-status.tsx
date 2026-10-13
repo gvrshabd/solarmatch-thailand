@@ -33,7 +33,7 @@ export function InstallerPaymentStatus() {
   const labels:Record<string,[string,string]>={paid:['ชำระเงินสำเร็จ','Payment successful'],failed:['ชำระเงินไม่สำเร็จ','Payment failed'],cancelled:['ยกเลิกการชำระเงิน','Payment cancelled'],reversed:['ยกเลิกยอดชำระเงินแล้ว','Payment reversed'],refunded:['คืนเงินแล้ว','Payment refunded']};
   const status=order?(labels[order.status]?.[en?1:0]??t('รอยืนยันการชำระเงิน','Payment pending')):'';
   const portal='/installers?view=credits&lang='+(en?'en':'th');
-  return <main className="installer-shell"><section className="installer-card">
+  return <main className="installer-shell" lang={en?'en':'th'}><section className="installer-card">
     <a href={portal}>← {t('กลับไปที่เครดิตและการซื้อ','Back to credits and purchases')}</a>
     <h1>{t('สถานะการชำระเงิน','Payment status')}</h1>
     {order&&<><h2>{status}</h2><p>{new Intl.NumberFormat(en?'en-GB':'th-TH',{style:'currency',currency:order.currency}).format(order.amountMinor/100)} · {order.credits} {t('เครดิต','credits')}</p><p>{t('รายการ','Order')}: {order.id}</p>{order.receiptReference&&<p>{t('ใบเสร็จอ้างอิง','Receipt reference')}: {order.receiptReference}</p>}<p>{order.status==='paid'&&order.credited?t('ยืนยันจากผู้ให้บริการแล้ว เครดิตที่ซื้อจะหักหนี้เครดิตก่อนเพิ่มยอดพร้อมใช้','Confirmed by the provider. Purchased credits first offset credit debt, then increase your available balance.'):t('หน้านี้แสดงสถานะที่ตรวจสอบโดยเซิร์ฟเวอร์ การกลับจากหน้าชำระเงินไม่ได้ยืนยันความสำเร็จ','This page shows the server-verified status. Returning from payment does not confirm success.')}</p></>}

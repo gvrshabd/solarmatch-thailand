@@ -1,0 +1,80 @@
+SolarMatch installer Studio redesign - 13 October 2026
+
+Scope
+Local feature/installer-shared-workflow only. Starting commit:
+a58b9d179550539c1b766bab8248e60416f142ce.
+Visual references: the owner's partners-refined Studio design study and all
+13 pages of SolarMatch_Installer_Redesign.pdf. No remote design was changed.
+
+Implemented
+- Ivory, sage, forest-green and restrained lime palette.
+- Editorial desktop headings; Thai-compatible type and compact mobile headings.
+- Desktop sidebar; four-item mobile bottom navigation with safe-area clearance.
+- Overview with the actual unstarted enquiry count and oldest-unstarted link.
+- Enquiry cards with real assessment details and trial/charged-credit labels.
+- Search and All/New/In progress/Closed filters. Withdrawn PII is neither shown
+  nor searched, even when an older response contains stale personal fields.
+- Credits balance, separate trial/reserved figures, packages, ledger and a
+  collapsible order history; all values come from the existing API.
+- Restyled account, claims, terms, enquiry details, sign-in and payment status.
+- Original SVG skyline/panel illustration, without external image requests.
+- Browser Back navigation, visible focus and reduced-motion behavior.
+
+Intentionally not imported from the visual mockups
+The API has no live competitor-contact count, so there is no competition meter.
+There are no invented calculator outputs, scarcity claims or cash-equivalent
+balance. Opening a record or a phone link does not mark it contacted.
+No OTP sign-in, licence-upload application, automated messaging, new payment
+flow or recipient-tracking backend was introduced. Existing account and service
+actions remain authoritative. Claims and Terms are under Company.
+
+Safety
+No backend, schema, migration source, production or staging configuration changed.
+No remote deployment, push, real payment or real message is part of this task.
+Milly's and main were not targeted. Existing demo data remains preserved.
+The eighteen EXISTING migrations were applied only to a new disposable local
+installer-ui store for real synthetic signup/recovery tests.
+The established installer-demo store remains the browseable final preview.
+
+Verification
+Final: 336 unit tests across 47 files; typecheck; lint (zero errors, the existing
+provider-QR no-img-element warning); normal production build; isolated local
+production build; 84 focused browser cases across desktop Chromium, mobile
+Chromium and mobile WebKit; two real local authentication workflows.
+The first 52 Chromium checks passed.
+The expanded cross-browser sweep exposed a WebKit breakpoint contrast defect:
+active navigation foreground changed before its background transition finished.
+The fix makes navigation highlighting immediate and explicitly sets both colors
+at each breakpoint; the substantive accessibility assertion is retained.
+The expanded pre-fix run had 82 passes and two WebKit contrast failures.
+The final complete 84-case rerun passed after the correction (two workers,
+3.0 minutes). Both builds were repeated successfully after the CSS fix.
+Coverage includes the original payment/withdrawal/LINE regressions, bilingual
+Studio layouts, axe, focus, browser Back, reduced motion and real local auth.
+Viewport widths: 320, 360, 390, 430, 768, 900 and 1440 CSS pixels.
+Scoped axe checks passed; this is not a claim of a full manual WCAG certification.
+Failed-run evidence remains separately in ignored test-results/studio-final;
+successful final evidence is in test-results/studio-verified. Synthetic proof
+images are also in .wrangler/installer-studio-proof. No sensitive traces exported.
+
+Final held-state checks passed for both installer-demo and installer-ui.
+The new store initially had unset safety keys (fail-closed defaults); the local
+test teardown explicitly set all required disabled/paused values and cleared its
+clock. Original demo counts before and after: five leads/enquiries, six recipient
+deliveries, thirteen ledger rows, two claims, three legal versions, 18 migrations.
+No real-provider acceptance or deployment is claimed.
+
+Reproduce
+Use docs/installer-local-test.md and the fictitious local-only bindings.
+After the isolated build, run the compiled IPv4 preview on 127.0.0.1:3000.
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000
+pnpm exec playwright test tests/e2e/installer-studio.spec.ts tests/e2e/installer-repair-portal.spec.ts tests/e2e/installer-payment-return.spec.ts --project=desktop-chromium --project=mobile-chromium --project=installer-mobile-webkit
+Real local authentication: INSTALLER_E2E=1, installer-workflow.spec.ts,
+--grep "real signup", desktop-chromium and mobile-chromium, disposable store.
+Do not treat mocked provider-return tests as real payment/LINE acceptance.
+
+Preview
+http://127.0.0.1:3000/installers?lang=en
+http://127.0.0.1:3000/installers?lang=th
+Use the existing synthetic demo account. Never enable live providers to review
+this design. Original preview balances, claims and enquiries are unchanged.

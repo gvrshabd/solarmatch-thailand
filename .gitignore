@@ -9,6 +9,8 @@ dist/
 .wrangler/
 test-results/
 playwright-report/
+# Local PDF reference renders (not production design assets).
+/tmp/pdfs/
 *.tsbuildinfo
 .env*
 !.env.example
