@@ -20,7 +20,7 @@ export function assertInstallerJobEnvironment(env:SolarMatchRuntimeEnv) {
 
 export function lineConfiguration(env:SolarMatchRuntimeEnv=getRuntimeEnv(),db?:D1Database):LineConfig {
   if(env.STAGING_LINE_MAX_MESSAGES&&!db)throw Error('staging_message_budget_requires_database');
-  return {mode:env.INSTALLER_PLATFORM_MODE==='local-test'?'local-test':env.INSTALLER_PLATFORM_MODE==='sandbox'&&env.LINE_PROVIDER_MODE==='sandbox'?'sandbox':env.INSTALLER_PLATFORM_MODE==='production'&&env.LINE_PROVIDER_MODE==='live'?'live':'off',channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:parseJson<string[]>(env.LINE_TEST_RECIPIENTS,[]),reserveMessage:db?stagingLineBudget(db,env):undefined,stagingLabel:!!env.STAGING_LINE_MAX_MESSAGES};
+  return {mode:env.INSTALLER_PLATFORM_MODE==='local-test'?'local-test':env.INSTALLER_PLATFORM_MODE==='sandbox'&&env.LINE_PROVIDER_MODE==='sandbox'?'sandbox':env.INSTALLER_PLATFORM_MODE==='production'&&env.LINE_PROVIDER_MODE==='live'?'live':'off',channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:parseJson<string[]>(env.LINE_TEST_RECIPIENTS,[]),reserveMessage:db?stagingLineBudget(db,env):undefined,countLinkTokenAttempts:!!env.STAGING_LINE_TEST_SESSION,stagingLabel:!!env.STAGING_LINE_MAX_MESSAGES};
 }
 function notificationContextMatches(row:Row,env:SolarMatchRuntimeEnv) {
   const mode=env.INSTALLER_PLATFORM_MODE;

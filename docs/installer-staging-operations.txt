@@ -1,7 +1,36 @@
 SOLARMATCH ISOLATED HTTPS STAGING — 12 OCTOBER 2026
 
-CURRENT CONTINUATION: the initial preparation/hold narrative below is historical.
-Use the completed Access/LINE continuation at the end for the current state.
+CURRENT STATE — 14 OCTOBER 2026:
+The initial preparation/hold narrative and three-push plan below are historical.
+Use the latest five-API result in installer-staging-test-report.txt. Repair 63b656d
+was verified in staging. Two old failed reservations remain; the explicitly
+authorised fresh session used all five state-changing calls (two invitation pushes,
+two link-token POSTs, one enquiry push). Three phone receipts confirmed by owner;
+both genuine signed linking events verified. Exactly one synthetic delivery used
+two NON-CASH fixture credits, not a real purchase or trial. Final balance2/trial0.
+
+No remaining authorised attempts. Do not send LINK or activate sending now.
+Session active=false; runtime outbound=false; notifications/collection/payments
+off; platform/company paused; allocation paused; clockNULL. Original OA greeting
+and response-hour settings restored, webhook remains active at the exact staging
+endpoint. Final held Worker version f7fec39e-b10f-4efc-9497-e35eecd3a23d.
+
+STAGING_LINE_TEST_SESSION is an optional staging-only pointer to an authorised,
+expiring operational-event marker. It is not configured in repository deployments
+and has no effect on production. Never delete/reset existing budget rows. A future
+exercise requires explicit fresh owner authorisation, a verified owner-only scope,
+preflight, a new expiring marker and an independent shutdown watchdog. Reusing an
+exhausted/revoked session is prohibited. Provider retries count as new API attempts.
+Each token request also counts; quota/identity GET checks are read-only and are
+reported separately. The original three-slot guard remains unchanged without an
+explicit session. No test-clock override or business-hour bypass is permitted.
+
+Private ignored management helper line-controlled-test.mjs supports status/off;
+off deactivates the session before closing DB and runtime gates. Its watch action
+already completed cleanup after this reconnection. Do not use its on action as an
+implicit replenishment. The synthetic homeowner SMS item remains held with zero
+attempts; do not resume it as part of LINE-only testing. Existing histories and
+linked owner are retained. No production deploy, push, merge or migration occurred.
 
 Scope: feature/installer-shared-workflow only. Never target main, production
 bindings, solarmatch-thailand, Milly's, or a production/customer database.

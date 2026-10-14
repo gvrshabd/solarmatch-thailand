@@ -8,6 +8,7 @@ export type SolarMatchRuntimeEnv = {
   PRIVATE_SITE_ACCESS_AUD?: string;
   STAGING_ACCESS_AUD?: string;
   STAGING_LINE_MAX_MESSAGES?: string;
+  STAGING_LINE_TEST_SESSION?: string;
   ADMIN_EMAILS?: string;
   CSRF_SECRET?: string;
   ASSESSMENT_SIGNING_SECRET?: string;

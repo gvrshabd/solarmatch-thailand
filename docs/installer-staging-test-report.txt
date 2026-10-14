@@ -1,5 +1,97 @@
 SOLARMATCH HTTPS STAGING PREPARATION — ACTUAL EVIDENCE, 12 OCTOBER 2026
 
+FRESH FIVE-API OWNER LINE TEST — 14 OCTOBER 2026 (LATEST RESULT)
+This section supersedes the earlier pending real-provider coverage below, while
+preserving both failed attempts and their original investigation. Starting feature
+repair: 63b656df69f93ad4f6c9e89a1fbb329c80496676. Production/main unchanged.
+
+Explicit owner authorisation permitted five fresh state-changing LINE API attempts
+to the sole verified allowlisted owner, within the existing free allowance. A new
+time-limited staging session adds five reservations WITHOUT deleting/resetting the
+two previous failures. Each invocation, including a reused retry key and link-token
+request, counts. The sixth is blocked atomically. Active session, recipient binding,
+real Bangkok hours, notification/platform holds and no test clock are enforced.
+Only the exact existing staging origin/sandbox configuration accepts the session.
+The session identifier and credential/recipient values are not committed.
+
+Preflight: existing bot Solar Match/@944yqdue; active exact staging webhook; sole
+allowlisted API user matches owner profile; approved verified synthetic owner;
+current synthetic contract and accepted terms; four non-cash fixture credits,
+zero trials/debt/deliveries. Bot identity, webhook/profile and quota GETs were
+read-only preflight checks, separate from the five state-changing-call budget.
+Workerd regression checks exercise the ACTUAL compiled provider implementations,
+manual redirects and rejection of a synthetic 302 without a second destination
+request or forwarding of the synthetic Authorization header.
+
+Staging code deployment before sending: 5787f51b-413b-4bcd-8dab-402013cb8c57,
+containing repair 63b656d and the additive session limiter. No migration ran.
+All real attempts occurred within 09:00-17:00 Bangkok (approximately 10:57-11:12).
+
+Actual state-changing API sequence (5/5, no retries):
+1. Invitation push: accepted; owner confirmed invitation arrived.
+2. Link-token POST: succeeded; genuine signed accountLink linked the same owner.
+3. Enquiry push: accepted; owner confirmed notification arrived and enquiry opens.
+4. Reconnection invitation push: accepted; owner confirmed invitation arrived.
+5. Reconnection link-token POST: succeeded; genuine signed accountLink confirmed
+   the same owner again after unlink. Owner completed approval before the next
+   instruction; no extra invitation or token request was made.
+Provider acceptance is not inferred to be phone receipt: the three message receipts
+are separate owner confirmations. Final quota GET returned 200, totalUsage=3,
+against the existing limited 300-message allowance. No paid service was enabled.
+
+One EXISTING eligible synthetic enquiry was allocated through the authenticated,
+same-origin/CSRF-protected admin action and normal eligibility/allocation service.
+The company was unpaused using its normal authenticated owner form. That form
+initially blocked saving because the fixture phone was empty; a visibly synthetic,
+non-contactable test value completed the required profile. No validation bypass.
+Internal collection/allocation gates were opened only for this single allocation;
+the staging Worker continued rejecting public PII submission endpoints. Those
+gates were immediately closed again. No manual delivery or debit was inserted.
+
+Financial evidence: exactly one delivery, one -2 available-credit ledger debit;
+fixture balance 4 -> 2, reserved0/trial0/debt0; no second delivery or debit and no
+payment order. Delivery funding_source is 'purchased' in the normal credit-path
+schema, but the originating staging-fixture ledger explicitly identifies these as
+NON-CASH, NOT purchased money. This is not evidence of a paid transaction or trial.
+The generated synthetic homeowner-confirmation SMS outbox item was explicitly
+held/action-required with an audit record BEFORE processing notifications. It
+remained attempts0/providerAccepted0. Only the LINE item ran, attempts1/accepted.
+
+Owner used Disconnect LINE; database association cleared, generation0 -> 1 and
+pending link challenges invalidated. Reconnection consumed a second fresh signed
+challenge. Final association matches the SAME private allowlisted owner. Four
+completed signed webhook records (two LINK messages/two accountLink events), two
+consumed challenges, four invitation records (including the two historical failed
+invitations), seven persistent budget records (two old failures plus five fresh).
+
+Cleanup: watchdog completed successfully after reconnection; session active=false,
+runtime outbound=false, platformPaused=true, company paused=true,
+collection/payments/notifications=false, deliveryPaused=true, clockNULL. SMS,
+email, Omise, live LINE and attribution remain disabled. Original OA greeting and
+response hours restored ON, manual chat during hours/auto-response outside, webhook
+ON unchanged. No production, main, Milly's, migration or remote customer operation.
+Final held staging version: f7fec39e-b10f-4efc-9497-e35eecd3a23d (100%);
+deployment: 72d9f089-cd4b-4029-bd65-6fe102642a3a.
+
+Verification: 353 tests / 50 files passed before staging deployment. Later running
+lint/typecheck/full tests concurrently produced one Workerd startup/test timeout
+(352 passed/1 timed out). Further LINE sends were held during diagnosis. After
+lint/typecheck finished, unchanged isolated security/session tests passed (7/7,
+1.61s), then the UNCHANGED full command passed (353/353, 50 files, 10.85s). No
+timeout increase, assertion removal, skip or test substitution. This supports local
+resource contention as the cause, not a provider/application failure; intermittent
+runtime startup under heavy concurrent tools remains an investigation limitation.
+Typecheck passed. Lint zero errors, existing QR-image advisory only. Staging build
+and subsequent local-test build passed. No new full Playwright run was performed;
+this report distinguishes actual device, authenticated browser, database and unit
+checks rather than claiming complete browser coverage.
+
+Still untested LIVE: provider retry/ambiguous failure, blocked/unfollowed device,
+queued-message unlink race and prolonged expiry scenarios. Their existing mocked
+regressions do not establish live-provider behavior. SMS/email/payment settlement
+remain intentionally out of scope. No extra sends beyond the five API calls.
+Local synthetic demo data was preserved; local preview restored after the build.
+
 CONTROLLED OWNER LINE TEST — 14 OCTOBER 2026 (CURRENT CONTINUATION)
 Within actual Bangkok referral hours, the owner authorised at most three staging
 test messages. No production operation, push, migration, payment, SMS, email or
