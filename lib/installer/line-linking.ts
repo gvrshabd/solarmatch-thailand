@@ -5,6 +5,7 @@ import { getPlatformSettings } from './settings';
 import { platformAudit } from './deliveries';
 import {stagingLineBudget} from './staging-line-budget';
 import { lineAccountLinkUrl,requestLinkToken,sendAccountLinkInvitation,verifyLineWebhook,type LineConfig,type LineEvent } from './providers/line';
+import {ProviderError} from './providers/common';
 async function configFor(db:D1Database,request:Request):Promise<LineConfig>{const {mode}=assertPlatformRequest(request);const env=getRuntimeEnv(),settings=await getPlatformSettings(db);let recipients:string[]=[];try{const value=JSON.parse(env.LINE_TEST_RECIPIENTS??'[]');if(Array.isArray(value)&&value.every(item=>typeof item==='string'))recipients=value;}catch{/* fail closed */}const providerMode=mode==='local-test'?'local-test':env.LINE_PROVIDER_MODE==='live'&&String(mode)==='production'?'live':env.LINE_PROVIDER_MODE==='sandbox'&&mode==='sandbox'?'sandbox':'off';return {mode:providerMode,channelSecret:env.LINE_CHANNEL_SECRET,accessToken:env.LINE_CHANNEL_ACCESS_TOKEN,outboundEnabled:!settings.platformPaused&&settings.notificationsEnabled&&env.OUTBOUND_MESSAGES_ENABLED==='true',liveEnabled:env.LINE_LIVE_ENABLED==='true',sandboxRecipients:recipients,reserveMessage:stagingLineBudget(db,env),stagingLabel:!!env.STAGING_LINE_MAX_MESSAGES};}
 export async function beginLineLink(db:D1Database,companyId:string,request:Request,linkRequest?:string){
   const config=await configFor(db,request);
@@ -94,7 +95,11 @@ export async function processLineWebhook(db:D1Database,request:Request,raw:strin
     // Domain-separated HMAC permits deterministic provider retry without storing
     // recoverable invitation tokens. Signed event IDs are not identity claims.
     const token=encodeBase64Url(await hmacSha256(`solarmatch-line-invitation:${event.webhookEventId}`,config.channelSecret));const tokenHash=await sha256(token),now=new Date().toISOString();
-    const retryHex=Array.from(await hmacSha256(`solarmatch-line-retry:${event.webhookEventId}`,config.channelSecret),byte=>byte.toString(16).padStart(2,'0')).join('').slice(0,32);const retryKey=`${retryHex.slice(0,8)}-${retryHex.slice(8,12)}-${retryHex.slice(12,16)}-${retryHex.slice(16,20)}-${retryHex.slice(20)}`;
+    const retryBytes=(await hmacSha256(`solarmatch-line-retry:${event.webhookEventId}`,config.channelSecret)).slice(0,16);
+    // A formatted HMAC alone is not an RFC UUID: set version and variant bits.
+    // The same signed event still produces the same provider idempotency key.
+    retryBytes[6]=(retryBytes[6]&0x0f)|0x40;retryBytes[8]=(retryBytes[8]&0x3f)|0x80;
+    const retryHex=Array.from(retryBytes,byte=>byte.toString(16).padStart(2,'0')).join('');const retryKey=`${retryHex.slice(0,8)}-${retryHex.slice(8,12)}-${retryHex.slice(12,16)}-${retryHex.slice(16,20)}-${retryHex.slice(20)}`;
     // Check and insert in one SQLite statement, not a racing count-then-insert.
     // Retrying the same event keeps its original token/expiry and provider key.
     await db.prepare(`INSERT OR IGNORE INTO installer_line_invitations(id,line_user_id,token_hash,expires_at,created_at)
@@ -102,7 +107,16 @@ export async function processLineWebhook(db:D1Database,request:Request,raw:strin
       .bind(eventId,event.source.userId,tokenHash,new Date(Date.now()+600000).toISOString(),now,event.source.userId,new Date(Date.now()-600000).toISOString()).run();
     if(!await db.prepare('SELECT id FROM installer_line_invitations WHERE id=? AND consumed_at IS NULL AND expires_at>?').bind(eventId,now).first())continue;
     const url=new URL('/installers',request.url);url.searchParams.set('linkRequest',token);
-    const result=await sendAccountLinkInvitation(event.source.userId,url.href,retryKey,config);
+    let result:Awaited<ReturnType<typeof sendAccountLinkInvitation>>;
+    try{result=await sendAccountLinkInvitation(event.source.userId,url.href,retryKey,config);}
+    catch(error){
+      // Keep actionable, private failure evidence without message text, tokens,
+      // recipient IDs, invitation URLs or raw provider response bodies.
+      const code=error instanceof ProviderError?error.code:'invitation_send_failed';
+      await db.prepare(`INSERT OR REPLACE INTO installer_operational_events(id,event_type,attribution_json,created_at)
+        VALUES(?,'line-invitation-provider-failure',?,?)`).bind(`line-invitation-failure:${event.webhookEventId}`,JSON.stringify({code}),now).run();
+      throw error;
+    }
     const statements=[db.prepare("INSERT OR IGNORE INTO installer_webhook_events(id,provider,created_at) VALUES(?,'line',?)").bind(eventId,now)];
     if(result.status==='captured')statements.push(db.prepare("INSERT INTO installer_test_messages(id,channel,recipient,body,created_at) VALUES(?,'line',?,?,?)").bind(crypto.randomUUID(),event.source.userId,JSON.stringify(result.captured),now));
     await db.batch(statements);

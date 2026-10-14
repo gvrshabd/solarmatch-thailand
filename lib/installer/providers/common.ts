@@ -11,7 +11,9 @@ export function parseObject(raw: string): Record<string, unknown> {
 }
 export async function requestJson(url: string, init: RequestInit, transport: typeof fetch = fetch): Promise<Record<string, unknown>> {
   try {
-    const response = await transport(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(15000) });
+    // Workerd supports manual/follow, not redirect:error. Manual keeps tokens
+    // on the intended provider host; every 3xx is rejected by the status check.
+    const response = await transport(url, { ...init, redirect: 'manual', signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new ProviderError(`provider_http_${response.status}`);
     return parseObject(await response.text());
   } catch (error) { if (error instanceof ProviderError) throw error; throw new ProviderError('provider_unavailable'); }

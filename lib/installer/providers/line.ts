@@ -17,6 +17,7 @@ export async function verifyLineWebhook(raw: string, headers: Headers, config: L
   return body.events as LineEvent[];
 }
 function userId(value: string) { if (!/^U[0-9a-f]{32}$/i.test(value)) throw new ProviderError('invalid_line_user'); }
+function retryUuid(value:string){if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))throw new ProviderError('invalid_retry_key');}
 function outbound(config: LineConfig, to: string) {
   requireMode(config.mode); userId(to);
   if (!config.outboundEnabled || (config.mode === 'live' && !config.liveEnabled) || (config.mode === 'sandbox' && !config.sandboxRecipients?.includes(to))) throw new ProviderError('outbound_disabled');
@@ -44,7 +45,7 @@ export function enquiryNotificationText(input: EnquiryNotification) {
 }
 export async function sendEnquiryNotification(input: EnquiryNotification, config: LineConfig) {
   requireMode(config.mode); userId(input.to);
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.retryKey)) throw new ProviderError('invalid_retry_key');
+  retryUuid(input.retryKey);
   const captured = { to: input.to, messages: [{ type: 'text', text: enquiryNotificationText(input) }] };
   if (config.mode === 'local-test') return { status: 'captured' as const, providerMessageId: `local_${input.retryKey}`, captured };
   outbound(config, input.to);
@@ -54,14 +55,14 @@ export async function sendEnquiryNotification(input: EnquiryNotification, config
   // Keep this UUID fixed on every retry of this outbox record. LINE accepts a
   // duplicate retry key with 409 and X-Line-Accepted-Request-Id.
   try {
-    const result = await (config.fetch ?? fetch)('https://api.line.me/v2/bot/message/push', { method: 'POST', headers: { Authorization: `Bearer ${config.accessToken}`, 'Content-Type': 'application/json', 'X-Line-Retry-Key': input.retryKey }, body: JSON.stringify(captured), redirect: 'error', signal: AbortSignal.timeout(15000) });
+    const result = await (config.fetch ?? fetch)('https://api.line.me/v2/bot/message/push', { method: 'POST', headers: { Authorization: `Bearer ${config.accessToken}`, 'Content-Type': 'application/json', 'X-Line-Retry-Key': input.retryKey }, body: JSON.stringify(captured), redirect: 'manual', signal: AbortSignal.timeout(15000) });
     const id = result.headers.get('x-line-accepted-request-id') ?? result.headers.get('x-line-request-id');
     if (!(result.ok || (result.status === 409 && result.headers.has('x-line-accepted-request-id')))) throw new ProviderError(`provider_http_${result.status}`);
     return { status: 'accepted' as const, providerMessageId: id ?? input.retryKey };
   } catch (error) { if (error instanceof ProviderError) throw error; throw new ProviderError('provider_unavailable'); }
 }
 export async function sendAccountLinkInvitation(to: string, invitationUrl: string, retryKey: string, config: LineConfig) {
-  requireMode(config.mode); userId(to);
+  requireMode(config.mode); userId(to);retryUuid(retryKey);
   const url=safeUrl(invitationUrl,config.mode==='local-test');
   const text=`เชื่อมต่อ LINE กับบริษัทของคุณ / Link LINE to your installer company\n${url.href}\nคุณสามารถยกเลิกการเชื่อมต่อได้ในพอร์ทัล / You can unlink in the portal.`;
   const captured={to,messages:[{type:'text',text}]};
@@ -70,7 +71,7 @@ export async function sendAccountLinkInvitation(to: string, invitationUrl: strin
   await config.reserveMessage?.(retryKey,to);
   if(config.stagingLabel)captured.messages[0].text='[SolarMatch STAGING TEST / ข้อความทดสอบ]\n'+captured.messages[0].text;
   try {
-    const response=await(config.fetch??fetch)('https://api.line.me/v2/bot/message/push',{method:'POST',headers:{Authorization:`Bearer ${config.accessToken}`,'Content-Type':'application/json','X-Line-Retry-Key':retryKey},body:JSON.stringify(captured),redirect:'error',signal:AbortSignal.timeout(15000)});
+    const response=await(config.fetch??fetch)('https://api.line.me/v2/bot/message/push',{method:'POST',headers:{Authorization:`Bearer ${config.accessToken}`,'Content-Type':'application/json','X-Line-Retry-Key':retryKey},body:JSON.stringify(captured),redirect:'manual',signal:AbortSignal.timeout(15000)});
     const id=response.headers.get('x-line-accepted-request-id')??response.headers.get('x-line-request-id');
     if(!(response.ok||(response.status===409&&response.headers.has('x-line-accepted-request-id'))))throw new ProviderError(`provider_http_${response.status}`);
     return {status:'accepted' as const,providerMessageId:id??retryKey};

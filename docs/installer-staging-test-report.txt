@@ -1,5 +1,77 @@
 SOLARMATCH HTTPS STAGING PREPARATION — ACTUAL EVIDENCE, 12 OCTOBER 2026
 
+CONTROLLED OWNER LINE TEST — 14 OCTOBER 2026 (CURRENT CONTINUATION)
+Within actual Bangkok referral hours, the owner authorised at most three staging
+test messages. No production operation, push, migration, payment, SMS, email or
+credential rotation was performed. The existing Solar Match OA and staging-only
+webhook/token were used; no additional Worker or public test bypass was created.
+
+Preflight verified API bot identity @944yqdue, active exact staging webhook, limited
+300-message allowance with usage zero, a single allowlisted real API user ID whose
+profile is Shabd, and an approved verified synthetic company owner. Signed empty
+webhook passed; signed non-owner input produced no invitation or budget reservation.
+Both actual phone LINK attempts subsequently matched that sole allowlisted user.
+The actual API ID, access token, signatures and invitation URLs are not exported.
+
+The synthetic company began disconnected and paused, with four non-cash fixture
+credits, no trial balance, no debt and no deliveries. Its persisted platform JSON
+omitted termsVersion. The existing authenticated/CSRF-protected admin settings
+operation normalized the full validated defaults while retaining the company's
+accepted test terms; no contract, consent, qualification or delivery guard was
+relaxed. Collection and allocation remained held during invitation attempts.
+
+The OA greeting was temporarily disabled and built-in response hours temporarily
+disabled with manual-only responses selected. These do not change SolarMatch's
+09:00-17:00 business-hour checks. Original greeting/response-hours switches were
+restored ON, with original manual-during/auto-outside behavior, and webhook left ON.
+Runtime outbound and DB notifications were enabled only for the controlled window.
+
+Actual outcome: two failed invitation attempts, two persistent budget reservations,
+zero accepted webhook-event completions, no device invitation received, no account
+link, zero portal deliveries, unchanged four fixture credits, zero trial use,
+zero payment orders and zero outbox rows. LINE quota usage remained zero. Both
+failed slots remain reserved; no deletion, replenishment or implicit new allowance.
+The final unused slot was not spent. Full connection/enquiry/reconnection coverage
+cannot be completed within this session's remaining allowance and remains untested.
+
+Defects and investigation retained:
+- The concurrent cap unit test incorrectly assumed request zero won a reservation.
+  It initially failed. It now retries an actually fulfilled reservation, preserving
+  cap, idempotency and cross-recipient rejection assertions.
+- Invitation HMAC bytes were merely hyphenated, without UUID version/variant bits.
+  The observed initial key had version 8 and variant d. Generation now sets RFC
+  version/variant bits deterministically, and malformed keys fail before sending.
+  This alone did not resolve the second device attempt; do not claim that it did.
+- The second attempt retained safe provider_unavailable evidence. Both LINE push
+  paths and shared link-token transport used redirect:error. A non-sending local
+  Workerd check reproduced TypeError "Invalid redirect value" with that mode;
+  manual reached LINE's unauthenticated bot-info endpoint and returned 401.
+  The actual source now uses manual and rejects 3xx without following redirects.
+  New Workerd tests use synthetic outbound handlers only, covering invitation,
+  link-token and notification transport plus credential-safe redirect rejection.
+  Their first assertion incorrectly inspected redirect on the Node service bridge;
+  the final test observes init modes inside Workerd and actual redirect rejection.
+- Safe private invitation failure records contain error codes only, no PII/tokens.
+- The temporary cleanup helper initially combined parameterized SQL statements,
+  which Cloudflare rejected (7400). Separate guarded statements repaired cleanup;
+  explicit shutdown verified every hold before final staging deployment.
+- The first staging build hit the existing preview dist lock (EPERM). Only the
+  SolarMatch local preview was stopped; the clean build then passed.
+
+Final unit/service suite: 348 passed / 49 files. Typecheck passed. Lint: zero errors,
+one existing QR-image advisory. Staging production build passed. No real message
+was sent for mock retry/redirect tests. Remote LINE acceptance remains unverified.
+Staging-only repair version: 70b7c93d-db50-426b-bc3b-7f64de9a29e3 (100%).
+Deployment: 251dc621-7a09-433d-8742-e868673cd1fb.
+No publication to main or production was performed. All remaining provider tests
+still require explicitly authorised device participation and an intact capped
+allowance; never erase failed reservations to make this exercise appear to pass.
+
+Final remote state verified: platform/company paused; collection/payments and
+notifications false; delivery paused; outbound false; SMS/email/payment/attribution
+live flags false; test clock NULL; the three-message cap preserved. Original
+business constants and synthetic enquiry/ledger histories remain unchanged.
+
 The original preparation evidence below is retained. The continuation at the end
 supersedes its pending Access/token/webhook state, not its historical failures.
 
