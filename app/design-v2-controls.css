@@ -45,3 +45,27 @@ html[lang=th] .terrace-public :is(h1,h2,h3,h4),.installer-shell[lang=th] :is(h1,
 .terrace-public .chart-narrow{display:none}@media(max-width:639px){.terrace-public .chart-wide{display:none}.terrace-public .chart-narrow{display:block}}
 @media(max-width:899px){.terrace-public .hdr .mobile-menu{display:none}}
 @media(min-width:860px){.terrace-public .footer-grid-v2{grid-template-columns:1.4fr 1fr 1fr 1fr}}
+
+/* Calculator: current fields/validation, supplied one-question layout. */
+.terrace-public .estimate-page{padding-top:0;min-height:calc(100svh - 68px)}
+.terrace-public .estimate-focus-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;align-items:start;padding-top:12px;padding-bottom:120px}
+.terrace-public .estimate-focus-layout .focus-card{padding:0;border:0;border-radius:0;box-shadow:none;background:none;min-width:0;max-width:640px}
+.terrace-public .estimate-focus-layout .question-heading{margin:0 0 28px;padding:0}
+.terrace-public .estimate-focus-layout .question-heading h1{font-size:clamp(30px,4vw,46px);line-height:1.06;font-weight:700}
+html[lang=th] .terrace-public .estimate-focus-layout .question-heading h1{font-size:clamp(26px,3.4vw,38px);line-height:1.35;font-weight:600}
+.terrace-public .question-heading p{font-size:16.5px;display:block;margin-top:12px}.terrace-public .question-heading p>svg{display:none}
+.terrace-public .flow-count{font-size:14px;font-weight:700;text-align:right;margin-bottom:16px}
+.terrace-public .segment-progress{height:5px;margin-bottom:28px;gap:4px}.terrace-public .segment-progress>span{height:5px;border-radius:3px;background:var(--sm-line)}.terrace-public .segment-progress>span.active{background:var(--sm-pine)}
+.terrace-public .estimate-focus-layout .visual-choice{display:flex;grid-template-columns:none;min-height:64px;padding:14px 18px;border:0;border-radius:var(--sm-r-md);background:white;box-shadow:inset 0 0 0 1.5px var(--sm-line);gap:14px}
+.terrace-public .estimate-focus-layout .visual-choice.selected{background:var(--sm-selected);box-shadow:inset 0 0 0 2px var(--sm-pine)}
+.terrace-public .visual-choice .choice-icon{display:none}.terrace-public .visual-choice>span:not(.choice-indicator),.terrace-public .visual-choice>strong{flex:1;min-width:0}.terrace-public .visual-choice strong{font-size:16.5px;font-weight:700}
+.terrace-public .choice-grid,.terrace-public .multichoice-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.terrace-public .choice-indicator{width:24px;height:24px;border:2px solid var(--sm-line-2);border-radius:50%;flex:none;margin-left:auto}.terrace-public .selected .choice-indicator{background:var(--sm-pine);border-color:var(--sm-pine);color:white}.terrace-public .checkbox-indicator{border-radius:8px}
+.terrace-public .location-fields{gap:24px}.terrace-public .location-fields .pchips{margin-top:0}
+.terrace-public .bill-direct-input{height:72px;max-width:420px;background:white;border:0;box-shadow:inset 0 0 0 1.5px var(--sm-line);border-radius:var(--sm-r-md);padding:0 18px}.terrace-public .bill-direct-input input{font-size:32px;font-weight:700}.terrace-public .bill-direct-input span{font-size:22px}
+.terrace-public .quick button{min-height:44px}.terrace-public .bill-slider{padding-top:0}.terrace-public .ac-count-controls{display:block}.terrace-public .stepper{width:max-content;max-width:100%}.terrace-public .stepper button{width:44px;height:44px;min-height:44px}.terrace-public .stepper input{width:64px;min-width:0;height:44px;border:0;background:transparent;text-align:center;padding:0;font:700 20px var(--font-manrope),sans-serif;box-shadow:none}
+.terrace-public .estimate-focus-layout .estimate-actions{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--sm-line);background:#f5f4efe6;backdrop-filter:blur(16px);padding:12px max(18px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;margin:0}
+.terrace-public .estimate-actions>.button{flex:1}.terrace-public .estimate-actions>.button-secondary{flex:0 0 auto;background:transparent;border:1.5px solid var(--sm-line-2);padding:0 18px}
+.terrace-public .estimate-focus-layout .estimate-privacy-line{border:0;margin-top:24px;display:grid;gap:12px;font-size:13px}.terrace-public .assessment-summary{order:2;min-width:0}.terrace-public .assessment-summary .summary{margin:8px 0 0}.terrace-public .assessment-summary .summary dt{max-width:48%}.terrace-public .assessment-summary h3{font-size:17px}.terrace-public .assessment-summary .checks{margin-top:12px}.terrace-public .assessment-summary .checks li{font-size:15px}.terrace-public .assessment-summary .note{margin-top:14px}.terrace-public .summary button{min-height:44px;padding:6px}
+.terrace-public .v2-loading{background:var(--sm-stone);display:grid;place-items:center;min-height:100svh;padding:24px}.terrace-public .v2-loading .box{width:min(420px,100%);display:grid;gap:22px;justify-items:center;text-align:center;min-height:0}.terrace-public .v2-loading h1{font-size:clamp(28px,4vw,40px)}.terrace-public .v2-loading-brand .brand-wordmark{display:none}.terrace-public .v2-loading-brand .brand-symbol{width:44px;height:40px}
+@media(min-width:1000px){.terrace-public .estimate-focus-layout{grid-template-columns:minmax(0,1fr) 360px;gap:64px;padding-bottom:64px}.terrace-public .estimate-focus-layout .estimate-actions{position:static;border:0;background:none;backdrop-filter:none;padding:32px 0 0}.terrace-public .assessment-summary{top:96px}}

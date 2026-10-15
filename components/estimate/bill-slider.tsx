@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { Locale } from '@/config/i18n';
 
 function sliderMaximum(value: number) {
@@ -24,7 +24,7 @@ export function BillSlider({
   invalid?: boolean;
 }) {
   const english = locale === 'en';
-  const [textValue, setTextValue] = useState(value ? String(value) : '');
+  const textValue=value?String(value):'';
 
   const numericValue = Number(textValue) || 0;
   const maximum = useMemo(() => sliderMaximum(numericValue), [numericValue]);
@@ -32,7 +32,6 @@ export function BillSlider({
 
   function updateText(next: string) {
     if (next !== '' && !/^\d+$/.test(next)) return;
-    setTextValue(next);
     onChange(next === '' ? undefined : Number(next));
   }
 
@@ -46,7 +45,7 @@ export function BillSlider({
           inputMode="numeric"
           autoComplete="off"
           aria-invalid={invalid}
-          value={textValue}
+          value={textValue?Number(textValue).toLocaleString('en-US'):''}
           placeholder="3,500"
           onChange={(event) => updateText(event.target.value.replaceAll(',', '').trim())}
         />
@@ -56,14 +55,14 @@ export function BillSlider({
         className="bill-range"
         aria-label={english ? 'Typical monthly electricity bill' : 'ค่าไฟต่อเดือนโดยเฉลี่ย'}
         type="range"
-        min="0"
+        min="500"
         max={maximum}
         step={step}
         value={Math.min(numericValue, maximum)}
         onChange={(event) => updateText(event.target.value)}
       />
       <div className="bill-range-labels" aria-hidden="true">
-        <span>฿0</span>
+        <span>฿500</span>
         <span>{english ? 'Slider expands for larger bills' : 'สไลเดอร์ขยายตามยอดที่สูงขึ้น'}</span>
         <span>฿{maximum.toLocaleString('en-US')}</span>
       </div>

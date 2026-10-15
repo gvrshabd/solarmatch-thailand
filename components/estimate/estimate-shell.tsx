@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
 import { DistrictCombobox } from './district-combobox';
-import { TerracePhoto } from '@/components/site/terrace-photo';
 import { LeadCapture } from '@/components/lead/lead-capture';
 import { CalculationLoading } from '@/components/results/calculation-loading';
 import Link from '@/components/site/internal-link';
@@ -19,7 +18,8 @@ import { contactReviewCopy } from '@/config/contact-review';
 import { prelaunchNotice } from '@/config/legal-review';
 import { localizedDistrictOptions } from '@/config/districts';
 import { localizedPath, type Locale } from '@/config/i18n';
-import { provinceOptions } from '@/config/provinces';
+import { provinceOptions,initialLaunchProvinces } from '@/config/provinces';
+import {designText} from '@/config/design-v2-copy';
 import { track } from '@/lib/analytics/track';
 import { calculateEstimate } from '@/lib/calculator';
 import { estimateAnswersSchema, estimateDraftSchema } from '@/lib/validation/estimate';
@@ -206,12 +206,7 @@ function AssessmentConditionalField({ field, question, draft, locale, setValue }
       <label htmlFor="air-conditioner-count">{field.label[locale]}<span aria-hidden="true">*</span></label>
       {field.help && <p>{field.help[locale]}</p>}
       <div className="ac-count-controls">
-        <select id="air-conditioner-count" value={count && count >= 10 ? '10+' : count ?? ''} onChange={(event) => setValue('airConditionerCount', event.target.value === '10+' ? 10 : Number(event.target.value) || undefined)}>
-          <option value="" disabled>{english ? 'Select a number' : 'เลือกจำนวน'}</option>
-          {Array.from({ length: 9 }, (_, index) => index + 1).map((number) => <option key={number} value={number}>{number}</option>)}
-          <option value="10+">10+</option>
-        </select>
-        {count !== undefined && count >= 10 && <label htmlFor="air-conditioner-count-exact"><span>{english ? 'Exact number (optional)' : 'จำนวนที่แน่นอน (ไม่บังคับ)'}</span><input id="air-conditioner-count-exact" type="number" inputMode="numeric" min="10" max="100" value={count} onChange={(event) => setValue('airConditionerCount', event.target.value === '' ? 10 : Math.min(100, Math.max(10, Number(event.target.value))))} /></label>}
+        <div className="stepper"><button type="button" aria-label={english?'Fewer installed air conditioners':'ลดจำนวนเครื่องปรับอากาศที่ติดตั้ง'} disabled={count===undefined||count<=1} onClick={()=>setValue('airConditionerCount',Math.max(1,(count??1)-1))}>−</button><input id="air-conditioner-count" type="number" inputMode="numeric" min="1" max="100" value={count??''} placeholder="—" onChange={event=>setValue('airConditionerCount',event.target.value===''?undefined:Math.min(100,Math.max(1,Number(event.target.value))))}/><button type="button" aria-label={english?'More installed air conditioners':'เพิ่มจำนวนเครื่องปรับอากาศที่ติดตั้ง'} disabled={count===100} onClick={()=>setValue('airConditionerCount',Math.min(100,(count??0)+1))}>+</button></div>
       </div>
     </div>;
   }
@@ -230,6 +225,9 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const [draft, setDraft] = useState<Draft>({});
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
+  const [showOtherProvince,setShowOtherProvince]=useState(false);
+  const autoAdvanceRef=useRef<number|null>(null);
+  const text=designText(locale);
   const [direction, setDirection] = useState<ScreenDirection>('forward');
   const [transitioning, setTransitioning] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
@@ -343,7 +341,10 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current);
   }, []);
 
+  useEffect(()=>()=>{if(autoAdvanceRef.current!==null)window.clearTimeout(autoAdvanceRef.current);},[step,locale,showContactForm]);
+  function cancelAutoAdvance(){if(autoAdvanceRef.current!==null){window.clearTimeout(autoAdvanceRef.current);autoAdvanceRef.current=null;}}
   function moveStep(nextStep: number, nextDirection: ScreenDirection) {
+    cancelAutoAdvance();
     if (navigationLockRef.current) return;
     navigationLockRef.current = true;
     setTransitioning(true);
@@ -357,6 +358,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function setValue<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K] | undefined) {
+    cancelAutoAdvance();
     setDraft((current) => {
       const next = { ...current, [key]: value };
       if (key === 'province') {
@@ -380,6 +382,11 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function chooseOption(id: string, value: string) {
+    cancelAutoAdvance();
+    if(navigationLockRef.current)return;
+    const candidate:Draft=id==='activelyPlanningSolar'?{...draft,planningTimeframe:value as EstimateAnswers['planningTimeframe'],activelyPlanningSolar:value!=='researching'}:{...draft,[id]:value};
+    const needsFollowup=id==='quoteContactRequested'||(id==='ownershipStatus'&&value!=='owner')||question.conditionalFields?.some(field=>field.whenOption===value);
+    if(!needsFollowup&&!firstQuestionError(question,candidate,english)&&step<questions.length-1){autoAdvanceRef.current=window.setTimeout(()=>{autoAdvanceRef.current=null;if(navigationLockRef.current)return;track('estimate_step_completed',{stepId:id,stepNumber:step+1});moveStep(step+1,'forward');window.scrollTo({top:0,behavior:'auto'});},260);}
     if (id === 'activelyPlanningSolar') {
       setDraft((current) => ({
         ...current,
@@ -406,7 +413,8 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       setError('');
       return;
     }
-    setValue(id as keyof EstimateAnswers, value as never);
+    setDraft(current=>{const next={...current,[id]:value};if(id==='propertyType'&&value!=='other-residential')delete next.customPropertyType;if(id==='ownershipStatus'&&value==='owner')delete next.ownerPermission;if(id==='roofMaterial'&&value!=='other')delete next.customRoofMaterial;return next;});
+    setError('');
   }
 
   function handleRadioKeys(event: KeyboardEvent<HTMLDivElement>) {
@@ -421,6 +429,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function next() {
+    cancelAutoAdvance();
     if (navigationLockRef.current) return;
     const reviewingContact = question.id === 'quoteContactRequested' && contactReview;
     if (reviewingContact && !reviewConsentAccepted) {
@@ -494,6 +503,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function restart() {
+    cancelAutoAdvance();
     [starterStorageKey, draftStorageKey, resultStorageKey, assessmentContextStorageKey].forEach(removeSessionValue);
     setDirection('backward'); setDraft({}); setStep(0); setError(''); setShowContactForm(false); setContactReview(false); setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); window.scrollTo({ top: 0, behavior: 'auto' });
   }
@@ -520,30 +530,32 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     ...(assessmentConfig ? [{ value: 'test', label: contactReviewCopy.label, description: contactReviewCopy.help }] : []),
   ] : question.options;
   const districtOptions = localizedDistrictOptions(draft.province ?? '', locale);
+  const summaryValue=(item:AssessmentQuestion)=>{const value=item.id==='activelyPlanningSolar'?draft.planningTimeframe:draft[item.id as keyof Draft];if(item.id==='province')return [districtOptions.find(d=>d.value===draft.district)?.label,provinceOptions.find(p=>p.value===draft.province)?.[locale]].filter(Boolean).join(', ');if(item.id==='monthlyBillThb')return typeof value==='number'?'฿'+value.toLocaleString('en-US'):'';if(Array.isArray(value))return value.map(v=>item.options?.find(o=>o.value===v)?.label[locale]??v).join(', ');return item.options?.find(o=>o.value===value)?.label[locale]??'';};
 
   return <>{completionJourney && <ScreenTransition transitionKey="journey-preparing" direction="forward" pace="result" className="journey-transition-surface"><CalculationLoading
     facts={assessmentConfig?.loadingFacts ?? []}
     locale={locale}
     onStarted={(fact, durationMs, startedAt) => persistCompletionView(completionJourney, { fact, loadingDurationMs: durationMs, loadingStartedAt: startedAt, viewed: false })}
     onComplete={() => setMinimumLoadingElapsed(true)}
+    calculated={calculationComplete}
+    prepared={calculationComplete&&submissionComplete}
+    savingRequest={completionJourney.waitsForSubmission&&!submissionComplete}
   /></ScreenTransition>}<main hidden={Boolean(completionJourney)} className="estimate-page" aria-hidden={Boolean(completionJourney)}><div className="site-shell estimate-focus-layout">
-    <aside className="terrace-assessment-aside" aria-label={english ? 'Your solar assessment' : 'แบบประเมินโซลาร์ของคุณ'}>
-      <TerracePhoto locale={locale} solar />
-      <div className="terrace-assessment-context"><p className="eyebrow">{english ? 'A CLEARER START' : 'เริ่มต้นอย่างเข้าใจ'}</p><h2>{english ? <>Your home.<br />Your solar potential.</> : <>บ้านของคุณ<br />กับโอกาสจากโซลาร์</>}</h2><p>{english ? 'A few practical details. A more informed next step.' : 'ข้อมูลใกล้ตัวไม่กี่ข้อ เพื่อก้าวต่อไปอย่างมีข้อมูล'}</p></div>
-    </aside>
+
     <section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
+    <p className="flow-count">{step===questions.length-1?text.almost:text.qOf.replace('{n}',String(step+1)).replace('{t}',String(questions.length-1))}</p>
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
     <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage">
       <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1>{question.help[locale] && <p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p>}</div>
       {question.type === 'province' && <div className="location-fields">
-        <label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>
+        <div className="pchips" role="group" aria-label={english?'Province':'จังหวัด'}>{initialLaunchProvinces.map(option=><button className="pchip" key={option.value} type="button" aria-pressed={draft.province===option.value} onClick={()=>{setShowOtherProvince(false);setValue('province',option.value);}}>{option[locale]}</button>)}<button type="button" className="pchip" aria-pressed={draft.province==='other'} onClick={()=>setShowOtherProvince(true)}>{text.otherProv}</button></div>
+        <div hidden={!showOtherProvince&&draft.province!=='other'}><label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label></div>
         {draft.province === 'other' && <label htmlFor="estimate-custom-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><input id="estimate-custom-province" maxLength={100} value={draft.customProvince ?? ''} placeholder={english ? 'e.g. Chonburi' : 'เช่น ชลบุรี'} onChange={(event) => setValue('customProvince', event.target.value)} /></label>}
         {draft.province && draft.province !== 'other' && <DistrictCombobox locale={locale} options={districtOptions} value={draft.district} onChange={(value) => setValue('district', value)} />}
         {draft.province === 'other' && <label htmlFor="estimate-district"><span>{english ? 'District or local area' : 'อำเภอ เขต หรือพื้นที่'}</span><input id="estimate-district" maxLength={100} value={draft.district ?? ''} placeholder={english ? 'e.g. Bang Lamung' : 'เช่น บางละมุง'} onChange={(event) => setValue('district', event.target.value)} /></label>}
-        {draft.province && <label htmlFor="estimate-postcode"><span>{english ? 'Postcode (optional)' : 'รหัสไปรษณีย์ (ไม่บังคับ)'}</span><input id="estimate-postcode" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={draft.postcode ?? ''} onChange={(event) => setValue('postcode', event.target.value.replace(/\D/gu, '').slice(0, 5) || undefined)} /></label>}
       </div>}
-      {question.type === 'bill' && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
+      {question.type === 'bill' && <><BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} /><div className="quick">{[2000,4000,6000,10000,15000].map(value=><button type="button" key={value} aria-pressed={draft.monthlyBillThb===value} onClick={()=>setValue('monthlyBillThb',value)}>฿{value.toLocaleString('en-US')}</button>)}</div></>}
       {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{visibleOptions?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = visibleOptions?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
       {question.id === 'ownershipStatus' && draft.ownershipStatus !== undefined && draft.ownershipStatus !== 'owner' && <fieldset className="inline-followup"><legend id="owner-permission-title">{english ? 'Do you have the property owner’s permission to request contact from solar installers?' : 'คุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อจากผู้ติดตั้งโซลาร์แล้วหรือไม่?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="owner-permission-title" onKeyDown={handleRadioKeys}>{([['yes', english ? 'Yes' : 'ได้รับอนุญาตแล้ว'], ['not-yet', english ? 'Not yet' : 'ยังไม่ได้รับอนุญาต']] as const).map(([value, label], index) => <button key={value} type="button" role="radio" aria-checked={draft.ownerPermission === value} tabIndex={draft.ownerPermission === value || (!draft.ownerPermission && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.ownerPermission === value ? 'selected' : ''}`} onClick={() => setValue('ownerPermission', value)}><Home className="choice-icon" aria-hidden="true" /><strong>{label}</strong><span className="choice-indicator" aria-hidden="true">{draft.ownerPermission === value && <Check />}</span></button>)}</div></fieldset>}
       {contactPermissionUnavailable && <div className="permission-result-notice"><p>{english ? 'You can still view your estimate. To request installer contact, you will first need the property owner’s permission.' : 'คุณยังดูผลประเมินได้ตามปกติ หากต้องการให้ผู้ติดตั้งติดต่อ คุณต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ก่อน'}</p></div>}
@@ -555,7 +567,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
       {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
-      <div className="estimate-actions"><button className="button button-secondary" type="button" disabled={step === 0 || !ready || transitioning} onClick={previous}><ArrowLeft aria-hidden="true" /> {english ? 'Back' : 'ย้อนกลับ'}</button><button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{contactReview ? (english ? 'Continue' : 'ถัดไป') : (contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
+      <div className="estimate-actions">{step>0&&<button className="button button-secondary" type="button" disabled={!ready||transitioning} aria-label={english?'Back':'ย้อนกลับ'} onClick={previous}><ArrowLeft aria-hidden="true"/><span className="sr-only">{english?'Back':'ย้อนกลับ'}</span></button>}<button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{contactReview ? (english ? 'Continue' : 'ถัดไป') : (contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
     </ScreenTransition></fieldset>
     <div className="estimate-privacy-line"><span>{contactReview ? contactReviewCopy.notice[locale] : english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
   </section>
@@ -576,5 +588,6 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       else beginCompletion(completedAnswers.data, 'skipped', false);
     }}
   />}
+  {!showContactForm&&<aside className="aside assessment-summary" aria-label={text.yourAnswers}><div className="card"><h3>{text.yourAnswers}</h3><dl className="summary">{questions.filter(item=>item.id!=='quoteContactRequested'&&summaryValue(item)).map(item=><div key={item.id}><dt>{item.title[locale]}</dt><dd>{summaryValue(item)} <button type="button" onClick={()=>moveStep(questions.indexOf(item),questions.indexOf(item)<step?'backward':'forward')}>{text.edit}</button></dd></div>)}</dl></div><div className="card band-sage"><p className="eyebrow">{text.youGet}</p><ul className="checks">{text.yg.map(value=><li key={value}><Check aria-hidden="true"/>{value}</li>)}</ul><p className="note">{text.saved}</p></div></aside>}
   </div></main></>;
 }

@@ -19,7 +19,7 @@ export function ScreenTransition({
   children: ReactNode;
 }) {
   const reduceMotion = useReducedMotion();
-  const offset = reduceMotion || direction === 'neutral' ? 0 : direction === 'forward' ? 12 : -12;
+  const offset = reduceMotion || direction === 'neutral' ? 0 : direction === 'forward' ? 10 : -10;
   const duration = reduceMotion ? 0.06 : pace === 'result' ? 0.38 : 0.24;
 
   return (
@@ -31,10 +31,10 @@ export function ScreenTransition({
           data-transition-direction={direction}
           data-transition-pace={pace}
           custom={offset}
-          initial={{ opacity: 0, x: offset }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -offset }}
-          transition={{ duration, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: offset }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -offset }}
+          transition={{ duration, ease: [0.2, 0.7, 0.2, 1] }}
         >
           {children}
         </motion.div>
