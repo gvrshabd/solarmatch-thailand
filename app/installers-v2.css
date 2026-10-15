@@ -50,6 +50,31 @@ html[lang=th] .installer-shell .installer-welcome h1{font-size:clamp(28px,3.4vw,
 .installer-shell .checklist2 li span{border-radius:50%;background:var(--sm-stone);width:28px;height:28px;display:grid;place-items:center}
 .installer-shell .checklist2 .done span{background:var(--sm-sage);color:var(--sm-ok)}
 .installer-shell .callnext .note{color:var(--sm-ondark)}
+.installer-shell .v2-detail-back{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 18px;font-size:13px;color:var(--sm-muted)}
+.installer-shell .v2-person-card{display:grid;gap:18px}
+.installer-shell .v2-person-card .person .avatar{background:var(--sm-sage);color:var(--sm-pine)}
+.installer-shell .v2-person-card .person h2{font-size:30px}
+.installer-shell .facts{margin-top:12px}
+.installer-shell .facts b{overflow-wrap:anywhere}
+.installer-shell .tracker{margin-top:12px}
+.installer-shell .v2-detail-disclosures{padding-top:4px;padding-bottom:4px}
+.installer-shell .installer-enquiry-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.installer-shell .installer-enquiry-card{padding:20px;border:0;border-radius:var(--sm-r-lg);box-shadow:var(--sm-shadow);gap:14px;display:grid}
+.installer-shell .installer-enquiry-top strong{font-size:18px}
+.installer-shell .installer-enquiry-top small{font-size:13px;color:var(--sm-muted);letter-spacing:0}
+.installer-shell .installer-enquiry-metrics{padding-top:12px;padding-bottom:0;margin-top:0}
+.installer-shell .installer-enquiry-metrics strong{font-size:22px}
+.installer-shell .installer-enquiry-bottom{border-top:0;padding-top:0;font-size:13px}
+.installer-shell .installer-inbox-tools{margin:0 0 18px;gap:12px;align-items:center;flex-direction:row;flex-wrap:wrap}
+.installer-shell .installer-segments{border-radius:var(--sm-pill);background:var(--sm-sage)}
+.installer-shell .installer-segments button{border-radius:var(--sm-pill);font-size:14px;padding:8px 12px}
+.installer-shell .installer-search{flex:1 1 240px;max-width:420px}
+.installer-shell .installer-search>span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.installer-shell .installer-search input{border-radius:var(--sm-pill);height:48px;margin-top:0}
+.installer-shell .installer-location{margin:0}
+@media(min-width:760px){.installer-shell .installer-enquiry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1300px){.installer-shell .installer-enquiry-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.installer-shell .installer-segments{display:flex;flex-wrap:wrap}.installer-shell .installer-segments button{font-size:12px;padding:8px 10px}}
 .installer-shell .installer-notice{border-radius:var(--sm-r-md);margin:0 0 18px;padding:16px 18px;font-size:14px}
 .installer-shell .installer-notice p{margin:0 0 5px}
 .installer-shell .installer-notice p:last-child{margin:0}

@@ -1,11 +1,12 @@
 'use client';
-import { assessmentRows, sharedResidentialLabel } from '@/lib/installer/assessment-display';
+import { sharedResidentialLabel } from '@/lib/installer/assessment-display';
+import { EnquiryDetail } from './enquiry-detail';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { InstallerPortalAction, InstallerPortalData } from '@/lib/installer/portal-contract';
 import type { InstallerPublicConfig } from '@/lib/installer/public-config';
 import { InstallerLanding } from './landing';
-import { CreditBalance, enquiryGroup, PortalBrand, PortalInbox, PortalNavigation, PortalOverview, type PortalView } from './workspace';
+import { CreditBalance, enquiryGroup, PortalInbox, PortalNavigation, PortalOverview, type PortalView } from './workspace';
 
 type View = PortalView;
 export function InstallerPortal({ deliveryId, publicConfig = { accountsAvailable: false, commercial: null } }: { deliveryId?: string; publicConfig?: InstallerPublicConfig }) {
@@ -124,7 +125,6 @@ export function InstallerPortal({ deliveryId, publicConfig = { accountsAvailable
     } finally { setBusy(false); }
   }
   const delivery = data?.deliveries.find((item) => item.id === deliveryId);
-  const claimOpen = delivery && Date.parse(delivery.claimDeadline) >= viewTime;
   const navigate = (item: View) => {
     if (deliveryId) { router.push('/installers?lang=' + (en ? 'en' : 'th') + '&view=' + item); return; }
     setView(item);
@@ -150,20 +150,7 @@ export function InstallerPortal({ deliveryId, publicConfig = { accountsAvailable
       {!data.session.user.emailVerified && <p className="installer-notice">{t('กรุณายืนยันอีเมลก่อนใช้ข้อมูลบริษัท', 'Please verify your email before using company controls.')}</p>}
       {['profile', 'claims', 'terms'].includes(view) && !deliveryId && <div className="installer-secondary-nav"><button aria-current={view === 'profile' ? 'page' : undefined} onClick={() => navigate('profile')}>{t('ข้อมูลบริษัท', 'Company details')}</button><button aria-current={view === 'claims' ? 'page' : undefined} onClick={() => navigate('claims')}>{t('คำร้อง', 'Claims')}</button><button aria-current={view === 'terms' ? 'page' : undefined} onClick={() => navigate('terms')}>{t('ข้อตกลง', 'Terms')}</button></div>}
       {data.company && data.balance.debt > 0 && <p className="installer-notice" role="status">{t('เครดิตค้างชำระ', 'Credit debt')}: {data.balance.debt}. {t('บริษัทจะยังรับคำขอใหม่ไม่ได้จนกว่าจะชำระยอดนี้ เครดิตที่ซื้อเพิ่มหรือได้รับคืนจะหักยอดค้างก่อน ส่วนที่เหลือจึงเป็นเครดิตพร้อมใช้ สิทธิ์ทดลองแยกจากยอดนี้', 'New deliveries are blocked until this debt is cleared. Purchased credits and purchased-credit restorations offset debt first; only the remainder becomes available. Trial entitlements are separate.')}</p>}
-      {deliveryId ? delivery ? <section className="installer-card installer-detail">
-        <a href={'/installers?view=inbox&lang=' + (en ? 'en' : 'th')}>← {t('กลับไปที่คำขอ', 'Back to inbox')}</a><h2>{delivery.reference}</h2>
-        {delivery.withdrawn ? <p className="installer-notice">{t('ถอนหรือระงับสิทธิ์เข้าถึงข้อมูลแล้ว ห้ามติดต่อเจ้าของบ้านจากคำขอนี้ ข้อมูลส่วนบุคคลและลิงก์ทีมงานไม่พร้อมใช้งาน บันทึกการคิดเครดิตยังคงอยู่ และสามารถยื่นคำร้องได้ภายในกำหนดเดิม', 'Access withdrawn or suppressed. Do not contact the homeowner about this enquiry. Personal details and staff links are unavailable. The financial record remains, and eligible claims can be submitted within the original deadline.')}</p> : <>
-          <div className="installer-detail-person"><span className="installer-avatar" aria-hidden="true">{Array.from(delivery.homeownerName)[0]}</span><div><h3>{delivery.homeownerName}</h3><p>{delivery.location}</p></div><a className="installer-call" href={'tel:' + delivery.phone}>{delivery.phone}</a></div><p className="installer-muted">{t('ร้องขอเมื่อ', 'Requested')}: {date(delivery.requestedAt, en)}</p>
-          <p>{delivery.qualification}</p><dl>{assessmentRows(delivery.assessment, en).map((row) => <div key={row.key}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl>
-          <h3>{t('แชร์กับทีมงาน', 'Share with staff')}</h3><p>{t('ผู้ที่ได้รับลิงก์สามารถอ่านข้อมูลคำขอนี้ได้ ใช้สำหรับพนักงานที่ดูแลคำขอของบริษัทเท่านั้น ลิงก์ไม่ได้ยืนยันตัวตนผู้เปิดและสามารถส่งต่อได้', 'Anyone with the link can read this enquiry. Forward only to staff handling it for your company. It does not verify the viewer’s identity and can be forwarded again.')}</p>
-          <button disabled={busy} onClick={() => action({ action: 'rotate-share-link', deliveryId: delivery.id })}>{t('สร้างลิงก์ใหม่', 'Create replacement link')}</button><button disabled={busy} onClick={() => { setShare(''); action({ action: 'revoke-share-link', deliveryId: delivery.id }); }}>{t('เพิกถอนลิงก์', 'Revoke link')}</button>{share && <label>{t('ลิงก์สำหรับทีมงาน', 'Staff access link')}<input readOnly value={share} onFocus={(event) => event.target.select()} /></label>}
-          <h3>{t('รายงานผล', 'Report outcome')}</h3><select aria-label={t('ผลการติดต่อ', 'Contact outcome')} disabled={busy} defaultValue={delivery.outcome || ''} onChange={(event) => action({ action: 'report-outcome', deliveryId: delivery.id, outcome: event.target.value })}><option value="">{t('เลือกผล', 'Choose outcome')}</option>{['open', 'won', 'lost', 'not-suitable'].map((value) => <option key={value} value={value}>{statusLabel(value, en)}</option>)}</select>
-        </>}
-        <p>{t('พร้อมใช้ในพอร์ทัลเมื่อ', 'Available in portal')}: {date(delivery.deliveredAt, en)}</p><p>{statusLabel(delivery.product, en)} · {delivery.fundingSource === 'trial' ? t('ทดลองฟรี', 'Free trial') : delivery.creditCost + ' ' + t('เครดิต', 'credits')}</p>
-        <p>{t('สถานะการแจ้งเตือน', 'Notification status')}: {statusLabel(delivery.notificationStatus, en)}</p>
-        <h3>{t('คำร้องคืนเครดิต', 'Credit claim')}</h3><p>{t('ยื่นได้ถึง', 'Submit by')}: {date(delivery.claimDeadline, en)}. {t('การไม่รับสายหรือไม่ซื้อ ไม่ถือเป็นคำขอที่ไม่ถูกต้องโดยอัตโนมัติ', 'No answer or no purchase does not automatically make an enquiry invalid.')}</p>
-        {claimOpen ? <form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); action({ action: 'create-claim', deliveryId: delivery.id, reason: String(form.get('reason')), notes: String(form.get('notes')) }); }}><label>{t('เหตุผล', 'Reason')}<select name="reason">{['incorrect-contact', 'duplicate', 'outside-criteria', 'no-request', 'withdrawn'].map((value) => <option key={value} value={value}>{statusLabel(value, en)}</option>)}</select></label><label>{t('ข้อมูลสนับสนุน', 'Supporting information')}<textarea name="notes" required maxLength={2000} /></label><button disabled={busy}>{t('ส่งคำร้อง', 'Submit claim')}</button></form> : <p>{t('พ้นกำหนดยื่นคำร้องสำหรับคำขอนี้แล้ว', 'The claim submission window has closed for this enquiry.')}</p>}
-      </section> : <p className="installer-card">{t('ไม่พบคำขอในบัญชีบริษัทนี้', 'This enquiry is not available to your company.')}</p> : <>
+      {deliveryId ? delivery ? <EnquiryDetail key={delivery.id} item={delivery} en={en} busy={busy||data.availability?.canManage===false} action={action} share={share} clearShare={()=>setShare('')} now={viewTime}/> : <p className="installer-card">{t('ไม่พบคำขอในบัญชีบริษัทนี้', 'This enquiry is not available to your company.')}</p> : <>
       {view === 'overview' && <PortalOverview data={data} en={en} navigate={navigate} />}
       {view === 'inbox' && <PortalInbox data={data} en={en} />}
       {view === 'profile' || !data.company ? <section className="installer-card"><h2>{t('ข้อมูลบริษัทและการรับคำขอ', 'Company and delivery preferences')}</h2><form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); action({ action: data.company ? 'update-company' : 'create-company', name: String(form.get('name')), contactName: String(form.get('contactName')), phone: String(form.get('phone')), serviceAreas: String(form.get('serviceAreas')).split(',').map((x) => x.trim()).filter(Boolean), supportedProducts: ['shared-residential'], dailyLimit: Number(form.get('dailyLimit')), paused: form.get('paused') === 'on' }); }}>
