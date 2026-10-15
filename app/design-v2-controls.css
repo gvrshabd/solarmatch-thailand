@@ -14,3 +14,34 @@ html[lang=th] .terrace-public :is(h1,h2,h3,h4),.installer-shell[lang=th] :is(h1,
 @media(min-width:900px){.terrace-public .site-shell{padding-inline:max(40px,env(safe-area-inset-left))}}
 :is(.terrace-public,.installer-shell) :is(.num,.sm-num){font-family:var(--font-manrope),sans-serif;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){:is(.terrace-public,.installer-shell),:is(.terrace-public,.installer-shell) *{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Homepage and real route adapters: exact reference geometry without demo chrome. */
+.terrace-public .hdr .header-inner{min-height:68px;gap:20px}
+.terrace-public .hdr .header-actions{margin-left:auto;gap:10px}
+.terrace-public .hdr .nav{margin-left:12px;gap:4px}
+.terrace-public .hdr .nav a{font-size:14.5px;padding:8px 14px}
+.terrace-public .brand-mark{gap:10px}.terrace-public .brand-symbol{width:34px;height:30px}.terrace-public .brand-wordmark strong{font-size:19px;font-weight:800;letter-spacing:-.04em}.terrace-public .brand-wordmark small{font-size:9.5px;letter-spacing:.18em}
+:is(.terrace-public,.installer-shell) .lang{height:44px;gap:0}
+:is(.terrace-public,.installer-shell) .lang a{display:flex;align-items:center;padding:0 11px;height:38px;border-radius:var(--sm-pill);font-size:13px;font-weight:700;color:var(--sm-muted);text-decoration:none}
+:is(.terrace-public,.installer-shell) .lang a[aria-current=true]{background:var(--sm-pine);color:white}
+.terrace-public .design-v2-home .hero{background:transparent;margin:0}
+.terrace-public .design-v2-home .hero::before,.terrace-public .design-v2-home .hero::after{display:none}
+.terrace-public .design-v2-home .hero-photo{grid-area:auto;min-height:0;min-width:0;width:100%;display:block;align-self:center;margin:0}
+.terrace-public .design-v2-home .hero-photo img{min-height:0}
+.terrace-public .button.button{border-radius:var(--sm-pill)}
+.terrace-public .hero-photo picture{display:block;height:100%}
+.terrace-public .hero-photo picture img{display:block;height:100%;width:100%;object-fit:cover}
+.terrace-public .hero-photo .example .muted{font-size:13px;font-weight:600}
+.terrace-public .v2-mini-result{background:var(--sm-pine);color:white;padding:26px;border-radius:var(--sm-r-xl);box-shadow:var(--sm-shadow-lift)}
+.terrace-public .v2-mini-result .eyebrow{color:var(--sm-lime)}
+.terrace-public .v2-mini-figure{font-size:64px;font-weight:700;color:var(--sm-lime);line-height:1;margin-top:16px}
+.terrace-public .v2-mini-result>p{font-weight:600;margin-top:8px}.terrace-public .v2-mini-result .rstats{margin-top:18px}
+.terrace-public .v2-mini-chart{margin-top:16px;background:white;border-radius:var(--sm-r-md);padding:12px 12px 4px}
+.terrace-public .v2-preview-section{padding-top:24px}.terrace-public .preview h2{font-size:clamp(32px,4.4vw,54px);margin-top:12px}.terrace-public .preview .lede{font-size:18px;margin-top:14px;max-width:32em}
+:is(.terrace-public,.installer-shell) .v2-top-space{margin-top:26px}
+.terrace-public .band-dark h2{font-size:clamp(34px,4.6vw,58px);margin-top:12px;color:white}.terrace-public .band-dark .lede{font-size:18px;margin-top:16px;max-width:30em}.terrace-public .band-dark .link{color:white}.terrace-public .v2-included{color:var(--sm-lime)}.terrace-public .compare{align-self:center}
+.terrace-public .faqband .eyebrow{color:var(--sm-lime)}.terrace-public .v2-soon-section{padding-top:0}.terrace-public .soon-card>div{display:grid;gap:10px}.terrace-public .soon-card .chip{justify-self:start}.terrace-public .soon-card p{font-size:17px;max-width:36em}
+.terrace-public .footer{padding:48px 0 40px}.terrace-public .footer .wrap{max-width:1240px}.terrace-public .footer-grid-v2{display:grid;gap:28px}.terrace-public .footer h2{font-size:14px;color:white;letter-spacing:0;margin-bottom:10px}.terrace-public .footer-bottom{display:block;font-size:12.5px;border-top:1px solid #ffffff1f;padding-top:20px;margin-top:28px}.terrace-public .footer-bottom p{margin-top:10px}
+.terrace-public .chart-narrow{display:none}@media(max-width:639px){.terrace-public .chart-wide{display:none}.terrace-public .chart-narrow{display:block}}
+@media(max-width:899px){.terrace-public .hdr .mobile-menu{display:none}}
+@media(min-width:860px){.terrace-public .footer-grid-v2{grid-template-columns:1.4fr 1fr 1fr 1fr}}

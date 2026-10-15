@@ -28,7 +28,7 @@ html[lang='en'] .terrace-public { font-family: var(--font-manrope), sans-serif; 
 .terrace-public .eyebrow { font-family: inherit; font-size: 11px; letter-spacing: .12em; font-weight: 600; }
 html[lang='th'] .terrace-public :is(h1,h2,h3,.eyebrow,.question-heading h1,.contact-form-heading h1) { letter-spacing: 0; line-height: 1.4; }
 .terrace-public :focus-visible { outline: 3px solid #68816b; outline-offset: 4px; }
-.terrace-public :is(.button,select,input:not([type='range']):not([type='checkbox']):not([type='radio']),textarea,.currency-input,.mobile-menu summary,.mobile-menu nav,.mobile-menu nav a) { border-radius: 2px; }
+.terrace-public :is(select,input:not([type='range']):not([type='checkbox']):not([type='radio']),textarea,.currency-input,.mobile-menu summary,.mobile-menu nav,.mobile-menu nav a) { border-radius: var(--sm-r-md); }
 .terrace-public .button { min-height: 50px; padding-inline: 22px; font-size: 14px; box-shadow: none; transition: background .2s ease, color .2s ease; }
 .terrace-public .button:hover { transform: none; box-shadow: none; }
 .terrace-public .button-gold { background: var(--terrace-lime); border-color: var(--terrace-lime); color: var(--terrace-pine); }

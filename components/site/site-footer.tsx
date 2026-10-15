@@ -16,14 +16,14 @@ export function SiteFooter() {
   if (focusMode || pathname.startsWith('/admin') || pathname.startsWith('/installers') || pathname === '/enquiry') return null;
 
   return (
-    <footer className="site-footer">
-      <div className="site-shell footer-grid">
+    <footer className="site-footer footer">
+      <div className="wrap footer-grid-v2">
         <div className="footer-brand">
           <BrandMark />
           <p>{english ? 'A free residential solar planning estimate for Thai homeowners.' : 'ผลประเมินโซลาร์เบื้องต้นฟรีเพื่อวางแผนสำหรับเจ้าของบ้านในไทย'}</p>
         </div>
         <div>
-          <h2>{english ? 'Get started' : 'เริ่มต้น'}</h2>
+          <h2>{english ? 'Estimate' : 'ประเมิน'}</h2>
           <Link href={link('/estimate')}>{english ? 'Solar estimate' : 'ประเมินโซลาร์'}</Link>
           <Link href={link('/how-it-works')}>{english ? 'How it works' : 'วิธีการทำงาน'}</Link>
           <Link href={link('/solar-guide')}>{english ? 'Solar guide' : 'คู่มือโซลาร์'}</Link>
