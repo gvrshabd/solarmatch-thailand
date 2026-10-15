@@ -30,6 +30,9 @@ it('publishes only allowlisted review assets behind verified owner Access',async
  expect((await stagingWorker.fetch(new Request(url,{headers,method:'POST'}),assetEnv,context)).status).toBe(405);
  expect((await stagingWorker.fetch(new Request(url+'VERIFICATION.txt',{headers}),assetEnv,context)).status).toBe(404);
  expect(stagingDesignAsset('/design-review/prototype/app.js')).toBe(true);
+ expect(stagingDesignAsset('/design-review/images/implementation-live-results-en-390.jpg')).toBe(true);
+ expect(stagingDesignAsset('/design-review/evidence/hero-source.jpg')).toBe(true);
+ expect(stagingDesignAsset('/design-review/evidence/private.jpg')).toBe(false);
  for(const path of ['estimate-en','estimate-th','estimate-en.html','estimate-th.html','open-example.js'])expect(stagingDesignAsset('/design-review/'+path)).toBe(true);
  expect(stagingDesignAsset('/design-review/images/implementation-results-en-390.png')).toBe(true);
  for(const path of ['/design-review/backup.sql','/design-review/secret.json','/design-review/../admin','/design-review/prototype/../../api/leads'])expect(stagingDesignAsset(path)).toBe(false);

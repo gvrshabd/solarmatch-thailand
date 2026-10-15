@@ -110,3 +110,28 @@ Cloudflare redirects .html to extensionless URLs, which the review path allowlis
 had rejected. Both exact canonical aliases are now allowed (no general path
 expansion), viewer links use canonical paths, and unit/browser checks cover them.
 This is a staging-only repair. No collection or real operations were activated.
+
+LIVE FUNCTIONAL FINDING
+The retained synthetic delivery has no name in its permitted disclosure fields.
+The detail template rendered an empty h1. It now falls back to the existing enquiry
+reference; no name is invented and no additional field is disclosed. Both locales
+have a regression check. Authenticated note save, reload and restoration actually
+passed against staging; the note is restored and the two audit events are retained.
+Company preference/LINE association/balances were inspected without lifting pauses.
+The new undisclosed-name regression initially failed 6 of 36 browser cases on
+320px overflow. Layout diagnostics identified min-content expansion from long
+legacy location/value tokens. The detail grid/card and person text now shrink and
+wrap without truncating or removing values. The original assertions and synthetic
+long-value fixture are retained; this is not fixed by hiding fields or a timeout.
+The corrected detail regression then passed all 36 cases across desktop Chromium,
+mobile Chromium and mobile WebKit. Both complete live Thai/English eleven-step
+No-contact journeys passed, with three result metrics, no contact fields and no
+result-page overflow. Live phone-width result captures include the staging banner.
+The matched normal fixture captures predate the missing-name edge-case correction;
+normal named fixtures retain their layout. No independent prototype exists for
+the missing-disclosure/long-token edge case. That exception is tested, not hidden
+by substituting prototype images.
+Native browser screenshots are JPEG despite the screenshot API's generic byte
+return. The packager's signature check caught their initial .png filenames before
+publication. Evidence/live screenshot names now correctly use .jpg without pixel
+alteration; Playwright PNGs remain PNG. No supplied photograph was modified.

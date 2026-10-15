@@ -1,5 +1,5 @@
 CUMULATIVE SOLARMATCH DESIGN V2 FILES RELATIVE TO 3186c758883c5ca7c481edd78613170050a685b2
-Integration branch only. PNG hashes are enumerated in SCREENSHOT_MANIFEST.json.
+Integration branch only. Image hashes are enumerated in SCREENSHOT_MANIFEST.json.
 No private backups, environment values, traces or credentials are included.
 
 .gitattributes
@@ -104,6 +104,8 @@ docs/design-v2-comparison/implementation-installers-en-1440.png
 docs/design-v2-comparison/implementation-installers-en-390.png
 docs/design-v2-comparison/implementation-installers-th-1440.png
 docs/design-v2-comparison/implementation-installers-th-390.png
+docs/design-v2-comparison/implementation-live-results-en-390.jpg
+docs/design-v2-comparison/implementation-live-results-th-390.jpg
 docs/design-v2-comparison/implementation-portal-en-1440.png
 docs/design-v2-comparison/implementation-portal-en-390.png
 docs/design-v2-comparison/implementation-portal-th-1440.png
@@ -345,10 +347,10 @@ docs/design-v2-implementation.txt
 docs/design-v2-review/PHOTO_PROVENANCE.txt
 docs/design-v2-review/RECOVERY.txt
 docs/design-v2-review/STAGING_REVIEW.txt
-docs/design-v2-review/photo-evidence/hero-source.png
-docs/design-v2-review/photo-evidence/installer-source.png
-docs/design-v2-review/photo-evidence/palms-source.png
-docs/design-v2-review/photo-evidence/pexels-license.png
+docs/design-v2-review/photo-evidence/hero-source.jpg
+docs/design-v2-review/photo-evidence/installer-source.jpg
+docs/design-v2-review/photo-evidence/palms-source.jpg
+docs/design-v2-review/photo-evidence/pexels-license.jpg
 docs/design-v2/00_EXECUTOR_START_HERE.txt
 docs/design-v2/CODEX_PROMPTS.md
 docs/design-v2/DESIGN_SPEC.md

@@ -36,6 +36,15 @@ test.describe('compiled repaired portal with synthetic route responses',()=>{
   });
   for(const lang of ['en','th'] as const) {
     const en=lang==='en';
+    test(`${lang}: an enquiry without a disclosed name retains a meaningful reference heading`,async({page})=>{
+      const data=portalFixture();data.deliveries[0].withdrawn=false;data.deliveries[0].homeownerName='';
+      await page.route('**/api/installer/portal**',route=>route.fulfill({json:data}));
+      await page.goto(`/installers/enquiry/${deliveryId}?lang=${lang}`);
+      await expect(page.getByRole('heading',{name:'SM-REPAIR09',exact:true})).toBeVisible();
+      const overflow=await page.evaluate(()=>[...document.querySelectorAll('#installer-content *')].filter(el=>el.getBoundingClientRect().right>innerWidth+1).slice(0,8).map(el=>({tag:el.tagName,className:el.className,width:Math.round(el.getBoundingClientRect().width)})));
+      if(overflow.length)console.log('SYNTHETIC_LAYOUT_DIAGNOSTIC',JSON.stringify(overflow));
+      await expect(page.getByLabel(en?'Team notes':'บันทึกสำหรับทีม',{exact:true})).toBeVisible();await narrowAccessible(page);
+    });
     test(`${lang}: withdrawn financial record preserves original claim route and hides contact controls`,async({page})=>{
       const data=portalFixture();const submissions:unknown[]=[];
       await page.route('**/api/installer/portal**',async route=>{

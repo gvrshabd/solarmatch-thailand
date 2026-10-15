@@ -8,17 +8,17 @@ CONFIRMED VISUAL MATCHES
 home-hero.jpg / home-hero-m.jpg — crops of Robert So, Palm Trees Around House:
 https://www.pexels.com/photo/palm-trees-around-house-12284244/
 Source lists Robert So, 6240x4160, 28 May 2022, and links its Free license.
-Evidence: photo-evidence/hero-source.png (source image and photographer visible).
+Evidence: photo-evidence/hero-source.jpg (source image and photographer visible).
 
 palms-roof.jpg — Kindel Media, Solar Panel on Roof of House in California, USA:
 https://www.pexels.com/photo/solar-panel-on-roof-of-house-in-california-usa-9875438/
 Source lists Kindel Media, 4385x3289, 12 October 2021, United States, Free license.
-Evidence: photo-evidence/palms-source.png.
+Evidence: photo-evidence/palms-source.jpg.
 
 installer.jpg / installer-tall.jpg — crops of Los Muertos Crew:
 https://www.pexels.com/photo/solar-technician-installing-solar-panel-8853507/
 Source lists Los Muertos Crew, 2832x4240, 21 July 2021, Free license.
-Evidence: photo-evidence/installer-source.png.
+Evidence: photo-evidence/installer-source.jpg.
 
 UNRESOLVED EXACT SOURCE IDENTITIES
 roof-tile.jpg — supplied credit Kindel Media. Related source IDs 9875442 and
@@ -30,7 +30,7 @@ for the supplied file. The original download/source records remain needed.
 
 LICENSE EVIDENCE
 https://www.pexels.com/license/ checked 15 October 2026 in the source website.
-Evidence: photo-evidence/pexels-license.png.
+Evidence: photo-evidence/pexels-license.jpg.
 The policy permits free use and modification without mandatory attribution. It
 restricts unaltered resale, stock redistribution, derogatory uses of identifiable
 people, implied endorsement, and use as a trademark. Website/promotion uses are

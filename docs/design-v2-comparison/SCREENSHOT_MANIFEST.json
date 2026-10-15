@@ -11,7 +11,7 @@
     390,
     1440
   ],
-  "format": "PNG; CSS-pixel scale; viewport and full-page captures distinguished by filenames",
+  "format": "PNG for Playwright comparisons; JPEG for native live browser captures. CSS viewport sizes and capture scope are recorded separately.",
   "files": [
     {
       "path": "comparison-home-en-desktop.png",
@@ -287,6 +287,16 @@
       "path": "implementation-installers-th-390.png",
       "bytes": 319987,
       "sha256": "b307e4e4da02ff9c5c234ccbe041fb60e24b2684664c94271457e77bab97cfcf"
+    },
+    {
+      "path": "implementation-live-results-en-390.jpg",
+      "bytes": 41297,
+      "sha256": "2b09287985628b63c5eec8751b17239ee482958bff445e50e81e25454a04b752"
+    },
+    {
+      "path": "implementation-live-results-th-390.jpg",
+      "bytes": 7501,
+      "sha256": "3f298e6e17280fc0d351e100beb1f553092867af97c58ef04500dadfa7dc2359"
     },
     {
       "path": "implementation-portal-en-1440.png",
@@ -1473,5 +1483,15 @@
   "financialCases": [
     "negative-net",
     "unavailable-payback"
-  ]
+  ],
+  "additionalLiveCaptures": {
+    "workerVersion": "b0092fd4-f1c6-4a60-a23d-07762b98a735",
+    "sourceCommit": "b70836e527640b2bba68c64cd34bc67eefcb1b33",
+    "syntheticOnly": true,
+    "width": 390,
+    "files": [
+      "implementation-live-results-en-390.jpg",
+      "implementation-live-results-th-390.jpg"
+    ]
+  }
 }
