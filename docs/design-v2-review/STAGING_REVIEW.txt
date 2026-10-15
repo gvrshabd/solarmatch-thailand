@@ -135,3 +135,98 @@ Native browser screenshots are JPEG despite the screenshot API's generic byte
 return. The packager's signature check caught their initial .png filenames before
 publication. Evidence/live screenshot names now correctly use .jpg without pixel
 alteration; Playwright PNGs remain PNG. No supplied photograph was modified.
+
+FINAL PROTECTED STAGING HANDOFF
+Active Worker version: 4548abeb-b785-4328-983a-a9f655c59a4e (100%).
+Deployed review source: 66a764cab616991cfb68ce7f7aa46d120a665bdd.
+Application repair source: 8b501b60741c6276a921f79d47c775d8cdd246ef.
+The final evidence commit changes only screenshots, their manifest and a unit
+assertion; it packages the previously verified protected application build.
+This addendum is a documentation-only follow-up, not another application release.
+
+Owner phone links (HTTPS, independent of a local preview process):
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/design-review/
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/en
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/estimate
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/en/estimate
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/design-review/estimate-th
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/design-review/estimate-en
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/installers?lang=th
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/installers?lang=en
+https://solarmatch-installer-staging.deluxejahseh.workers.dev/admin
+Use normal owner Cloudflare email/SSO verification. Only the interactive installer
+workspace also needs the existing synthetic installer login. Credentials were not
+changed, read from management files, published or included in any URL.
+
+Actual authenticated HTTPS verification:
+- Both homepages, eighteen bilingual supporting/legal pages, and all eleven
+  calculator steps through No-contact results passed. No contact PII was submitted.
+- Both synthetic completed-estimate aliases restore actual calculator results.
+  Negative-net EN/TH shows the existing negative explanation, 24.8-year simple
+  payback and no cumulative crossing. Unavailable EN payback is a dash, not zero.
+  Local positive/negative/unavailable coverage includes both locales.
+- Approved paused installer Today/inbox/detail/credits/company load. Actual legacy
+  Open stays unconfirmed rather than being silently relabelled Contacted. Separate
+  Won/Lost actions remain. Balance is 2 available, 0 reserved, 0 trial and 0 debt.
+- Actual synthetic note save, reload, restoration and second reload passed. The
+  original note is restored; two legitimate audit events remain. No staged result
+  is inferred merely from opening a form. Company settings and linked LINE state
+  were inspected without changing preferences, linking or sending a message.
+- Final legacy detail h1 falls back to its existing reference when name disclosure
+  is not permitted; the actual record is usable at 320px without overflow. Thai
+  Today/credits/company navigation and paused/payment-disabled messages passed.
+- The authenticated admin dashboard and its two existing leads loaded through the
+  separate admin Access audience. No admin gate, policy or operating hold changed.
+- The viewer loads both reference images at phone width, switches language/mode,
+  zooms and offers full-size assets and interactive links. The original clickable
+  prototype's Home -> question 1 interaction passed on HTTPS; its controls stay
+  mock-only behind CSP/external-navigation restrictions.
+- Final no-cookie requests for site/calculator/installer/viewer/example/image paths
+  returned 302 to the owner site Access audience. /admin returned 302 to its
+  distinct admin audience. No installer login is required for the static viewer.
+  An existing signed-in session alone was not treated as fresh-session evidence.
+
+Final capture correction:
+The native getScreenshot wrapper produced an incorrectly scaled Thai proof image
+despite a 390px CSS viewport; the English proof also had a different pixel width.
+Both separate live proof images were recaptured using an exact 390x844 viewport
+clip after the actual result heading/metrics were visible. JPEG dimensions and
+SHA256 now have a dedicated unit assertion. Matched Playwright comparison images
+were unaffected. Corrected JPEGs are live and the Thai image was checked at its
+actual 390x844 native dimensions. No screenshot was cosmetically edited.
+
+Final verification totals (distinct runs, not one combined total):
+- Full regression: 263 passed / 22 intentional local-test skips / zero failures.
+- Genuine isolated workflow: 8 passed, including combined admin and mock providers.
+- Final affected detail/financial regression: 36 passed, desktop/mobile Chromium
+  and mobile WebKit. The initial long-token failures remain documented above.
+- Final viewer canonical-path/isolation/mobile regression: 3 passed.
+- Final unit suite after evidence assertion: 377 passed in 53 files.
+- Typecheck passed. Lint: zero errors, two pre-existing next/image warnings.
+- Normal production and protected-staging builds passed before the final
+  evidence-only commit. No application/build input changed after those builds.
+- Read-only local safety/integrity checks passed: all holds restored, test clock
+  null and all 59 common demo-table values unchanged.
+
+Post-final-deployment remote verification:
+Worker 4548abeb-b785-4328-983a-a9f655c59a4e is active at 100%.
+All 56 original data tables excluding d1_migrations and the three known mutable
+audit/session/rate-limit tables match pre-migration original-column hashes.
+Leads 2; enquiries 2; deliveries 1; ledger entries 2; legal versions 3; migrations 19.
+Foreign-key violations 0; credit-ledger mismatches 0. Existing audit rows remain;
+two note events were appended, sessions renewed and rate-limit metadata advanced.
+Private R2 binding and Standard/private configuration are unchanged; no R2 object
+write/delete was issued. Comprehensive R2 recovery or inventory is not claimed.
+Collection/payments/notifications/attribution/outbound remain disabled, platform
+and allocation paused, live provider flags false and no test-clock override.
+Only the existing pending staging migration 0019 was applied. No production
+schema, resource, main commit, Access policy or Milly's resource was changed.
+No Git push or merge occurred. Previous staging rollback version remains
+f7fec39e-b10f-4efc-9497-e35eecd3a23d; retain the additive schema on code rollback.
+
+Remaining external/unverified items:
+Exact provenance for roof-tile.jpg and modern-roof.jpg; real operator/legal/tax
+facts and counsel-approved policy decisions; native-speaker acceptance; physical
+phone/screen-reader acceptance; real provider settlement and outbound-message
+tests. None is represented as verified, approved or enabled by this review.
