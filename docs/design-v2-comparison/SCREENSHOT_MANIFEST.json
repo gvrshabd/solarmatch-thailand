@@ -290,13 +290,13 @@
     },
     {
       "path": "implementation-live-results-en-390.jpg",
-      "bytes": 41297,
-      "sha256": "2b09287985628b63c5eec8751b17239ee482958bff445e50e81e25454a04b752"
+      "bytes": 50085,
+      "sha256": "7e5f4aa332505a407c0bcd81f790aa3dd50d8d464887e6361b30356b123c97ff"
     },
     {
       "path": "implementation-live-results-th-390.jpg",
-      "bytes": 7501,
-      "sha256": "3f298e6e17280fc0d351e100beb1f553092867af97c58ef04500dadfa7dc2359"
+      "bytes": 45821,
+      "sha256": "87ce34ff0d628811b967dcf7e809c0580a2bf3ae5274421ae3ebd873a9d3b2cd"
     },
     {
       "path": "implementation-portal-en-1440.png",
@@ -1485,10 +1485,12 @@
     "unavailable-payback"
   ],
   "additionalLiveCaptures": {
-    "workerVersion": "b0092fd4-f1c6-4a60-a23d-07762b98a735",
-    "sourceCommit": "b70836e527640b2bba68c64cd34bc67eefcb1b33",
+    "workerVersion": "3514f3de-37a1-4038-b705-d0f91b4e967a",
+    "sourceCommit": "8b501b60741c6276a921f79d47c775d8cdd246ef",
     "syntheticOnly": true,
     "width": 390,
+    "height": 844,
+    "scope": "Exact 390x844 viewport screenshots, after the synthetic result heading and metrics were visible; not full-page captures.",
     "files": [
       "implementation-live-results-en-390.jpg",
       "implementation-live-results-th-390.jpg"

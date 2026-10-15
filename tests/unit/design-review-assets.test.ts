@@ -1,6 +1,7 @@
 import {it,expect} from 'vitest';
 import {readFileSync,existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
+import {imageSize} from 'image-size';
 import {exampleLink} from '../../scripts/design-v2-review-assets.mjs';
 import {restoreSharedEstimate} from '@/lib/design-v2/share-estimate';
 it('keeps every original handoff file frozen',()=>{
@@ -18,4 +19,14 @@ it('does not package review assets through production public routes or its Worke
  expect(existsSync('public/design-review')).toBe(false);expect(existsSync('app/design-review')).toBe(false);
  expect(readFileSync('worker.ts','utf8')).not.toContain('staging-design-review');
  const packager=readFileSync('scripts/design-v2-review-assets.mjs','utf8');expect(packager).toContain("'.wrangler/design-v2-staging-assets'");expect(packager).not.toContain("cp(path.join(root,'docs/design-v2-comparison')");
+});
+it('records native live proof at the actual documented phone dimensions and hash',()=>{
+ const manifest=JSON.parse(readFileSync('docs/design-v2-comparison/SCREENSHOT_MANIFEST.json','utf8'));
+ for(const file of manifest.additionalLiveCaptures.files){
+  const bytes=readFileSync('docs/design-v2-comparison/'+file);
+  const entry=manifest.files.find((item:{path:string})=>item.path===file);
+  expect(imageSize(bytes)).toMatchObject({width:390,height:844,type:'jpg'});
+  expect(bytes.length).toBe(entry.bytes);
+  expect(createHash('sha256').update(bytes).digest('hex')).toBe(entry.sha256);
+ }
 });
