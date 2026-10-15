@@ -10,7 +10,7 @@ http.createServer(async(req,res)=>{
     const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
     if(pathname.startsWith('/design-review/')){
       if(!stagingDesignAsset(pathname)){res.writeHead(404).end();return;}
-      const file=path.resolve('.wrangler/design-v2-staging-assets','.'+(pathname.endsWith('/')?pathname+'index.html':pathname));
+      const file=path.resolve('.wrangler/design-v2-staging-assets','.'+(pathname.endsWith('/')?pathname+'index.html':/\/estimate-(en|th)$/.test(pathname)?pathname+'.html':pathname));
       const content=await readFile(file);
       res.writeHead(200,{'Content-Type':types[path.extname(file)]??'application/octet-stream','Cache-Control':'no-store','Content-Security-Policy':pathname.includes('/prototype/')?reviewContentSecurityPolicy:reviewContentSecurityPolicy.replace("connect-src 'none'","connect-src 'self'")}).end(content);return;
     }

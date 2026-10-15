@@ -29,3 +29,9 @@ test('reference mock is isolated from application APIs',async({page})=>{
  await page.goto('http://127.0.0.1:4174/design-review/prototype/?lang=en#enquiry-e39');
  await expect(page.locator('a[href^="tel:"]')).toBeVisible();await page.locator('a[href^="tel:"]').click();expect(page.url()).toContain('#enquiry-e39');expect(requests).toEqual([]);
 });
+test('both canonical completed-estimate aliases serve the safe fragment redirect',async({request})=>{
+ for(const lang of ['en','th']){
+  const response=await request.get('http://127.0.0.1:4174/design-review/estimate-'+lang);
+  expect(response.status()).toBe(200);expect(await response.text()).toContain('id="example-link"');expect(await response.text()).toContain('#sm-estimate=');
+ }
+});

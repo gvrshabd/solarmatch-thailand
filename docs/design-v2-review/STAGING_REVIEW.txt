@@ -101,3 +101,12 @@ all required image pairs exist and PNG signatures are validated. This was toolin
 ordering, not a deployment or application success claim.
 Authenticated HTTPS smoke results and Worker identity follow in the deployment
 addendum after publication. Nothing has been pushed or merged to main.
+
+LIVE PUBLICATION CHECK — FIRST ITERATION
+Initial protected staging version: 7983375b-d37d-4148-919d-4a6be8d67abd.
+The live viewer, catalog and images loaded after owner SSO, with no overflow at
+390px. A live short-estimate check caught an Assets canonicalization defect:
+Cloudflare redirects .html to extensionless URLs, which the review path allowlist
+had rejected. Both exact canonical aliases are now allowed (no general path
+expansion), viewer links use canonical paths, and unit/browser checks cover them.
+This is a staging-only repair. No collection or real operations were activated.
