@@ -79,6 +79,12 @@ html[lang=th] .installer-shell .installer-welcome h1{font-size:clamp(28px,3.4vw,
 .installer-shell .tracker{margin-top:12px}
 .installer-shell .v2-detail-disclosures{padding-top:4px;padding-bottom:4px}
 .installer-shell .v2-company-form{align-items:start}
+.installer-shell .v2-extra-area{margin-top:12px}
+.installer-shell .v2-extra-area summary{cursor:pointer;min-height:44px;font-size:13px;color:var(--sm-muted)}
+.installer-shell .v2-extra-area[open] .field{margin-bottom:10px}
+.installer-shell .v2-company-secondary{padding-block:12px}
+.installer-shell .v2-company-secondary button{width:100%;display:flex;justify-content:space-between;align-items:center;border:0;border-radius:0;background:none;padding:16px 0;text-align:start}
+.installer-shell .v2-company-secondary button+button{border-top:1px solid var(--sm-line)}
 .installer-shell .v2-company-form .card{margin:0}
 .installer-shell .v2-company-form .stepper{min-width:132px}
 .installer-shell .v2-company-form .stepper input{width:48px;min-width:0;padding:0;text-align:center;border:0;box-shadow:none;background:none;margin:0;-moz-appearance:textfield}

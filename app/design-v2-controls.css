@@ -43,6 +43,7 @@ html[lang=th] .terrace-public :is(h1,h2,h3,h4),.installer-shell[lang=th] :is(h1,
 .terrace-public .faqband .eyebrow{color:var(--sm-lime)}.terrace-public .v2-soon-section{padding-top:0}.terrace-public .soon-card>div{display:grid;gap:10px}.terrace-public .soon-card .chip{justify-self:start}.terrace-public .soon-card p{font-size:17px;max-width:36em}
 .terrace-public .footer{padding:48px 0 40px}.terrace-public .footer .wrap{max-width:1240px}.terrace-public .footer-grid-v2{display:grid;gap:28px}.terrace-public .footer h2{font-size:14px;color:white;letter-spacing:0;margin-bottom:10px}.terrace-public .footer-bottom{display:block;font-size:12.5px;border-top:1px solid #ffffff1f;padding-top:20px;margin-top:28px}.terrace-public .footer-bottom p{margin-top:10px}
 .terrace-public .chart-narrow{display:none}@media(max-width:639px){.terrace-public .chart-wide{display:none}.terrace-public .chart-narrow{display:block}}
+.terrace-public .lifetime-chart{width:100%;margin:0;padding:0;border:0;background:none}
 /* Retain the established keyboard/Escape mobile menu as a documented navigation exception. */
 @media(max-width:899px){.terrace-public .hdr .mobile-menu{display:block}.terrace-public .hdr .mobile-menu summary{min-height:44px;min-width:44px}.terrace-public .hdr .lang a{min-width:44px;justify-content:center}.terrace-public .hdr .lang{height:50px}.terrace-public .hdr .lang a{height:44px}}
 @media(min-width:860px){.terrace-public .footer-grid-v2{grid-template-columns:1.4fr 1fr 1fr 1fr}}
