@@ -9,6 +9,8 @@ export type InstallerDelivery = {
   creditCost: number; deliveredAt: string; notificationStatus: string; claimDeadline: string;
   withdrawn: boolean;
   homeownerName: string; phone: string; location: string; requestedAt: string;
+  province?: string; district?: string; customArea?: string;
+  teamNotes?: string; notesRevision?: number; notesUpdatedAt?: string | null;
   assessment: Record<string, unknown>; qualification: string; outcome: string | null;
 };
 export type InstallerPortalData = {
@@ -36,5 +38,6 @@ export type InstallerPortalAction =
   | { action: 'create-claim'; deliveryId: string; reason: string; notes: string }
   | { action: 'rotate-share-link' | 'revoke-share-link'; deliveryId: string }
   | { action: 'report-outcome'; deliveryId: string; outcome: string }
+  | { action: 'save-team-notes'; deliveryId: string; notes: string; revision: number }
   | { action: 'link-line'; linkRequest?: string }
   | { action: 'unlink-line' };

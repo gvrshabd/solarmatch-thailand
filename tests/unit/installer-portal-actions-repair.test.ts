@@ -84,3 +84,44 @@ describe('portal payment, unlink and withdrawn delivery actions',()=>{
     expect(fixture.sqlite.prepare("SELECT COUNT(*) AS n FROM audit_events WHERE action='installer.outcome'").get()?.n).toBe(0);
   });
 });
+
+describe('Design v2 bounded workspace actions',()=>{
+ it('persists preference without overwriting company edits or lifting global pauses',async()=>{
+   const before=fixture.sqlite.prepare('SELECT trading_name,daily_limit FROM solar_company_partners WHERE id=?').get(company);
+   expect((await post({action:'set-accepting',accepting:false})).status).toBe(200);
+   expect(fixture.sqlite.prepare('SELECT paused FROM solar_company_partners WHERE id=?').get(company)?.paused).toBe(1);
+   expect(fixture.sqlite.prepare('SELECT trading_name,daily_limit FROM solar_company_partners WHERE id=?').get(company)).toEqual(before);
+   expect((await post({action:'set-accepting',accepting:true})).status).toBe(200);
+   state.userId='member';expect((await post({action:'set-accepting',accepting:true})).status).toBe(403);
+ });
+ it.each(['contacted','site_visit','quoted','open','won','lost','not-suitable'])('persists explicit %s without changing legacy values on read',async(outcome)=>{
+   const d=await delivered();
+   expect((await post({action:'report-outcome',deliveryId:d.id,outcome})).status).toBe(200);
+   const {getPortalData}=await import('@/lib/installer/portal-data');
+   const data=await getPortalData(fixture.d1(),{user:{id:'owner1',name:'Synthetic',email:'owner1@example.test',emailVerified:true}});
+   expect(data.deliveries.find(x=>x.id===d.id)?.outcome).toBe(outcome);
+ });
+ it('persists bounded notes, detects stale edits, and isolates tenant/staff views',async()=>{
+   const d=await delivered();
+   expect((await post({action:'save-team-notes',deliveryId:d.id,notes:'Synthetic team note',revision:0})).status).toBe(200);
+   expect((await post({action:'save-team-notes',deliveryId:d.id,notes:'Stale overwrite',revision:0})).status).toBe(409);
+   expect((await post({action:'save-team-notes',deliveryId:d.id,notes:'x'.repeat(2001),revision:1})).status).toBe(400);
+   state.userId='owner2';expect((await post({action:'save-team-notes',deliveryId:d.id,notes:'Cross tenant',revision:1})).status).toBe(409);
+   const {getPortalData}=await import('@/lib/installer/portal-data');
+   const data=await getPortalData(fixture.d1(),{user:{id:'owner1',name:'Synthetic',email:'owner1@example.test',emailVerified:true}});
+   expect(data.deliveries.find(x=>x.id===d.id)?.teamNotes).toBe('Synthetic team note');
+   const {rotateShareLink,readShareLink}=await import('@/lib/installer/share');
+   const share=await rotateShareLink(fixture.d1(),company,d.id,'fixture','http://localhost:3000');
+   const token=new URL(share.url).hash.slice('#token='.length);
+   expect(JSON.stringify(await readShareLink(fixture.d1(),token))).not.toContain('Synthetic team note');
+   expect(JSON.stringify(fixture.sqlite.prepare("SELECT next_json FROM audit_events WHERE action='installer.team-notes'").all())).not.toContain('Synthetic team note');
+ });
+ it('erases notes on withdrawal and blocks later updates at the atomic boundary',async()=>{
+   const d=await delivered();
+   expect((await post({action:'save-team-notes',deliveryId:d.id,notes:'Synthetic private note',revision:0})).status).toBe(200);
+   await suppressEnquiry(fixture.d1(),d.enquiryId,'fixture withdrawal','fixture');
+   expect(fixture.sqlite.prepare('SELECT portal_team_notes FROM lead_recipient_deliveries WHERE id=?').get(d.id)?.portal_team_notes).toBe('');
+   expect((await post({action:'save-team-notes',deliveryId:d.id,notes:'No',revision:1})).status).toBe(409);
+   expect((await post({action:'report-outcome',deliveryId:d.id,outcome:'contacted'})).status).toBe(400);
+ });
+});
