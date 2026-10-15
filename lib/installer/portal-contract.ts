@@ -20,8 +20,8 @@ export type InstallerPortalData = {
   packages: { id: string; nameTh: string; nameEn: string; credits: number; amountMinor: number; currency: string; taxLabel: string }[];
   balance: { available: number; reserved: number; trialRemaining: number; debt: number };
   deliveries: InstallerDelivery[];
-  orders: { id: string; status: string; amountMinor: number; currency: string; credits: number; createdAt: string; receiptReference: string | null }[];
-  ledger: { id: string; kind: string; units: number; reason: string; createdAt: string }[];
+  orders: { id: string; status: string; amountMinor: number; currency: string; credits: number; createdAt: string; refundedMinor?:number; reversedCredits?:number; receiptReference: string | null }[];
+  ledger: { id: string; kind: string; units: number; sourceId?:string|null; availableDelta?:number; reservedDelta?:number; trialDelta?:number; debtDelta?:number; reason: string; createdAt: string }[];
   claims: { id: string; deliveryId: string; reason: string; status: string; submittedAt: string; decision: string | null }[];
   terms: { version: string; textTh: string; textEn: string; acceptedAt: string | null };
   integrations: { paymentsEnabled: boolean; paymentMethods: string[]; lineConfigured: boolean; mode: string };

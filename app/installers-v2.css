@@ -58,6 +58,24 @@ html[lang=th] .installer-shell .installer-welcome h1{font-size:clamp(28px,3.4vw,
 .installer-shell .facts b{overflow-wrap:anywhere}
 .installer-shell .tracker{margin-top:12px}
 .installer-shell .v2-detail-disclosures{padding-top:4px;padding-bottom:4px}
+.installer-shell .v2-company-form{align-items:start}
+.installer-shell .v2-company-form .card{margin:0}
+.installer-shell .v2-company-form .stepper{min-width:132px}
+.installer-shell .v2-company-form .stepper input{width:48px;min-width:0;padding:0;text-align:center;border:0;box-shadow:none;background:none;margin:0;-moz-appearance:textfield}
+.installer-shell .v2-company-form .stepper input::-webkit-inner-spin-button{appearance:none}
+.installer-shell .v2-company-form .stepper button{min-width:36px;min-height:44px;padding:0}
+.installer-shell .v2-company-form .pchips{margin:14px 0}
+.installer-shell .v2-inline-actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.installer-shell .balance .eyebrow{color:var(--sm-lime)}
+.installer-shell .balance .note{color:var(--sm-ondark)}
+.installer-shell .statement .grow{flex:1;min-width:0}
+.installer-shell .statement .grow b,.installer-shell .statement .grow small{display:block}
+.installer-shell .statement .grow small{font-size:13.5px;color:var(--sm-muted);overflow-wrap:anywhere}
+.installer-shell .statement>div{gap:12px}
+.installer-shell .pkg{display:grid;gap:14px}
+.installer-shell .pkg .price{flex-wrap:wrap}
+.installer-shell .installer-secondary-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.installer-shell .installer-secondary-nav button{border-radius:var(--sm-pill);font-size:13px}
 .installer-shell .installer-enquiry-grid{display:grid;grid-template-columns:1fr;gap:14px}
 .installer-shell .installer-enquiry-card{padding:20px;border:0;border-radius:var(--sm-r-lg);box-shadow:var(--sm-shadow);gap:14px;display:grid}
 .installer-shell .installer-enquiry-top strong{font-size:18px}
