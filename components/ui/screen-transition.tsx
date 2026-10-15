@@ -11,12 +11,14 @@ export function ScreenTransition({
   pace = 'step',
   className,
   children,
+  onEntered,
 }: {
   transitionKey: string;
   direction?: ScreenDirection;
   pace?: 'step' | 'result';
   className?: string;
   children: ReactNode;
+  onEntered?: () => void;
 }) {
   const reduceMotion = useReducedMotion();
   const offset = reduceMotion || direction === 'neutral' ? 0 : direction === 'forward' ? 10 : -10;
@@ -32,8 +34,10 @@ export function ScreenTransition({
           data-transition-pace={pace}
           custom={offset}
           initial={{ opacity: 0, y: offset }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -offset }}
+          animate="entered"
+          exit="leaving"
+          variants={{ entered: { opacity: 1, y: 0 }, leaving: (distance: number) => ({ opacity: 0, y: -distance }) }}
+          onAnimationComplete={(definition) => { if (definition === 'entered') onEntered?.(); }}
           transition={{ duration, ease: [0.2, 0.7, 0.2, 1] }}
         >
           {children}

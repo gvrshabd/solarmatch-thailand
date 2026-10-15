@@ -26,6 +26,8 @@ async function openReview(page: Page, locale: 'en' | 'th', enabled = false) {
   await page.goto(locale === 'en' ? '/en/estimate' : '/estimate');
   const option = page.getByRole('radio', { name: locale === 'en' ? /^Test/ : /^ทดสอบ/ });
   await expect(option).toHaveAttribute('aria-checked', 'false');
+  await expect(page.locator('.question-stage')).toHaveCSS('opacity','1');
+  await page.evaluate(()=>document.fonts.ready);
   await option.click();
   return requests;
 }

@@ -31,9 +31,55 @@ async function audit(page:Page) {
  expect(results.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
 }
 for(const lang of ['en','th'] as const) {
- test(`${lang}: supplied screens at mobile and desktop, with real calculation and safe sharing`,async({page,context})=>{
+ test(`${lang}: eligibility and error states stay truthful at narrow and desktop widths`,async({page},info)=>{
+  const folder=path.resolve('docs/design-v2-comparison');const en=lang==='en';
+  let data=fixture(),status=200;
+  await page.route('**/api/installer/portal**',route=>route.fulfill({status,json:status===200?data:{error:'portal_unavailable'}}));
+  for(const width of [390,1440]){
+   await page.setViewportSize({width,height:900});
+   for(const state of ['pending','rejected','paused','unverified','terms-required','platform-paused','zero-credit','empty','error']){
+    data=fixture();data.deliveries=[];status=200;
+    if(state==='pending'||state==='rejected')data.company!.approvalStatus=state;
+    if(state==='paused')data.company!.paused=true;
+    if(state==='unverified')data.session.user.emailVerified=false;
+    if(state==='terms-required')data.terms.acceptedAt=null;
+    if(state==='platform-paused')data.availability!.platformPaused=true;
+    if(state==='zero-credit')data.balance={available:0,reserved:0,trialRemaining:0,debt:0};
+    if(state==='error')status=503;
+    await page.goto('/installers?lang='+lang);
+    if(state==='error'){await expect(page.getByRole('button',{name:en?'Retry':'ลองอีกครั้ง',exact:true})).toBeVisible();await expect(page.locator('.installer-workspace')).toHaveCount(0);}
+    else{await expect(page.locator('.installer-workspace')).toBeVisible();await expect(page.locator('.callnext')).toHaveCount(0);await expect(page.getByText(en?'No new enquiries':'ไม่มีคำขอใหม่',{exact:true})).toBeVisible();}
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+    if(info.project.name==='desktop-chromium')await page.screenshot({path:path.join(folder,`implementation-state-${state}-${lang}-${width}.png`),scale:'css'});
+   }
+  }
+  // An expired installer session on a genuine enquiry URL still offers sign-in.
+  status=401;await page.goto('/installers/enquiry/'+id+'?lang='+lang);
+  await expect(page.getByRole('heading',{name:en?'Sign in':'เข้าสู่ระบบ',exact:true})).toBeVisible();
+  await expect(page.getByLabel(en?'Email':'อีเมล',{exact:true})).toBeVisible();
+ });
+ test(`${lang}: conditional household answers remain editable without accidental advance`,async({context},info)=>{
+  const folder=path.resolve('docs/design-v2-comparison');
+  const cases=[
+   {name:'other-location',step:0,answers:{province:'other',customProvince:'Chonburi',district:'Bang Lamung'},selector:'#estimate-custom-province'},
+   {name:'other-property',step:4,answers:{propertyType:'other-residential',customPropertyType:'Synthetic residential property'},selector:'#conditional-customPropertyType'},
+   {name:'owner-permission',step:5,answers:{ownershipStatus:'renter',ownerPermission:'not-yet'},selector:'.inline-followup'},
+   {name:'other-appliance',step:7,answers:{daytimeLoads:['other-high-use'],customDaytimeLoad:'Synthetic household equipment',airConditionerCount:undefined},selector:'#conditional-customDaytimeLoad'},
+   {name:'other-roof',step:9,answers:{roofMaterial:'other',customRoofMaterial:'Synthetic roof'},selector:'#conditional-customRoofMaterial'},
+  ];
+  for(const width of [390,1440])for(const scenario of cases){
+   const candidate=await context.newPage();await candidate.setViewportSize({width,height:900});
+   await candidate.addInitScript(({answers,step})=>sessionStorage.setItem('solarmatch:estimate-draft',JSON.stringify({version:9,step,answers})),{answers:{...designV2ExampleAnswers,...scenario.answers},step:scenario.step});
+   await candidate.goto(lang==='en'?'/en/estimate':'/estimate');await expect(candidate.locator(scenario.selector)).toBeVisible();await expect(candidate.getByRole('progressbar')).toHaveAttribute('aria-valuenow',String(scenario.step+1));
+   await expect(candidate.locator('.question-stage')).toHaveCSS('opacity','1');
+   if(info.project.name==='desktop-chromium')await candidate.screenshot({path:path.join(folder,`implementation-conditional-${scenario.name}-${lang}-${width}.png`),scale:'css'});
+   await candidate.close();
+  }
+ });
+ test(`${lang}: supplied screens at mobile and desktop, with real calculation and safe sharing`,async({page,context},info)=>{
   test.setTimeout(240000);
   const data=fixture();
+  const capture=info.project.name==='desktop-chromium';
   await page.clock.setFixedTime(new Date(fixed));
   await page.route('**/api/installer/portal**',route=>route.fulfill({json:data}));
   await page.addInitScript(answers=>sessionStorage.setItem('solarmatch:estimate',JSON.stringify(answers)),designV2ExampleAnswers);
@@ -49,11 +95,13 @@ for(const lang of ['en','th'] as const) {
     await page.goto(url);await expect(page.locator('main h1').first()).toBeVisible();
     if(name==='home')await page.locator('#hero-monthly-bill').fill('6000');
     if(name==='results'){await expect(page.locator('.rbig')).toHaveText('฿1,665');await expect(page.locator('.rstats>div')).toHaveCount(3);}
-    await audit(page);await page.screenshot({path:path.join(folder,`implementation-${name}-${lang}-${width}.png`),fullPage:true});
-    await page.screenshot({path:path.join(folder,`viewport-implementation-${name}-${lang}-${width}.png`)});
+    await audit(page);if(capture)await page.screenshot({path:path.join(folder,`implementation-${name}-${lang}-${width}.png`),fullPage:true,scale:'css'});
     await reference.goto('http://127.0.0.1:4174/#'+name);await reference.evaluate(()=>document.fonts.ready);
-    await reference.screenshot({path:path.join(folder,`prototype-${name}-${lang}-${width}.png`),fullPage:true});
-    await reference.screenshot({path:path.join(folder,`viewport-prototype-${name}-${lang}-${width}.png`)});
+    if(capture)await reference.screenshot({path:path.join(folder,`prototype-${name}-${lang}-${width}.png`),fullPage:true,scale:'css'});
+    const chrome=await reference.locator('.proto').evaluate(el=>Math.ceil(el.getBoundingClientRect().height));
+    await page.evaluate(()=>window.scrollTo(0,0));await reference.evaluate(()=>window.scrollTo(0,0));
+    if(capture)await page.screenshot({path:path.join(folder,`viewport-implementation-${name}-${lang}-${width}.png`),clip:{x:0,y:0,width,height:900-chrome},scale:'css'});
+    if(capture)await reference.screenshot({path:path.join(folder,`viewport-prototype-${name}-${lang}-${width}.png`),clip:{x:0,y:chrome,width,height:900-chrome},scale:'css'});
    }
   }
   for(const width of [390,1440]) {
@@ -65,8 +113,10 @@ for(const lang of ['en','th'] as const) {
     await expect(page.locator('.question-stage')).toHaveCSS('opacity','1');await page.evaluate(()=>document.fonts.ready);
     await reference.goto('http://127.0.0.1:4174/#estimate');await reference.reload();await reference.evaluate(()=>document.fonts.ready);
     await expect(reference.locator('#qh')).toContainText(initialQuestionnaire.questions[step].title[lang].slice(0,18));
-    await page.screenshot({path:path.join(folder,`implementation-question-${step+1}-${lang}-${width}.png`)});
-    await reference.screenshot({path:path.join(folder,`prototype-question-${step+1}-${lang}-${width}.png`)});
+    const chrome=await reference.locator('.proto').evaluate(el=>Math.ceil(el.getBoundingClientRect().height));
+    await page.evaluate(()=>window.scrollTo(0,0));await reference.evaluate(()=>window.scrollTo(0,0));
+    if(capture)await page.screenshot({path:path.join(folder,`implementation-question-${step+1}-${lang}-${width}.png`),clip:{x:0,y:0,width,height:900-chrome},scale:'css'});
+    if(capture)await reference.screenshot({path:path.join(folder,`prototype-question-${step+1}-${lang}-${width}.png`),clip:{x:0,y:chrome,width,height:900-chrome},scale:'css'});
    }
   }
   await reference.close();

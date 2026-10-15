@@ -52,6 +52,9 @@ html[lang=th] .terrace-public :is(h1,h2,h3,h4),.installer-shell[lang=th] :is(h1,
 .terrace-public .estimate-focus-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;align-items:start;padding-top:12px;padding-bottom:120px}
 .terrace-public .estimate-focus-layout .focus-card{padding:0;border:0;border-radius:0;box-shadow:none;background:none;min-width:0;max-width:640px}
 .terrace-public .estimate-focus-layout .question-heading{margin:0 0 28px;padding:0}
+.terrace-public .estimate-focus-layout .question-stage{animation:none}
+html:has(.terrace-public .estimate-page){scroll-padding-top:80px;scroll-padding-bottom:120px}
+.terrace-public .estimate-page :is(input,select,textarea,button){scroll-margin-top:80px;scroll-margin-bottom:120px}
 .terrace-public .estimate-focus-layout .question-heading h1{font-size:clamp(30px,4vw,46px);line-height:1.06;font-weight:700}
 html[lang=th] .terrace-public .estimate-focus-layout .question-heading h1{font-size:clamp(26px,3.4vw,38px);line-height:1.35;font-weight:600}
 .terrace-public .question-heading p{font-size:16.5px;display:block;margin-top:12px}.terrace-public .question-heading p>svg{display:none}

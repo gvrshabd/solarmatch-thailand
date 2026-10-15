@@ -206,7 +206,7 @@ test('district chooser is searchable, eight rows tall, and sorted for each langu
   await page.getByRole('option', { name: 'Sathon', exact: true }).click();
   await expect(district).toHaveValue('Sathon');
 
-  await page.getByRole('link', { name: 'View this estimate in Thai' }).click();
+  await page.getByRole('link', { name: 'View this page in Thai' }).click();
   const thaiDistrict = page.locator('#estimate-district');
   await expect(thaiDistrict).toHaveValue('สาทร');
   await thaiDistrict.fill('');
@@ -258,7 +258,7 @@ test('refresh and language switching preserve estimator progress without restore
  await expectHeading(page,'คุณกำลังพิจารณาโครงการโซลาร์แบบใด?');
  await page.getByRole('button',{name:'Back',exact:true}).count().then(async n=>{if(n)await page.getByRole('button',{name:'Back',exact:true}).click();else await page.getByRole('button',{name:'ย้อนกลับ',exact:true}).click();});
  await expect(page.getByRole('radio',{name:'ใช่ — ภายใน 3 เดือน',exact:true})).toBeChecked();
- await page.getByRole('link',{name:'ดูแบบประเมินนี้เป็นภาษาอังกฤษ'}).click();
+ await page.getByRole('link',{name:'View this page in English'}).click();
  await expect(page.getByRole('radio',{name:'Yes — within 3 months',exact:true})).toBeChecked();
 });
 
@@ -288,7 +288,7 @@ test('optional map never sends the typed address to a geocoder', async ({ page }
   page.on('request', (request) => requests.push(request.url()));
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.goto('/en/estimate/results');
-  await page.locator('.accuracy-upgrade summary').click();
+  await page.getByText('More optional details',{exact:true}).click();
   await page.getByLabel('Exact address (optional)').fill('777 Privacy Test Lane Bangkok');
   await page.getByRole('button', { name: 'Position on map' }).click();
   await expect(page.getByRole('button', { name: 'Put marker at map centre' })).toBeVisible();

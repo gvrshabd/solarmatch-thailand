@@ -66,14 +66,14 @@ test.describe('isolated local installer workflow',()=>{
     expect(portal.status()).toBe(200);
     expect((await portal.json()).company).toMatchObject({approvalStatus:'pending',paused:true});
     await page.setViewportSize({width:320,height:800});
-    await page.getByRole('button',{name:'TH',exact:true}).click();
+    await page.getByRole('button',{name:'Switch to Thai',exact:true}).click();
     await expect(page.getByRole('heading',{name:'วันนี้',exact:true})).toBeVisible();
     await expect(page.getByRole('status').filter({hasText:/^บันทึกแล้ว/})).toBeVisible();
     await expect(page.getByText('รอตรวจสอบ',{exact:true})).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
     expect((await new AxeBuilder({page}).include('.installer-shell').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
     await page.screenshot({path:testInfo.outputPath('installer-portal-320-th.png'),fullPage:true});
-    await page.getByRole('button',{name:'EN',exact:true}).click();
+    await page.getByRole('button',{name:'Switch to English',exact:true}).click();
     await expect(page.getByRole('heading',{name:'Today',exact:true})).toBeVisible();
     await expect(page.getByText('Pending',{exact:true})).toBeVisible();
     await page.screenshot({path:testInfo.outputPath('installer-portal-320-en.png'),fullPage:true});

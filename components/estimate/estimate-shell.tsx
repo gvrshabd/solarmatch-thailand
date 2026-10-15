@@ -330,10 +330,10 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     if (!ready || showContactForm) return;
     const timer = window.setTimeout(() => {
       const activeElement = document.activeElement;
-      if (!activeElement || activeElement === document.body || activeElement === questionHeadingRef.current) {
+      if (!activeElement || activeElement === document.body || activeElement === questionHeadingRef.current || activeElement.closest('.estimate-actions')) {
         questionHeadingRef.current?.focus();
       }
-    }, 255);
+    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches?130:500);
     return () => window.clearTimeout(timer);
   }, [ready, step, showContactForm]);
 
@@ -354,7 +354,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     transitionTimerRef.current = window.setTimeout(() => {
       navigationLockRef.current = false;
       setTransitioning(false);
-    }, 270);
+    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches?130:500);
   }
 
   function setValue<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K] | undefined) {
@@ -546,7 +546,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     <p className="flow-count">{step===questions.length-1?text.almost:text.qOf.replace('{n}',String(step+1)).replace('{t}',String(questions.length-1))}</p>
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
-    <fieldset className="hydration-fieldset" disabled={!ready} aria-busy={!ready}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage">
+    <fieldset className="hydration-fieldset" disabled={!ready||transitioning} aria-busy={!ready||transitioning}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage" onEntered={()=>{navigationLockRef.current=false;setTransitioning(false);if(transitionTimerRef.current!==null)window.clearTimeout(transitionTimerRef.current);const active=document.activeElement;if(!active||active===document.body||active===questionHeadingRef.current||active.closest('.estimate-actions'))questionHeadingRef.current?.focus();}}>
       <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1>{question.help[locale] && <p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p>}</div>
       {question.type === 'province' && <div className="location-fields">
         <div className="pchips" role="group" aria-label={english?'Province':'จังหวัด'}>{initialLaunchProvinces.map(option=><button className="pchip" key={option.value} type="button" aria-pressed={draft.province===option.value} onClick={()=>{setShowOtherProvince(false);setValue('province',option.value);}}>{option[locale]}</button>)}<button type="button" className="pchip" aria-pressed={draft.province==='other'} onClick={()=>setShowOtherProvince(true)}>{text.otherProv}</button></div>
@@ -567,8 +567,9 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
       {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
+    </ScreenTransition>
       <div className="estimate-actions">{step>0&&<button className="button button-secondary" type="button" disabled={!ready||transitioning} aria-label={english?'Back':'ย้อนกลับ'} onClick={previous}><ArrowLeft aria-hidden="true"/><span className="sr-only">{english?'Back':'ย้อนกลับ'}</span></button>}<button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{contactReview ? (english ? 'Continue' : 'ถัดไป') : (contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
-    </ScreenTransition></fieldset>
+    </fieldset>
     <div className="estimate-privacy-line"><span>{contactReview ? contactReviewCopy.notice[locale] : english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
   </section>
   {assessmentConfig && completedAnswers.success && <LeadCapture

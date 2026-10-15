@@ -42,6 +42,13 @@ function answerSignature(answers: Record<string, unknown>) {
 }
 
 async function expectSequentialGeometry(page: Page, selectors: string[], label: string) {
+  // Fixed v2 navigation must not permanently hide the final flow control.
+  const fixed=selectors.includes('.estimate-actions');
+  const flowSelectors=fixed?selectors.filter(selector=>selector!=='.estimate-actions'):selectors;
+  if(fixed)await page.evaluate(selectors=>{
+    const last=document.querySelector(selectors[selectors.length-1]),bar=document.querySelector('.estimate-actions');
+    if(last&&bar)window.scrollBy(0,Math.max(0,last.getBoundingClientRect().bottom-bar.getBoundingClientRect().top+24));
+  },flowSelectors);
   const result = await page.evaluate((orderedSelectors) => {
     const elements = orderedSelectors.map((selector) => document.querySelector<HTMLElement>(selector));
     if (elements.some((element) => !element)) return null;
@@ -54,10 +61,14 @@ async function expectSequentialGeometry(page: Page, selectors: string[], label: 
       return rect.left < next.right && rect.right > next.left && rect.top < next.bottom && rect.bottom > next.top;
     });
     return { rectangles, intersections };
-  }, selectors);
+  }, flowSelectors);
   expect(result, `${label}: every geometry target should exist`).not.toBeNull();
   expect(result!.rectangles.every((rect) => rect.width > 0 && rect.height > 0), `${label}: every geometry target should have dimensions`).toBe(true);
   expect(result!.intersections, `${label}: sequential controls must not intersect`).not.toContain(true);
+  if(fixed)expect(await page.evaluate(selectors=>{
+    const last=document.querySelector(selectors[selectors.length-1]),bar=document.querySelector('.estimate-actions');
+    return !!last&&!!bar&&last.getBoundingClientRect().bottom+12<=bar.getBoundingClientRect().top;
+  },flowSelectors),label+': final control can scroll clear of the fixed action bar').toBe(true);
 }
 
 for (const width of widths) {
@@ -156,7 +167,7 @@ test('mobile bill slider occupies real document space and remains fully above na
     expect(positions!.buttonsIntersect, `${width}px Back and Next must not intersect`).toBe(false);
     expect(positions!.wrapper.bottom + 24, `${width}px complete control wrapper must retain spacing before navigation`).toBeLessThanOrEqual(positions!.actions.top);
     expect(positions!.labels.bottom + 24, `${width}px control must retain spacing before navigation`).toBeLessThanOrEqual(positions!.actions.top);
-    expect(positions!.position, `${width}px navigation must participate in layout`).toBe('static');
+    expect(positions!.position, `${width}px v2 navigation is viewport fixed`).toBe('fixed');
 
     const range = page.locator('.bill-range');
     await expect(range).toBeVisible();
@@ -258,6 +269,7 @@ test('bill control remains in flow after portrait-landscape rotation and scrolli
   for (const viewport of [{ width: 844, height: 390 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
     await page.locator('.bill-range-labels').scrollIntoViewIfNeeded();
+    await page.evaluate(()=>{const labels=document.querySelector('.bill-range-labels'),bar=document.querySelector('.estimate-actions');if(labels&&bar)window.scrollBy(0,Math.max(0,labels.getBoundingClientRect().bottom-bar.getBoundingClientRect().top+24));});
     const separated = await page.evaluate(() => {
       const labels = document.querySelector('.bill-range-labels')?.getBoundingClientRect();
       const actions = document.querySelector('.estimate-actions')?.getBoundingClientRect();

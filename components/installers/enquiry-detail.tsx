@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Copy, Phone } from 'lucide-react';
 import type { InstallerDelivery, InstallerPortalAction } from '@/lib/installer/portal-contract';
 import { assessmentRows } from '@/lib/installer/assessment-display';
@@ -15,6 +15,7 @@ export function EnquiryDetail({ item, en, busy, action, share, clearShare, now }
  const [saved,setSaved]=useState(false);
  const [copyStatus,setCopyStatus]=useState('');
  const [manualCopy,setManualCopy]=useState(false);
+ useEffect(()=>{if(item.withdrawn)queueMicrotask(()=>{setNotes('');setSaved(false);setCopyStatus('');setManualCopy(false);});},[item.withdrawn]);
  const fmt=(v:string)=>{const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleString(en?'en-GB':'th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'}):'—';};
  const claimOpen=Number.isFinite(new Date(item.claimDeadline).getTime())&&now<=new Date(item.claimDeadline).getTime();
  const stages=[['open','ยังไม่ระบุผลการติดต่อ','Open — contact not confirmed'],['contacted','ติดต่อแล้ว','Contacted'],['site_visit','สำรวจหน้างาน','Site visit'],['quoted','เสนอราคาแล้ว','Quoted'],['won','ตกลงซื้อ','Won'],['lost','ไม่ได้งาน','Lost'],['not-suitable','ไม่เหมาะสม','Not suitable']];
