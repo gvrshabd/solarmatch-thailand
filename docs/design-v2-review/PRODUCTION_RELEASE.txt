@@ -1,0 +1,96 @@
+SolarMatch Design v2 production release — 15 October 2026 (Asia/Bangkok)
+
+Authorised scope
+Publish the existing Design v2 code/design through SolarMatch's existing GitHub ->
+Cloudflare Builds pipeline. No commercial activation, customer submission, provider
+call, secret rotation, staging replacement or unrelated resource change.
+Approved parent: 807b4970e724bd0e8f9d89c73b55defd64f82856.
+Staging-tested source: 66a764cab616991cfb68ce7f7aa46d120a665bdd.
+Staging retained: 4548abeb-b785-4328-983a-a9f655c59a4e.
+LINE repair 63b656df69f93ad4f6c9e89a1fbb329c80496676 remains in the history.
+Remote main before release: 4bd3a412a850ec77e58821fcbe910728d8df51c6.
+The feature branch contains current main; no conflicting/new remote commits were
+present at preparation. No reset, forced update or historical rewrite is allowed.
+
+Production identities / rollback point
+Worker: solarmatch-thailand.
+D1: solarmatch-thailand-admin / 61d0704e-5c1f-4bf6-bf58-32dbe07e9f65.
+Private R2: solarmatch-thailand-storage.
+Admin audience: b717abfa537a10f8817266c0b9fdab777a99154fbdc53679e88e067151e7bccd.
+Previous Worker version: 7df4598d-b749-4953-9eaf-1e725f800d21 (100%).
+Previous deployment: 2e7d56bc-dcdf-4a7d-9efa-88dcbf07c395.
+The shared Access team domain is retained; no Milly's application is targeted.
+
+Fresh recoverable backup / rehearsal
+Private ignored directory: .wrangler/production-design-v2-20261015/.
+database.sql.enc.json is AES-256-GCM encrypted; key.dpapi is Windows CurrentUser
+DPAPI wrapped. The directory has owner-only inherited child ACLs. Neither file,
+the manifest, original row values nor the temporary SQL is committed/published.
+Decrypted export SHA256:
+73c587144a7718a097fae5ce7185da0fe32661c39b14509c162618ba9f92f484.
+Encrypted roundtrip and full disposable restore verified all 60 tables, foreign
+keys, SQLite integrity and credit-ledger reconciliation. Time Travel information
+is recorded privately. Raw temporary SQL was removed only after verification.
+The first ACL attempt used an unresolved SID spelling and stopped before export;
+the supported explicit numeric-SID spelling was corrected, then backup passed.
+No production mutation occurred during that initial local tooling failure.
+
+Before: 18 applied migrations; 7 leads; 7 historical enquiry backfills; 0 media;
+3 legal versions; 9 audit rows; 0 installer users, deliveries, payment orders,
+credit ledger entries or outbox rows. No synthetic account/data is imported.
+Only pending source: migrations/0019_installer_delivery_workspace.sql.
+SHA256: 4d715b91bc34db89d741fe44b9326412590d673d78a590086cc208a17570497d.
+Seven additive statements add nullable/default workspace columns and redaction
+triggers. Rehearsal against the recovered production export preserved every old
+column/record and passed foreign-key/ledger checks. Previous application code is
+compatible; apply schema before publishing new application code. Applied files
+0001-0018 are unchanged. The helper refuses unexpected pending files or changed
+source hashes and never deploys, seeds, activates or restores a remote database.
+
+Release checks before publication
+Normal production build passed with INSTALLER_STAGING/LOCAL_TEST/LOCAL_STORE unset.
+Generated Worker name, D1/R2, own origin, admin AUD, mode off, false live/outbound
+flags and empty cron were checked. Production assets contain no design-review,
+prototype, private backup, credentials or demo package. The review wrapper exists
+only in the staging entrypoint; public/ has no design-review folder.
+No tracked env/database/key file or detected credential pattern was found in the
+release source. Original prototype/consent/legal records remain unchanged.
+Fresh unit run: 377 passed / 53 files. Typecheck passed. Lint zero errors / two
+existing next/image warnings. Existing exact-application staging evidence remains
+applicable: 263 browser passes / 22 intentional skips; separate 8 combined-workflow
+passes; 36 final affected regression passes; 3 viewer passes. No redesign or
+calculation/tariff/assumption change is introduced during this release.
+
+Operation holds
+INSTALLER_PLATFORM_MODE=off, account registration unavailable, collection/payment/
+notification/attribution/outbound disabled, all live providers off, platform and
+allocation paused, test clock null, no cron. Existing schedule restrictions and
+Access/installer authentication controls remain. No actual message/charge or
+fake production enquiry is authorised. Public legal-review Test mode remains a
+preview, not a permission to submit or allocate a real request.
+
+Outstanding items remain outstanding
+Exact source identities for roof-tile.jpg and modern-roof.jpg; company/operator,
+tax and lawyer decisions; native-language acceptance; physical device/screen-reader
+acceptance; live provider settlement/recovery/delivery checks. Publishing code does
+not mean these are approved or that commercial operations are enabled.
+
+Rollback
+Prefer a normal code revert after previous main 4bd3a412a850ec77e58821fcbe910728d8df51c6
+and the existing build pipeline, or the supported Worker version rollback to
+7df4598d-b749-4953-9eaf-1e725f800d21, scoped to solarmatch-thailand only. Preserve
+the additive 0019 schema and operation holds. A Git revert does not undo D1.
+Do not restore a backup for a CSS/application regression. Actual data damage needs
+an explicit controlled recovery: preserve current state, verify backup hash/key,
+restore to a disposable destination and check consent/finance/FKs before deciding
+on a targeted repair or D1 Time Travel. No R2 restoration is claimed by this D1
+backup; no R2 objects are modified by this release.
+
+Production migration receipt: only 0019 was applied using Wrangler's supported
+migrations apply, under its original filename, transaction and D1 migration record.
+Post-apply all 59 pre-existing tables' original columns/values match (no mutable
+metadata differences at this checkpoint). Foreign keys and ledger reconcile and
+all five operation holds remain intact. No historical migration was replayed.
+
+The final deployment/build receipt and live acceptance results follow in the
+release handoff after the pipeline finishes; preparation is not deployment proof.
