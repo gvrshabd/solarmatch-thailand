@@ -23,10 +23,12 @@ export type InstallerPortalData = {
   claims: { id: string; deliveryId: string; reason: string; status: string; submittedAt: string; decision: string | null }[];
   terms: { version: string; textTh: string; textEn: string; acceptedAt: string | null };
   integrations: { paymentsEnabled: boolean; paymentMethods: string[]; lineConfigured: boolean; mode: string };
+  availability?: { platformPaused: boolean; allocationPaused: boolean; notificationsEnabled: boolean; canManage: boolean };
   commercial?: { creditValueMinor:number; sharedCredits:number; claimDays:number; trialDeliveries:number; recipientLimit:number };
 };
 export type InstallerPortalAction =
   | { action: 'create-company' | 'update-company'; name: string; contactName: string; phone: string; serviceAreas: string[]; supportedProducts: string[]; dailyLimit: number; paused: boolean }
+  | { action: 'set-accepting'; accepting: boolean }
   | { action: 'accept-terms'; version: string }
   | { action: 'checkout'; packageId: string; method: string; token?: string }
   | { action: 'reconcile-order'; orderId: string }

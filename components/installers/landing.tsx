@@ -1,0 +1,33 @@
+'use client';
+import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
+import { designText } from '@/config/design-v2-copy';
+import type { InstallerPublicConfig } from '@/lib/installer/public-config';
+import { PortalBrand } from './workspace';
+
+export function InstallerLanding({ en, config, apply, signIn }: { en: boolean; config: InstallerPublicConfig; apply: () => void; signIn: () => void }) {
+  const t = designText(en ? 'en' : 'th');
+  const c = config.commercial;
+  const available = config.accountsAvailable;
+  const action = <><button className="btn btn-primary" disabled={!available} onClick={apply}>{available ? t.iApply : en ? 'Applications unavailable' : 'ยังไม่เปิดรับสมัคร'}<ArrowRight size={18}/></button><button className="btn btn-ghost" disabled={!available} onClick={signIn}>{en ? 'Sign in' : 'เข้าสู่ระบบ'}</button></>;
+  const faq = [
+    [en ? 'Is a sale guaranteed?' : 'รับประกันว่าจะขายได้หรือไม่?', en ? 'No. A shared enquiry is a request for contact, not a guaranteed sale. You provide your own advice, quotation and installation agreement.' : 'ไม่รับประกัน คำขอแบบแชร์เป็นคำขอรับการติดต่อ ไม่ใช่ยอดขายที่รับประกัน บริษัทของคุณเป็นผู้ให้คำแนะนำ ใบเสนอราคา และสัญญาติดตั้งเอง'],
+    [en ? 'Can other companies receive the same request?' : 'บริษัทอื่นได้รับคำขอเดียวกันได้หรือไม่?', c ? en ? `Yes. A request may reach up to ${c.recipientLimit} companies, including trial deliveries.` : `ได้ คำขอหนึ่งอาจส่งให้บริษัทได้สูงสุด ${c.recipientLimit} แห่ง รวมรายการทดลอง` : en ? 'Requests are shared, not exclusive. Current limits are shown in the installer terms.' : 'คำขอเป็นแบบแชร์ ไม่ใช่เฉพาะราย ขอบเขตปัจจุบันระบุในข้อตกลงผู้ติดตั้ง'],
+    [en ? 'What if an enquiry has a problem?' : 'หากคำขอมีปัญหาต้องทำอย่างไร?', c ? en ? `Submit a claim within ${c.claimDays} days of its original portal availability. Claims are reviewed; a credit restoration is not a cash refund.` : `ยื่นคำร้องภายใน ${c.claimDays} วันนับจากพร้อมใช้ในพอร์ทัลครั้งแรก คำร้องต้องผ่านการตรวจสอบ การคืนเครดิตไม่ใช่การคืนเงินสด` : en ? 'Use the protected claim flow in your portal. The current terms explain eligibility.' : 'ยื่นคำร้องผ่านพอร์ทัลที่มีการปกป้องสิทธิ์ โดยดูเงื่อนไขในข้อตกลงฉบับปัจจุบัน'],
+  ];
+  return <div className="v2-installer-landing">
+    <header className="wrap v2-landing-header"><a href={'/installers?lang='+(en?'en':'th')}><PortalBrand/></a><a className="link" href={en?'/en':'/'}>{en?'For homeowners':'สำหรับเจ้าของบ้าน'}</a></header>
+    <section className="wrap ihero"><div><p className="eyebrow">{t.iEyebrow}</p><h1>{t.iH1}</h1><p className="lede">{t.iLede}</p><div className="btns">{action}</div><div className="terms">
+      <div><span>{t.tPrice}</span><b>{c ? new Intl.NumberFormat(en?'en-GB':'th-TH',{style:'currency',currency:'THB',maximumFractionDigits:0}).format(c.creditValueMinor*c.sharedCredits/100) : '—'}</b></div>
+      <div><span>{t.tCos}</span><b>{c ? `${en?'Up to':'สูงสุด'} ${c.recipientLimit}` : '—'}</b></div>
+      <div><span>{t.tStart}</span><b>{c ? `${c.trialDeliveries} ${en?'trial enquiries':'คำขอทดลอง'}` : '—'}</b></div>
+      <div><span>{t.tClaim}</span><b>{c ? `${c.claimDays} ${en?'days':'วัน'}` : '—'}</b></div>
+    </div><p className="note">{en?'Subject to approval, current terms and delivery availability. No automatic billing.':'ขึ้นอยู่กับการอนุมัติ ข้อตกลงปัจจุบัน และความพร้อมในการส่งคำขอ ไม่มีการเรียกเก็บเงินอัตโนมัติ'}</p></div>
+    <div className="iphoto"><Image src="/images/design-v2/installer-tall.jpg" alt={en?'Solar technician working on rooftop panels':'ช่างกำลังติดตั้งแผงโซลาร์บนหลังคา'} width={900} height={1347}/><span className="credit">Los Muertos Crew</span><div className="sample"><div className="example-top"><b>{t.sample}</b><span className="tag-ex">{t.exampleTag}</span></div><div className="v2-sample-chips">{[en?'Sathon, Bangkok':'สาทร กรุงเทพมหานคร','฿6,000'+t.perMo,en?'5 air conditioners':'เครื่องปรับอากาศ 5 เครื่อง',en?'Owner':'เจ้าของ',en?'Within 3 months':'ภายใน 3 เดือน'].map(x=><span className="chip" key={x}>{x}</span>)}</div></div></div></section>
+    <section className="section band-sage"><div className="wrap"><div className="section-head"><h2>{t.iHowH}</h2></div><div className="steps">{[[t.ih1t,t.ih1p],[t.ih2t,t.ih2p],[t.ih3t,c?(en?`Approved companies may receive ${c.trialDeliveries} trial enquiries. A request may reach up to ${c.recipientLimit} companies.`:`บริษัทที่อนุมัติอาจได้รับคำขอทดลอง ${c.trialDeliveries} รายการ คำขอหนึ่งอาจส่งให้บริษัทได้สูงสุด ${c.recipientLimit} แห่ง`):(en?'Follow up on available enquiries in your portal.':'ติดตามคำขอที่พร้อมใช้ในพอร์ทัลของคุณ')]].map(([h,p],i)=><div className="step" key={h}><span className="n">{i+1}</span><h3>{h}</h3><p>{p}</p></div>)}</div></div></section>
+    <section className="section"><div className="wrap trustgrid"><div><h2>{t.fairH}</h2><p className="lede">{t.fairP}</p></div><div className="fairtable"><div><span>{en?'The terms':'เงื่อนไข'}</span><span>SolarMatch</span></div>{[[en?'Shared request':'คำขอแบบแชร์',c?en?`Up to ${c.recipientLimit} companies`:`สูงสุด ${c.recipientLimit} บริษัท`:'—'],[en?'Automatic billing':'การเรียกเก็บอัตโนมัติ',en?'None':'ไม่มี'],[en?'Sales guarantee':'การรับประกันยอดขาย',en?'No':'ไม่รับประกัน'],[en?'Claim window':'ระยะเวลายื่นคำร้อง',c?`${c.claimDays} ${en?'days':'วัน'}`:'—']].map(([l,v])=><div key={l}><span className="muted">{l}</span><span className="us">{v}</span></div>)}</div></div></section>
+    <section className="section v2-installer-faq"><div className="wrap"><h2>{t.iFaqH}</h2><div className="faq">{faq.map(([h,p])=><details key={h}><summary>{h}</summary><p>{p}</p></details>)}</div></div></section>
+    <section className="section band-dark"><div className="wrap cta-final"><h2>{t.iH1}</h2><div className="btns">{action}</div></div></section>
+    <footer className="wrap footer"><a href={en?'/en/privacy':'/privacy'}>{en?'Privacy Notice':'ประกาศความเป็นส่วนตัว'}</a><a href={en?'/en/terms':'/terms'}>{en?'Terms of use':'ข้อกำหนดการใช้งาน'}</a></footer>
+  </div>;
+}

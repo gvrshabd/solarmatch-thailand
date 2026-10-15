@@ -1,0 +1,67 @@
+/* Adapters for the real portal shell; visual values are from the frozen v2 prototype. */
+.installer-shell{background:var(--sm-stone);color:var(--sm-ink);font-family:var(--font-manrope),var(--font-anuphan),sans-serif;min-height:100vh}
+.installer-shell :is(h1,h2,h3,p){margin-top:0}
+.installer-shell button{font-family:inherit}
+.installer-shell .installer-workspace{padding:0}
+.installer-shell.installer-workspace{padding-left:0;padding-bottom:110px}
+.installer-shell .installer-content{max-width:1180px;margin:0 auto;padding:0 20px 48px}
+.installer-shell .installer-header{background:transparent;border:0;min-height:72px;padding:10px 20px;max-width:1180px;margin:0 auto}
+.installer-shell .installer-header .right{margin-left:auto}
+.installer-shell .installer-welcome{margin:14px 0 22px}
+.installer-shell .installer-welcome h1{font-size:clamp(32px,4vw,46px);letter-spacing:-.045em}
+html[lang=th] .installer-shell .installer-welcome h1{font-size:clamp(28px,3.4vw,38px)}
+.installer-shell .installer-nav{position:fixed;inset:auto 0 0;width:auto;height:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#fff;border:0;border-top:1px solid var(--sm-line);z-index:40}
+.installer-shell .installer-nav>button{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;font-size:11px;min-height:54px;padding:8px 4px;border-radius:12px;line-height:1.5;background:none;border:0}
+.installer-shell .installer-nav>button[aria-current=page],.installer-shell .installer-nav>button[aria-current=page]:hover{background:var(--sm-sage);color:var(--sm-pine)}
+.installer-shell .installer-sidebar-brand,.installer-shell .installer-sidebar-note{display:none}
+.installer-shell .installer-card{background:var(--sm-white);border:0;border-radius:var(--sm-r-lg);box-shadow:var(--sm-shadow);padding:22px;margin:0}
+.installer-shell .installer-footer{font-size:13px;color:var(--sm-muted);border-top:1px solid var(--sm-line);padding-top:22px;margin-top:36px}
+.installer-shell .v2-installer-brand{display:grid;gap:1px;position:relative}
+.installer-shell .v2-installer-brand .brand-mark{gap:8px}
+.installer-shell .v2-installer-brand .brand-symbol{width:34px;height:34px}
+.installer-shell .v2-installer-brand .brand-wordmark strong{font-size:22px}
+.installer-shell .v2-installer-brand .brand-wordmark small{display:none}
+.installer-shell .v2-installer-brand>small{margin-left:42px;font-size:8px;letter-spacing:.16em;font-weight:800}
+.installer-shell .v2-account-menu{position:relative}
+.installer-shell .v2-account-menu summary{cursor:pointer;list-style:none}
+.installer-shell .v2-account-menu summary::-webkit-details-marker{display:none}
+.installer-shell .v2-account-menu>div{position:absolute;left:0;top:48px;min-width:220px;padding:16px;background:white;border:1px solid var(--sm-line);border-radius:var(--sm-r-md);box-shadow:var(--sm-shadow-lift);display:grid;gap:12px;z-index:60}
+.installer-shell .v2-account-menu button{border-radius:var(--sm-pill)}
+.installer-shell .lang-toggle{display:flex;border:1px solid var(--sm-line);border-radius:var(--sm-pill);padding:3px;background:white}
+.installer-shell .lang-toggle button{border:0;background:none;border-radius:var(--sm-pill);padding:6px 10px;font-size:12px;min-height:38px;min-width:38px}
+.installer-shell .lang-toggle button[aria-pressed=true]{background:var(--sm-pine);color:white}
+.installer-shell .switch{min-height:32px;padding:0;box-shadow:none;outline-offset:5px}
+.installer-shell .switch::before{content:"";position:absolute;inset:-6px 0}
+.installer-shell .v2-landing-header{display:flex;align-items:center;justify-content:space-between;padding-block:20px}
+.installer-shell .v2-installer-landing .btns{display:flex;justify-content:inherit;gap:10px;flex-wrap:wrap}
+.installer-shell .v2-installer-landing .band-dark .btn-primary{background:var(--sm-lime);color:var(--sm-pine)}
+.installer-shell .v2-installer-landing .band-dark .btn-ghost{color:white;box-shadow:inset 0 0 0 1px #ffffff50}
+.installer-shell .v2-installer-landing .trustgrid h2{font-size:clamp(32px,4.4vw,54px)}
+.installer-shell .v2-installer-landing .trustgrid .lede{font-size:18px;color:var(--sm-muted);margin-top:14px;max-width:30em}
+.installer-shell .v2-installer-faq{padding-top:0}
+.installer-shell .v2-installer-faq h2{font-size:clamp(28px,3.4vw,40px)}
+.installer-shell .v2-sample-chips{display:flex;gap:8px;flex-wrap:wrap}
+.installer-shell .installer-signed-out{padding:0}
+.installer-shell.installer-signed-out .installer-content{max-width:none;padding:0}
+.installer-shell.installer-signed-out>.installer-header{position:absolute;right:16px;top:68px;z-index:10;padding:0;min-height:0}
+.installer-shell .installer-auth{display:block;max-width:520px;margin:40px auto;padding:0 20px;scroll-margin-top:30px}
+.installer-shell .checklist2{list-style:none;padding:0;display:grid;gap:16px}
+.installer-shell .checklist2 li{display:flex;align-items:center;gap:12px}
+.installer-shell .checklist2 li span{border-radius:50%;background:var(--sm-stone);width:28px;height:28px;display:grid;place-items:center}
+.installer-shell .checklist2 .done span{background:var(--sm-sage);color:var(--sm-ok)}
+.installer-shell .callnext .note{color:var(--sm-ondark)}
+.installer-shell .installer-notice{border-radius:var(--sm-r-md);margin:0 0 18px;padding:16px 18px;font-size:14px}
+.installer-shell .installer-notice p{margin:0 0 5px}
+.installer-shell .installer-notice p:last-child{margin:0}
+@media(min-width:1000px){
+ .installer-shell.installer-workspace{padding-left:248px;padding-bottom:0}
+ .installer-shell .installer-content{padding-inline:32px}
+ .installer-shell .installer-header{padding-inline:32px}
+ .installer-shell .installer-nav{inset:0 auto 0 0;width:248px;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:22px 16px;background:#ECEEE6;border-top:0;border-right:1px solid var(--sm-line)}
+ .installer-shell .installer-sidebar-brand{display:block;padding:4px 10px 24px;text-decoration:none}
+ .installer-shell .installer-sidebar-note{display:block;margin-top:auto;font-size:13px;color:var(--sm-muted)}
+ .installer-shell .installer-nav>button{flex-direction:row;justify-content:flex-start;font-size:15px;gap:12px;padding:11px 14px;border-radius:14px;min-height:44px}
+ .installer-shell .installer-nav>button[aria-current=page],.installer-shell .installer-nav>button[aria-current=page]:hover{background:var(--sm-pine);color:white}
+ .installer-shell .installer-nav-count{position:static;background:var(--sm-lime);color:var(--sm-pine);border-radius:9px;padding:1px 8px;font-size:11px}
+}
+@media(max-width:499px){.installer-shell .acc-label{display:none}.installer-shell .phdr .who b{font-size:14px;max-width:140px;overflow-wrap:anywhere}.installer-shell .accept{padding:5px}.installer-shell .phdr{gap:8px}.installer-shell .phdr .right{gap:8px}}

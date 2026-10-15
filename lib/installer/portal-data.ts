@@ -42,6 +42,7 @@ export async function getPortalData(db:D1Database,session:InstallerPortalData['s
     claims:claims.results.map(r=>({id:String(r.id),deliveryId:String(r.delivery_id),reason:r.financial_only?'withdrawn-claim':String(r.reason),status:String(r.status),submittedAt:String(r.submitted_at),decision:!r.financial_only&&r.decision_notes?String(r.decision_notes):null})),
     terms:{version:settings.termsVersion,textEn:installerTerms.en,textTh:installerTerms.th,acceptedAt:company?.terms_version===settings.termsVersion&&company?.terms_accepted_at?String(company.terms_accepted_at):null},
     integrations:{paymentsEnabled:settings.paymentsEnabled,paymentMethods:enabledPaymentMethods({activatedMethods:settings.paymentMethods,activatedCardBrands:settings.paymentCardBrands}),lineConfigured:!!getRuntimeEnv().LINE_CHANNEL_ACCESS_TOKEN,mode:getRuntimeEnv().INSTALLER_PLATFORM_MODE??'off'},
+    availability:{platformPaused:settings.platformPaused,allocationPaused:settings.deliveryPaused,notificationsEnabled:settings.notificationsEnabled,canManage:company?.role==='owner'},
     commercial:{creditValueMinor:settings.creditValueMinor,sharedCredits:settings.sharedCredits,claimDays:settings.claimDays,trialDeliveries:settings.trialDeliveries,recipientLimit:settings.recipientLimit},
   };
 }

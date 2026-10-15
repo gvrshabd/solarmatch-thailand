@@ -1,7 +1,8 @@
 'use client';
 
+import { BrandMark } from '@/components/site/brand-mark';
 import { useState } from 'react';
-import { ArrowRight, Building2, ChevronRight, CircleDollarSign, Inbox, LayoutGrid, MapPin, Search, Sun, Wallet } from 'lucide-react';
+import { ArrowRight, Building2, ChevronRight, CircleDollarSign, Inbox, LayoutGrid, MapPin, Search, Wallet } from 'lucide-react';
 import type { InstallerDelivery, InstallerPortalData } from '@/lib/installer/portal-contract';
 
 export type PortalView = 'overview' | 'inbox' | 'credits' | 'profile' | 'terms' | 'claims';
@@ -17,13 +18,11 @@ export function enquiryHref(item: InstallerDelivery, en: boolean) {
   return '/installers/enquiry/' + encodeURIComponent(item.id) + '?lang=' + (en ? 'en' : 'th');
 }
 
-export function PortalBrand() {
-  return <span className="installer-brand-lockup"><span className="installer-brand-symbol" aria-hidden="true"><Sun /><span /></span><span>SolarMatch<small>FOR INSTALLERS</small></span></span>;
-}
+export function PortalBrand() { return <span className="v2-installer-brand"><BrandMark/><small>FOR INSTALLERS</small></span>; }
 
 export function PortalNavigation({ view, en, count, navigate }: { view: PortalView; en: boolean; count: number; navigate: (view: PortalView) => void }) {
   const items = [
-    { key: 'overview', th: 'ภาพรวม', en: 'Overview', icon: LayoutGrid },
+    { key: 'overview', th: 'วันนี้', en: 'Today', icon: LayoutGrid },
     { key: 'inbox', th: 'คำขอ', en: 'Enquiries', icon: Inbox },
     { key: 'credits', th: 'เครดิต', en: 'Credits', icon: Wallet },
     { key: 'profile', th: 'บริษัท', en: 'Company', icon: Building2 },
@@ -49,20 +48,32 @@ export function EnquiryCard({ item, en }: { item: InstallerDelivery; en: boolean
   </a>;
 }
 
+export function waitingTime(deliveredAt: string, en: boolean, now = Date.now()) {
+  const minutes = Math.max(0, Math.floor((now - new Date(deliveredAt).getTime()) / 60000));
+  if (!Number.isFinite(minutes)) return '—';
+  return minutes < 60 ? `${minutes} ${en?'min':'นาที'}` : minutes < 1440 ? `${Math.floor(minutes/60)} ${en?'hr':'ชั่วโมง'}` : `${Math.floor(minutes/1440)} ${en?'days':'วัน'}`;
+}
 export function PortalOverview({ data, en, navigate }: { data: InstallerPortalData; en: boolean; navigate: (view: PortalView) => void }) {
-  const fresh = data.deliveries.filter(item => enquiryGroup(item) === 'new').sort((a, b) => a.deliveredAt.localeCompare(b.deliveredAt));
-  return <>
-    <div className="installer-overview-grid">
-      <section className="installer-hero-card"><p className="installer-eyebrow">{en ? 'YOUR NEXT STEP' : 'ขั้นตอนถัดไปของคุณ'}</p><h2><span className="installer-hero-number">{fresh.length}</span> {en ? (fresh.length === 1 ? 'new enquiry' : 'new enquiries') : 'คำขอใหม่'}</h2><p>{en ? 'A little context. A better conversation.' : 'เข้าใจความต้องการก่อนเริ่มพูดคุย'}</p>{fresh[0] ? <a className="installer-lime-action" href={enquiryHref(fresh[0], en)}>{en ? 'Open next enquiry' : 'เปิดคำขอถัดไป'}<ArrowRight size={18} aria-hidden="true" /></a> : <button className="installer-lime-action" onClick={() => navigate('inbox')}>{en ? 'View enquiries' : 'ดูคำขอทั้งหมด'}<ArrowRight size={18} aria-hidden="true" /></button>}<small>{en ? 'Existing enquiries, oldest unstarted first.' : 'แสดงคำขอที่ยังไม่เริ่มดำเนินการ โดยเรียงจากรายการเก่าสุด'}</small></section>
-      <section className="installer-next-up"><p className="installer-eyebrow">{en ? 'NEXT UP' : 'รายการถัดไป'}</p>{fresh[0] ? <EnquiryCard item={fresh[0]} en={en} /> : <div className="installer-empty"><Inbox aria-hidden="true" /><h2>{en ? 'You’re all caught up' : 'ไม่มีคำขอใหม่ในขณะนี้'}</h2><p>{en ? 'Your existing enquiries remain in the inbox.' : 'คุณยังดูคำขอที่ผ่านมาได้ในหน้าคำขอ'}</p></div>}</section>
-    </div>
-    <div className="installer-quick-links">
-      <button onClick={() => navigate('credits')}><Wallet aria-hidden="true" /><span>{en ? 'Credits' : 'เครดิต'}<small>{en ? 'Available balance' : 'ยอดพร้อมใช้'}</small></span><strong>{data.balance.available} {en ? 'cr' : 'เครดิต'}</strong><ChevronRight aria-hidden="true" /></button>
-      <button onClick={() => navigate('profile')}><MapPin aria-hidden="true" /><span>{en ? 'Service areas' : 'พื้นที่บริการ'}<small>{en ? 'Manage your coverage' : 'จัดการพื้นที่รับคำขอ'}</small></span><ChevronRight aria-hidden="true" /></button>
-      <button onClick={() => navigate('profile')}><Building2 aria-hidden="true" /><span>{en ? 'Company & preferences' : 'บริษัทและการตั้งค่า'}<small>{en ? 'Capacity, LINE and delivery preferences' : 'จำนวนคำขอ LINE และการรับคำขอ'}</small></span><ChevronRight aria-hidden="true" /></button>
-    </div>
-    <div className="installer-summary"><section><span>{en ? 'Free enquiries remaining' : 'สิทธิ์ทดลองคงเหลือ'}</span><strong>{data.balance.trialRemaining}</strong><small>{en ? 'Separate from purchased credits' : 'แยกจากเครดิตที่ซื้อ'}</small></section><section><span>{en ? 'Reserved credits' : 'เครดิตที่สำรอง'}</span><strong>{data.balance.reserved}</strong><small>{en ? 'Not part of your available balance' : 'ไม่รวมในยอดพร้อมใช้'}</small></section></div>
-  </>;
+  const fresh = data.deliveries.filter(item=>enquiryGroup(item)==='new').sort((a,b)=>a.deliveredAt.localeCompare(b.deliveredAt));
+  const next=fresh[0], c=data.company;
+  const reasons = [
+    !data.session.user.emailVerified && (en?'Verify your email before using company controls.':'กรุณายืนยันอีเมลก่อนใช้ข้อมูลบริษัท'),
+    !c && (en?'Complete your company profile.':'กรอกข้อมูลบริษัทให้ครบ'),
+    c&&c.approvalStatus!=='approved'&&(en?`Company status: ${c.approvalStatus}. New deliveries are unavailable.`:`สถานะบริษัท: ${c.approvalStatus} ยังไม่พร้อมรับคำขอใหม่`),
+    c?.paused&&(en?'Your company preference is paused.':'บริษัทของคุณพักรับคำขออยู่'),
+    !data.terms.acceptedAt&&(en?'Accept the current installer terms.':'กรุณายอมรับข้อตกลงผู้ติดตั้งฉบับปัจจุบัน'),
+    (data.availability?.platformPaused||data.availability?.allocationPaused)&&(en?'New deliveries are paused by SolarMatch. Your preference does not override this.':'SolarMatch พักการส่งคำขอใหม่ การตั้งค่าของบริษัทไม่สามารถเปลี่ยนสถานะนี้ได้'),
+    (data.balance.debt>0||(data.balance.available<(data.commercial?.sharedCredits??2)&&data.balance.trialRemaining===0))&&(en?'No spendable entitlement for a new enquiry.':'ยังไม่มีเครดิตหรือสิทธิ์ทดลองที่พร้อมใช้รับคำขอใหม่'),
+  ].filter(Boolean);
+  const enough=data.balance.debt>0?0:Math.floor(data.balance.available/(data.commercial?.sharedCredits??2));
+  return <>{reasons.length>0&&<div className="installer-notice" role="status">{reasons.map((r,i)=><p key={i}>{r}</p>)}</div>}
+    {c?.approvalStatus!=='approved'&&<div className="card"><h2>{en?'Your next steps':'ขั้นตอนถัดไป'}</h2><ul className="checklist2">{[
+      [data.session.user.emailVerified,en?'Verify email':'ยืนยันอีเมล'],[c?.approvalStatus==='approved',en?'Company approval':'การอนุมัติบริษัท'],[!!c?.serviceAreas.length,en?'Choose service areas':'เลือกพื้นที่บริการ'],[!!c?.lineLinked,en?'Connect LINE alerts':'เชื่อมต่อ LINE'],[!!data.terms.acceptedAt,en?'Accept installer terms':'ยอมรับข้อตกลงผู้ติดตั้ง'],
+    ].map(([done,label],i)=><li key={i} className={done?'done':''}><span aria-hidden="true">{done?'✓':'○'}</span>{label}</li>)}</ul><button onClick={()=>navigate('profile')}>{en?'Company settings':'ตั้งค่าบริษัท'}</button></div>}
+    <div className="pgrid"><div className="col">{next?<section className="callnext"><div className="top"><span className="eyebrow">{en?'CALL NEXT':'ติดต่อรายถัดไป'}</span><span className="wait">{en?'Waiting':'รอมาแล้ว'} {waitingTime(next.deliveredAt,en)}</span></div><div className="person"><span className="avatar">{Array.from(next.homeownerName)[0]||'—'}</span><div><b>{next.homeownerName}</b><small>{next.location}</small></div></div><div className="cfacts"><span className="chip chip-dark">฿{Number(next.assessment.monthlyBillThb||0).toLocaleString()} / {en?'mo':'เดือน'}</span><span className="chip chip-dark">{String(next.assessment.airConditionerCount??'—')} {en?'air conditioners':'เครื่องปรับอากาศ'}</span></div><div className="btns">{next.phone&&<a className="btn btn-lime" href={'tel:'+next.phone}>{en?'Call':'โทร'} {next.homeownerName}</a>}<a className="btn btn-ghost-dark" href={enquiryHref(next,en)}>{en?'Open enquiry':'เปิดคำขอ'}</a></div><p className="note">{en?'Opening or calling does not record a successful contact.':'การเปิดคำขอหรือกดโทรไม่ได้บันทึกว่าติดต่อสำเร็จ'}</p></section>:<div className="card empty"><Inbox/><h2>{en?'No new enquiries':'ไม่มีคำขอใหม่'}</h2><p>{en?'Existing enquiries remain available in your inbox.':'ยังดูคำขอเดิมได้ในหน้าคำขอ'}</p></div>}
+    {fresh.length>1&&<div><p className="eyebrow">{en?'ALSO WAITING':'กำลังรอเช่นกัน'}</p><div className="list">{fresh.slice(1).map(item=><a key={item.id} href={enquiryHref(item,en)}><span className="avatar">{Array.from(item.homeownerName)[0]||'—'}</span><span className="grow"><b>{item.homeownerName} · {item.location}</b><small>{en?'Waiting':'รอมาแล้ว'} {waitingTime(item.deliveredAt,en)}</small></span><ChevronRight className="chev"/></a>)}</div></div>}
+    {data.deliveries.some(d=>enquiryGroup(d)==='progress')&&<div className="list"><a href={'/installers?view=inbox&lang='+(en?'en':'th')}><span className="tile"><Inbox/></span><span className="grow"><b>{en?'Enquiries in progress':'คำขอที่กำลังดำเนินการ'}</b><small>{en?'Record an outcome when known.':'บันทึกผลเมื่อทราบผลแล้ว'}</small></span><ChevronRight/></a></div>}</div>
+    <div className="col"><div className="list"><a href={'/installers?view=credits&lang='+(en?'en':'th')}><span className="tile dark"><Wallet/></span><span className="grow"><b>{data.balance.available} {en?'credits':'เครดิต'} · {en?'enough for':'รับได้'} {enough} {en?'shared enquiries':'คำขอแบบแชร์'}</b><small>{data.balance.trialRemaining} {en?'trial enquiries remaining, separately':'สิทธิ์ทดลองคงเหลือ แยกจากเครดิต'}</small></span><ChevronRight/></a></div><div className="list"><a href={'/installers?view=profile&lang='+(en?'en':'th')}><span className="tile"><MapPin/></span><span className="grow"><b>{en?'Service areas':'พื้นที่บริการ'}</b><small>{en?'Company capacity and LINE settings':'จำนวนคำขอและการตั้งค่า LINE'}</small></span><ChevronRight/></a></div></div></div></>;
 }
 
 export function PortalInbox({ data, en }: { data: InstallerPortalData; en: boolean }) {
