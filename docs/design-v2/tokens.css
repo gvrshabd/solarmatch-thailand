@@ -1,0 +1,56 @@
+/* SolarMatch Design v2 tokens. Shared by the homeowner site (PublicDesignShell / terrace.css)
+   and the installer portal (.installer-shell / installers.css). Values match prototype/app.css. */
+:root {
+  /* colour */
+  --sm-stone: #F5F4EF;     /* page canvas */
+  --sm-stone-2: #EEEDE6;   /* tracks, subtle fills */
+  --sm-white: #FFFFFF;     /* cards */
+  --sm-pine: #142D26;      /* text, primary on light, dark surfaces */
+  --sm-pine-2: #1E3A30;    /* hover, gradient end */
+  --sm-lime: #D6EF91;      /* primary action on dark surfaces only */
+  --sm-lime-2: #C9E57A;    /* lime hover */
+  --sm-gold: #E2A62B;      /* brand sun, warm accents */
+  --sm-gold-soft: #F7EBD0; /* example tags, pending */
+  --sm-green: #137A50;     /* brand roof, success ticks, focus ring */
+  --sm-sage: #E7ECE1;      /* secondary buttons, chips, soft bands */
+  --sm-sage-2: #DCE4D4;
+  --sm-line: #E1E4DB;      /* hairlines, input borders */
+  --sm-line-2: #CDD3C6;    /* hover borders */
+  --sm-muted: #5B6A61;     /* secondary text on stone (5.4:1) */
+  --sm-ondark: #B8C7BE;    /* secondary text on pine */
+  --sm-ok: #2F8A57;
+  --sm-danger: #A4402A;
+  --sm-selected: #F3F8EA;  /* selected option fill */
+
+  /* shape */
+  --sm-r-xl: 32px; --sm-r-lg: 24px; --sm-r-md: 18px; --sm-r-sm: 12px; --sm-pill: 999px;
+  --sm-shadow: 0 1px 2px rgba(20,45,38,.04), 0 12px 32px -12px rgba(20,45,38,.14);
+  --sm-shadow-lift: 0 2px 4px rgba(20,45,38,.05), 0 24px 48px -16px rgba(20,45,38,.22);
+
+  /* type (next/font variables already exist: --font-manrope, --font-anuphan) */
+  --sm-font: var(--font-manrope), var(--font-anuphan), system-ui, sans-serif;
+  --sm-font-th: var(--font-anuphan), var(--font-manrope), system-ui, sans-serif;
+  --sm-h-tracking: -0.035em;
+
+  /* motion */
+  --sm-ease: cubic-bezier(.2,.7,.2,1);
+  --sm-fast: 180ms; --sm-med: 260ms; --sm-slow: 320ms;
+
+  /* control sizes */
+  --sm-btn-h: 52px; --sm-btn-h-sm: 40px; --sm-input-h: 56px; --sm-option-h: 64px; --sm-target-min: 44px;
+}
+
+/* Thai rhythm */
+:lang(th) h1, :lang(th) h2, :lang(th) h3 { letter-spacing: 0; line-height: 1.35; font-weight: 600; }
+:lang(th) body { line-height: 1.7; }
+
+/* Numbers always in Manrope, tabular */
+.sm-num { font-family: var(--font-manrope), system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+
+/* Programmatic heading focus: no visible ring; keyboard focus keeps its ring */
+[tabindex="-1"]:focus { outline: none; }
+:focus-visible { outline: 2.5px solid var(--sm-green); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

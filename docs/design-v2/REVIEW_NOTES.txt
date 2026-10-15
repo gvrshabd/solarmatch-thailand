@@ -1,0 +1,104 @@
+SOLARMATCH DESIGN V2 — REVIEW NOTES
+15 October 2026 (Bangkok)
+
+VERDICT
+The actual ZIP contains enough material to implement Claude's main visual design: HTML entry point, app.js, app.css, bundled calculator, token file, seven JPEG assets, bilingual strings, detailed spec and eight prompts. Additional generated images, a Figma recreation or new general design prompt are not necessary.
+
+The original prompts are a useful implementation sequence, but should not be run unchanged. 00_EXECUTOR_START_HERE.txt keeps their visual direction and provides explicit corrections. Original Claude files have not been edited.
+
+WHAT WAS REVIEWED
+- Entire README.md, CODEX_PROMPTS.md, DESIGN_SPEC.md and tokens.css.
+- Prototype renderers, interaction handlers, CSS, assets and bundled calculator.
+- Current published GitHub tree, pinned to main 4bd3a412a850ec77e58821fcbe910728d8df51c6.
+- Relevant current calculator, installer projection/contract/actions and homeowner collection code.
+- Local browser rendering of the reference prototype, with desktop English and mobile Thai captures.
+- This is not a new production release, a complete accessibility certification or a review of an inaccessible private Claude audit page.
+- The reported newer local LINE commit was not accessible in this cloud filesystem; the executor must preserve and verify it on the owner's machine.
+
+SOURCE ARCHIVE
+Original upload: solarmatch-design-v2.zip
+Bytes: 1,585,259
+SHA-256: 0fffd6fac1625e7c259728d0ec10a650f59f7df16b803cf25629d545288f55e2
+ZIP integrity check passed.
+
+MOST IMPORTANT AMENDMENTS
+1. The installer signed-out landing in DESIGN_SPEC 8.1 / #installers is omitted from the eight prompts. Add it to phase 5.
+2. DESIGN_SPEC 7.4 and prompt 6 revive homeowner LINE IDs, contrary to the agreed phone-only flow. Exclude that change. Installer LINE integration and sharing to LINE are separate.
+3. Prompt 7's PromptPay-only instruction conflicts with retaining all configured payment methods. Use the visual treatment with the real selected/available method.
+4. Progress stages, persistent notes and sharing exact estimates are new functionality. They need actual storage/API/validation work and focused tests, not prototype state or success toasts.
+5. Global CSS/focus changes can affect admin or suppress keyboard focus. Scope them; preserve usable touch targets.
+6. Current ordinary disabled-contact flow and explicit legal-review mode must be distinguished. The review's blanket claim that the consent step inevitably leads to a dead live phone form is not established by the current main source.
+7. Correct status copy requires real approval, company/global pause and eligibility state. Prototype demo toggles are not an implementation.
+8. Native Thai review and lawyer approval of the proposed short consent summary remain outstanding.
+
+CONFIRMED CALCULATOR EXAMPLES
+I executed the bundled calculator with the exact Sathon example answers, rather than relying on the text alone.
+
+Sathon, Bangkok; detached home; owner; new rooftop; high daytime use; five ACs, pump and home office; concrete tiles; almost no shade.
+Bill ฿6,000:
+- Monthly saving ฿1,665
+- System 4.5 kWp
+- Planning price ฿165,000
+- Simple payback 9 years
+- Rounded 25-year net benefit ฿263,000
+
+Same answers, bill ฿2,000:
+- Monthly saving ฿547
+- System 1.5 kWp
+- Planning price ฿130,000
+- Simple payback 24.8 years
+- Rounded 25-year net benefit -฿9,000
+- Final plotted cumulative-cost gap -฿8,600 before presentation rounding
+- Existing recommendation worth-comparing ("Solar may suit your home")
+- No cumulative-cost crossing within the plotted 25 years
+
+Simple payback and long-term cumulative-cost crossing are not the same measure. A 24.8-year simple payback can coexist with a negative 25-year cumulative net once maintenance and degradation are counted. The arithmetic should not be changed merely to remove the apparent contradiction.
+
+Recommended owner decision: a clearer negative financial verdict under the stated assumptions. Pending that decision, retain the current recommendation logic plus Claude's explicit warning. The revised executor prompt does not assume approval of a new verdict.
+
+PROTOTYPE BEHAVIOR THAT MUST NOT BE COPIED
+- app.js 681: Share to LINE only displays a toast.
+- app.js 682: Copy link copies a generic #results URL, not this estimate's inputs.
+- app.js 682–683: Clipboard failure still displays success.
+- app.js 688/700/711: Outcome/notes/settings behavior is memory-only or a toast.
+- app.js 691: LINE connection is only a boolean change.
+- app.js 564–565: Delivery/deadline calculation drifts with the elapsed timer; use real server timestamps.
+- app.js 577: The combined Won / Lost row writes won.
+- app.js 282: Formatting null payback can show 0 years.
+- app.js 325: Many footer links point to #home.
+- Prototype fictional credits, commercial values and outcome statistics are illustrative. They must not be rendered as real production records.
+- Small 40 px controls and a global negative-tabindex focus suppression need accessible implementation despite the stated scan pass.
+
+COPY THAT NEEDS FACTUAL CHECKING
+Exact visual design does not require repeating misleading product promises.
+- "You choose who contacts you": current workflow lets a homeowner request contact and matches up to three approved installers; it does not necessarily offer a company-selection UI.
+- "No sales calls": needs to be qualified to the estimate/no-request journey.
+- Instant LINE wording: notifications follow the agreed Bangkok business-hours policy, account linkage and actual provider availability.
+- "We email you": must match the actual approval notification implementation/readiness.
+- Competitor comparisons and policy/tax/export claims need substantiation and current eligibility wording; this design review did not independently re-research Thai regulations.
+- The pack lists photo photographers, but no original photo-page URLs/license capture. Preserve the assets and obtain provenance before publication if not already held.
+
+DESIGN COVERAGE LIMITS
+The core screens have executable visual references. Many secondary states do not: true authentication/recovery, enabled consent/OTP, detailed claims, actual terms, payment returns, staff-link access/expiry, withdrawal, account dropdown, and content/legal pages.
+The default implementation plan preserves those working screens and applies Claude's shared component styling. A claim of exact reproduction should be limited to screens with an actual reference.
+If the owner wants Claude-designed compositions for those missing screens as well, request a targeted addendum; do not commission a new redesign of the already supplied core screens.
+
+RECOMMENDED SEQUENCE
+0. Pin and preserve current working code and freeze the prototype reference.
+1. Shared tokens, type and controls.
+2. Homeowner homepage/header/footer.
+3. Calculator/loading.
+4. Results/charts and validated sharing.
+5. Installer landing/shell/Today.
+6. Enquiry detail and its bounded persistent workflow support.
+7. Credits/company and existing secondary screens.
+8. Content/SEO and visual/accessibility/functional comparison.
+
+Use one integration branch, sequential reviewable commits and paired TH/EN screenshots. Do not split the prompts across eight unrelated branches or let parallel workers independently edit shared CSS without integration ownership.
+
+OPTIONAL CLAUDE FOLLOW-UP
+Only use this if exact new compositions are wanted for missing states:
+
+"Keep the delivered SolarMatch Design v2 core screens unchanged. Add a small extension to the existing prototype covering the real sign-in/recovery/verification states, phone-only contact/OTP with the original legal text, claims/history, payment pending/failed/success/unknown, staff-link expired/revoked and withdrawn enquiries, and the avatar/sign-out menu. Include EN/TH and mobile/desktop. Preserve phone-only homeowner contact, actual business gates and current security. Give each state a reachable prototype route/state and export its source, CSS and assets into the existing handoff. Do not redesign the existing homepage, calculator, results or portal. Clearly label any state that needs factual or legal input instead of inventing it."
+
+No production source, database, configuration or deployment was changed by this review.

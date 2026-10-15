@@ -1,0 +1,99 @@
+SOLARMATCH DESIGN V2 — CONTROLLING EXECUTOR PROMPT
+Prepared 15 October 2026 (Bangkok).
+
+OWNER TASK
+Implement Claude's supplied SolarMatch Design v2 in the existing homeowner site and installer portal. Preserve Claude's actual visual design. Work through all eight original CODEX_PROMPTS.md prompts in order, subject to the explicit corrections below. This is implementation of a supplied design, not an invitation to redesign it.
+
+Read this file, README.md, DESIGN_SPEC.md, CODEX_PROMPTS.md, tokens.css and the complete runnable prototype before editing. Keep those original Claude files unchanged as the reference. Copy the handoff into docs/design-v2/ if it is not already there. The additional REVIEW_NOTES.txt explains the review evidence.
+
+SCOPE AND CURRENT WORK
+- Work only in gvrshabd/solarmatch-thailand. Do not touch Milly's or unrelated resources.
+- Inspect Git status, branches and recent commits first. Published main was independently checked at 4bd3a412a850ec77e58821fcbe910728d8df51c6 during this review; recheck current refs rather than assuming that remains the newest version.
+- Preserve all newer local work, especially LINE transport repair 63b656d and its reported containing feature commit 3186c758883c5ca7c481edd78613170050a685b2. Verify their presence locally. Do not reset the feature branch or overwrite owner changes. Start one integration branch from the correct current baseline, with a checkpoint commit for each implementation phase.
+- Implement and verify locally. Do not push, merge into main, deploy, apply remote migrations, modify Cloudflare Access, change secrets, enable live collection/registration/payments/messages/attribution/allocation, or send real messages/charges.
+- Local tests may use isolated synthetic fixtures and mock providers. Preserve the existing local demo records and disabled real-operation switches.
+- Do not redesign the admin. Scope stylesheet/type/control changes to the homeowner and installer surfaces; check for CSS leakage.
+
+DESIGN FIDELITY
+1. The running prototype and its app.css/app.js are the visual specification: preserve layout, section order, content hierarchy, dimensions, spacing, colours, gradients, fonts and weights, radii, shadows, image choice/crop, icons and responsive behavior. Use the supplied assets. Do not substitute another theme, stock dashboard, generic cards or different typography.
+2. Port the design into the existing Next.js/React components. Do not transplant the prototype's vanilla JavaScript, mock state, bundled engine or hash router into production.
+3. Current business rules, authentic application data, security and approved legal text control where the prototype conflicts. Apply only the corrections identified here or required to make the supplied design work accessibly. Record every visible exception; do not use this rule as permission for aesthetic improvisation.
+4. Preserve original prototype files. Serve the prototype locally and capture reference screenshots before editing. Use identical viewport, language, fixture answers, account states, timestamps and fonts for reference/implementation comparisons. Supplied review captures are examples, not the complete acceptance matrix.
+5. Cover #home, every #estimate step and conditional branch, #loading, #results, #installers, #portal approved/pending/empty/paused, #enquiries tabs/search, enquiry details, #credits and #company. Include TH and EN at 390 and 1440 px; check 360/430/768 and breakpoint behavior too.
+6. Prototype banners, demo status toggles, fictional people/balances/statistics and simulated notifications are review fixtures. They must not become real customer data or production controls. Keep reference-only chrome separate when making visual comparisons.
+7. No independent mock-up exists for several secondary states: real sign-in/recovery, consent/OTP, claims, actual terms, payment returns, staff-link expiry, withdrawn enquiries, account menu and content/legal pages. Retain their working functionality and existing structure, applying the supplied component styles. Do not claim they match a nonexistent Claude screen. List any state needing a focused Claude addendum.
+
+BUSINESS/LEGAL INVARIANTS
+- Homeowner contact remains phone-only, with existing verification. Do not add homeowner LINE-ID fields or a Phone/LINE chooser. Installer LINE account linking/alerts and homeowner sharing of an estimate to LINE are different features and remain supported.
+- Keep optional installer contact in its current place inside the calculator. Results remain available without providing contact details or consenting to contact.
+- Keep legal/consent text, checkbox meaning, consent versions and collection gates unchanged. Do not publish the proposed short consent summary until the lawyer-approved wording is supplied.
+- Preserve calculator formulas and assumptions. Derive example and user figures from the application's current calculateEstimate implementation. Do not ship hard-coded prototype results.
+- Preserve the shared residential model, configured commercial values, trial separation, three-company lifetime cap, allocation fairness, Bangkok 09:00–17:00 notification policy, seven-day claim policy, withdrawal/redaction and financial records.
+- Auth, tenant isolation, staff-link expiry/revocation, provider adapters, idempotency, credit accounting and existing payment methods must keep working. No new exclusive/factory products or unrelated workflows.
+
+IMPLEMENTATION ORDER AND CORRECTIONS TO CLAUDE'S EIGHT PROMPTS
+
+1 — Shared tokens, typography and controls
+Follow original Prompt 1. Preserve exact reference values, using the app's existing font delivery. Scope all global-looking typography/control rules so admin and unrelated surfaces are unaffected.
+Do not copy the blanket [tabindex="-1"]:focus suppression. Target only the intended headings receiving focus after navigation, while preserving keyboard focus visibility everywhere it is needed. Keep usable 44 px targets with appropriate hit-area spacing where the visual control is smaller. Do not globally remove focus outlines.
+
+2 — Home, header and footer
+Follow original Prompt 2 and spec sections 7.1–7.2. Compute the Sathon example from the specified full answers; do not adapt the calculator to force the illustration's numbers.
+Use the supplied photos and retain provenance/credits. The pack names photographers but supplies no original photo-page/license records: record that remaining provenance check instead of inventing links.
+Preserve approved legal/operator information. Missing company facts are a launch blocker, not permission to invent values, delete required disclosures or weaken the placeholder check.
+Review prototype copy for factual/product conflicts. In particular, "You choose who contacts you" is not the existing up-to-three automatic matching workflow; "No sales calls" must not imply a quote request leads to no installer calls. Preserve design while using truthful, bilingual wording consistent with the current service.
+Do not publish unsupported competitor comparisons, guaranteed savings, instant LINE-delivery promises, or unverified tariff/tax/export claims merely because they appear in T. Retain verified source links and existing eligibility qualifications. Record such copy exceptions.
+Wire footer/navigation to real application routes, not the prototype's placeholder #home links.
+
+3 — Calculator and loading
+Follow original Prompt 3. Retain questionnaire validation, ownership/authority branches, restored drafts and refinements, optional contact placement, server submission behavior and phone-only OTP.
+Current code distinguishes unavailable collection from an explicitly chosen legal-review mode. Do not mistake that review form for a live lead form or remove the existing review capability indiscriminately. An ordinary disabled-contact journey should reach full results without asking for unusable contact details.
+Auto-advance only after a deliberate valid single-choice selection; never on hydration or restored answers. Cancel stale timers on Back/edit/route changes and when follow-up fields are needed. Preserve accessible focus and keyboard completion.
+Render Claude's three loading steps, but avoid pretending to fetch a tariff or finish processing when that has not happened. Do not hide actual errors or pending work. Do not add a mandatory delay just to fit the animation; use a bounded presentation of genuine preparation and respect reduced motion.
+Do not apply spec 7.4's proposed homeowner LINE option or unapproved consent summary.
+
+4 — Results and safe sharing
+Follow original Prompt 4 and retain its exact hierarchy and charts.
+Compute chart crossing from lifetimeCostSeries. Simple payback and lifetime cumulative-cost crossing are different calculations; do not force their labels to match. No crossing means no crossing marker. Treat null/unavailable payback as unavailable, never "0 years".
+Keep the prototype's negative-net warning whenever planningTwentyFiveYearNetBenefitThb < 0. Unless the owner separately approves a replacement verdict, keep existing recommendation logic untouched and record the decision as pending. Do not alter the calculator's arithmetic to resolve wording.
+Implement actual estimate sharing, not the prototype toast or generic #results link. Define a bounded, versioned and validated allowlist of relevant numerical/categorical calculator inputs. Exclude names, phone, email, homeowner LINE IDs, exact address, consent/OTP/auth data, lead/delivery IDs and user-entered free text. Coarse location and bill information can still describe a household: explain what the shared link contains; do not call encoded data anonymous or encrypted.
+Use a fragment-based payload or another justified approach that avoids unnecessary server/query logging. Do not use base64 as a security measure. A shared estimate must reconstruct permitted inputs without submitting a lead or treating the link as contact consent. Handle malformed/unsupported payloads and clipboard failure honestly.
+Retain legal wording and important qualifications in their appropriate context. Do not hide consent-critical disclosure solely to make a screenshot shorter.
+
+5 — Installer landing, shell and Today
+Follow original Prompt 5 AND implement spec 8.1 / prototype #installers. The original eight prompts omit this landing page. Preserve its hero, photo/sample-card treatment, terms grid, section rhythm and FAQ arrangement.
+Use current public-safe configured commercial data for marketing figures. Do not expose authenticated portal data to render the landing. Keep sign-in/registration gates; Apply must accurately show unavailable registration while it is disabled. "Explore the demo portal" may only open a separate synthetic demo if one actually exists, never bypass protected real accounts.
+Remove prototype-only demo controls in product screens. Pending/approved/paused/rejected/unverified/terms-required/platform-off/zero-credit/empty/error states must reflect actual state.
+The accepting switch changes the company preference only. It cannot lift platform/global pauses or approval/contract/credit requirements. Persist changes through authorized APIs; provide in-flight/error state and rollback. Avoid overwriting unsaved profile edits.
+Keep all claims of trial entitlement, emails and LINE delivery tied to actual configuration/readiness. Do not invent available services.
+Use real deliveredAt for waiting time. Hide unavailable outcome statistics, especially median first-call time if no reliable event data exists. Clicking tel: or opening an enquiry must not automatically record a successful contact.
+
+6 — Enquiries, detail and explicit functional additions
+Follow original Prompt 6's visual layout, household hierarchy, localisation and phone formatting. Preserve all ten household answers and redaction/disclosure rules.
+Exclude the requested homeowner LINE fields/button when no supported disclosed contact exists; do not infer a LINE account from a phone number or revive LINE-ID collection. Keep Call and Copy genuine actions in the same contact-bar design.
+The progress tracker and team notes require persistent behavior, not just CSS. Implement the bounded support necessary for those supplied controls in a separate reviewable functional commit. First inspect existing storage/APIs. Preserve all valid legacy outcomes, including open/won/lost/not-suitable and any additional current values; do not silently reinterpret old open records as confirmed contact.
+Add contacted/site_visit/quoted only through validated, tenant-scoped APIs. Clearly distinguish Won from Lost; the prototype's single "Won / Lost" action always sets won and must not be copied. Do not add speculative funnel automation.
+If notes require new storage, keep them scoped to company and delivery, validated and access-controlled, and include them in withdrawal/redaction/purge handling. Do not reuse claim-supporting notes as a general notebook or expose notes through staff links without an existing authorized scope. A save indicator must reflect a successful save, including after reload.
+Add only necessary forward migrations locally; never edit/reorder historical migrations or apply them remotely during this task. Update migration-chain/recovery checks if the chain changes. Keep unrelated D1/ledger/claim logic intact.
+Use immutable server delivery time and claimDeadline; the prototype's derived timestamps drift and are not authoritative. Preserve withdrawn financial/claim access while hiding personal data. Connect staff-link/claim actions to actual protected flows rather than mock toasts.
+
+7 — Credits, company and secondary installer pages
+Follow original Prompt 7. Preserve the exact composition while deriving balances, trials, reserved credits, debt, package price, tax wording, claim window and recipient cap from authoritative data.
+Do not reduce enabled payment methods to PromptPay. Use "Pay with PromptPay" only when it is the actual available selected method; retain cards and other configured methods. Respect disabled checkout and real pending/failed/reversed orders.
+The specified formatter works with baht, whereas current payment amounts are often integer satang. Convert minor units exactly once. Do not lose sub-baht accuracy on actual statements/refunds; preserve exact amounts where needed even if whole-baht package cards use the reference's integer appearance.
+A combined statement must not duplicate an order and its ledger posting or lose unpaid orders, reversals, reservations or trial information. Compute "enough for n" from spendable credits and configured shared-enquiry cost, using existing debt rules.
+Province chips must preserve existing saved provinces beyond the initial six; supply an appropriate existing search/fallback. Preserve the actual daily-limit range/zero semantics instead of copying the demo's 1–20 clamp.
+Preserve repaired LINE linking, unlinking, reconnection, retry and revoked-link behavior. No fake connected/saved state.
+Claims, terms, payment return and staff-link screens keep their existing behavior; apply shared styles without inventing additional design.
+
+8 — Content, SEO and final verification
+Follow original Prompt 8. Retain legal/source content and real links. Use verified business facts for structured data; omit unknown optional fields and report missing required launch facts. FAQ structured data must match visible content. A shared brand Open Graph image is not automatically a defect; do not invent per-page imagery absent from the supplied design.
+Run appropriate unit/integration and browser tests for affected flows, plus lint, typecheck and relevant build profiles. Retain assertions when updating selectors; do not delete tests or update visual snapshots merely to conceal a mismatch.
+Verify both languages, narrow/intermediate/desktop widths, keyboard/screen-reader behavior, reduced motion, Thai wrapping, focus visibility, touch targets and bottom bars around the virtual keyboard. Automated axe success alone is not full accessibility verification.
+Meaningful regression checks must cover: calculator fixture parity including negative-net and unavailable payback; no-contact results and disabled modes; safe share round-trip; actual state messages; persistence/errors for switches/outcomes/notes; tenant isolation; withdrawal; claims; real enabled payment-method selection; immutable financial data and local LINE behavior with mocked providers.
+Capture paired prototype/implementation screenshots with matched data for the main pages/states. Examine overlays/side-by-side differences, fix unjustified visual drift and list any remaining differences. Do not declare an "exact" match without that comparison.
+
+DELIVERY
+Continue through the full local implementation without requiring the owner to resend each of the eight prompts. Isolate a missing external input and continue independent work.
+Return the branch/commits, local preview links, completed screen/state matrix, test evidence, paired screenshots and a concise list of remaining design differences, legal/copy decisions and functional limitations.
+State explicitly that nothing was pushed/deployed and all real-operation gates remain unchanged. Do not claim public release or native/legal approval.
