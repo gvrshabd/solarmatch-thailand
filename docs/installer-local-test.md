@@ -2,7 +2,32 @@
 
 Run only against the dedicated local configuration; its database ID is deliberately fictitious. Do not pass `--remote` or deploy this configuration.
 
-## Current focused reliability pass after 055dcf0
+## Design v2 integration — 15 October 2026
+
+The current feature integration adds the forward migration `0019_installer_delivery_workspace.sql`. It has been applied only to the isolated `.wrangler/installer-design-v2` copy. The original `installer-demo` remains on its original eighteen migrations and must not be migrated in place for this review.
+
+Use the current nineteen-migration store explicitly with the export and restore helpers; they validate the complete migration chain dynamically. The historical eighteen-migration rehearsals below remain historical evidence, not a claim that the current chain has eighteen files.
+
+For the compiled local preview, build with `INSTALLER_LOCAL_TEST=true`, then run:
+
+```powershell
+pnpm exec wrangler dev --config .installer-test/preview-ipv4.jsonc --local --persist-to .wrangler/installer-design-v2 --port 3000 --ip 127.0.0.1 --log-level error
+```
+
+This uses fictitious local bindings, not production. Keep collection, payments, notifications and outbound sending off, and platform/allocation paused. Do not use `--remote`. The synthetic provider workflow uses a separate disposable `installer-v2-e2e` store; do not run its seeding workflow against the preserved demo.
+
+Current local recovery commands:
+
+```powershell
+node scripts/installer-local-export.mjs installer-design-v2-final installer-design-v2
+node scripts/installer-local-restore-check.mjs restore-v2 installer-design-v2
+node scripts/design-v2-local-integrity.mjs
+node scripts/installer-local-safety-check.mjs installer-design-v2
+```
+
+Export refuses to overwrite a differing snapshot. Restore-check compares an already restored disposable database and does not create it. Use a fresh private destination for another rehearsal. This is database-only synthetic recovery, not proof of production or R2 recovery. See `docs/design-v2-comparison/VERIFICATION.txt` for final evidence and design exceptions.
+
+## Historical focused reliability pass after 055dcf0
 
 The earlier IPv4-only workaround did not resolve the combined timeout. The current fix consumes small rejected request bodies with a strict size/deadline limit before returning the existing 401/403/415. Full sequence coverage is retained, including rejected POST followed by document navigation and a credential-free reduced reproduction. Nothing is fixed by increasing browser timeouts or replacing the sequence with isolated cases. Run the complete sequence against a disposable restored demo:
 

@@ -1,0 +1,194 @@
+SOLARMATCH DESIGN V2 — LOCAL VERIFICATION AND DEPARTURES
+15 October 2026, Asia/Bangkok
+Repository: gvrshabd/solarmatch-thailand
+Branch: feature/design-v2-integration
+Baseline: 3186c758883c5ca7c481edd78613170050a685b2
+Main remains: 4bd3a412a850ec77e58821fcbe910728d8df51c6
+
+SCOPE
+All eight original implementation phases were completed in order, with the controlling corrections.
+Original handoff files in docs/design-v2 remain byte-for-byte unchanged (39 manifest hashes checked).
+LINE transport repair 63b656df69f93ad4f6c9e89a1fbb329c80496676 remains an ancestor.
+No push, merge into main, deployment, remote migration, secret/Access/configuration change,
+real provider call, purchase, or operation targeting Milly's occurred.
+
+LOCAL PREVIEWS
+Homeowner Thai: http://127.0.0.1:3000/
+Homeowner English: http://127.0.0.1:3000/en
+Calculator Thai: http://127.0.0.1:3000/estimate
+Calculator English: http://127.0.0.1:3000/en/estimate
+Installer English: http://127.0.0.1:3000/installers?lang=en
+Installer Thai: http://127.0.0.1:3000/installers?lang=th
+Internal admin: http://127.0.0.1:3000/admin/local-access
+Unmodified prototype: http://127.0.0.1:4174/#home
+Visual comparisons: http://127.0.0.1:4174/comparison/
+These are loopback-only local services, not public staging.
+Installer requires the existing synthetic account. Existing local admin password remains only
+in ignored .installer-test/.dev.vars; no password, cookie, OTP or bearer link is packaged here.
+Do not run the setup again against the preserved demo just to obtain a new password.
+
+COMPLETED SCREEN / STATE MATRIX
+Both English and Thai, paired at 390 and 1440 CSS px:
+- Home, real example, installer landing.
+- All eleven existing assessment screens, in unchanged order.
+- Real results, monthly bars, cumulative chart, detailed trace, optional refinements, safe share.
+- Signed-in Today, enquiries, enquiry detail, credits/statement, company/preferences.
+Additional implementation-only captures and browser checks:
+- Pending/rejected company, company paused, unverified email, missing terms,
+  platform pause, exhausted credits, empty inbox, service error and retry.
+- Expired deep-link session offers genuine sign-in.
+- Other location/property/roof/appliance and renter owner-permission branches.
+- Separate current legal Test/contact/phone-verification flows remain covered by existing tests.
+- Notes save/reload/failure/conflict, explicit outcomes, preference persistence and error states.
+- Withdrawal redaction, original claim deadlines, staff links, debt/trial distinction,
+  enabled payment methods and pending/failed/cancelled/repeated payment returns.
+- Admin authorization/CSRF/rejected-request lifecycle and unchanged operational holds.
+
+SCREENSHOT METHOD / LIMITS
+Files contain only synthetic fixtures; no real lead records or credentials.
+Paired main screen PNGs use the same language, viewport, household and fictional company.
+Prototype-only demo chrome is excluded from viewport and question crops; full-page PNGs retain it.
+Question crops are not full-page comparisons. Viewport comparisons align content origins, not
+unrelated browser chrome. Financial fixture balances/stages are matched where structurally valid;
+real ledger obligations and extra current household answers necessarily add content.
+The review-supplied reference-captures folder remains separate and unchanged. Superseded agent
+JPGs are archived privately in .wrangler/design-v2-obsolete-captures; use final PNGs via the viewer.
+The original prototype is not production code and its fictional data is not shipped in runtime.
+No claim of pixel-perfect equivalence is made for functional/legal exceptions below.
+No independent prototype exists for secondary authentication, OTP, legal Test, claims, staff,
+terms-acceptance or payment-return screens; these retain real structure with scoped styling.
+
+NECESSARY DEPARTURES FROM PROTOTYPE
+1. Current brand asset and genuine routes remain. The existing accessible mobile navigation is
+   retained rather than dropping working navigation. At 320 px, installer header Apply is hidden
+   while the equivalent hero Apply remains. The reference-only demo switch/banner is absent.
+2. Approved legal/footer/consent copy and unresolved factual placeholders remain unchanged.
+   Longer disclosures remain longer; no fabricated operator identity, shortened consent or
+   homeowner LINE collection was introduced. The actual phone-only OTP path remains.
+3. Existing eleven-screen order, district search, custom fields, owner permission and installed
+   AC semantics remain. Optional postcode is not newly required or promoted.
+4. Loading displays genuine preparation state, not a fabricated minimum wait, tariff lookup,
+   installer matching or simulated processing. Ready results never depend on an outgoing
+   JavaScript animation completing. Result entry is a restrained CSS animation with a visible
+   base state and reduced-motion override; step transitions retain direction and focus control.
+5. Hero inputs start unselected/blank rather than suggesting a default user answer. The separately
+   labelled example derives from the real calculator, not a hard-coded marketing promise.
+6. Unsupported no-sales-call, choose-who-calls, competitor, instant LINE, absolute roof-leak and
+   unverified incentive/rate claims were replaced by factual copy. Existing sources/legal text remain.
+7. Real monthly savings, price, generation, reserve, simple payback and cumulative crossing are
+   distinct. Negative net savings stay visible and unavailable payback is a dash, not zero.
+   Low-bill recommendation logic is intentionally unchanged pending an owner/model decision.
+8. Share links use a strict bounded versioned allowlist and fragment, excluding contact, consent,
+   exact address/map, free text and private identifiers. Privacy explanation and clipboard-failure
+   fallback add truthful controls. No anonymous/encrypted claim or automatic LINE send is made.
+9. Installer landing uses genuine authentication/configuration and one authoritative company name
+   rather than different invented header/form company names. No anonymous Demo bypass,
+   fictional operational availability, invented customer stats or fabricated first-call median.
+10. Accepting-enquiries is only a preference and cannot override approval, verification, terms,
+    credit, capacity, hours, global pause or allocation checks. Messages reflect actual holds.
+11. Enquiry contact bar offers only genuine Call/Copy. Legacy Open is not relabelled confirmed
+    contact. Contacted, site visit and quoted are explicit; Won/Lost/Not suitable remain distinct.
+    Calling/opening does not automatically report success. Team notes require explicit successful
+    save and revision checks; unsaved edits survive errors.
+12. Original delivery/claim times are authoritative. Withdrawn financial/claim access remains,
+    with contact/notes redacted. Existing genuine staff-link/claim actions remain available.
+13. Statements use authentic ledger/order data, retain unpaid/reversed/reserved/debt/trial facts,
+    avoid double-counting paid orders, and convert minor units once. All configured payment
+    methods remain; sub-baht financial amounts are not rounded away.
+14. Company service areas beyond six are retained through an expandable fallback. Actual daily range 0-100
+    and zero-capacity meaning remain rather than the demo 1-20 clamp.
+15. Inbox retains the working All filter and reference numbers. Records are ordered by actual
+    delivery time (oldest first), rather than the prototype's fixed fictional array order. This adds
+    a reference/location row and changes card height. Authentic/localized wording, retained mobile
+    navigation and 44 px focus/touch targets can cause small wrapping/spacing differences; these
+    are visible in the comparisons, not represented as an exact pixel match.
+16. Structured data contains only known brand facts and visible FAQs, not an invented legal
+    address, incorporation record or per-page imagery.
+
+LOCAL DATA / RECOVERY
+Forward migration: migrations/0019_installer_delivery_workspace.sql.
+Applied only to isolated local copies, never the original demo or a remote database.
+It adds bounded delivery notes/revision/stage fields and privacy-clearing triggers; historical
+migrations, legal/consent snapshots, calculator functions and production bindings are unchanged.
+Original .wrangler/installer-demo remains on eighteen migrations.
+Preview .wrangler/installer-design-v2 has nineteen.
+Read-only comparison: 59 common tables identical to original, zero changed tables.
+Preview: 5 leads, 5 enquiries, 6 deliveries, 13 ledger entries, 2 claims, 3 legal versions.
+Separate disposable provider tests use .wrangler/installer-v2-e2e and legitimately add fixtures;
+they are not the preserved demo or remote customer data.
+Private export .wrangler/installer-design-v2-final/synthetic-final.sql:
+SHA256 56813c2bb5295280a5bbb1fd4162d156ddc635ddcb339421257512372c333e41.
+Ordered import into disposable restore-v2: 60 tables / 28 triggers match; zero foreign-key,
+ledger, recipient-cap or missing-consent violations. This is synthetic database-only rehearsal,
+not production Time Travel or R2 recovery. Private SQL, sessions and browser traces are excluded.
+
+VERIFICATION HISTORY — DO NOT CONFLATE RUNS
+Full browser run 1: 210 passed, 22 skipped, 19 failed.
+Those failures are retained in private logs rather than hidden by a successful isolated rerun.
+Failures exposed narrow header overflow, fixed contact/navigation overlap, focus/scroll races,
+result animation lifecycle dependency, stale accessible selectors and redundant high-DPR captures.
+Controls/semantics assertions were retained; artifact-only duplicate captures were removed from
+mobile projects, while their behavior/layout assertions still execute.
+Intermediate expanded Design v2 run: 7 passed, 1 failed (outgoing loading transition).
+Cold-result check subsequently caught an additional transparent-result animation dependency.
+Both are repaired without increasing timeouts, removing assertions or forcing visibility in tests.
+A CSS result entry now has a visible base state even with a fixed application clock.
+Additional partial aggregate runs were stopped for visual comparison corrections. One exposed a
+test-fixture teardown race: route.fetch completed after its context closed. The fixture now fetches
+the real public baseline before interception, retaining all consent/no-submission assertions.
+These partial runs are not represented as complete successful regressions.
+Final aggregate results are recorded in the implementation record alongside exact log names.
+Separate synthetic provider workflow: 3 passed, including real local auth/recovery, SMS-proof
+submission and idempotent payment fixture. No external message/payment was sent.
+Separate combined admin/lifecycle workflow: 10 passed across desktop/mobile Chromium.
+Final-source separate combined admin/lifecycle/provider run: 8 passed on desktop Chromium
+(.wrangler/design-v2-local-final.log). This includes the genuine local auth/phone/payment services,
+not only intercepted portal responses; its disposable store was returned to disabled/paused state.
+Lint: 0 errors, 2 img warnings (supplied responsive photo and existing provider QR).
+Typecheck passed. Unit suite: 371 passed across 52 files.
+Normal production build and isolated local build passed. Building is not deploying.
+Automated axe and keyboard/geometry assertions are not a certification or physical-device audit.
+
+REMAINING OWNER / EXTERNAL DECISIONS
+- Supply original photo page/license evidence for the supplied photography before publication.
+  Photographer attribution is retained; the archive alone does not establish usage rights.
+- Real legal/operator facts, tax/credit/refund/retention decisions and qualified legal approval
+  remain external prerequisites; this implementation does not certify legal compliance.
+- Decide whether a low-bill/negative-net case needs a different recommendation rule. No silent
+  calculator or qualification change was authorized by this visual task.
+- Real provider onboarding/settlement/delivery, verified sending domain and controlled authorized
+  HTTPS acceptance remain separate work. A purchased domain is not inherently required for every
+  test; a separately approved dedicated Cloudflare test hostname can serve suitable HTTPS tests.
+- Physical iOS/Android virtual-keyboard and screen-reader acceptance remains appropriate before
+  launch; emulated Safari/Chrome and axe are reported only as automated/emulated evidence.
+- Secondary screens have no independent Claude reference. Any additional visual direction needs
+  a focused design addendum, not an invented redesign.
+
+FINAL AGGREGATE VERIFICATION
+Visual/application candidate d3813cd374b18a09246995f542c4befb4e94095b:
+pnpm test:e2e --workers=2 --output=.wrangler/design-v2-browser-final-complete-results --reporter=line
+Result: 241 passed, 22 intentional skips, zero failures, 11.6 minutes.
+Log: .wrangler/design-v2-browser-final-complete.log (private local evidence).
+Sixteen skips require the opt-in isolated local fixture mode; six avoid duplicate desktop-only
+protocol/navigation checks. They are not new skips added to hide a failure.
+The genuine local provider/admin acceptance is recorded separately above.
+Both desktop Chromium Design v2 paired-capture journeys passed, as did their mobile behavior
+counterparts. Snapshot manifest includes 272 automated PNGs plus three manual comparison views.
+Original 39 file checksums and all seven supplied/copied photo byte comparisons pass.
+The broad result was obtained before the final keyboard-only duplicate-skip-link correction.
+That correction does not alter visible layouts, stored data, legal text or calculator behavior;
+its final-source focused browser result is appended in the implementation record.
+
+FINAL KEYBOARD FOLLOW-UP
+Source commits d8d2048 (one localized portal skip link) and dee4ea4 (explicit tabindex=0).
+Initial plain-Tab focused run: 6 passed / 2 WebKit failures. A follow-up using Option/Alt+Tab
+also retained those two failures. Safe diagnostics showed the link present, visible and not
+inert, but WebKit traversing form controls rather than that implicit link. Explicit tabindex=0
+fixed the application control: the original plain-Tab focus assertion now passes unchanged.
+Final focused run: 8 passed / 0 failed, desktop/mobile Chrome and emulated mobile WebKit;
+log .wrangler/design-v2-keyboard-explicit.log. Protected-admin style checks also passed.
+No timeout increase, skipped assertion, forced focus or programmatic visibility workaround.
+Apple documents its general link/form-control keyboard distinction here (checked 15 October):
+https://support.apple.com/en-gb/guide/safari/cpsh003/mac
+This is emulated keyboard evidence, not physical iOS/VoiceOver certification.
+Final source lint/typecheck/unit and normal/local builds were rerun after the fix.

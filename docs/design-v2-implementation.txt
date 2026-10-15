@@ -20,3 +20,58 @@ Known required departures:
 - No recommendation arithmetic/logic change; negative-net warning remains.
 
 No push, merge, deployment, remote migration or real-operation activation authorised.
+
+IMPLEMENTED PHASES / CHECKPOINT COMMITS
+f3af29f freeze supplied reference; 7d8498e tokens/type/shared controls;
+62991d4 homeowner home/header/footer; 5493b9d assessment/loading;
+b9b2d2c results/real charts/safe sharing; 554f65c installer landing/shell/Today;
+9ee1854 bounded persistent notes/stages (functional support, separate review commit);
+0bbfb4c enquiries/detail styling; 310fa19 credits/company;
+f9b8c97 supporting content/SEO/regression selectors;
+9ad9877 navigation/focus/localized review fixes;
+0ef62f3 remove outgoing-animation dependency for ready results;
+38eea15 visible-base CSS result entry and cold-result regression;
+1996471 restore actual Today date/planning/waiting detail hierarchy.
+ad068dd remove legacy chart frame and restore company secondary-link placement;
+d3813cd clear legacy sidebar/balance spacing and preserve compact package badge.
+
+The complete scope/state/departure and verification register is:
+docs/design-v2-comparison/VERIFICATION.txt
+The local comparison viewer is http://127.0.0.1:4174/comparison/.
+Main preview is http://127.0.0.1:3000 (compiled, loopback only).
+Installer preview is /installers?lang=en or /installers?lang=th.
+Existing synthetic authentication remains required; no anonymous demo bypass.
+Internal administrator login is /admin/local-access using the existing private local password.
+
+Only local migration 0019 adds the necessary persistent delivery workspace controls.
+The original eighteen-migration demo is preserved; isolated preview uses installer-design-v2.
+Tests with provider fixtures use a different disposable store, installer-v2-e2e.
+All real effects remain off, platform/allocation paused, test clocks cleared.
+See docs/installer-local-test.md for exact local/recovery commands.
+
+No legal/consent history, calculator arithmetic, production bindings or LINE repair was rewritten.
+Photograph attribution is retained but original photo-page/license evidence is still required
+before publication. No public release, legal approval or real-provider acceptance is claimed.
+
+FINAL VERIFICATION
+Full browser suite on visual candidate d3813cd: 241 passed, 22 intentional skips, zero failures (11.6m).
+Final functional source dee4ea40193e3a8c82f32a596a1b29c2399d3f78 additionally removes the duplicate
+Thai public-layout skip link ahead of the localized installer skip link. It is keyboard-only,
+with no visible layout/data/consent/calculation change. Focused verification is recorded below.
+Unit suite: 371 passed / 52 files. Typecheck passed. Lint: 0 errors, 2 image warnings.
+Both normal production and isolated local build profiles are required and checked; neither deploys.
+Separate final synthetic admin/lifecycle/auth/phone/payment workflow: 8 passed.
+
+FINAL KEYBOARD FOLLOW-UP
+Source commits d8d2048 (one localized portal skip link) and dee4ea4 (explicit tabindex=0).
+Initial plain-Tab focused run: 6 passed / 2 WebKit failures. A follow-up using Option/Alt+Tab
+also retained those two failures. Safe diagnostics showed the link present, visible and not
+inert, but WebKit traversing form controls rather than that implicit link. Explicit tabindex=0
+fixed the application control: the original plain-Tab focus assertion now passes unchanged.
+Final focused run: 8 passed / 0 failed, desktop/mobile Chrome and emulated mobile WebKit;
+log .wrangler/design-v2-keyboard-explicit.log. Protected-admin style checks also passed.
+No timeout increase, skipped assertion, forced focus or programmatic visibility workaround.
+Apple documents its general link/form-control keyboard distinction here (checked 15 October):
+https://support.apple.com/en-gb/guide/safari/cpsh003/mac
+This is emulated keyboard evidence, not physical iOS/VoiceOver certification.
+Final source lint/typecheck/unit and normal/local builds were rerun after the fix.
