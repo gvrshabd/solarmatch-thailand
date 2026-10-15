@@ -98,6 +98,11 @@ for (const lang of ['en', 'th'] as const) {
       await page.route('**/api/installer/portal**', route => route.fulfill({ status: 401, json: { error: 'unauthorized' } }));
       await page.setViewportSize({ width: 320, height: 800 });
       await page.goto('/installers?lang=' + lang);
+      await expect(page.locator('.skip-link')).toHaveCount(0);
+      const skip = page.getByRole('link', {name:en?'Skip to content':'ข้ามไปเนื้อหา',exact:true});
+      await expect(skip).toHaveCount(1);
+      await page.keyboard.press('Tab');
+      await expect(skip).toBeFocused();
       await page.getByRole('button', {name:en?'Sign in':'เข้าสู่ระบบ',exact:true}).first().click();
       await expect(page.getByRole('heading', { name: en ? 'Sign in' : 'เข้าสู่ระบบ', exact: true })).toBeVisible();
       await page.getByLabel(en ? 'Email' : 'อีเมล', { exact: true }).fill('design@example.test');
