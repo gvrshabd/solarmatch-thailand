@@ -13,5 +13,5 @@ export function thaiPhone(value: string) {
   return /^0[689]\d{8}$/.test(local)?local.slice(0,3)+' '+local.slice(3,6)+' '+local.slice(6):value;
 }
 export function portalMoney(minor: number, currency: string, en: boolean, whole=false) {
-  return new Intl.NumberFormat(en?'en-GB':'th-TH',{style:'currency',currency,minimumFractionDigits:whole?0:2,maximumFractionDigits:whole?0:2}).format(minor/100);
+  return new Intl.NumberFormat(en?'en-GB':'th-TH',{style:'currency',currency,currencyDisplay:currency==='THB'?'narrowSymbol':'symbol',minimumFractionDigits:whole?0:2,maximumFractionDigits:whole?0:2}).format(minor/100);
 }

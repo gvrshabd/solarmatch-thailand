@@ -68,6 +68,11 @@ for(const lang of ['en','th'] as const) {
   await expect(page.getByRole('heading',{name:en?'Sign in':'เข้าสู่ระบบ',exact:true})).toBeVisible();
   await expect(page.getByLabel(en?'Email':'อีเมล',{exact:true})).toBeVisible();
  });
+ test(`${lang}: an approved empty inbox does not falsely request company approval`,async({page})=>{
+  const data=fixture();data.deliveries=[];await page.route('**/api/installer/portal**',route=>route.fulfill({json:data}));
+  await page.goto('/installers?view=inbox&lang='+lang);await page.getByRole('button',{name:lang==='en'?/^All /:/^ทั้งหมด /}).click();
+  await expect(page.getByText(lang==='en'?'New enquiries appear here when available. Review your service areas and receiving status in Company.':'คำขอใหม่จะแสดงที่นี่เมื่อพร้อมรับ ตรวจสอบพื้นที่บริการและสถานะการรับคำขอได้ที่หน้าบริษัท',{exact:true})).toBeVisible();
+ });
  test(`${lang}: conditional household answers remain editable without accidental advance`,async({context},info)=>{
   const folder=path.resolve('docs/design-v2-comparison');
   const cases=[
@@ -117,16 +122,21 @@ for(const lang of ['en','th'] as const) {
   for(const width of [390,1440]) {
    await page.setViewportSize({width,height:900});await reference.setViewportSize({width,height:900});
    for(let step=0;step<11;step++){
-    await page.evaluate(({answers,step})=>{sessionStorage.removeItem('solarmatch:assessment-context');sessionStorage.setItem('solarmatch:estimate-draft',JSON.stringify({version:9,answers,step}));},{answers:designV2ExampleAnswers,step});
+    // Seed before mounting, not into an active prior question whose pending
+    // effects may still persist its old step. This is fixture setup, not a user edit.
+    const questionPage=await context.newPage();await questionPage.setViewportSize({width,height:900});
+    await questionPage.addInitScript(({answers,step})=>{sessionStorage.removeItem('solarmatch:assessment-context');sessionStorage.setItem('solarmatch:estimate-draft',JSON.stringify({version:9,answers,step}));},{answers:designV2ExampleAnswers,step});
     await reference.evaluate(step=>sessionStorage.setItem('sm-step',JSON.stringify(step)),step);
-    await page.goto(lang==='en'?'/en/estimate':'/estimate');await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow',String(step+1));
-    await expect(page.locator('.question-stage')).toHaveCSS('opacity','1');await page.evaluate(()=>document.fonts.ready);
+    await questionPage.goto(lang==='en'?'/en/estimate':'/estimate');await expect(questionPage.getByRole('progressbar')).toHaveAttribute('aria-valuenow',String(step+1));
+    await expect(questionPage.locator('.question-stage')).toHaveCSS('opacity','1');await questionPage.evaluate(()=>document.fonts.ready);
+    expect(await questionPage.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft')!).step)).toBe(step);
     await reference.goto('http://127.0.0.1:4174/#estimate');await reference.reload();await reference.evaluate(()=>document.fonts.ready);
     await expect(reference.locator('#qh')).toContainText(initialQuestionnaire.questions[step].title[lang].slice(0,18));
     const chrome=await reference.locator('.proto').evaluate(el=>Math.ceil(el.getBoundingClientRect().height));
-    await page.evaluate(()=>window.scrollTo(0,0));await reference.evaluate(()=>window.scrollTo(0,0));
-    if(capture)await page.screenshot({path:path.join(folder,`implementation-question-${step+1}-${lang}-${width}.png`),clip:{x:0,y:0,width,height:900-chrome},scale:'css'});
+    await questionPage.evaluate(()=>window.scrollTo(0,0));await reference.evaluate(()=>window.scrollTo(0,0));
+    if(capture)await questionPage.screenshot({path:path.join(folder,`implementation-question-${step+1}-${lang}-${width}.png`),clip:{x:0,y:0,width,height:900-chrome},scale:'css'});
     if(capture)await reference.screenshot({path:path.join(folder,`prototype-question-${step+1}-${lang}-${width}.png`),clip:{x:0,y:chrome,width,height:900-chrome},scale:'css'});
+    await questionPage.close();
    }
   }
   await reference.close();

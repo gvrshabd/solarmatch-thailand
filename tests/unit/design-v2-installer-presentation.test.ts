@@ -11,8 +11,9 @@ describe('Design v2 installer display integrity',()=>{
    expect(thaiPhone('+66812345678')).toBe('081 234 5678');
  });
  it('converts satang once and retains sub-baht refunds',()=>{
-   expect(portalMoney(400000,'THB',true,true)).toMatch(/4,000/);
-   expect(portalMoney(12345,'THB',true)).toMatch(/123\.45/);
+   expect(portalMoney(400000,'THB',true,true)).toBe('฿4,000');
+   expect(portalMoney(12345,'THB',true)).toBe('฿123.45');
+   expect(portalMoney(1,'THB',false)).toBe('฿0.01');
  });
  it('never interprets not-recorded or legacy open as a completed call',()=>{
    expect(enquiryGroup({outcome:'not-recorded'} as InstallerDelivery)).toBe('new');

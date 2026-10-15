@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { designText } from '@/config/design-v2-copy';
 import type { InstallerPublicConfig } from '@/lib/installer/public-config';
 import { PortalBrand } from './workspace';
+import { portalMoney } from '@/lib/installer/presentation';
 
 export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage }: { en: boolean; config: InstallerPublicConfig; apply: () => void; signIn: () => void; auth?:ReactNode; setLanguage:(english:boolean)=>void }) {
   const t = designText(en ? 'en' : 'th');
@@ -19,7 +20,7 @@ export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage 
   return <div className="v2-installer-landing">
     <header className="hdr"><div className="wrap v2-landing-header"><a className="brand" href={'/installers?lang='+(en?'en':'th')}><PortalBrand/></a><nav className="nav" aria-label={en?'Installer information':'ข้อมูลผู้ติดตั้ง'}><a aria-current="page" href={'/installers?lang='+(en?'en':'th')}>{en?'For installers':'สำหรับผู้ติดตั้ง'}</a><a href={en?'/en':'/'}>{en?'Homeowner site':'เว็บไซต์เจ้าของบ้าน'}</a></nav><div className="hdr-right"><div className="lang-toggle"><button aria-label="Switch to Thai" aria-pressed={!en} onClick={()=>setLanguage(false)}>ไทย</button><button aria-label="Switch to English" aria-pressed={en} onClick={()=>setLanguage(true)}>EN</button></div><button className="btn btn-ghost v2-landing-signin" disabled={!available} onClick={signIn}>{en?'Sign in':'เข้าสู่ระบบ'}</button><button className="btn btn-primary" disabled={!available} onClick={apply}>{en?'Apply':'สมัคร'}</button></div></div></header>
     <section className="wrap ihero"><div><p className="eyebrow">{t.iEyebrow}</p><h1>{t.iH1}</h1><p className="lede">{t.iLede}</p><div className="btns">{action}</div><div className="terms">
-      <div><span>{t.tPrice}</span><b>{c ? new Intl.NumberFormat(en?'en-GB':'th-TH',{style:'currency',currency:'THB',maximumFractionDigits:0}).format(c.creditValueMinor*c.sharedCredits/100) : '—'}</b></div>
+      <div><span>{t.tPrice}</span><b>{c ? portalMoney(c.creditValueMinor*c.sharedCredits,'THB',en,(c.creditValueMinor*c.sharedCredits)%100===0) : '—'}</b></div>
       <div><span>{t.tCos}</span><b>{c ? `${en?'Up to':'สูงสุด'} ${c.recipientLimit}` : '—'}</b></div>
       <div><span>{t.tStart}</span><b>{c ? `${c.trialDeliveries} ${en?'trial enquiries':'คำขอทดลอง'}` : '—'}</b></div>
       <div><span>{t.tClaim}</span><b>{c ? `${c.claimDays} ${en?'days':'วัน'}` : '—'}</b></div>
