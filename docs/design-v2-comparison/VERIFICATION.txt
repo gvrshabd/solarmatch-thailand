@@ -1,4 +1,9 @@
 SOLARMATCH DESIGN V2 — LOCAL VERIFICATION AND DEPARTURES
+Historical local implementation record below. The owner-authorised protected
+staging review on 15 October is recorded in ../design-v2-review/STAGING_REVIEW.txt.
+It applies existing migration 0019 to staging only and corrects the previously
+deferred negative-net verdict; prior no-deployment statements describe the earlier
+local-only task, not the subsequent authorised staging publication.
 15 October 2026, Asia/Bangkok
 Repository: gvrshabd/solarmatch-thailand
 Branch: feature/design-v2-integration

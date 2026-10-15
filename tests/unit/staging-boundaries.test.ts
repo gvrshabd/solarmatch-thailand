@@ -5,12 +5,35 @@ import {readdirSync,readFileSync} from 'node:fs';
 import {unstable_splitSqlQuery} from 'wrangler';
 import {triggerSafeStatement} from '../../scripts/installer-staging-migration-transport.mjs';
 import stagingWorker from '../../staging/worker';
+import {stagingDesignAsset,reviewContentSecurityPolicy} from '@/lib/server/staging-design-review';
+import {assertStagingCheckout} from '../../scripts/installer-staging-cloudflare.mjs';
 const verify=vi.hoisted(()=>vi.fn());
 vi.mock('jose',()=>({jwtVerify:verify,createRemoteJWKSet:vi.fn(()=>({}))}));
 vi.mock('../../worker',()=>({default:{fetch:vi.fn(()=>new Response('Application route'))}}));
 const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 const env:StagingAccessEnv={INSTALLER_PLATFORM_MODE:'sandbox',INSTALLER_BASE_URL:origin,STAGING_ACCESS_AUD:'staging-site',ACCESS_AUD:'staging-admin',ACCESS_TEAM_DOMAIN:'https://team.example.test',ADMIN_EMAILS:'owner@example.test'};
 beforeEach(()=>{verify.mockReset();});
+it('limits staging management to the exact repository and two integration branches',()=>{
+ for(const branch of ['feature/installer-shared-workflow','feature/design-v2-integration'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).not.toThrow();
+ for(const branch of ['main','unrelated'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).toThrow();
+ expect(()=>assertStagingCheckout('https://github.com/example/other.git','feature/design-v2-integration')).toThrow();
+});
+it('publishes only allowlisted review assets behind verified owner Access',async()=>{
+ const fetchAsset=vi.fn(async()=>new Response('Synthetic review',{headers:{'Content-Type':'text/html'}}));
+ const assetEnv={...env,ASSETS:{fetch:fetchAsset} as unknown as Fetcher};
+ const context={} as ExecutionContext,url=origin+'/design-review/';
+ expect((await stagingWorker.fetch(new Request(url),assetEnv,context)).status).toBe(403);expect(fetchAsset).not.toHaveBeenCalled();
+ verify.mockResolvedValue({payload:{email:'owner@example.test'}});
+ const headers={'cf-access-jwt-assertion':'fixture'};
+ const response=await stagingWorker.fetch(new Request(url,{headers}),assetEnv,context);
+ expect(response.status).toBe(200);expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+ expect((await stagingWorker.fetch(new Request(url,{headers,method:'POST'}),assetEnv,context)).status).toBe(405);
+ expect((await stagingWorker.fetch(new Request(url+'VERIFICATION.txt',{headers}),assetEnv,context)).status).toBe(404);
+ expect(stagingDesignAsset('/design-review/prototype/app.js')).toBe(true);
+ expect(stagingDesignAsset('/design-review/images/implementation-results-en-390.png')).toBe(true);
+ for(const path of ['/design-review/backup.sql','/design-review/secret.json','/design-review/../admin','/design-review/prototype/../../api/leads'])expect(stagingDesignAsset(path)).toBe(false);
+ expect(reviewContentSecurityPolicy).toContain("connect-src 'none'");expect(reviewContentSecurityPolicy).toContain("form-action 'none'");
+});
 it('exempts only the exact LINE path, not its children or other APIs',()=>{
   expect(stagingRoute(new Request(origin+'/api/installer/webhooks/line'),env)).toBe('signed-webhook');
   for(const route of ['/api/installer/webhooks/line/','/api/installer/webhooks/line/admin','/api/leads','/admin','/assets/file'])expect(stagingRoute(new Request(origin+route),env)).toBe('access');

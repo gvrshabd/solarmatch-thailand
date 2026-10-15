@@ -1,0 +1,50 @@
+SolarMatch protected staging recovery — no production operation authorised
+
+Previous staging Worker version:
+f7fec39e-b10f-4efc-9497-e35eecd3a23d
+Previous deployment:
+72d9f089-cd4b-4029-bd65-6fe102642a3a
+
+Private backup folder (ignored, never commit or publish):
+.wrangler/design-v2-staging-20261015/
+database.sql.enc.json — AES-256-GCM encrypted SQL export
+key.dpapi — key wrapped to the Windows CurrentUser account
+manifest.json — original column/count/value hashes, version, Time Travel bookmark
+Export SHA256:
+75146cc963451ee97227c4d8d71076a184159d84f00e81c678c7a71b3d1fa56f
+The plaintext temporary export was removed only after encryption/decryption and
+an in-memory full restore matched every table and passed FK/ledger checks.
+
+APPLICATION ROLLBACK
+Verify the exact staging identity before any action:
+node scripts/installer-staging-cloudflare.mjs verify
+If an application rollback is necessary and separately authorised, use the existing
+Wrangler versions rollback workflow with --config staging/wrangler.jsonc and ONLY
+the previous staging version above. Check exact Worker name/bindings in its output.
+Do not run the repository's generic deploy script (it targets production).
+Do not reset main or restore a database for a CSS/application-only regression.
+
+MIGRATION / DATABASE
+0019 is additive: nullable/default workspace columns plus privacy-clearing triggers.
+Old code remains compatible with it. A Worker rollback does not undo the migration.
+Do not edit applied migration files, manually delete the migration record, or
+restore an export over an active populated database.
+Actual data corruption requires a separately authorised recovery plan: preserve
+the current state first, decrypt using the protected user key on this account,
+check the export hash, restore schema/indexes then data then triggers into a NEW
+disposable destination, verify all rows/FKs/ledger/consent/recipient invariants,
+then decide whether a targeted repair or D1 Time Travel recovery is appropriate.
+The backup verifier rehearsed this order, including D1's sqlite_stat1 ANALYZE
+creation. It does not replay credit/delivery triggers against restored balances.
+Time Travel bookmark and timestamp are private in manifest.json, not public URLs.
+No production database or R2 recovery is authorised or claimed.
+Never imply that deliberately purged personal data can be restored under policy.
+
+STAGING DEPLOYMENT PROCEDURE
+Keep the feature integration branch, exact origin and dedicated resources.
+Build with INSTALLER_STAGING=true and INSTALLER_LOCAL_TEST unset.
+node scripts/installer-staging-cloudflare.mjs deploy --design-review
+The helper verifies the staging D1/Worker/bucket identity and holds, confirms the
+compiled protected entrypoint, packages review-safe assets in a private generated
+folder and deploys directly to the one existing staging Worker. It does not push
+Git, alter main, install secrets, change Access or run migrations implicitly.

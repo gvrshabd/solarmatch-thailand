@@ -1,0 +1,44 @@
+SolarMatch Design v2 supplied photography — source review, 15 October 2026
+
+The seven supplied JPEG files were not replaced or modified. The original handoff
+remains frozen. Exact source identity was checked visually in the source website,
+not inferred just from a photographer name or a similar image title.
+
+CONFIRMED VISUAL MATCHES
+home-hero.jpg / home-hero-m.jpg — crops of Robert So, Palm Trees Around House:
+https://www.pexels.com/photo/palm-trees-around-house-12284244/
+Source lists Robert So, 6240x4160, 28 May 2022, and links its Free license.
+Evidence: photo-evidence/hero-source.png (source image and photographer visible).
+
+palms-roof.jpg — Kindel Media, Solar Panel on Roof of House in California, USA:
+https://www.pexels.com/photo/solar-panel-on-roof-of-house-in-california-usa-9875438/
+Source lists Kindel Media, 4385x3289, 12 October 2021, United States, Free license.
+Evidence: photo-evidence/palms-source.png.
+
+installer.jpg / installer-tall.jpg — crops of Los Muertos Crew:
+https://www.pexels.com/photo/solar-technician-installing-solar-panel-8853507/
+Source lists Los Muertos Crew, 2832x4240, 21 July 2021, Free license.
+Evidence: photo-evidence/installer-source.png.
+
+UNRESOLVED EXACT SOURCE IDENTITIES
+roof-tile.jpg — supplied credit Kindel Media. Related source IDs 9875442 and
+9875440 were inspected; their framing does NOT match this supplied photograph.
+Do not cite those as proof of this file's provenance.
+modern-roof.jpg — supplied credit Budget Bizar. IDs 17762230, 16427010 and
+12224996 were inspected; they are different photographs. They are not provenance
+for the supplied file. The original download/source records remain needed.
+
+LICENSE EVIDENCE
+https://www.pexels.com/license/ checked 15 October 2026 in the source website.
+Evidence: photo-evidence/pexels-license.png.
+The policy permits free use and modification without mandatory attribution. It
+restricts unaltered resale, stock redistribution, derogatory uses of identifiable
+people, implied endorsement, and use as a trademark. Website/promotion uses are
+listed. Existing photographer credits are retained. This is evidence of the
+displayed license, not legal clearance of every property/model right or proof of
+the historic download date. No customer, installation, performance or Thailand
+location endorsement is implied by the photographs.
+
+The unmatched source identities remain an external provenance item before public
+release. They do not justify inventing licenses or replacing Claude's imagery in
+this protected review. No lawyer or native-speaker approval is claimed.

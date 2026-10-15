@@ -1,0 +1,103 @@
+SolarMatch Design v2 focused review — 15 October 2026
+Repository: gvrshabd/solarmatch-thailand
+Branch: feature/design-v2-integration
+Initial checkout: 321d7c81314db1ef85e33806911defd3b47376e8 (clean)
+Local main retained: 4bd3a412a850ec77e58821fcbe910728d8df51c6
+LINE repair 63b656df69f93ad4f6c9e89a1fbb329c80496676 remains an ancestor.
+
+VERIFIED ISSUES / CHANGES
+- Negative-net results used an encouraging suitability verdict. The hero and
+  breakdown now lead with the prototype's existing bilingual negative-net
+  explanation. Independent roof/site warnings remain. No calculator, tariff,
+  assumption, score or numerical result changed. Positive/negative/null-payback
+  browser cases passed in both languages before the expanded final regression.
+- English THB formatting differed from the prototype. Portal/landing use the baht
+  symbol while converting integer satang once; statements retain sub-baht values.
+- An approved empty All inbox incorrectly said company approval was required.
+  It now directs approved companies to actual availability and Company settings.
+- Entrance opacity on the enquiry grid caused intermittent AA contrast failures.
+  The 200ms 6px ease-out movement remains, with fully opaque text throughout.
+- Review screenshot setup wrote a new draft into an already mounted old question.
+  One regression reopened step 4 instead of step 5. Each question capture now seeds
+  its isolated page before mounting, and asserts both visible progress and stored
+  step. No question/progress assertions were removed and no timeouts increased.
+- Numeric font fallback was investigated. Runtime inspection confirmed this vinext
+  build registers the named Manrope family; a speculative font override was
+  removed. Existing typography is preserved rather than claiming a false defect.
+
+VERIFICATION HISTORY (NOT ALL ONE SUCCESSFUL RUN)
+- Initial financial browser check: 7 passed.
+- First viewer check: 1 passed / 1 failed (ambiguous accessible label). Explicit
+  accessible names were added; the rerun passed both checks.
+- Full regression 1: 254 passed, 22 intentionally skipped, 5 failed. Four failures
+  exposed the entrance contrast issue; one exposed active-page fixture setup.
+  Failures/traces remain privately recorded, not hidden behind reruns.
+- Separate genuine loopback workflow: 8 passed, including the combined admin
+  sequence, authentication/recovery, no-contact results, captured SMS verification
+  and repeat-safe simulated payment. It used a disposable synthetic database,
+  never the preserved demo or staging data. All its holds were restored afterward.
+- Unit suite: 376 passed in 53 files. Typecheck passed. Lint has 0 source errors
+  and two existing next/image warnings. An intermediate lint accidentally scanned
+  generated staged build assets; only that generated folder is now ignored.
+- Normal build and final local-test build passed. Expanded final browser result,
+  protected staging build/deployment and authenticated smoke evidence are recorded
+  in the final addendum after completion, not inferred from earlier runs.
+
+DATA / SAFETY
+Dedicated staging D1 id: 153b8867-e7ad-40ad-8a63-c2bde2338b43.
+Encrypted pre-migration export restored all 60 tables with matching hashes,
+zero foreign-key violations and zero ledger mismatches. CurrentUser DPAPI protects
+the AES-256-GCM key. Time Travel information is recorded in the private manifest.
+Only migration 0019_installer_delivery_workspace.sql was pending and applied.
+Source SHA256: 4d715b91bc34db89d741fe44b9326412590d673d78a590086cc208a17570497d.
+Immediate remote comparison: all 59 original data tables/columns unchanged.
+Counts: 2 leads, 2 enquiries, 1 delivery, 2 ledger entries, 3 legal versions, 1 user.
+Later legitimate authentication may update session metadata; it is not a reason to
+erase sessions or falsify the initial exact comparison. No existing lead is reset.
+Original local demo and preview: 59 common tables remain identical (zero changes).
+Private staging R2: Standard, APAC, managed public domain disabled. Binding retained;
+no R2 object write/delete was performed. Database recovery is not R2 recovery.
+Collection, payments, notifications and attribution stay disabled. Allocation and
+platform stay paused, outbound off, test clock cleared. No provider calls authorised.
+
+REVIEW PUBLICATION
+The staging-only /design-review/ package is generated under ignored .wrangler;
+neither public/ nor the normal production Worker includes the review files.
+Only allowlisted synthetic PNGs, the original prototype's asset files, source-license
+evidence and curated review notes are published. Private SQL, reports, sessions,
+credentials, browser traces and management files are excluded.
+Access JWT issuer/audience/exact-owner verification occurs before asset delivery.
+The viewer does not require an installer account. Actual workspace routes do.
+Original prototype source is unchanged. Only its served copy receives locale,
+selected-question/financial-fixture initialization and external-call/navigation
+blocking. Its mock controls cannot call application APIs or launch fictional calls.
+These review-only safety wrappers are not changes to Claude's visual reference.
+
+INTENTIONAL DIFFERENCES / EXTERNAL ITEMS
+See the protected viewer's curated notes and the original VERIFICATION.txt for
+legal/functional exceptions: current phone-only contact/OTP/Test, full legal text,
+real gates, claims/redaction, stages, ledger and payment methods, current household
+questions, working navigation and accessible targets all take priority over mocks.
+Photo source evidence: PHOTO_PROVENANCE.txt. Five supplied files matched three
+exact Pexels sources; roof-tile.jpg and modern-roof.jpg source identities remain
+unresolved. Similar images were rejected as evidence, not substituted.
+Company/operator facts, tax/retention/distribution policy and lawyer decisions remain
+owner/counsel items. No legal or native-speaker approval is claimed. Real provider
+settlement, messaging/SMS and physical-device/screen-reader acceptance are not
+established by this synthetic browser review.
+
+FINAL LOCAL VERIFICATION
+Product repair commit: 296f4ae29f9300b2b581d023839446ce6076e2db.
+Full regression 2: 263 passed, 22 intentional local-test skips, zero failures (15.3m).
+All original failed scenarios remain asserted and now pass. No assertions were
+removed, snapshots substituted for assertions, or timeouts increased.
+The separate genuine eight-test workflow passed before the display-only follow-up;
+notes/stages also have real SQLite service coverage and browser reload/error checks.
+Final normal and protected-staging production builds passed. Unit suite 376/53,
+typecheck and lint passed (two existing image warnings). Final viewer rerun: 2 passed.
+A packaging attempt overlapped the build cleaning dist/client and stopped with
+ENOENT before publication. Packaging was rerun serially after build completion;
+all required image pairs exist and PNG signatures are validated. This was tooling
+ordering, not a deployment or application success claim.
+Authenticated HTTPS smoke results and Worker identity follow in the deployment
+addendum after publication. Nothing has been pushed or merged to main.

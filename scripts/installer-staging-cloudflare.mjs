@@ -14,6 +14,10 @@ const privateDirectory='.wrangler/installer-staging-management';
 const stateFile=`${privateDirectory}/resources.json`;
 const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 let token;
+export function assertStagingCheckout(remote,branch){
+  if(remote!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/installer-shared-workflow','feature/design-v2-integration'].includes(branch))throw Error('Wrong repository/branch.');
+}
+function verifyCheckout(){assertStagingCheckout(execFileSync('git',['remote','get-url','origin'],{encoding:'utf8'}).trim(),execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim());}
 export async function cloudflare(suffix,method='GET',body){
   if(!token){
     const value=JSON.parse(execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','auth','token','--json'],{encoding:'utf8',stdio:['ignore','pipe','pipe']}));
@@ -30,7 +34,7 @@ export async function cloudflare(suffix,method='GET',body){
 }
 function accountPath(suffix){return `accounts/${account}/${suffix}`;}
 export async function stagingState(){
-  if(execFileSync('git',['remote','get-url','origin'],{encoding:'utf8'}).trim()!=='https://github.com/gvrshabd/solarmatch-thailand.git'||execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim()!=='feature/installer-shared-workflow')throw Error('Wrong repository/branch.');
+  verifyCheckout();
   const state=JSON.parse(await readFile(stateFile,'utf8'));
   if(state.account!==account||state.worker!==workerName||state.database.name!==databaseName||state.bucket!==bucketName||state.origin!==origin||state.database.id==='61d0704e-5c1f-4bf6-bf58-32dbe07e9f65')throw Error('Staging identity mismatch.');
   return state;
@@ -48,6 +52,12 @@ export async function stagingQuery(sql,params=[]){
 async function verifiedConfiguration(){
   const state=await verifiedDatabase(),config=JSON.parse(await readFile('staging/wrangler.jsonc','utf8'));
   if(config.name!==workerName||config.account_id!==account||config.d1_databases[0].database_id!==state.database.id||config.d1_databases[0].database_name!==databaseName||config.r2_buckets[0].bucket_name!==bucketName||config.vars.INSTALLER_PLATFORM_MODE!=='sandbox'||config.vars.INSTALLER_BASE_URL!==origin||config.vars.OUTBOUND_MESSAGES_ENABLED!=='false'||config.vars.INSTALLER_TEST_CLOCK_ENABLED!=='false'||config.preview_urls!==false||config.assets.run_worker_first!==true||config.triggers.crons.length)throw Error('Unsafe staging deployment configuration.');
+  if(config.d1_databases.length!==1||config.r2_buckets.length!==1||config.d1_databases[0].binding!=='DB'||config.r2_buckets[0].binding!=='MEDIA'||config.vars.STAGING_ACCESS_AUD!==state.access.site.aud||config.vars.ACCESS_AUD!==state.access.admin.aud||config.vars.ACCESS_TEAM_DOMAIN!=='https://millys.cloudflareaccess.com')throw Error('Staging bindings or Access audiences differ from verified provenance.');
+  for(const key of ['AUTH_EMAIL_LIVE_ENABLED','SMS_LIVE_ENABLED','OMISE_LIVE_ENABLED','LINE_LIVE_ENABLED','CAMPAIGN_ATTRIBUTION_ENABLED','CAMPAIGN_ATTRIBUTION_PRIVACY_REVIEWED'])if(config.vars[key]!=='false')throw Error('Live operation must remain disabled: '+key);
+  for(const key of ['AUTH_EMAIL_PROVIDER_MODE','SMS_PROVIDER_MODE','OMISE_PROVIDER_MODE'])if(config.vars[key]!=='off')throw Error('Provider must remain off: '+key);
+  const held=(await stagingQuery("SELECT json_extract(config_json,'$.collectionEnabled') collection,json_extract(config_json,'$.paymentsEnabled') payments,json_extract(config_json,'$.notificationsEnabled') notifications,json_extract(config_json,'$.platformPaused') platform,json_extract(config_json,'$.deliveryPaused') delivery FROM installer_platform_settings WHERE id=1"))[0].results[0];
+  if(!held||held.collection!==0||held.payments!==0||held.notifications!==0||held.platform!==1||held.delivery!==1)throw Error('Staging operation holds are not intact.');
+  if((await stagingQuery('SELECT fixed_at FROM installer_test_clock WHERE id=1'))[0].results[0]?.fixed_at!==null)throw Error('Staging test clock must be cleared.');
   return config;
 }
 async function migrateStatements(){
@@ -77,7 +87,7 @@ async function migrateStatements(){
   console.log(JSON.stringify({complete:true,migrations:names.length,isolatedStagingOnly:true}));
 }
 async function prepare(){
-  if(execFileSync('git',['remote','get-url','origin'],{encoding:'utf8'}).trim()!=='https://github.com/gvrshabd/solarmatch-thailand.git'||execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim()!=='feature/installer-shared-workflow')throw Error('Wrong repository/branch.');
+  verifyCheckout();
   const user=await cloudflare('user');
   if(!user.email||user.email_verified===false)throw Error('Verified account owner email required.');
   const subdomain=await cloudflare(accountPath('workers/subdomain'));
@@ -135,9 +145,18 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
     await verifiedConfiguration();
     execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','secret','bulk',`${privateDirectory}/secrets.json`,'--config','staging/wrangler.jsonc'],{stdio:['ignore','inherit','inherit']});
   }else if(action==='deploy'){
-    await verifiedConfiguration();
+    const config=await verifiedConfiguration();
     const compiled=await readFile('dist/server/index.js','utf8');
     if(!compiled.includes('STAGING_ACCESS_AUD')||!compiled.includes('SolarMatch HTTPS staging'))throw Error('Build is not the protected staging entrypoint.');
-    execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','deploy','--config','staging/wrangler.jsonc'],{stdio:['ignore','inherit','inherit'],env:{...process.env,CI:'true'}});
+    let configPath='staging/wrangler.jsonc';
+    if(process.argv.includes('--design-review')){
+      const {prepareReviewAssets}=await import('./design-v2-review-assets.mjs');
+      const rows=(await stagingQuery("SELECT d.id FROM lead_recipient_deliveries d JOIN leads l ON l.id=d.lead_id WHERE l.is_test_submission=1 AND l.submission_mode='sandbox' AND d.allocation_environment='sandbox' ORDER BY d.delivered_at LIMIT 1"))[0].results;
+      const assets=await prepareReviewAssets(process.cwd(),{enquiryId:rows[0]?.id});
+      config.main=path.resolve('dist/server/index.js');config.assets.directory=assets;
+      for(const db of config.d1_databases)db.migrations_dir=path.resolve('migrations');
+      configPath='.wrangler/design-v2-staging-deploy.json';await writeFile(configPath,JSON.stringify(config,null,2));
+    }
+    execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','deploy','--config',configPath],{stdio:['ignore','inherit','inherit'],env:{...process.env,CI:'true'}});
   }
 }
