@@ -1,0 +1,22 @@
+SOLARMATCH DESIGN V2 — LOCAL INTEGRATION RECORD
+
+Baseline: 3186c758883c5ca7c481edd78613170050a685b2 on feature/installer-shared-workflow.
+Integration branch: feature/design-v2-integration.
+Remote main and feature refs checked read-only: 4bd3a412a850ec77e58821fcbe910728d8df51c6.
+LINE repairs 63b656d and 3186c75 are ancestors, not reset or rewritten.
+All supplied manifest checksums verified after extraction. Original files stay unchanged.
+
+Sequence: 0 reference; 1 tokens; 2 home/header/footer; 3 assessment/loading;
+4 results/sharing; 5 landing/Today; 6 persistent enquiry workflow;
+7 credits/company; 8 content/SEO/full verification.
+
+Known required departures:
+- No homeowner LINE collection or unapproved short consent summary.
+- Original legal text, placeholders, contact review capability and gates retained.
+- No unsupported competitor/instant messaging claims or invented operator facts.
+- Supplied photo provenance lacks original photo-page/license records; local-only use.
+- Genuine app results, financial records and tenant permissions replace prototype mocks.
+- Secondary screens without a prototype retain working structure with shared styling.
+- No recommendation arithmetic/logic change; negative-net warning remains.
+
+No push, merge, deployment, remote migration or real-operation activation authorised.

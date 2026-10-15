@@ -1,8 +1,8 @@
 /* Terrace v1. All overrides are public-only; /admin retains the original design. */
 .terrace-public {
-  --terrace-pine: #142d26;
-  --terrace-stone: #f4f3ed;
-  --terrace-lime: #d6ef91;
+  --terrace-pine: var(--sm-pine);
+  --terrace-stone: var(--sm-stone);
+  --terrace-lime: var(--sm-lime);
   --terrace-garden: #68816b;
   --forest: var(--terrace-pine);
   --forest-hover: #29473a;
@@ -12,7 +12,7 @@
   --pale-green: #e8ecdf;
   --border: #cbd0c4;
   --muted: #536259;
-  --text: #142d26;
+  --text: var(--sm-pine);
   --shell: min(1320px, calc(100% - 80px));
   background: var(--terrace-stone);
   color: var(--terrace-pine);
@@ -46,17 +46,17 @@ html[lang='th'] .terrace-public :is(h1,h2,h3,.eyebrow,.question-heading h1,.cont
 .terrace-public .desktop-nav a[aria-current='page'] { text-decoration: underline; text-underline-offset: 7px; }
 .terrace-public .brand-wordmark strong { font-size: 20px; }
 .terrace-public .brand-logo-roof { stroke: #137a50; }
-.terrace-public .brand-logo-sun { stroke: #e2a62b; }
-.terrace-public .brand-logo-rays { fill: #e2a62b; }
+.terrace-public .brand-logo-sun { stroke: var(--sm-gold); }
+.terrace-public .brand-logo-rays { fill: var(--sm-gold); }
 .terrace-public .terrace-menu-close { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 8px 12px; border: 0; border-bottom: 1px solid var(--border); background: transparent; font-size: 14px; cursor: pointer; }
 
 /* Static architectural hero: semantic responsive image, never a video backdrop. */
 .terrace-photo { position: relative; margin: 0; min-width: 0; overflow: hidden; background: var(--terrace-pine); }
 .terrace-photo picture { display: block; height: 100%; }
 .terrace-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.terrace-photo figcaption { position: absolute; bottom: 0; right: 0; max-width: 100%; padding: 7px 12px; background: #142d26ed; color: #f4f3ed; font-size: 10px; line-height: 1.5; z-index: 2; }
+.terrace-photo figcaption { position: absolute; bottom: 0; right: 0; max-width: 100%; padding: 7px 12px; background: #142d26ed; color: var(--sm-stone); font-size: 10px; line-height: 1.5; z-index: 2; }
 .terrace-photo figcaption a { display: inline-block; text-decoration: underline; text-underline-offset: 3px; }
-.terrace-hero { position: relative; isolation: isolate; min-height: 690px; min-height: min(820px, calc(100svh - 82px)); background: #142d26; color: var(--terrace-stone); display: grid; align-items: center; }
+.terrace-hero { position: relative; isolation: isolate; min-height: 690px; min-height: min(820px, calc(100svh - 82px)); background: var(--sm-pine); color: var(--terrace-stone); display: grid; align-items: center; }
 .terrace-hero > .terrace-photo { position: absolute; inset: 0; z-index: -2; }
 .terrace-hero > .terrace-photo img { object-position: 62% 60%; }
 .terrace-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #142d26ec 0%, #142d26b0 33%, #142d2620 75%); pointer-events: none; }
@@ -64,8 +64,8 @@ html[lang='th'] .terrace-public :is(h1,h2,h3,.eyebrow,.question-heading h1,.cont
 .terrace-hero-content .eyebrow { color: #e2ebd9; margin-bottom: 34px; }
 .terrace-public .terrace-hero h1 { max-width: 780px; font-size: clamp(64px, 7.5vw, 110px); line-height: 1.04; color: var(--terrace-stone); font-weight: 500; }
 .terrace-hero h1 em { color: var(--terrace-lime); font-style: normal; }
-.terrace-hero-content > p:not(.eyebrow) { max-width: 440px; color: #f4f3ed; font-size: 16px; margin: 30px 0; }
-.terrace-hero-secondary { display: flex; align-items: center; gap: 12px; width: fit-content; min-height: 44px; margin-top: 16px; font-size: 12px; color: #f4f3ed; }
+.terrace-hero-content > p:not(.eyebrow) { max-width: 440px; color: var(--sm-stone); font-size: 16px; margin: 30px 0; }
+.terrace-hero-secondary { display: flex; align-items: center; gap: 12px; width: fit-content; min-height: 44px; margin-top: 16px; font-size: 12px; color: var(--sm-stone); }
 .terrace-promise-strip { border-bottom: 1px solid var(--border); padding-block: 23px; }
 .terrace-public .terrace-promise-strip .trust-list { justify-content: space-between; margin-block: 0; margin-inline: auto; color: var(--terrace-pine); font-size: 12px; gap: 12px 24px; }
 .terrace-public :is(.value-intro,.home-process,.terrace-roof-section,.terrace-starter,.terrace-evidence,.faq-section) { padding-block: clamp(64px, 8vw, 112px); }

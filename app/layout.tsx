@@ -8,6 +8,9 @@ import { CampaignCapture } from '@/components/site/campaign-capture';
 import { siteConfig } from '@/config/site';
 import './globals.css';
 import './terrace.css';
+import './design-v2-tokens.css';
+import './design-v2.css';
+import './design-v2-controls.css';
 
 const anuphan = Anuphan({
   variable: '--font-anuphan',

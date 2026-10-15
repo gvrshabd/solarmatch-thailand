@@ -1,0 +1,16 @@
+/* Design-v2 adapters for existing functional controls. Admin is never selected. */
+:is(.terrace-public,.installer-shell) { --forest:var(--sm-pine);--forest-hover:var(--sm-pine-2);--dark:var(--sm-pine);--text:var(--sm-pine);--ink:var(--sm-pine);--ivory:var(--sm-stone);--paper:var(--sm-stone);--surface:var(--sm-white);--pale-green:var(--sm-sage);--border:var(--sm-line);--line:var(--sm-line);--muted:var(--sm-muted);--sage:var(--sm-sage);--lime:var(--sm-lime);--font:var(--sm-font);--font-th:var(--sm-font-th);background:var(--sm-stone);color:var(--sm-pine);font:16px/1.6 var(--sm-font); }
+html[lang=th] .terrace-public,.installer-shell[lang=th] {font-family:var(--sm-font-th);line-height:1.7}
+:is(.terrace-public,.installer-shell) :is(h1,h2,h3,h4){font-family:inherit;font-weight:700;letter-spacing:-.035em;line-height:1.06}
+html[lang=th] .terrace-public :is(h1,h2,h3,h4),.installer-shell[lang=th] :is(h1,h2,h3,h4){font-weight:600;letter-spacing:0;line-height:1.35}
+:is(.terrace-public,.installer-shell) :is(.button,.installer-primary,.installer-call){border-radius:var(--sm-pill);min-height:52px;background:var(--sm-pine);color:white;font-weight:700;box-shadow:none;border-color:var(--sm-pine)}
+:is(.terrace-public,.installer-shell) :is(.button,.installer-primary):hover{background:var(--sm-pine-2);transform:none}
+:is(.terrace-public,.installer-shell) :is(.button-secondary,.btn-soft){background:var(--sm-sage);color:var(--sm-pine);border-color:transparent}
+.terrace-public :is(.button-small,.btn-sm),.installer-shell .btn-sm{min-height:44px}
+:is(.terrace-public,.installer-shell) :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),select,textarea,.currency-input){border-radius:var(--sm-r-md)}
+:is(.terrace-public,.installer-shell) :focus-visible{outline:2.5px solid var(--sm-green);outline-offset:3px}
+:is(.terrace-public,.installer-shell) :is(h1,h2,h3)[tabindex='-1']:focus:not(:focus-visible){outline:none}
+.terrace-public .site-shell{width:min(1240px,100%);padding-inline:max(18px,env(safe-area-inset-left))}
+@media(min-width:900px){.terrace-public .site-shell{padding-inline:max(40px,env(safe-area-inset-left))}}
+:is(.terrace-public,.installer-shell) :is(.num,.sm-num){font-family:var(--font-manrope),sans-serif;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){:is(.terrace-public,.installer-shell),:is(.terrace-public,.installer-shell) *{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

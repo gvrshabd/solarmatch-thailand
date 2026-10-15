@@ -10,6 +10,8 @@ const localBindingConfig = {
 };
 
 export default defineConfig(async () => {
+  const localStore=process.env.INSTALLER_LOCAL_STORE;
+  if(localStore&&(process.env.INSTALLER_LOCAL_TEST!=='true'||!/^installer-[a-z0-9-]{1,40}$/.test(localStore)))throw new Error('Explicit isolated local store required.');
   if(process.env.INSTALLER_STAGING==='true'&&process.env.INSTALLER_LOCAL_TEST==='true')throw new Error('Choose staging or loopback testing, not both.');
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
@@ -30,7 +32,7 @@ export default defineConfig(async () => {
       vinext(),
       cloudflare({
         ...(process.env.INSTALLER_STAGING==='true'?{configPath:'./staging/wrangler.jsonc',persistState:{path:'.wrangler/installer-staging-build'}}:{}),
-        ...(process.env.INSTALLER_LOCAL_TEST === 'true' ? { configPath: './.installer-test/wrangler.jsonc', persistState: { path: '.wrangler/installer-test-state' } } : {}),
+        ...(process.env.INSTALLER_LOCAL_TEST === 'true' ? { configPath: './.installer-test/wrangler.jsonc', persistState: { path: localStore?`.wrangler/${localStore}`:'.wrangler/installer-test-state' } } : {}),
         viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },
         config: process.env.INSTALLER_STAGING==='true'?{main:'../staging/worker.ts'}:process.env.INSTALLER_LOCAL_TEST === 'true' ? { main: '../worker.ts' } : localBindingConfig,
       }),
