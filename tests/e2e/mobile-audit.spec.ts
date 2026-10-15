@@ -47,7 +47,7 @@ async function expectSequentialGeometry(page: Page, selectors: string[], label: 
   const flowSelectors=fixed?selectors.filter(selector=>selector!=='.estimate-actions'):selectors;
   if(fixed)await page.evaluate(selectors=>{
     const last=document.querySelector(selectors[selectors.length-1]),bar=document.querySelector('.estimate-actions');
-    if(last&&bar)window.scrollBy(0,Math.max(0,last.getBoundingClientRect().bottom-bar.getBoundingClientRect().top+24));
+    if(last&&bar)window.scrollBy({top:Math.max(0,last.getBoundingClientRect().bottom-bar.getBoundingClientRect().top+24),behavior:'instant'});
   },flowSelectors);
   const result = await page.evaluate((orderedSelectors) => {
     const elements = orderedSelectors.map((selector) => document.querySelector<HTMLElement>(selector));
@@ -65,10 +65,13 @@ async function expectSequentialGeometry(page: Page, selectors: string[], label: 
   expect(result, `${label}: every geometry target should exist`).not.toBeNull();
   expect(result!.rectangles.every((rect) => rect.width > 0 && rect.height > 0), `${label}: every geometry target should have dimensions`).toBe(true);
   expect(result!.intersections, `${label}: sequential controls must not intersect`).not.toContain(true);
-  if(fixed)expect(await page.evaluate(selectors=>{
-    const last=document.querySelector(selectors[selectors.length-1]),bar=document.querySelector('.estimate-actions');
-    return !!last&&!!bar&&last.getBoundingClientRect().bottom+12<=bar.getBoundingClientRect().top;
-  },flowSelectors),label+': final control can scroll clear of the fixed action bar').toBe(true);
+  if(fixed){
+    const clearance=await page.evaluate(selectors=>{
+      const last=document.querySelector(selectors[selectors.length-1]),bar=document.querySelector('.estimate-actions');
+      return {bottom:last?.getBoundingClientRect().bottom??null,barTop:bar?.getBoundingClientRect().top??null,scrollY,scrollHeight:document.documentElement.scrollHeight,viewport:innerHeight,active:document.activeElement?.id};
+    },flowSelectors);
+    expect(clearance.bottom!==null&&clearance.barTop!==null&&clearance.bottom+12<=clearance.barTop,label+': final control can scroll clear of the fixed action bar '+JSON.stringify(clearance)).toBe(true);
+  }
 }
 
 for (const width of widths) {
@@ -269,7 +272,7 @@ test('bill control remains in flow after portrait-landscape rotation and scrolli
   for (const viewport of [{ width: 844, height: 390 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
     await page.locator('.bill-range-labels').scrollIntoViewIfNeeded();
-    await page.evaluate(()=>{const labels=document.querySelector('.bill-range-labels'),bar=document.querySelector('.estimate-actions');if(labels&&bar)window.scrollBy(0,Math.max(0,labels.getBoundingClientRect().bottom-bar.getBoundingClientRect().top+24));});
+    await page.evaluate(()=>{const labels=document.querySelector('.bill-range-labels'),bar=document.querySelector('.estimate-actions');if(labels&&bar)window.scrollBy({top:Math.max(0,labels.getBoundingClientRect().bottom-bar.getBoundingClientRect().top+24),behavior:'instant'});});
     const separated = await page.evaluate(() => {
       const labels = document.querySelector('.bill-range-labels')?.getBoundingClientRect();
       const actions = document.querySelector('.estimate-actions')?.getBoundingClientRect();

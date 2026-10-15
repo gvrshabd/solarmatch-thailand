@@ -181,7 +181,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     track('estimate_result_viewed', { recommendation: result.recommendation, systemKw: result.planningSystemKw });
     track('results_viewed', { language: locale, recommendation: result.recommendation });
     if(resultFocusedRef.current)return;
-    const timer = window.setTimeout(() => {resultHeadingRef.current?.focus();resultFocusedRef.current=true;}, 390);
+    const timer = window.setTimeout(() => {resultHeadingRef.current?.focus({preventScroll:true});resultFocusedRef.current=true;}, 390);
     return () => window.clearTimeout(timer);
   }, [journey, locale, result, selectedFact?.id]);
 

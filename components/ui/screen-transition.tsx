@@ -24,6 +24,14 @@ export function ScreenTransition({
   const offset = reduceMotion || direction === 'neutral' ? 0 : direction === 'forward' ? 10 : -10;
   const duration = reduceMotion ? 0.06 : pace === 'result' ? 0.38 : 0.24;
 
+  // Preparation is already complete when the result key changes. Do not make
+  // availability of that result depend on an outgoing animation's lifecycle.
+  if (pace === 'result') return <div className="screen-transition-boundary"><motion.div
+    key={transitionKey} className={className} data-transition-direction={direction}
+    data-transition-pace={pace} initial={{opacity:0,y:offset}} animate={{opacity:1,y:0}}
+    transition={{duration,ease:[0.2,0.7,0.2,1]}}
+  >{children}</motion.div></div>;
+
   return (
     <div className="screen-transition-boundary">
       <AnimatePresence mode="wait" initial={false} custom={offset}>

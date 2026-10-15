@@ -31,6 +31,15 @@ async function audit(page:Page) {
  expect(results.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
 }
 for(const lang of ['en','th'] as const) {
+ test(`${lang}: immediately prepared results cannot remain behind an outgoing loader`,async({page})=>{
+  await page.clock.setFixedTime(new Date(fixed));
+  await page.addInitScript(answers=>{sessionStorage.setItem('solarmatch:estimate',JSON.stringify(answers));sessionStorage.removeItem('solarmatch:result-view-state');},designV2ExampleAnswers);
+  for(let attempt=0;attempt<8;attempt++){
+   await page.goto(lang==='en'?'/en/estimate/results':'/estimate/results');
+   await expect(page.locator('.rbig')).toHaveText('฿1,665');
+   await expect(page.locator('.calculation-loading-page')).toHaveCount(0);
+  }
+ });
  test(`${lang}: eligibility and error states stay truthful at narrow and desktop widths`,async({page},info)=>{
   const folder=path.resolve('docs/design-v2-comparison');const en=lang==='en';
   let data=fixture(),status=200;

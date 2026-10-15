@@ -80,7 +80,7 @@ test.describe('isolated local installer workflow',()=>{
     await page.route('**/api/installer-auth/sign-out',route=>route.fulfill({status:503,contentType:'application/json',body:'{"error":"synthetic_unavailable"}'}));
     await page.getByLabel('Account menu',{exact:true}).click();
     await page.getByRole('button',{name:'Sign out',exact:true}).click();
-    await expect(page.getByRole('status')).toContainText('You are still signed in.');
+    await expect(page.getByRole('status').filter({hasText:'You are still signed in.'})).toContainText('You are still signed in.');
     await expect(page.getByRole('heading',{name:'Today',exact:true})).toBeVisible();
     await page.unroute('**/api/installer-auth/sign-out');
     await page.getByRole('button',{name:'Sign out',exact:true}).click();
