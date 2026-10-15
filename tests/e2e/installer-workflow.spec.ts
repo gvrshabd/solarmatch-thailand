@@ -42,7 +42,7 @@ test.describe('isolated local installer workflow',()=>{
     test.setTimeout(120000);
     const email=`installer-${Date.now()}-${Math.random().toString(16).slice(2)}@example.test`;
     await page.goto('/installers?lang=en');
-    await page.getByRole('button',{name:'Create a company account',exact:true}).click();
+    await page.getByRole('button',{name:'Apply',exact:true}).click();
     await page.getByLabel('Your name',{exact:true}).fill('Synthetic Installer');
     await page.getByLabel('Email',{exact:true}).fill(email);
     await page.getByLabel('Password (at least 12 characters)',{exact:true}).fill(password);
@@ -51,38 +51,40 @@ test.describe('isolated local installer workflow',()=>{
     expect((await signupResponse).status()).toBeLessThan(400);
     await expect(page.getByRole('status')).toContainText('Check your email');
     await page.goto(await emailUrl(page.request,email,'verification'));
-    await expect(page.getByRole('heading',{name:'Your workspace',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Today',exact:true})).toBeVisible();
     const sessionCookies=(await context.cookies()).filter(cookie=>cookie.name.includes('session_token'));
     expect(sessionCookies.length).toBeGreaterThan(0);
     expect(sessionCookies.every(cookie=>cookie.httpOnly&&cookie.expires>Date.now()/1000+86400)).toBe(true);
     await page.reload();
-    await expect(page.getByRole('heading',{name:'Your workspace',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Today',exact:true})).toBeVisible();
     await page.getByLabel('Company name',{exact:true}).fill('Synthetic Browser Installer');
     await page.getByLabel('Company phone',{exact:true}).fill('0812345678');
-    await page.getByLabel('Service areas (comma-separated)',{exact:true}).fill('bangkok');
+    await page.getByRole('button',{name:'Bangkok',exact:true}).click();
     await page.getByRole('button',{name:'Save company',exact:true}).click();
-    await expect(page.getByRole('status')).toContainText('Saved.');
+    await expect(page.getByRole('status').filter({hasText:/^Saved\./})).toBeVisible();
     const portal=await page.request.get('/api/installer/portal');
     expect(portal.status()).toBe(200);
     expect((await portal.json()).company).toMatchObject({approvalStatus:'pending',paused:true});
     await page.setViewportSize({width:320,height:800});
-    await page.getByRole('button',{name:'Switch to Thai',exact:true}).click();
-    await expect(page.getByRole('heading',{name:'ภาพรวมของคุณ',exact:true})).toBeVisible();
-    await expect(page.getByRole('status')).toContainText('บันทึกแล้ว');
-    await expect(page.getByText('รอตรวจสอบ · พักรับคำขอ',{exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'TH',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'วันนี้',exact:true})).toBeVisible();
+    await expect(page.getByRole('status').filter({hasText:/^บันทึกแล้ว/})).toBeVisible();
+    await expect(page.getByText('รอตรวจสอบ',{exact:true})).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
     expect((await new AxeBuilder({page}).include('.installer-shell').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
     await page.screenshot({path:testInfo.outputPath('installer-portal-320-th.png'),fullPage:true});
-    await page.getByRole('button',{name:'Switch to English',exact:true}).click();
-    await expect(page.getByRole('heading',{name:'Your workspace',exact:true})).toBeVisible();
-    await expect(page.getByText('Pending · Deliveries paused',{exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'EN',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'Today',exact:true})).toBeVisible();
+    await expect(page.getByText('Pending',{exact:true})).toBeVisible();
     await page.screenshot({path:testInfo.outputPath('installer-portal-320-en.png'),fullPage:true});
     await page.route('**/api/installer-auth/sign-out',route=>route.fulfill({status:503,contentType:'application/json',body:'{"error":"synthetic_unavailable"}'}));
+    await page.getByLabel('Account menu',{exact:true}).click();
     await page.getByRole('button',{name:'Sign out',exact:true}).click();
     await expect(page.getByRole('status')).toContainText('You are still signed in.');
-    await expect(page.getByRole('heading',{name:'Your workspace',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Today',exact:true})).toBeVisible();
     await page.unroute('**/api/installer-auth/sign-out');
     await page.getByRole('button',{name:'Sign out',exact:true}).click();
+    await page.getByRole('button',{name:'Sign in',exact:true}).first().click();
     await expect(page.getByRole('heading',{name:'Sign in',exact:true})).toBeVisible();
     expect((await page.request.get('/api/installer/portal')).status()).toBe(401);
     await page.getByRole('button',{name:'Forgot password',exact:true}).click();
@@ -99,7 +101,7 @@ test.describe('isolated local installer workflow',()=>{
     await page.getByLabel('Email',{exact:true}).fill(email);
     await page.getByLabel('Password (at least 12 characters)',{exact:true}).fill(recoveredPassword);
     await page.getByRole('button',{name:'Continue',exact:true}).click();
-    await expect(page.getByRole('heading',{name:'Your workspace',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Today',exact:true})).toBeVisible();
   });
 
   test('No produces full results with zero referrals; real SMS proof permits the optional request',async({page})=>{
@@ -110,7 +112,7 @@ test.describe('isolated local installer workflow',()=>{
     await prepareQuote(page);
     await page.getByRole('radio',{name:'No, show my estimate without installer contact',exact:true}).click();
     await page.getByRole('button',{name:'See my estimate',exact:true}).click();
-    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:45000});
+    await expect(page.locator('.rstats > div')).toHaveCount(3,{timeout:45000});
     expect(requests).toEqual([]);
     await page.goto('/en/estimate');
     await page.getByRole('radio',{name:'Yes, I would like solar companies to contact me',exact:true}).click();
@@ -138,7 +140,7 @@ test.describe('isolated local installer workflow',()=>{
     const leadResponse=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/leads');
     await page.getByRole('button',{name:'Try again',exact:true}).click();
     const lead=await leadResponse;expect(lead.status()).toBe(201);
-    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:45000});
+    await expect(page.locator('.rstats > div')).toHaveCount(3,{timeout:45000});
     expect(requests.filter(url=>new URL(url).pathname==='/api/leads')).toHaveLength(1);
   });
 

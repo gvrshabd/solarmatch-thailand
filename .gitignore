@@ -3,6 +3,7 @@ node_modules/
 .installer-test/.dev.vars*
 .installer-test/demo-share-links.json
 .installer-test/demo-state.json
+.installer-test/design-v2-e2e.jsonc
 dist/
 .next/
 .vinext/

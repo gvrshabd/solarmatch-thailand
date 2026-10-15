@@ -1,5 +1,6 @@
 import { encodeBase64Url,sha256 } from '@/lib/server/crypto';
 import { getPlatformSettings } from './settings';
+import { deliveryLocation } from './presentation';
 import { activeDelivery,deliverySelect,deliveryProjection } from './portal-data';
 import { platformAudit,isoNow,type Row } from './deliveries';
 export async function rotateShareLink(db:D1Database,companyId:string,deliveryId:string,actor:string,origin:string) {
@@ -28,6 +29,7 @@ export async function readShareLink(db:D1Database,token:string) {
     homeownerName:delivery.homeownerName,
     phone:delivery.phone,
     location:delivery.location,
+    locationTh:deliveryLocation(delivery,false),
     requestedAt:delivery.requestedAt,
     assessment:delivery.assessment,
     qualification:delivery.qualification,

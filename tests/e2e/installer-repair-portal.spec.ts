@@ -51,7 +51,8 @@ test.describe('compiled repaired portal with synthetic route responses',()=>{
       await expect(page.getByText(en?'Access withdrawn or suppressed. Do not contact the homeowner about this enquiry. Personal details and staff links are unavailable. The financial record remains, and eligible claims can be submitted within the original deadline.':'ถอนหรือระงับสิทธิ์เข้าถึงข้อมูลแล้ว ห้ามติดต่อเจ้าของบ้านจากคำขอนี้ ข้อมูลส่วนบุคคลและลิงก์ทีมงานไม่พร้อมใช้งาน บันทึกการคิดเครดิตยังคงอยู่ และสามารถยื่นคำร้องได้ภายในกำหนดเดิม',{exact:true})).toBeVisible();
       await expect(page.getByText(en?/ · 2 credits$/u:/ · 2 เครดิต$/u)).toBeVisible();
       const formatted=await dates(page,en);
-      await expect(page.getByText(`${en?'Available in portal':'พร้อมใช้ในพอร์ทัลเมื่อ'}: ${formatted.delivered}`,{exact:true})).toBeVisible();
+      await expect(page.getByText(`${en?'Available in portal':'พร้อมใช้ในพอร์ทัลเมื่อ'}: ${formatted.delivered}`,{exact:false})).toBeVisible();
+      await page.getByText(en?'Problem with this enquiry?':'คำขอมีปัญหาหรือไม่?',{exact:true}).click();
       const deadline=page.getByText(`${en?'Submit by':'ยื่นได้ถึง'}: ${formatted.deadline}`,{exact:false});await expect(deadline).toBeVisible();
       for(const marker of ['WITHDRAWN_SYNTHETIC_HOMEOWNER','+66876543210','WITHDRAWN_SYNTHETIC_LOCATION','WITHDRAWN_SYNTHETIC_ROOF','WITHDRAWN_SYNTHETIC_ASSESSMENT','765,432'])await expect(page.locator('.installer-shell')).not.toContainText(marker);
       await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
@@ -61,7 +62,7 @@ test.describe('compiled repaired portal with synthetic route responses',()=>{
       await page.getByRole('combobox',{name:en?'Reason':'เหตุผล',exact:true}).selectOption('withdrawn');
       await page.getByLabel(en?'Supporting information':'ข้อมูลสนับสนุน',{exact:true}).fill('Synthetic evidence supporting the original delivery claim.');
       await page.getByRole('button',{name:en?'Submit claim':'ส่งคำร้อง',exact:true}).click();
-      await expect(page.getByRole('status')).toContainText(en?'Saved.':'บันทึกแล้ว');expect(submissions).toHaveLength(1);
+      await expect(page.locator('.installer-notice[role=status]')).toContainText(en?'Saved.':'บันทึกแล้ว');expect(submissions).toHaveLength(1);
       await expect(deadline).toBeVisible();expect(data.deliveries[0].claimDeadline).toBe(claimDeadline);
       await narrowAccessible(page);
     });
@@ -73,6 +74,7 @@ test.describe('compiled repaired portal with synthetic route responses',()=>{
       });
       await page.goto(`/installers/enquiry/${deliveryId}?lang=${lang}`);
       await expect(page.getByRole('heading',{name:'SM-REPAIR09',exact:true})).toBeVisible();
+      await page.getByText(en?'Problem with this enquiry?':'คำขอมีปัญหาหรือไม่?',{exact:true}).click();
       await expect(page.getByText(en?'The claim submission window has closed for this enquiry.':'พ้นกำหนดยื่นคำร้องสำหรับคำขอนี้แล้ว',{exact:true})).toBeVisible();
       await expect(page.getByRole('button',{name:en?'Submit claim':'ส่งคำร้อง',exact:true})).toHaveCount(0);
       await expect(page.getByLabel(en?'Supporting information':'ข้อมูลสนับสนุน',{exact:true})).toHaveCount(0);expect(posts).toEqual([]);

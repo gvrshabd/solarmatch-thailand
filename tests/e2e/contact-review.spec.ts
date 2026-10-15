@@ -80,7 +80,7 @@ for (const locale of ['en', 'th'] as const) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
     expect(requests.configurations).toBe(1);
     await finish.click();
-    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 15_000 });
+    await expect(page.locator('.rstats > div')).toHaveCount(3, { timeout: 15_000 });
     await expectNoStoredDetails(page);
     expect(requests.submissions).toBe(0);
     // The results page performs its ordinary configuration read; the test form
@@ -103,7 +103,7 @@ test('Test remains non-submitting even when the real contact configuration is en
   const finish = form.getByRole('button', { name: 'Finish test and view my estimate', exact: true });
   expect(requests.configurations).toBe(1);
   await finish.evaluate((element: HTMLButtonElement) => { element.click(); element.click(); });
-  await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 15_000 });
+  await expect(page.locator('.rstats > div')).toHaveCount(3, { timeout: 15_000 });
   expect(requests.submissions).toBe(0);
   expect(requests.configurations).toBeLessThanOrEqual(2);
   await expectNoStoredDetails(page);

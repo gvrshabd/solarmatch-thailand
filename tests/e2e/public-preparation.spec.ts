@@ -57,7 +57,7 @@ for (const locale of ['en', 'th'] as const) {
     await expect(page.getByRole('radio', { name: locale === 'en' ? /^Test/ : /^ทดสอบ/ })).toBeVisible();
     await expect(page.getByRole('radio', { name: locale === 'en' ? /^Yes,/ : /^ใช่ / })).toHaveCount(0);
     await page.getByRole('button', { name: locale === 'en' ? 'View my estimate' : 'ดูผลประเมิน', exact: true }).click();
-    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 15_000 });
+    await expect(page.locator('.rstats > div')).toHaveCount(3, { timeout: 15_000 });
     expect(submissions).toBe(0);
   });
 }

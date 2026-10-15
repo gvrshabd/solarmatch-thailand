@@ -1,3 +1,4 @@
+import {PublicSchema} from '@/components/site/public-schema';
 import {ArrowRight,Check,ShieldCheck} from 'lucide-react';
 import Link from '@/components/site/internal-link';
 import {HeroEstimator} from './hero-estimator';
@@ -7,7 +8,7 @@ import {localizedPath,type Locale} from '@/config/i18n';
 
 export function HomePage({locale='th'}:{locale?:Locale}) {
   const text=designText(locale),link=(path:string)=>localizedPath(path,locale);
-  return <main className="design-v2-home">
+  return <main className="design-v2-home"><PublicSchema locale={locale} faq={text.faq}/>
     <section className="hero" id="top"><div className="wrap hero-grid"><div><p className="eyebrow">{text.heroEyebrow}</p><h1>{text.heroH1}</h1><p className="lede">{text.heroLede}</p><HeroEstimator locale={locale}/><div className="trust">{[text.t1,text.t2,text.t3].map(t=><span key={t}><Check aria-hidden="true"/>{t}</span>)}</div></div><div className="hero-photo"><picture><source media="(max-width:700px)" srcSet="/images/design-v2/home-hero-m.jpg"/><img src="/images/design-v2/home-hero.jpg" width="1800" height="1199" fetchPriority="high" alt={locale==='en'?'An illustrative home with rooftop solar among palm trees':'ภาพประกอบบ้านที่มีแผงโซลาร์บนหลังคาและต้นปาล์ม'}/></picture><span className="credit">{text.credit.replace('{p}','Robert So')}</span><ExampleResult locale={locale}/></div></div></section>
     <section className="section v2-preview-section" id="how"><div className="wrap preview"><div><p className="eyebrow">{text.pvEyebrow}</p><h2>{text.pvH2}</h2><p className="muted lede">{text.pvP}</p><ul className="checks">{[text.pv1,text.pv2,text.pv3,text.pv4].map(t=><li key={t}><Check aria-hidden="true"/><span>{t}</span></li>)}</ul><p className="v2-top-space"><Link className="link" href={link('/estimate')}>{text.pvTry}<ArrowRight aria-hidden="true"/></Link></p></div><ExampleResult locale={locale} mini/></div></section>
     <section className="section band-sage"><div className="wrap"><div className="section-head"><p className="eyebrow">{text.howEyebrow}</p><h2>{text.howH2}</h2></div><div className="steps">{[[text.h1t,text.h1p],[text.h2t,text.h2p],[text.h3t,text.h3p]].map(([title,body],i)=><div className={'step'+(i===2?' soon':'')} key={title}><span className="n">{i+1}</span><h3>{title}</h3><p>{body}</p>{i===2&&<span className="chip chip-gold">{text.soon}</span>}</div>)}</div></div></section>

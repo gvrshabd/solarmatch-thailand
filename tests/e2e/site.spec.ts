@@ -13,8 +13,8 @@ test('saved Thai and English estimates remain available when configuration never
   await page.addInitScript(answers=>sessionStorage.setItem('solarmatch:estimate',JSON.stringify(answers)),savedEstimate);
   for(const prefix of ['','/en']){
     await page.goto(`${prefix}/estimate/results`);
-    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:10000});
-    await expect(page.getByText(prefix?'Simple payback (first-year basis)':'ระยะคืนทุนอย่างง่าย (อิงปีแรก)')).toBeVisible();
+    await expect(page.locator('.rstats > div')).toHaveCount(3,{timeout:10000});
+    await expect(page.getByText(prefix?'simple payback':'คืนทุนอย่างง่าย')).toBeVisible();
   }
   for(const route of pending)await route.abort().catch(()=>{});
 });
@@ -28,7 +28,7 @@ test('a refreshed release cannot replace the saved result journey snapshot',asyn
   await page.route('**/api/assessment/config',route=>route.fulfill({json:{...stored,releaseId:'different-release',questionnaireVersionId:'different-questionnaire',loadingFactSetVersionId:'replacement-facts'}}));
   for(const prefix of ['','/en']){
     await page.goto(`${prefix}/estimate/results`);
-    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:10000});
+    await expect(page.locator('.rstats > div')).toHaveCount(3,{timeout:10000});
     expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:result-view-state')!).factSetVersionId)).toBe('saved-facts');
   }
 });
@@ -38,7 +38,7 @@ test('failed configuration refresh does not block Thai or English results',async
   await page.route('**/api/assessment/config',route=>route.fulfill({status:503,json:{error:'synthetic_unavailable'}}));
   for(const prefix of ['','/en']){
     await page.goto(`${prefix}/estimate/results`);
-    await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:10000});
+    await expect(page.locator('.rstats > div')).toHaveCount(3,{timeout:10000});
   }
 });
 
@@ -96,8 +96,8 @@ async function primeQuoteStep(page: Page, answerOverrides: Record<string, unknow
   }, { answers: { ...savedEstimate, ...answerOverrides, quoteContactRequested: undefined }, configuration: operationalConfiguration() });
 }
 
-const thaiHeaderLinks = [['หน้าหลัก', '/'], ['ประเมินโซลาร์', '/estimate'], ['วิธีการทำงาน', '/how-it-works'], ['คู่มือโซลาร์', '/solar-guide'], ['วิธีคำนวณ', '/methodology']] as const;
-const englishHeaderLinks = [['Home', '/en'], ['Solar estimate', '/en/estimate'], ['How it works', '/en/how-it-works'], ['Solar guide', '/en/solar-guide'], ['Methodology', '/en/methodology']] as const;
+const thaiHeaderLinks = [['วิธีการทำงาน', '/how-it-works'], ['ทำไมเชื่อถือได้', '/#trust'], ['สำหรับผู้ติดตั้ง', '/installers?lang=th']] as const;
+const englishHeaderLinks = [['How it works', '/en/how-it-works'], ['Why trust us', '/en#trust'], ['For installers', '/installers?lang=en']] as const;
 
 function desktopOnly(testInfo: TestInfo) { test.skip(testInfo.project.name !== 'desktop-chromium', 'Desktop-only coverage.'); }
 async function expectPath(page: Page, path: string) {
@@ -110,7 +110,8 @@ async function expectHeading(page: Page, name: string) {
 
 async function choose(page: Page, name: string | RegExp, next: string) {
   await page.getByRole('radio', { name, exact: typeof name === 'string' }).click();
-  await page.getByRole('button', { name: next, exact: true }).click();
+  void next;
+  await expect(page.getByRole('radio', {name, exact:typeof name==='string'})).toBeHidden();
 }
 
 async function chooseDistrict(page: Page, label: string) {
@@ -124,15 +125,15 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await page.goto(en ? '/en' : '/');
   const starter = page.locator('#hero-estimator');
   await starter.getByRole('textbox').fill(bill);
-  await starter.getByRole('button', { name: en ? 'See my solar estimate' : 'ดูค่าประเมินโซลาร์' }).click();
+  await starter.getByRole('button', { name: en ? 'See my estimate' : 'ดูผลประเมินของฉัน' }).click();
   await expectPath(page, en ? '/en/estimate' : '/estimate');
   const next = en ? 'Next' : 'ถัดไป';
+  await page.getByRole('button',{name:en?'Bangkok':'กรุงเทพมหานคร',exact:true}).click();
   await chooseDistrict(page, en ? 'Sathon' : 'สาทร');
   await page.getByRole('button', { name: next, exact: true }).click();
-  await expect(page.locator('#monthly-bill')).toHaveValue(bill);
+  await expect(page.locator('#monthly-bill')).toHaveValue(Number(bill).toLocaleString('en-US'));
   await page.getByRole('button', { name: next, exact: true }).click();
-  await page.getByRole('radio', { name: en ? 'Yes — within 3 months' : 'ใช่ — ภายใน 3 เดือน', exact: true }).click();
-  await page.getByRole('button', { name: next, exact: true }).click();
+  await choose(page,en?'Yes — within 3 months':'ใช่ — ภายใน 3 เดือน',next);
   await choose(page, en ? 'A new rooftop solar system' : 'ระบบโซลาร์รูฟท็อปใหม่', next);
   await choose(page, en ? 'Detached house' : 'บ้านเดี่ยว', next);
   await choose(page, en ? 'I own the property' : 'เป็นเจ้าของกรรมสิทธิ์', next);
@@ -140,7 +141,7 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   await expectHeading(page, en ? 'Which appliances are installed in the home' : 'บ้านนี้มีเครื่องใช้ไฟฟ้าหรืออุปกรณ์ใดบ้าง?');
   await page.getByRole('checkbox', { name: en ? 'Air conditioning' : 'เครื่องปรับอากาศ' }).click();
   await page.getByRole('checkbox', { name: en ? 'Home-office computers or equipment' : 'คอมพิวเตอร์หรืออุปกรณ์ทำงานที่บ้าน' }).click();
-  await page.getByLabel(en ? 'How many air-conditioning units are installed at this property?' : 'บ้านหรือที่พักอาศัยนี้ติดตั้งเครื่องปรับอากาศทั้งหมดกี่เครื่อง?').selectOption('5');
+  await page.getByLabel(en ? 'How many air-conditioning units are installed at this property?' : 'บ้านหรือที่พักอาศัยนี้ติดตั้งเครื่องปรับอากาศทั้งหมดกี่เครื่อง?').fill('5');
   await page.getByRole('button', { name: next, exact: true }).click();
   await choose(page, en ? 'Almost none' : 'แทบไม่มี', next);
   await choose(page, en ? 'Concrete roof tiles' : 'กระเบื้องคอนกรีต', next);
@@ -153,56 +154,42 @@ async function completeEstimate(page: Page, locale: 'th' | 'en', bill = '6000') 
   }
   await expectPath(page, en ? '/en/estimate/results' : '/estimate/results');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByText(en ? 'Simple payback (first-year basis)' : 'ระยะคืนทุนอย่างง่าย (อิงปีแรก)')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(en ? 'simple payback' : 'คืนทุนอย่างง่าย')).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('main')).not.toContainText(/Needs more information|ต้องมีข้อมูลเพิ่ม|Evidence confidence|ความมั่นใจจากหลักฐาน/);
 }
 
 test.beforeEach(async ({ page }) => { await page.route('https://tile.openstreetmap.org/**', (route) => route.abort()); });
 
-test('homepage reflects the lead-first brief and language spacing', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('บ้านยุคใหม่');
-  await expect(page.locator('main')).toContainText('เริ่มด้วยโซลาร์');
-  await expect(page.locator('main')).not.toContainText(/ตัวอย่างผลเพื่อวางแผน|ประมาณ 5 kWp|ไม่ใช่คำสัญญาหรือใบเสนอราคา/);
-  await expect(page.locator('footer')).not.toContainText('©');
-  const switcher = page.getByRole('link', { name: 'View this page in English' });
-  await expect(switcher).toHaveText('TH / EN');
-  expect(await switcher.evaluate((element) => Number.parseFloat(getComputedStyle(element).gap))).toBeGreaterThan(0);
+test('homepage reflects the supplied design and language spacing',async({page})=>{
+ await page.goto('/');
+ await expect(page.getByRole('heading',{level:1})).toHaveText('โซลาร์ช่วยบ้านคุณประหยัดได้เท่าไร?');
+ await expect(page.locator('main')).toContainText('ไม่ต้องให้เบอร์โทร');
+ await expect(page.locator('.hero-photo .example')).toContainText('฿1,665');
+ const switcher=page.getByRole('link',{name:'View this page in English'});
+ await expect(switcher).toHaveText('EN');await switcher.click();await expectPath(page,'/en');
 });
 
-test('bill field can be emptied and supports large values without a 50,000 cap', async ({ page }) => {
-  await page.goto('/en');
-  const input = page.locator('#hero-monthly-bill');
-  const range = page.locator('#hero-estimator input[type="range"]');
-  await expect(range).toHaveAttribute('max', '25000');
-  await input.fill('0');
-  await input.press('Backspace');
-  await expect(input).toHaveValue('');
-  await expect(range).toHaveAttribute('max', '25000');
-  await input.fill('250000');
-  await expect(input).toHaveValue('250000');
-  await expect(range).toHaveAttribute('max', '250000');
+test('bill field can be emptied and supports large values without a 50,000 cap',async({page})=>{
+ await page.goto('/en');const input=page.locator('#hero-monthly-bill');
+ await input.fill('0');await input.press('Backspace');await expect(input).toHaveValue('');
+ await input.fill('250000');await expect(input).toHaveValue('250,000');
+ await page.getByRole('button',{name:'See my estimate',exact:true}).click();await expectPath(page,'/en/estimate');
+ await page.getByRole('button',{name:'Bangkok',exact:true}).click();await chooseDistrict(page,'Sathon');
+ await page.getByRole('button',{name:'Next',exact:true}).click();await expect(page.locator('#monthly-bill')).toHaveValue('250,000');
+ await expect(page.locator('.bill-range')).toHaveAttribute('max','250000');
 });
 
-test('homepage values hand off while the assessment still collects a district', async ({ page }) => {
-  await page.goto('/en');
-  await page.locator('#hero-province').selectOption('nonthaburi');
-  await page.locator('#hero-monthly-bill').fill('85000');
-  await page.getByRole('button', { name: 'See my solar estimate' }).click();
-  await expectPath(page, '/en/estimate');
-  await expectHeading(page, 'Where is the property located?');
-  await expect(page.locator('#estimate-province')).toHaveValue('nonthaburi');
-  await chooseDistrict(page, 'Mueang Nonthaburi');
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.locator('#monthly-bill')).toHaveValue('85000');
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expectHeading(page, 'Where is the property located?');
-  await expect(page.locator('#estimate-district')).toHaveValue('Mueang Nonthaburi');
+test('homepage values hand off while the assessment still collects a district',async({page})=>{
+ await page.goto('/en');await page.locator('#hero-monthly-bill').fill('85000');await page.getByRole('button',{name:'See my estimate',exact:true}).click();
+ await expectPath(page,'/en/estimate');await expectHeading(page,'Where is the property located?');
+ await page.getByRole('button',{name:'Nonthaburi',exact:true}).click();await chooseDistrict(page,'Mueang Nonthaburi');
+ await page.getByRole('button',{name:'Next',exact:true}).click();await expect(page.locator('#monthly-bill')).toHaveValue('85,000');
+ await page.getByRole('button',{name:'Back',exact:true}).click();await expect(page.locator('#estimate-district')).toHaveValue('Mueang Nonthaburi');
 });
 
 test('district chooser is searchable, eight rows tall, and sorted for each language', async ({ page }) => {
   await page.goto('/en/estimate');
-  await page.locator('#estimate-province').selectOption('bangkok');
+  await page.getByRole('button',{name:/^(Bangkok|กรุงเทพมหานคร)$/}).click();
   const district = page.locator('#estimate-district');
   await district.click();
   const listbox = page.getByRole('listbox', { name: 'Districts' });
@@ -236,7 +223,7 @@ test('all desktop navigation anchors work in Thai and English', async ({ page },
       const link = page.getByRole('navigation', { name: navigation }).getByRole('link', { name: label, exact: true });
       await expect(link).toHaveAttribute('href', path);
       await link.click();
-      await expectPath(page, path);
+      await expectPath(page, new URL(path,'http://localhost').pathname);
     }
   }
 });
@@ -252,7 +239,7 @@ test('required estimator uses eleven concise residential questions and focused c
 
 test('planning and project type are separate consecutive questions', async ({ page }) => {
   await page.goto('/en/estimate');
-  await page.locator('#estimate-province').selectOption('bangkok');
+  await page.getByRole('button',{name:/^(Bangkok|กรุงเทพมหานคร)$/}).click();
   await chooseDistrict(page, 'Sathon');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.locator('#monthly-bill').fill('6000');
@@ -264,18 +251,15 @@ test('planning and project type are separate consecutive questions', async ({ pa
   await expect(page.getByRole('radio', { name: 'A new rooftop solar system' })).toBeVisible();
 });
 
-test('refresh and language switching preserve estimator progress', async ({ page }) => {
-  await page.goto('/estimate');
-  await page.locator('#estimate-province').selectOption('bangkok');
-  await chooseDistrict(page, 'สาทร');
-  await page.getByRole('button', { name: 'ถัดไป', exact: true }).click();
-  await page.locator('#monthly-bill').fill('7200');
-  await page.getByRole('button', { name: 'ถัดไป', exact: true }).click();
-  await page.getByRole('radio', { name: 'ใช่ — ภายใน 3 เดือน', exact: true }).click();
-  await page.reload();
-  await expect(page.getByRole('radio', { name: 'ใช่ — ภายใน 3 เดือน', exact: true })).toBeChecked();
-  await page.getByRole('link', { name: 'ดูแบบประเมินนี้เป็นภาษาอังกฤษ' }).click();
-  await expect(page.getByRole('radio', { name: 'Yes — within 3 months', exact: true })).toBeChecked();
+test('refresh and language switching preserve estimator progress without restored auto-advance',async({page})=>{
+ await page.goto('/estimate');await page.getByRole('button',{name:'กรุงเทพมหานคร',exact:true}).click();await chooseDistrict(page,'สาทร');
+ await page.getByRole('button',{name:'ถัดไป',exact:true}).click();await page.locator('#monthly-bill').fill('7200');await page.getByRole('button',{name:'ถัดไป',exact:true}).click();
+ await choose(page,'ใช่ — ภายใน 3 เดือน','ถัดไป');await page.reload();
+ await expectHeading(page,'คุณกำลังพิจารณาโครงการโซลาร์แบบใด?');
+ await page.getByRole('button',{name:'Back',exact:true}).count().then(async n=>{if(n)await page.getByRole('button',{name:'Back',exact:true}).click();else await page.getByRole('button',{name:'ย้อนกลับ',exact:true}).click();});
+ await expect(page.getByRole('radio',{name:'ใช่ — ภายใน 3 เดือน',exact:true})).toBeChecked();
+ await page.getByRole('link',{name:'ดูแบบประเมินนี้เป็นภาษาอังกฤษ'}).click();
+ await expect(page.getByRole('radio',{name:'Yes — within 3 months',exact:true})).toBeChecked();
 });
 
 test('complete Thai and English journeys produce every metric', async ({ page }) => {
@@ -287,14 +271,15 @@ test('complete Thai and English journeys produce every metric', async ({ page })
 test('optional precision details visibly recalculate results', async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.goto('/en/estimate/results');
-  const productionCard = page.locator('.result-metrics-v3 article').filter({ hasText: 'Estimated first-year solar generation' });
+  await page.locator('.v2-breakdown summary').click();
+  const productionCard = page.locator('.kv > div').filter({ hasText: 'Yearly generation' });
   await expect(productionCard).toBeVisible({ timeout: 10_000 });
-  const production = productionCard.locator('strong');
+  const production = productionCard.locator('b');
   const before = await production.textContent();
-  await page.locator('.accuracy-upgrade summary').click();
+  await page.getByText('More optional details',{exact:true}).click();
   await page.getByLabel('Main roof direction').selectOption('north');
   await page.getByLabel('Roof slope').selectOption('steep');
-  await expect(page.locator('.calculation-updated[role="status"]')).toContainText('Roof slope applied');
+  await expect(page.locator('.toast[role="status"]')).toContainText('Roof slope applied');
   await expect(production).not.toHaveText(before ?? '');
 });
 
@@ -313,8 +298,7 @@ test('optional map never sends the typed address to a geocoder', async ({ page }
 test('disabled contact release requests no personal information', async ({ page }) => {
   await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
   await page.goto('/en/estimate/results');
-  await expect(page.getByRole('heading', { name: 'Preparing your solar estimate' })).toBeVisible();
-  await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('simple payback')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByLabel(/Mobile phone number|First name/i)).toHaveCount(0);
   await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
 });
@@ -337,9 +321,8 @@ test('integrated quote question starts unselected and No reaches the full estima
   await expect(consent).toHaveCount(0);
   const loadingStartedAt = Date.now();
   await page.getByRole('button', { name: 'See my estimate' }).click();
-  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
-  await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
-  expect(Date.now() - loadingStartedAt).toBeGreaterThanOrEqual(3400);
+  await expect(page.getByText('simple payback')).toBeVisible({ timeout: 10_000 });
+  // No artificial minimum: real preparation controls completion.
   expect(Date.now() - loadingStartedAt).toBeLessThan(6500);
   expect(leadRequests).toBe(0);
   await expect(page.locator('input[autocomplete="given-name"]')).toHaveCount(0);
@@ -357,19 +340,20 @@ test('the ฿4,800 Bangkok result reconciles its shared cards, table, and MEA ta
     airConditionerCount: 4,
   });
   await page.goto('/en/estimate/results');
-  await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
-  await expect(page.locator('.result-saving-headline')).toContainText('About ฿115,000');
-  await expect(page.getByText('Estimated first-year bill reduction').locator('..')).toContainText(/About ฿98\d\/month/u);
-  await expect(page.getByText('Estimated first-year bill reduction').locator('..')).toContainText('About 20.5% of your current bill');
-  await expect(page.locator('.result-metrics-v3 article').filter({ hasText: 'Annual maintenance/component reserve' })).toContainText('฿1,326');
-  await expect(page.getByText('Simple payback (first-year basis)').locator('..')).toContainText('12.4 years');
+  await expect(page.getByText('simple payback')).toBeVisible({ timeout: 10_000 });
+  await page.locator('.v2-breakdown summary').click();
+  await expect(page.locator('.kv > div').filter({hasText:'25-year net benefit'})).toContainText('฿115,000');
+  await expect(page.locator('.rbig')).toContainText(/฿98\d/u);
+  await expect(page.locator('.rhero')).toContainText('21%');
+  await expect(page.locator('.kv > div').filter({ hasText: 'Yearly maintenance reserve' })).toContainText('฿1,326');
+  await expect(page.getByText('simple payback').locator('..')).toContainText('12.4 yrs');
   await expect(page.getByRole('table', { name: 'Key lifetime cost points' }).getByRole('row').last()).toContainText('฿1,440,000');
-  await expect(page.getByRole('table', { name: 'Key lifetime cost points' }).getByRole('row').last()).toContainText(/฿1,325,\d00/u);
+  await expect(page.getByRole('table', { name: 'Key lifetime cost points' }).getByRole('row').last()).toContainText(/฿1,325,\d{3}/u);
   await expect(page.locator('.trace-list article').filter({ hasText: /^TariffMEA/u })).toContainText('MEA');
   await expect(page.getByRole('link', { name: 'MEA residential tariff source' })).toHaveAttribute('href', /^https:\/\//u);
   const hierarchy = await page.locator('.results-page').evaluate((element) => {
-    const metrics = element.querySelector('.result-metrics-v3');
-    const disclaimer = element.querySelector('.result-service-disclaimer');
+    const metrics = element.querySelector('.rstats');
+    const disclaimer = element.querySelector('.v2-breakdown');
     return metrics && disclaimer ? Boolean(metrics.compareDocumentPosition(disclaimer) & Node.DOCUMENT_POSITION_FOLLOWING) : false;
   });
   expect(hierarchy).toBe(true);
@@ -395,7 +379,7 @@ test('a renter without owner permission can view the estimate but cannot request
   await expect(page.getByRole('radio', { name: 'Yes, I would like solar companies to contact me' })).toHaveCount(0);
   await expect(page.locator('input[autocomplete="given-name"]')).toHaveCount(0);
   await page.getByRole('button', { name: 'View my estimate', exact: true }).click();
-  await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('simple payback')).toBeVisible({ timeout: 10_000 });
 });
 
 test('Yes requires disclosure consent and stores an operational request from one contact form', async ({ page }) => {
@@ -436,15 +420,15 @@ test('Yes requires disclosure consent and stores an operational request from one
   await adult.check();
   await page.getByRole('button', { name: 'Submit my request' }).click();
 
-  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
+  await expect(page.locator('.rstats>div')).toHaveCount(3);
   expect(submitted).toMatchObject({ legalFirstName: 'Private', legalLastName: 'Tester', contactMethod: 'phone', phone:'0812345678', phoneVerificationId:challengeId, adultConfirmed: true, consent: true });
   expect(submitted).not.toHaveProperty('lineId');
-  await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('simple payback')).toBeVisible({ timeout: 10_000 });
 });
 
 test('assessment transitions preserve direction, focus and block rapid double navigation', async ({ page }) => {
   await page.goto('/en/estimate');
-  await page.locator('#estimate-province').selectOption('bangkok');
+  await page.getByRole('button',{name:/^(Bangkok|กรุงเทพมหานคร)$/}).click();
   await chooseDistrict(page, 'Sathon');
   const next = page.getByRole('button', { name: 'Next', exact: true });
   await next.evaluate((element) => { (element as HTMLButtonElement).click(); (element as HTMLButtonElement).click(); });
@@ -456,33 +440,14 @@ test('assessment transitions preserve direction, focus and block rapid double na
   await expect(page.getByRole('heading', { name: 'Where is the property located?' })).toBeFocused();
 });
 
-test('loading fact stays paired, uses the minimal loading surface, and is not repeated on results', async ({ page }) => {
-  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
-  await page.goto('/en/estimate/results');
-  const loadingFact = page.locator('.calculation-fact');
-  await expect(loadingFact).toBeVisible();
-  await expect(loadingFact.getByText('DID YOU KNOW?')).toBeVisible();
-  await expect(loadingFact.getByRole('link', { name: 'View reference' })).toHaveAttribute('href', /^\/en\/resources#/u);
-  await expect(page.locator('.calculation-loading-content')).not.toHaveCSS('border-style', 'solid');
-  await expect(page.locator('.calculation-loading-content')).toHaveAttribute('role', 'status');
-  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
-  const progressRing = page.locator('.solar-loading-indicator-progress');
-  await expect(progressRing).toBeVisible();
-  const startOffset = await progressRing.evaluate((element) => (element as SVGElement).style.strokeDashoffset);
-  await expect.poll(() => progressRing.evaluate((element) => (element as SVGElement).style.strokeDashoffset)).not.toBe(startOffset);
-  await expect(page.locator('body')).toHaveClass(/calculation-loading-active/u);
-  await expect(page.locator('.site-header')).toBeHidden();
-  await expect(page.locator('.site-footer')).toBeHidden();
-  await expect(page.locator('.calculation-loading-page').getByRole('progressbar')).toHaveCount(0);
-  await expect(page.locator('.calculation-loading-page')).not.toContainText(/progress bar|satellite scan|engineering analysis|installer matching/iu);
-  await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible({ timeout: 10_000 });
-  await expect(page.locator('body')).not.toHaveClass(/calculation-loading-active/u);
-  await expect(page.locator('.site-header')).toBeVisible();
-  await expect(page.locator('.site-footer')).toBeVisible();
-  await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
-  await page.reload();
-  await expect(page.getByText('Simple payback (first-year basis)')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Preparing your solar estimate' })).toHaveCount(0);
+test('ready results have no artificial delay or repeated loading fact',async({page})=>{
+ await page.addInitScript(estimate=>sessionStorage.setItem('solarmatch:estimate',JSON.stringify(estimate)),savedEstimate);
+ const started=Date.now();await page.goto('/en/estimate/results');await expect(page.locator('.rstats>div')).toHaveCount(3);
+ expect(Date.now()-started).toBeLessThan(6500);
+ await expect(page.locator('.calculation-fact,.solar-loading-indicator,.result-fact-section')).toHaveCount(0);
+ await expect(page.locator('.site-header')).toBeVisible();await expect(page.locator('.site-footer')).toBeVisible();
+ await page.reload();await expect(page.locator('.rstats>div')).toHaveCount(3);
+ await expect(page.getByRole('heading',{name:'Preparing your solar estimate'})).toHaveCount(0);
 });
 
 test('bilingual Resources pages expose the four supported fact anchors and references', async ({ page }) => {

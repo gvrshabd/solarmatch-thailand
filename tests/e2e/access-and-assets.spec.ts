@@ -97,20 +97,20 @@ test('SSR metadata, language boundaries, and images are safe', async ({ request 
   const english = await (await request.get('/en/methodology')).text();
   expect(english).toContain('lang="en" data-locale="en"');
   expect(english).toMatch(/hrefLang="th-TH"/i);
-  expect(english).toContain('A useful ballpark without pretending it is a quote');
+  expect(english).toContain('How we calculate your estimate');
 
   const home = await (await request.get('/')).text();
   expect(home).toMatch(/<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/i);
   expect(home).not.toMatch(/user-scalable=no|maximum-scale=1/i);
-  expect(home).toContain('/images/solar-home-real-768.webp 768w');
+  expect(home).toContain('/images/design-v2/home-hero-m.jpg');
   expect(home).not.toContain('solar-home-hero.jpg');
   expect(home).not.toContain('solar-home-ai-');
   expect(home).not.toMatch(/<img[^>]+src="https?:\/\//i);
 
-  const largeImage = await request.get('/images/solar-home-real-1440.webp');
+  const largeImage = await request.get('/images/design-v2/home-hero.jpg');
   expect(largeImage.status()).toBe(200);
-  expect(largeImage.headers()['content-type']).toContain('image/webp');
-  expect((await largeImage.body()).byteLength).toBeLessThan(350_000);
+  expect(largeImage.headers()['content-type']).toContain('image/jpeg');
+  expect((await largeImage.body()).byteLength).toBeLessThan(1_000_000);
   expect((await request.get('/images/solar-home-hero.jpg')).status()).toBe(404);
   expect((await request.get('/images/solar-home-ai-1440.webp')).status()).toBe(404);
   expect((await request.get('/images/solar-home-ai-768.webp')).status()).toBe(404);

@@ -1,3 +1,4 @@
+import { pageDescriptions } from './descriptions';
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 
@@ -7,6 +8,7 @@ export function thaiMetadata(title: string, path = ''): Metadata {
 
   return {
     title,
+    description: pageDescriptions[path.replace(/^\//, '')]?.th,
     alternates: {
       canonical: thaiUrl,
       languages: { 'th-TH': thaiUrl, 'en-US': englishUrl },
@@ -16,6 +18,7 @@ export function thaiMetadata(title: string, path = ''): Metadata {
       locale: 'th_TH',
       url: thaiUrl,
       title,
+      description: pageDescriptions[path.replace(/^\//, '')]?.th,
       images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Solar panels on a tiled residential roof with palm trees in the background' }],
     },
   };

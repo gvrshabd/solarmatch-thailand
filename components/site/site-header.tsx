@@ -15,7 +15,7 @@ const nav = [
 
 function LanguageSwitch({locale,pathname}:{locale:Locale;pathname:string}) {
   const alternate=alternateLanguagePath(pathname);
-  return <div className="lang" role="group" aria-label="Language"><a href={locale==='th'?pathname:alternate} lang="th" aria-current={locale==='th'?'true':undefined}>ไทย</a><a href={locale==='en'?pathname:alternate} lang="en" aria-current={locale==='en'?'true':undefined}>EN</a></div>;
+  return <div className="lang" role="group" aria-label="Language"><a href={locale==='th'?pathname:alternate} lang="th" aria-label="View this page in Thai" aria-current={locale==='th'?'true':undefined}>ไทย</a><a href={locale==='en'?pathname:alternate} lang="en" aria-label="View this page in English" aria-current={locale==='en'?'true':undefined}>EN</a></div>;
 }
 
 function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {

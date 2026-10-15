@@ -19,7 +19,7 @@ test('Terrace static surfaces retain accessibility and stay within the viewport'
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     if (route.includes('results')) {
-      await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 15_000 });
+      await expect(page.locator('.rstats > div')).toHaveCount(3, { timeout: 15_000 });
       await expect(page.locator('.results-page')).toHaveCSS('opacity', '1');
     }
     for (const image of await page.locator('main img').all()) {

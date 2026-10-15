@@ -5,9 +5,9 @@ import type { InstallerPortalData } from '../../lib/installer/portal-contract';
 for (const lang of ['en', 'th']) test(`disabled installer service hides registration and recovery (${lang})`, async ({ page }) => {
   await page.route('**/api/installer/portal*', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'portal_unavailable' }) }));
   await page.goto(`/installers?lang=${lang}`);
-  await expect(page.getByRole('heading', { name: lang === 'en' ? 'The installer portal is not open yet' : 'พอร์ทัลผู้ติดตั้งยังไม่เปิดให้บริการ' })).toBeVisible();
+  await expect(page.getByRole('heading', { level:1, name: lang === 'en' ? 'Homeowners who already know their numbers.' : 'ลูกค้าที่รู้ตัวเลขของตัวเองมาแล้ว' })).toBeVisible();
   await expect(page.locator('form')).toHaveCount(0);
-  await expect(page.getByRole('link', { name: lang === 'en' ? 'Open the solar calculator' : 'ไปที่เครื่องคำนวณโซลาร์' })).toHaveAttribute('href', lang === 'en' ? '/en/estimate' : '/estimate');
+  await expect(page.getByRole('button',{name:lang==='en'?'Applications unavailable':'ยังไม่เปิดรับสมัคร',exact:true}).first()).toBeDisabled();
 });
 
 // Deliberately synthetic API fixtures: no account, messages or payment side effects.
@@ -40,11 +40,11 @@ for (const lang of ['en', 'th'] as const) {
     test('responsive workspace, credits, account, enquiries and accessibility', async ({ page }, info) => {
       test.setTimeout(120000);
       await page.goto('/installers?lang=' + lang);
-      await expect(page.locator('.installer-hero-number')).toHaveText('1');
+      await expect(page.locator('.callnext')).toContainText('Synthetic Arun');
       const nav = page.getByRole('navigation', { name: en ? 'Installer navigation' : 'เมนูผู้ติดตั้ง' });
       for (const width of [320, 360, 390, 430, 768, 900, 1440]) {
         await page.setViewportSize({ width, height: 900 });
-        for (const view of [en ? 'Overview' : 'ภาพรวม', en ? 'Enquiries' : 'คำขอ', en ? 'Credits' : 'เครดิต', en ? 'Company' : 'บริษัท']) {
+        for (const view of [en ? 'Today' : 'วันนี้', en ? 'Enquiries' : 'คำขอ', en ? 'Credits' : 'เครดิต', en ? 'Company' : 'บริษัท']) {
           await nav.getByRole('button', { name: view, exact: true }).click();
           await expect(page.locator('#installer-page-title')).toBeFocused();
           await page.evaluate(() => document.fonts.ready);
@@ -64,6 +64,7 @@ for (const lang of ['en', 'th'] as const) {
     });
     test('search, status groups, withdrawal privacy and back navigation', async ({ page }) => {
       await page.goto('/installers?view=inbox&lang=' + lang);
+      await page.getByRole('button',{name:en?'All 3':'ทั้งหมด 3',exact:true}).click();
       await expect(page.locator('.installer-enquiry-card')).toHaveCount(3);
       await expect(page.locator('.installer-shell')).not.toContainText('HIDDEN_PRIVATE');
       await expect(page.locator('.installer-shell')).not.toContainText('999,999');
@@ -75,16 +76,17 @@ for (const lang of ['en', 'th'] as const) {
       await page.getByRole('button', { name: en ? 'New 1' : 'ใหม่ 1', exact: true }).click();
       await expect(page.locator('.installer-enquiry-card')).toContainText('SM-TEST-039');
       await page.getByRole('navigation').getByRole('button', { name: en ? 'Credits' : 'เครดิต', exact: true }).click();
-      await expect(page.locator('.installer-credit-balance .installer-hero-number')).toHaveText('18');
-      await expect(page.getByRole('button', { name: (en ? 'Pay with ' : 'ชำระผ่าน ') + 'promptpay' })).toBeDisabled();
+      await expect(page.locator('.balance .big')).toHaveText('18');
+      await expect(page.getByRole('button', { name: (en ? 'Pay with ' : 'ชำระผ่าน ') + 'PromptPay' })).toBeDisabled();
       await page.goBack();
       await expect(page.locator('.installer-enquiry-grid')).toBeVisible();
     });
     test('details retain actions and reduced-motion support without fake competition', async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/installers/enquiry/' + fixture().deliveries[0].id + '?lang=' + lang);
-      await expect(page.getByRole('link', { name: '0800000000', exact: true })).toHaveAttribute('href', 'tel:0800000000');
-      await expect(page.getByRole('combobox', { name: en ? 'Contact outcome' : 'ผลการติดต่อ' })).toBeVisible();
+      await expect(page.getByRole('link', { name: '080 000 0000', exact: true })).toHaveAttribute('href', 'tel:0800000000');
+      await expect(page.getByRole('group', { name: en ? 'Report outcome' : 'รายงานผล' })).toBeVisible();
+      await page.getByText(en?'Share with staff':'แชร์กับทีมงาน',{exact:true}).click();
       await expect(page.getByRole('button', { name: en ? 'Create replacement link' : 'สร้างลิงก์ใหม่' })).toBeVisible();
       await expect(page.locator('.installer-shell')).not.toContainText('companies have contacted');
       await page.setViewportSize({ width: 320, height: 800 });
@@ -96,6 +98,7 @@ for (const lang of ['en', 'th'] as const) {
       await page.route('**/api/installer/portal**', route => route.fulfill({ status: 401, json: { error: 'unauthorized' } }));
       await page.setViewportSize({ width: 320, height: 800 });
       await page.goto('/installers?lang=' + lang);
+      await page.getByRole('button', {name:en?'Sign in':'เข้าสู่ระบบ',exact:true}).first().click();
       await expect(page.getByRole('heading', { name: en ? 'Sign in' : 'เข้าสู่ระบบ', exact: true })).toBeVisible();
       await page.getByLabel(en ? 'Email' : 'อีเมล', { exact: true }).fill('design@example.test');
       await expect(page.getByLabel(en ? 'Email' : 'อีเมล', { exact: true })).toHaveValue('design@example.test');

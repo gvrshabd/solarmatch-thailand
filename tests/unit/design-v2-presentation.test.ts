@@ -9,6 +9,8 @@ describe('Design v2 real calculator presentation',()=>{
   expect(normal.planningMonthlySavingsThb).toBe(1665);expect(normal.planningInstalledCostThb).toBe(165000);expect(normal.planningSystemKw).toBe(4.5);
   expect(low.planningTwentyFiveYearNetBenefitThb).toBe(-9000);expect(low.recommendation).toBe('worth-comparing');expect(lifetimeCrossing(low.lifetimeCostSeries)).toBeNull();
   const crossing=lifetimeCrossing(normal.lifetimeCostSeries);expect(crossing?.year).toBeGreaterThan(normal.planningPaybackYears!);expect(payback(null)).toBe('—');
+  const unavailable=calculateEstimate({...designV2Example,monthlyBillThb:1});
+  expect(unavailable.planningPaybackYears).toBeNull();expect(payback(unavailable.planningPaybackYears)).toBe('—');
  });
  it('round-trips allowed answers/refinements without contact or consent',()=>{
   const source={...designV2Example,roofDirection:'east' as const,exactRoofAreaSqm:62,electricityPhase:'three' as const,quoteContactRequested:true,quoteConsentAccepted:true};

@@ -271,12 +271,12 @@ test('mobile homepage image, credit, message, and estimator do not collide', asy
   await page.setViewportSize({ width: 320, height: 844 });
   for (const route of ['/', '/en']) {
     await page.goto(route);
-    const figure = page.locator('.terrace-hero .terrace-photo');
-    await expect(figure.locator('img')).toHaveAttribute('srcset', /terrace-house-768\.jpg 768w/);
-    await expect(figure.locator('figcaption')).toContainText('Alef Morais');
+    const figure = page.locator('.hero-photo');
+    await expect(figure.locator('source')).toHaveAttribute('srcset','/images/design-v2/home-hero-m.jpg');
+    await expect(figure.locator('.credit')).toContainText('Robert So');
     const collision = await page.evaluate(() => {
-      const photo = document.querySelector('.terrace-hero')?.getBoundingClientRect();
-      const estimator = document.querySelector('.terrace-starter')?.getBoundingClientRect();
+      const photo = document.querySelector('.hero-photo')?.getBoundingClientRect();
+      const estimator = document.querySelector('.billcard')?.getBoundingClientRect();
       if (!photo || !estimator) return true;
       return !(photo.bottom <= estimator.top || estimator.bottom <= photo.top);
     });
@@ -287,8 +287,9 @@ test('mobile homepage image, credit, message, and estimator do not collide', asy
 test('mobile results keep metrics, charts, tables, and lead fields readable', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.goto('/en/estimate/results');
-  await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5, { timeout: 10_000 });
-  await expect(page.locator('.result-metrics-v3')).not.toContainText(/Needs more information/);
+  await expect(page.locator('.rstats > div')).toHaveCount(3, { timeout: 10_000 });
+  await expect(page.locator('.rstats')).not.toContainText(/Needs more information/);
+  await page.locator('.v2-breakdown summary').click();
   await expect(page.getByRole('table', { name: 'Key lifetime cost points' })).toBeVisible();
   await expect(page.locator('.result-fact-section .solar-fact-card')).toHaveCount(0);
   const layout = await page.evaluate(() => ({ clientWidth: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
@@ -317,7 +318,7 @@ test('landscape menu remains reachable and reduced motion is respected', async (
     }));
   }, { signature: answerSignature(savedEstimate), estimate: savedEstimate });
   await page.goto('/en/estimate/results');
-  await expect(page.locator('.solar-loading-indicator')).toBeVisible();
-  await expect(page.locator('.solar-loading-indicator')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.solar-loading-indicator-progress')).toBeVisible();
+  await expect(page.locator('.rstats>div')).toHaveCount(3);
+  await expect(page.locator('.solar-loading-indicator')).toHaveCount(0);
+  await expect(page.locator('.results-page')).toHaveCSS('opacity','1');
 });

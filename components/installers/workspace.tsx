@@ -64,7 +64,7 @@ export function PortalOverview({ data, en, navigate }: { data: InstallerPortalDa
     c?.paused&&(en?'Your company preference is paused.':'บริษัทของคุณพักรับคำขออยู่'),
     !data.terms.acceptedAt&&(en?'Accept the current installer terms.':'กรุณายอมรับข้อตกลงผู้ติดตั้งฉบับปัจจุบัน'),
     (data.availability?.platformPaused||data.availability?.allocationPaused)&&(en?'New deliveries are paused by SolarMatch. Your preference does not override this.':'SolarMatch พักการส่งคำขอใหม่ การตั้งค่าของบริษัทไม่สามารถเปลี่ยนสถานะนี้ได้'),
-    (data.balance.debt>0||(data.balance.available<(data.commercial?.sharedCredits??2)&&data.balance.trialRemaining===0))&&(en?'No spendable entitlement for a new enquiry.':'ยังไม่มีเครดิตหรือสิทธิ์ทดลองที่พร้อมใช้รับคำขอใหม่'),
+    (data.balance.debt===0&&data.balance.available<(data.commercial?.sharedCredits??2)&&data.balance.trialRemaining===0)&&(en?'No spendable entitlement for a new enquiry.':'ยังไม่มีเครดิตหรือสิทธิ์ทดลองที่พร้อมใช้รับคำขอใหม่'),
   ].filter(Boolean);
   const enough=data.balance.debt>0?0:Math.floor(data.balance.available/(data.commercial?.sharedCredits??2));
   return <>{reasons.length>0&&<div className="installer-notice" role="status">{reasons.map((r,i)=><p key={i}>{r}</p>)}</div>}

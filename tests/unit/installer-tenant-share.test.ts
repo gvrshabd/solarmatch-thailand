@@ -34,7 +34,7 @@ describe('tenant and delivery share boundaries',()=>{
   it('supports repeated reads and rotation without billing or renewing claim deadline; expiry closes access',async()=>{
     const {db,deliveryId}=await delivered();const before=fixture.sqlite.prepare('SELECT * FROM lead_recipient_deliveries WHERE id=?').get(deliveryId)!;
     const first=await rotateShareLink(db,'synthetic-company-1',deliveryId,'fixture','http://localhost:3000');const one=await readShareLink(db,token(first.url));expect(one?.delivery.phone).toBe('+66812345678');expect(one?.delivery.homeownerName).toBe('');expect((await readShareLink(db,token(first.url)))?.delivery.reference).toBe(`SM-${deliveryId.slice(0,8).toUpperCase()}`);expect(Object.keys(one!)).toEqual(['delivery','expiresAt']);
-    expect(Object.keys(one!.delivery).sort()).toEqual(['assessment','homeownerName','location','phone','product','qualification','reference','requestedAt']);
+    expect(Object.keys(one!.delivery).sort()).toEqual(['assessment','homeownerName','location','locationTh','phone','product','qualification','reference','requestedAt']);
     const second=await rotateShareLink(db,'synthetic-company-1',deliveryId,'fixture','http://localhost:3000');expect(await readShareLink(db,token(first.url))).toBeNull();expect(await readShareLink(db,token(second.url))).not.toBeNull();
     const after=fixture.sqlite.prepare('SELECT * FROM lead_recipient_deliveries WHERE id=?').get(deliveryId)!;expect(after.available_at).toBe(before.available_at);expect(after.claim_deadline).toBe(before.claim_deadline);expect(fixture.sqlite.prepare("SELECT COUNT(*) n FROM installer_credit_ledger WHERE kind='delivery'").get()?.n).toBe(1);
     fixture.now='2099-01-01T00:00:00.000Z';expect(await readShareLink(db,token(second.url))).toBeNull();

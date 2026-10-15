@@ -17,6 +17,6 @@ test('contact review has only phone and never calls OTP or collection', async ({
   await form.locator('.contact-adult-confirmation input').check();
   await expect(form).toContainText('No code is sent');
   await form.getByRole('button',{name:'Finish test and view my estimate',exact:true}).click();
-  await expect(page.locator('.result-metrics-v3 article')).toHaveCount(5,{timeout:15_000});
+  await expect(page.locator('.rstats > div')).toHaveCount(3,{timeout:15_000});
   expect(calls).toEqual([]);
 });

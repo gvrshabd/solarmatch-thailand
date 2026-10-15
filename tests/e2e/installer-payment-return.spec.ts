@@ -66,7 +66,7 @@ test.describe('compiled payment return pages with mocked provider responses',()=
       });
       await page.route('**/api/installer/payment-status**',route=>route.fulfill({json:{order}}));
       await page.goto(`/installers?view=credits&lang=${lang}`);
-      await page.getByRole('button',{name:(en?'Pay with ':'ชำระผ่าน ')+method,exact:true}).click();
+      await page.getByRole('button',{name:(en?'Pay with ':'ชำระผ่าน ')+(method==='promptpay'?'PromptPay':'K PLUS'),exact:true}).click();
       await expect(page.getByRole('heading',{name:en?'Payment pending':'รอยืนยันการชำระเงิน',exact:true})).toBeVisible();
       expect(checkoutMethod).toBe(method);expect(hostedMethod).toBe(method);expect(authorized).toBe(true);
       await expect(page).toHaveURL(new RegExp(`/installers/payment\\?orderId=${orderId}&lang=${lang}$`));

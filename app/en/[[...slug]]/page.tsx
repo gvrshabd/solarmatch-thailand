@@ -1,3 +1,4 @@
+import { pageDescriptions } from '@/lib/seo/descriptions';
 import type { Metadata } from 'next';
 import { HomePage } from '@/components/home/home-page';
 import { EnglishPage } from '@/components/pages/english-pages';
@@ -29,9 +30,9 @@ export async function generateMetadata({ params }: EnglishRouteProps): Promise<M
   const thaiUrl = `${siteConfig.url}${path}`;
   return {
     title: titles[key] ?? 'SolarMatch Thailand',
-    description: 'Understand a practical rooftop solar starting size and planning savings figure for a home in Thailand before speaking with an installer.',
+    description: pageDescriptions[key]?.en ?? pageDescriptions[''].en,
     alternates: { canonical: englishUrl, languages: { 'en-US': englishUrl, 'th-TH': thaiUrl } },
-    openGraph: { type: 'website', locale: 'en_US', url: englishUrl, title: titles[key] ?? 'SolarMatch Thailand', description: 'Start with your electricity bill, province, property, and daytime use to understand a practical rooftop solar planning figure.', images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Solar panels on a tiled residential roof with palm trees in the background' }] },
+    openGraph: { type: 'website', locale: 'en_US', url: englishUrl, title: titles[key] ?? 'SolarMatch Thailand', description: pageDescriptions[key]?.en ?? pageDescriptions[''].en, images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Solar panels on a tiled residential roof with palm trees in the background' }] },
   };
 }
 

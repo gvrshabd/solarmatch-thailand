@@ -7,7 +7,7 @@ export function MethodologyContent({ locale = 'th' }: { locale?: Locale }) {
   const english = locale === 'en';
   return (
     <main>
-      <PageHero eyebrow="Methodology" title={english ? 'A useful ballpark without pretending it is a quote' : 'ค่าประเมินที่มีประโยชน์ โดยไม่ทำให้ดูเหมือนใบเสนอราคา'}>
+      <PageHero eyebrow="Methodology" title={english ? 'How we calculate your estimate' : 'เราคำนวณผลประเมินอย่างไร'}>
         <p>{english ? 'SolarMatch turns a normal electricity bill and a few easy property answers into one conservative planning result. An installer still needs to inspect the site and issue the final design and price.' : 'SolarMatch เปลี่ยนค่าไฟของเดือนปกติและข้อมูลสถานที่ที่ตอบง่าย ให้เป็นผลประเมินเบื้องต้นหนึ่งชุด โดยผู้ติดตั้งยังต้องตรวจหน้างาน ออกแบบ และเสนอราคาจริง'}</p>
         <p className="updated-date">{english ? 'Sources checked 2 September 2026' : 'ตรวจแหล่งข้อมูล 2 กันยายน 2569'} · {solarAssumptions.version}</p>
       </PageHero>
