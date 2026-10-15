@@ -104,7 +104,7 @@ for(const lang of ['en','th'] as const) {
     if(name==='portal'){await page.unroute('**/api/installer/portal**');await page.route('**/api/installer/portal**',r=>r.fulfill({json:data}));}
     await page.goto(url);await expect(page.locator('main h1').first()).toBeVisible();
     if(name==='home')await page.locator('#hero-monthly-bill').fill('6000');
-    if(name==='results'){await expect(page.locator('.rbig')).toHaveText('฿1,665');await expect(page.locator('.rstats>div')).toHaveCount(3);}
+    if(name==='results'){await expect(page.locator('.rbig')).toHaveText('฿1,665');await expect(page.locator('.rstats>div')).toHaveCount(3);await expect(page.locator('.journey-transition-surface')).toHaveCSS('opacity','1');}
     await audit(page);if(capture)await page.screenshot({path:path.join(folder,`implementation-${name}-${lang}-${width}.png`),fullPage:true,scale:'css'});
     await reference.goto('http://127.0.0.1:4174/#'+name);await reference.evaluate(()=>document.fonts.ready);
     if(capture)await reference.screenshot({path:path.join(folder,`prototype-${name}-${lang}-${width}.png`),fullPage:true,scale:'css'});
