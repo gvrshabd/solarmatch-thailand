@@ -3310,6 +3310,9 @@ select { padding: 0 38px 0 13px; }
 /* Optional-contact journey and result preparation */
 .screen-transition-boundary { width: 100%; min-width: 0; overflow-x: clip; }
 .journey-transition-surface { width: 100%; min-width: 0; }
+.journey-transition-surface[data-transition-pace="result"] { animation: result-entry .38s cubic-bezier(.2,.7,.2,1); }
+@keyframes result-entry { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .journey-transition-surface[data-transition-pace="result"] { animation: none; } }
 .contact-journey-page {
   min-height: calc(100vh - 88px);
   min-height: calc(100svh - 88px);

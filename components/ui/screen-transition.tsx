@@ -26,11 +26,10 @@ export function ScreenTransition({
 
   // Preparation is already complete when the result key changes. Do not make
   // availability of that result depend on an outgoing animation's lifecycle.
-  if (pace === 'result') return <div className="screen-transition-boundary"><motion.div
+  if (pace === 'result') return <div className="screen-transition-boundary"><div
     key={transitionKey} className={className} data-transition-direction={direction}
-    data-transition-pace={pace} initial={{opacity:0,y:offset}} animate={{opacity:1,y:0}}
-    transition={{duration,ease:[0.2,0.7,0.2,1]}}
-  >{children}</motion.div></div>;
+    data-transition-pace={pace}
+  >{children}</div></div>;
 
   return (
     <div className="screen-transition-boundary">

@@ -38,6 +38,7 @@ for(const lang of ['en','th'] as const) {
    await page.goto(lang==='en'?'/en/estimate/results':'/estimate/results');
    await expect(page.locator('.rbig')).toHaveText('฿1,665');
    await expect(page.locator('.calculation-loading-page')).toHaveCount(0);
+   await expect(page.locator('.journey-transition-surface')).toHaveCSS('opacity','1');
   }
  });
  test(`${lang}: eligibility and error states stay truthful at narrow and desktop widths`,async({page},info)=>{

@@ -4,18 +4,23 @@ import legalReviewCopy from '../../config/installer-commercial-copy';
 
 async function openReview(page: Page, locale: 'en' | 'th', enabled = false) {
   const requests = { submissions: 0, configurations: 0 };
+  // Resolve the real baseline before installing the interception. A refresh
+  // completing after result navigation must not leave a route.fetch response
+  // being read after Playwright has disposed the test context.
+  const baselineResponse = await page.request.get('/api/assessment/config');
+  expect(baselineResponse.ok()).toBe(true);
+  const baselineConfig = await baselineResponse.json();
   await page.route('**/api/leads', (route) => { requests.submissions++; return route.abort(); });
   await page.route('**/api/assessment/config', async (route) => {
     requests.configurations++;
-    const response = await route.fetch();
-    const config = await response.json();
+    const config = structuredClone(baselineConfig);
     config.liveLeadSubmissions = enabled;
     config.contact.enabled = enabled;
     config.contact.mode = enabled ? 'shared_solar_company_handoff' : 'disabled';
     config.assessmentToken = enabled ? 'review-must-not-use-this-token' : null;
     // Review must use the supplied review version, never old persisted wording.
     config.contact.consent = { en: 'Obsolete consent', th: 'ข้อความเก่า' };
-    await route.fulfill({ response, json: config });
+    await route.fulfill({ json: config });
   });
   await page.addInitScript(() => sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ version: 9, step: 10, answers: {
     province: 'bangkok', district: 'sathon', monthlyBillThb: 6000, activelyPlanningSolar: true,
