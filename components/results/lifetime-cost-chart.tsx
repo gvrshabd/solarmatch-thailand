@@ -1,32 +1,8 @@
 'use client';
-
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import type { Locale } from '@/config/i18n';
-import type { LifetimeCostPoint } from '@/lib/calculator/types';
-import { formatCompactMoney, formatMoney, formatNumber } from '@/lib/format/numbers';
-
-export function LifetimeCostChart({ data, locale = 'th' }: { data: LifetimeCostPoint[]; locale?: Locale }) {
-  const english = locale === 'en';
-  const labels = {
-    without: english ? 'Without solar' : 'ไม่ติดโซลาร์',
-    withSolar: english ? 'With solar · planning path' : 'ติดโซลาร์ · ตัวเลขวางแผน',
-  };
-  return (
-    <div className="lifetime-chart" aria-hidden="true">
-      <ResponsiveContainer width="100%" height={360}>
-        <LineChart accessibilityLayer={false} data={data} margin={{ top: 12, right: 18, left: 4, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#d8e2dc" />
-          <XAxis dataKey="year" ticks={[0, 5, 10, 15, 20, 25]} tick={{ fill: '#617169', fontSize: 11 }} tickFormatter={(value) => english ? `Year ${formatNumber(Number(value), locale)}` : `ปี ${formatNumber(Number(value), locale)}`} />
-          <YAxis tick={{ fill: '#617169', fontSize: 11 }} width={72} tickFormatter={(value) => formatCompactMoney(Number(value), locale)} />
-          <Tooltip
-            labelFormatter={(value) => english ? `Year ${formatNumber(Number(value), locale)}` : `ปีที่ ${formatNumber(Number(value), locale)}`}
-            formatter={(value, name) => [formatMoney(Number(value), locale), name]}
-          />
-          <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
-          <Line name={labels.without} type="monotone" dataKey="withoutSolarThb" stroke="var(--terrace-garden, #7f8d85)" strokeDasharray="6 3" strokeWidth={2.5} dot={false} isAnimationActive={false} />
-          <Line name={labels.withSolar} type="monotone" dataKey="withSolarThb" stroke="var(--terrace-pine, #137a50)" strokeWidth={2.5} dot={false} isAnimationActive={false} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+import {LifetimePlot} from '@/components/design-v2/lifetime-plot';
+import type {Locale} from '@/config/i18n';
+import type {LifetimeCostPoint} from '@/lib/calculator/types';
+export function LifetimeCostChart({data,locale='th',netBenefit}:{data:LifetimeCostPoint[];locale?:Locale;netBenefit?:number}) {
+  const last=data.at(-1),net=netBenefit??(last?last.withoutSolarThb-last.withSolarThb:0);
+  return <div className="lifetime-chart"><LifetimePlot data={data} net={net} locale={locale}/></div>;
 }

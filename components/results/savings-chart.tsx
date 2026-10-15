@@ -1,33 +1,7 @@
 'use client';
-
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import type { Locale } from '@/config/i18n';
-import { formatMoney } from '@/lib/format/numbers';
-
-export function SavingsChart({ currentBill, estimatedBill, locale = 'th' }: { currentBill: number; estimatedBill: number; locale?: Locale }) {
-  const english = locale === 'en';
-  const before = english ? 'Before solar' : 'ก่อนติดโซลาร์';
-  const after = english ? 'After solar (planning)' : 'หลังติดโซลาร์ (เพื่อวางแผน)';
-  const data = [{ name: english ? 'Monthly bill' : 'ค่าไฟต่อเดือน', [before]: currentBill, [after]: estimatedBill }];
-  return (
-    <div className="chart-wrap">
-      <div aria-hidden="true">
-      <ResponsiveContainer width="100%" height={270}>
-        <BarChart accessibilityLayer={false} data={data} margin={{ top: 12, right: 12, left: 4, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#d8e2dc" />
-          <XAxis dataKey="name" tick={{ fill: '#617169', fontSize: 12 }} />
-          <YAxis tickFormatter={(value) => formatMoney(Number(value), locale)} tick={{ fill: '#617169', fontSize: 11 }} width={72} />
-          <Tooltip formatter={(value) => formatMoney(Number(value), locale)} />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
-          <Bar dataKey={before} fill="var(--terrace-garden, #b8c6bd)" radius={[1, 1, 0, 0]} isAnimationActive={false} />
-          <Bar dataKey={after} fill="var(--terrace-pine, #137a50)" radius={[1, 1, 0, 0]} isAnimationActive={false} />
-        </BarChart>
-      </ResponsiveContainer>
-      </div>
-      <div className="chart-value-summary">
-        <span><strong>{before}:</strong> {formatMoney(currentBill, locale)}/{english ? 'month' : 'เดือน'}</span>
-        <span><strong>{english ? 'After solar' : 'หลังติดโซลาร์'}:</strong> {formatMoney(estimatedBill, locale)}/{english ? 'month' : 'เดือน'}</span>
-      </div>
-    </div>
-  );
+import type {Locale} from '@/config/i18n';
+import {baht} from '@/lib/design-v2/figures';
+export function SavingsChart({currentBill,estimatedBill,locale='th'}:{currentBill:number;estimatedBill:number;locale?:Locale}) {
+ const rows=[{label:locale==='en'?'Today':'ตอนนี้',value:currentBill,after:false},{label:locale==='en'?'With solar':'เมื่อติดโซลาร์',value:estimatedBill,after:true}];
+ return <div className="bars">{rows.map(row=><div className="row" key={row.label}><span className="muted">{row.label}</span><div className="track" aria-hidden="true"><div className={'fill'+(row.after?' after':'')} style={{width:Math.min(100,Math.max(0,row.value/Math.max(1,currentBill)*100))+'%'}}/></div><b className="num">{baht(row.value)}</b></div>)}</div>;
 }

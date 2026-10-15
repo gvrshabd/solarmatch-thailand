@@ -2,20 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ArrowRight,
-  BadgeCheck,
-  Banknote,
-  ChevronDown,
-  CircleDollarSign,
-  Gauge,
-  LocateFixed,
-  MapPin,
-  RefreshCcw,
-  Sun,
-  TrendingUp,
-  Zap,
-} from 'lucide-react';
+import {ArrowRight,LocateFixed,MapPin,RefreshCcw,Sun,Copy,MessageCircle} from 'lucide-react';
 import Link from '@/components/site/internal-link';
 import { ScreenTransition } from '@/components/ui/screen-transition';
 import { assessmentContextStorageKey } from '@/components/estimate/estimate-shell';
@@ -30,6 +17,11 @@ import type { EstimateAnswers, EstimateLocation, EstimateResult, FutureLoad } fr
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
 import type { PublicAssessmentConfig } from '@/lib/questionnaire/types';
 import { estimateAnswersSchema } from '@/lib/validation/estimate';
+import {designText} from '@/config/design-v2-copy';
+import {provinceOptions} from '@/config/provinces';
+import {localizedDistrictOptions} from '@/config/districts';
+import {baht,payback} from '@/lib/design-v2/figures';
+import {sharedEstimatePrefix,sharedEstimateUrl,restoreSharedEstimate} from '@/lib/design-v2/share-estimate';
 import { track } from '@/lib/analytics/track';
 
 const AddressMap = dynamic(() => import('@/components/estimate/address-map'), {
@@ -126,13 +118,23 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
   const [showMap, setShowMap] = useState(false);
   const [updateStatus, setUpdateStatus] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
+  const [shareStatus,setShareStatus]=useState('');
+  const [manualShareLink,setManualShareLink]=useState('');
+  const [shareError,setShareError]=useState('');
+  const resultFocusedRef=useRef(false);
+  const text=designText(locale);
 
   const resultHeadingRef = useRef<HTMLHeadingElement>(null);
   const resultsViewedTrackedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
-    const parsed = readAnswers();
+    let shared:EstimateAnswers|undefined;
+    if(window.location.hash.startsWith(sharedEstimatePrefix)){
+      try{shared=restoreSharedEstimate(window.location.hash);sessionStorage.setItem(storageKey,JSON.stringify(shared));}
+      catch{queueMicrotask(()=>{if(active){setShareError(english?'This shared estimate is invalid or unsupported. Start a new assessment.':'ลิงก์ผลประเมินนี้ไม่ถูกต้องหรือไม่รองรับ กรุณาเริ่มแบบประเมินใหม่');setReady(true);}});return()=>{active=false;};}
+    }
+    const parsed = shared?estimateAnswersSchema.safeParse(shared):readAnswers();
     if (!parsed.success) {
       queueMicrotask(() => { if (active) setReady(true); });
       return () => { active = false; };
@@ -152,7 +154,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       setSelectedFact(storedView?.fact ?? null);
       setLoadingDuration(storedView?.loadingDurationMs);
       setLoadingStartedAt(storedView?.loadingStartedAt);
-      if (storedView?.viewed) setJourney('result');
+      if (shared||storedView?.viewed) setJourney('result');
       else setJourney('preparing');
       setReady(true);
     };
@@ -169,7 +171,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
       .catch(() => finish(contactSafeFallback(storedConfiguration)))
       .finally(() => window.clearTimeout(timeout));
     return () => { active = false; window.clearTimeout(timeout); controller.abort(); };
-  }, []);
+  }, [english]);
 
   const result = useMemo(() => answers ? calculateEstimate(answers) : null, [answers]);
 
@@ -178,7 +180,8 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     resultsViewedTrackedRef.current = true;
     track('estimate_result_viewed', { recommendation: result.recommendation, systemKw: result.planningSystemKw });
     track('results_viewed', { language: locale, recommendation: result.recommendation });
-    const timer = window.setTimeout(() => resultHeadingRef.current?.focus(), 390);
+    if(resultFocusedRef.current)return;
+    const timer = window.setTimeout(() => {resultHeadingRef.current?.focus();resultFocusedRef.current=true;}, 390);
     return () => window.clearTimeout(timer);
   }, [journey, locale, result, selectedFact?.id]);
 
@@ -213,6 +216,16 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     persistResultView({ fact, viewed: true });
     setJourney('result');
   }, [persistResultView]);
+
+  useEffect(()=>{if(!updateStatus)return;const timer=window.setTimeout(()=>setUpdateStatus(''),2600);return()=>window.clearTimeout(timer);},[updateStatus]);
+
+  function makeShareUrl(){if(!answers)throw Error('no_estimate');return sharedEstimateUrl(answers,window.location.origin,locale);}
+  async function copyShare(){
+    try{const url=makeShareUrl();setManualShareLink(url);if(!navigator.clipboard)throw Error('clipboard_unavailable');await navigator.clipboard.writeText(url);setShareStatus(text.copied);}
+    catch{setShareStatus(english?'Could not copy automatically. Copy the link below if available.':'คัดลอกอัตโนมัติไม่ได้ คุณคัดลอกลิงก์ด้านล่างได้หากมีลิงก์แสดงอยู่');}
+  }
+  function shareLine(){try{const url=makeShareUrl();setManualShareLink(url);window.open('https://social-plugins.line.me/lineit/share?url='+encodeURIComponent(url),'_blank','noopener,noreferrer');}catch{setShareStatus(english?'This estimate cannot be shared safely.':'ไม่สามารถแชร์ผลประเมินนี้อย่างปลอดภัยได้');}}
+  function restartEstimate(){for(const key of [storageKey,resultViewStorageKey,assessmentContextStorageKey,'solarmatch:estimate-draft','solarmatch:starter'])sessionStorage.removeItem(key);window.location.assign(localizedPath('/estimate',locale));}
 
   function update<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K] | undefined, status: string) {
     setAnswers((current) => {
@@ -267,7 +280,7 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
 
   if (!ready) return <main className="results-page"><section className="site-shell result-loading" aria-busy="true"><h1>{english ? 'Your rooftop solar estimate' : 'ผลประเมินโซลาร์รูฟท็อปของคุณ'}</h1><p>{english ? 'Loading the answers saved in this browser…' : 'กำลังโหลดคำตอบที่เก็บไว้ในเบราว์เซอร์นี้…'}</p></section></main>;
 
-  if (!answers || !result) return <main className="results-page"><section className="site-shell empty-result"><Sun aria-hidden="true" /><h1>{english ? 'Start with your electricity bill' : 'เริ่มจากค่าไฟของคุณ'}</h1><p>{english ? 'Complete the short estimator to see a practical solar starting point.' : 'ตอบคำถามสั้น ๆ เพื่อดูจุดเริ่มต้นโซลาร์ที่เหมาะกับสถานที่ของคุณ'}</p><Link className="button" href={localizedPath('/estimate', locale)}>{english ? 'Start estimate' : 'เริ่มประเมิน'} <ArrowRight /></Link></section></main>;
+  if (!answers || !result) return <main className="results-page"><section className="site-shell empty-result"><Sun aria-hidden="true" /><h1>{english ? 'Start with your electricity bill' : 'เริ่มจากค่าไฟของคุณ'}</h1><p>{shareError||(english ? 'Complete the short estimator to see a practical solar starting point.' : 'ตอบคำถามสั้น ๆ เพื่อดูจุดเริ่มต้นโซลาร์ที่เหมาะกับสถานที่ของคุณ')}</p><Link className="button" href={localizedPath('/estimate', locale)}>{english ? 'Start estimate' : 'เริ่มประเมิน'} <ArrowRight /></Link></section></main>;
 
   if (journey === 'preparing' || journey === 'initializing') {
     return <ScreenTransition transitionKey="journey-preparing" direction="forward" pace="result" className="journey-transition-surface"><CalculationLoading
@@ -288,46 +301,19 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
     'site-check-first': english ? ['A roof check should come first', 'Shade or available roof space may limit the system, so a careful site assessment is the useful next step.'] : ['ควรตรวจหลังคาเป็นอันดับแรก', 'เงาบังหรือพื้นที่หลังคาอาจจำกัดระบบ การประเมินหน้างานอย่างละเอียดจึงเป็นขั้นตอนถัดไปที่เหมาะสม'],
   }[result.recommendation];
 
-  return (
-    <ScreenTransition transitionKey="journey-result" direction="forward" pace="result" className="journey-transition-surface"><main className="results-page">
-      <p className="sr-only" role="status" aria-live="polite">{english ? 'Your solar estimate is ready.' : 'ผลประเมินโซลาร์ของคุณพร้อมแล้ว'}</p>
-      <section className="result-hero-v3">
-        <div className="site-shell result-hero-grid">
-          <div className="result-recommendation">
-            <p className="eyebrow">{english ? 'Your SolarMatch estimate' : 'ผลประเมินจาก SolarMatch'}</p>
-            <h1 ref={resultHeadingRef} tabIndex={-1}>{recommendation[0]}</h1>
-            <p>{recommendation[1]}</p>
-            <div className="result-saving-headline">
-              <span>{english ? 'Estimated 25-year net savings' : 'เงินประหยัดสุทธิ 25 ปีโดยประมาณ'}</span>
-              <strong>{result.planningTwentyFiveYearNetBenefitThb > 0 ? `${english ? 'About ' : 'ประมาณ '}${money(result.planningTwentyFiveYearNetBenefitThb, locale)}` : (english ? 'Not yet positive' : 'ยังไม่เป็นบวก')}</strong>
-              <small>{english ? 'A planning estimate, not a guarantee. Includes the planning cash price and annual maintenance reserve; excludes export income, tax relief, finance costs and future electricity-price changes.' : 'เป็นค่าประเมินเพื่อวางแผน ไม่ใช่การรับประกัน โดยรวมราคาเงินสดเพื่อวางแผนและเงินสำรองค่าบำรุงรักษารายปี แต่ไม่รวมรายได้จากการขายไฟ สิทธิภาษี ต้นทุนทางการเงิน และการเปลี่ยนแปลงค่าไฟในอนาคต'}</small>
-            </div>
-          </div>
-          <div className="result-primary-metrics">
-            <article><CircleDollarSign aria-hidden="true" /><span>{english ? 'Estimated first-year bill reduction' : 'ค่าไฟปีแรกที่คาดว่าจะลดได้'}</span><strong>{english ? 'About ' : 'ประมาณ '}{money(result.planningMonthlySavingsThb, locale)}<small>/{english ? 'month' : 'เดือน'}</small></strong><p>{english ? 'About ' : 'ประมาณ '}{number(result.planningBillReductionPct, 1)}% {english ? 'of your current bill' : 'ของค่าไฟปัจจุบัน'}</p></article>
-            <article><Zap aria-hidden="true" /><span>{english ? 'Estimated starting system size' : 'ขนาดระบบเริ่มต้นโดยประมาณ'}</span><strong>{number(result.planningSystemKw, 1)} kWp</strong><p>{english ? 'Before installer design' : 'ก่อนผู้ติดตั้งออกแบบจริง'}</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section className="site-shell result-metrics-v3" aria-label={english ? 'Key estimate figures' : 'ตัวเลขสำคัญ'}>
-        <article><Banknote aria-hidden="true" /><span>{english ? 'Planning cash price' : 'ราคาเงินสดเพื่อวางแผน'}</span><strong>{money(result.planningInstalledCostThb, locale)}</strong><small>{english ? 'Current planning evidence; not a quotation' : 'อิงหลักฐานราคาเพื่อวางแผนปัจจุบัน ไม่ใช่ใบเสนอราคา'}</small></article>
-        <article><TrendingUp aria-hidden="true" /><span>{english ? 'Simple payback (first-year basis)' : 'ระยะคืนทุนอย่างง่าย (อิงปีแรก)'}</span><strong>{result.planningPaybackYears === null ? (english ? 'Not reached' : 'ยังไม่คืนทุน') : `${number(result.planningPaybackYears, 1)} ${english ? 'years' : 'ปี'}`}</strong><small>{result.planningPaybackYears === null ? (english ? 'First-year bill savings do not exceed the annual maintenance reserve.' : 'เงินประหยัดค่าไฟปีแรกยังไม่สูงกว่าเงินสำรองค่าบำรุงรักษารายปี') : (english ? 'Planning price divided by first-year bill savings after the annual maintenance reserve. Excludes finance, tax relief and future tariff changes.' : 'ราคาเพื่อวางแผนหารด้วยเงินประหยัดค่าไฟปีแรกหลังหักเงินสำรองค่าบำรุงรักษารายปี ไม่รวมต้นทุนทางการเงิน สิทธิภาษี และการเปลี่ยนแปลงอัตราค่าไฟในอนาคต')}</small></article>
-        <article><Sun aria-hidden="true" /><span>{english ? 'Estimated first-year solar generation' : 'การผลิตไฟโซลาร์ปีแรกโดยประมาณ'}</span><strong>{number(result.planningAnnualProductionKwh)} kWh</strong><small>{english ? 'Long-run solar data; not a clear-sky assumption' : 'ใช้ข้อมูลแดดระยะยาว ไม่ได้สมมติว่าฟ้าใสทุกวัน'}</small></article>
-        <article><CircleDollarSign aria-hidden="true" /><span>{english ? 'Annual maintenance/component reserve' : 'เงินสำรองค่าบำรุงรักษา/อุปกรณ์ต่อปี'}</span><strong>{money(result.planningAnnualMaintenanceReserveThb, locale)}</strong><small>{english ? '1.02% of the planning price each year' : '1.02% ของราคาเพื่อวางแผนในแต่ละปี'}</small></article>
-        <article><Gauge aria-hidden="true" /><span>{english ? 'Estimated monthly use' : 'การใช้ไฟต่อเดือนโดยประมาณ'}</span><strong>{number(result.estimatedMonthlyConsumptionKwh)} kWh</strong><small>{english ? 'Reverse-calculated from your bill' : 'คำนวณย้อนกลับจากยอดค่าไฟ'}</small></article>
-      </section>
-
-      <section className="site-shell result-service-disclaimer" aria-label={english ? 'Service and estimate disclaimer' : 'ข้อจำกัดของบริการและผลประเมิน'}>
-        <p>{legalReviewDisclosures.estimate[locale]}</p>
-        <p>{prelaunchNotice[locale]}</p>
-        {answers.projectType === 'expand-existing' && <p><strong>{english ? 'Existing-system project:' : 'โครงการระบบเดิม:'}</strong> {english ? 'Use these figures as a general planning reference only. An installer must assess the existing equipment, electrical design, warranties and available expansion capacity.' : 'ใช้ตัวเลขเหล่านี้เป็นข้อมูลอ้างอิงเบื้องต้นเท่านั้น ผู้ติดตั้งต้องตรวจสอบอุปกรณ์เดิม การออกแบบระบบไฟฟ้า การรับประกัน และความสามารถในการขยายระบบ'}</p>}
-      </section>
-
-      <section className="site-shell accuracy-upgrade" aria-labelledby="accuracy-title">
-        <details>
-          <summary><span><strong id="accuracy-title">{english ? 'Want a more precise estimate?' : 'อยากให้ค่าประเมินละเอียดขึ้น?'}</strong><small>{english ? 'Optional details update the figures immediately.' : 'ข้อมูลเสริมจะอัปเดตตัวเลขทันที'}</small></span><ChevronDown aria-hidden="true" /></summary>
-          <div className="accuracy-fields">
+  const place=[localizedDistrictOptions(answers.province,locale).find(item=>item.value===answers.district)?.label,provinceOptions.find(item=>item.value===answers.province)?.[locale]].filter(Boolean).join(', ');
+  return <ScreenTransition transitionKey="journey-result" direction="forward" pace="result" className="journey-transition-surface"><main className="results-page v2-results">
+    <p className="sr-only" role="status">{english?'Your solar estimate is ready.':'ผลประเมินโซลาร์ของคุณพร้อมแล้ว'}</p>
+    <section className="rhero"><div className="wrap rgrid"><div><p className="eyebrow">{text.rEyebrow.replace('{place}',place)}</p><div className="rbig num">{baht(result.planningMonthlySavingsThb)}</div><h1 className="rsub" ref={resultHeadingRef} tabIndex={-1}>{text.rLess}</h1><p className="muted">{text.rPct.replace('{p}',String(Math.round(result.planningBillReductionPct)))}</p><span className={'verdict'+(result.recommendation!=='strong-fit'?' careful':'')}><Sun size={16} aria-hidden="true"/>{recommendation[0]}</span>{result.planningTwentyFiveYearNetBenefitThb<0&&<p className="rfine v2-negative-warning">{text.negNote}</p>}</div><div><div className="rstats"><div><b>{result.planningSystemKw} kWp</b><span>{text.rSystem}</span></div><div><b>{baht(result.planningInstalledCostThb)}</b><span>{text.rPrice}</span></div><div><b>{payback(result.planningPaybackYears)} {result.planningPaybackYears!==null&&text.yrs}</b><span>{text.rPayback}</span></div></div><p className="rfine">{text.rFine} <Link href={localizedPath('/methodology',locale)}>{text.rHow}</Link></p></div></div></section>
+    <div className="wrap rbody"><div className="col">
+      <section className="card"><div className="card-head"><h2>{text.cTitle}</h2><div className="legend"><span><i/>{text.cWith}</span><span><i className="dash"/>{text.cWithout}</span></div></div><LifetimeCostChart data={result.lifetimeCostSeries} netBenefit={result.planningTwentyFiveYearNetBenefitThb} locale={locale}/><p className="note">{text.cNote}</p></section>
+      <section className="card"><h2>{text.billTitle}</h2><SavingsChart currentBill={result.currentMonthlyBillThb} estimatedBill={afterSolarBill} locale={locale}/><p className="eyebrow v2-top-space">{text.exTitle}</p><div className="extras"><Link className="chip chip-line" href={localizedPath('/resources',locale)}>{english?'Tax relief eligibility':'เงื่อนไขสิทธิภาษี'}</Link><a className="chip chip-line" href="https://myenergy.mea.or.th/project" target="_blank" rel="noreferrer">{english?'Surplus purchase programmes':'โครงการรับซื้อไฟส่วนเกิน'}</a></div><p className="note">{text.exNote}</p><details className="disc"><summary>{english?'Incentive conditions and sources':'เงื่อนไขและแหล่งข้อมูลสิทธิประโยชน์'}</summary><div className="in"><p>{legalReviewDisclosures.incentives[locale]}</p><small>{english?'Existing official-source review: 2 September 2026.':'ตรวจสอบแหล่งข้อมูลทางการเดิมเมื่อ 2 กันยายน 2569'}</small></div></details></section>
+      <section className="card refine v2-accuracy-upgrade" aria-labelledby="accuracy-title"><div><h2 id="accuracy-title">{text.rfTitle}</h2><p className="note">{text.rfP}</p></div><div className="grid accuracy-fields">
+            <label>{english ? 'Usable roof area (m²)' : 'พื้นที่หลังคาที่ใช้ได้ (ตร.ม.)'}<input type="number" inputMode="decimal" min="1" value={answers.exactRoofAreaSqm ?? ''} onChange={(event) => update('exactRoofAreaSqm', event.target.value ? Number(event.target.value) : undefined, english ? 'Exact roof area now limits the starting system.' : 'ใช้พื้นที่หลังคาจริงจำกัดขนาดระบบแล้ว')} /></label>
+            <label>{english ? 'Main roof direction' : 'ทิศหลักของหลังคา'}<select value={answers.roofDirection ?? 'unsure'} onChange={(event) => update('roofDirection', event.target.value as EstimateAnswers['roofDirection'], english ? 'Roof direction applied to production.' : 'ใช้ทิศหลังคาปรับผลผลิตแล้ว')}><option value="south-group">{english ? 'South / southeast / southwest' : 'ใต้ / ตะวันออกเฉียงใต้ / ตะวันตกเฉียงใต้'}</option><option value="east">{english ? 'East' : 'ตะวันออก'}</option><option value="west">{english ? 'West' : 'ตะวันตก'}</option><option value="north">{english ? 'North' : 'เหนือ'}</option><option value="flat">{english ? 'Flat roof' : 'หลังคาแบน'}</option><option value="several">{english ? 'Several directions' : 'หลายทิศ'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
+            <label>{english ? 'Roof slope' : 'ความลาดหลังคา'}<select value={answers.roofSlope ?? 'unsure'} onChange={(event) => update('roofSlope', event.target.value as EstimateAnswers['roofSlope'], english ? 'Roof slope applied to production.' : 'ใช้ความลาดหลังคาปรับผลผลิตแล้ว')}><option value="flat">{english ? 'Flat' : 'แบน'}</option><option value="gentle">{english ? 'Gentle' : 'ลาดเล็กน้อย'}</option><option value="steep">{english ? 'Steep' : 'ลาดชัน'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
+            <label>{english ? 'Electricity phase' : 'ระบบไฟฟ้า'}<select value={answers.electricityPhase ?? 'unsure'} onChange={(event) => update('electricityPhase', event.target.value as EstimateAnswers['electricityPhase'], english ? 'Phase-specific package pricing applied.' : 'ใช้ราคาตามระบบไฟฟ้าแล้ว')}><option value="single">{english ? 'Single phase' : '1 เฟส'}</option><option value="three">{english ? 'Three phase' : '3 เฟส'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
+      </div><details className="disc"><summary>{english?'More optional details':'รายละเอียดเพิ่มเติม (ไม่บังคับ)'}</summary><div className="in">
             <div className="accuracy-map-block">
               <label htmlFor="precision-address">{english ? 'Exact address (optional)' : 'ที่อยู่เต็ม (ไม่บังคับ)'}<input id="precision-address" autoComplete="street-address" value={answers.location?.address ?? ''} onChange={(event) => {
                 const next = answers.location ? { ...answers.location, address: event.target.value, confirmed: false } : makeInitialLocation(event.target.value);
@@ -342,26 +328,14 @@ export function ResultsShell({ locale = 'th' }: { locale?: Locale }) {
               }}>{mapProvinces.map((province) => <option value={province.value} key={province.value}>{province[locale]}</option>)}</select></label><AddressMap locale={locale} location={answers.location} onChange={(location) => updateLocation({ ...location, confirmed: true })} /><p className="map-provider-note">{english ? 'OpenStreetMap receives ordinary tile requests for the area you view. Your typed address is not sent to a geocoder.' : 'OpenStreetMap ได้รับคำขอแผนที่ตามพื้นที่ที่เปิดดู แต่ข้อความที่อยู่ไม่ได้ถูกส่งไปค้นหาพิกัด'}</p></div>}
             </div>
 
-            <label>{english ? 'Usable roof area (m²)' : 'พื้นที่หลังคาที่ใช้ได้ (ตร.ม.)'}<input type="number" inputMode="decimal" min="1" value={answers.exactRoofAreaSqm ?? ''} onChange={(event) => update('exactRoofAreaSqm', event.target.value ? Number(event.target.value) : undefined, english ? 'Exact roof area now limits the starting system.' : 'ใช้พื้นที่หลังคาจริงจำกัดขนาดระบบแล้ว')} /></label>
-            <label>{english ? 'Main roof direction' : 'ทิศหลักของหลังคา'}<select value={answers.roofDirection ?? 'unsure'} onChange={(event) => update('roofDirection', event.target.value as EstimateAnswers['roofDirection'], english ? 'Roof direction applied to production.' : 'ใช้ทิศหลังคาปรับผลผลิตแล้ว')}><option value="south-group">{english ? 'South / southeast / southwest' : 'ใต้ / ตะวันออกเฉียงใต้ / ตะวันตกเฉียงใต้'}</option><option value="east">{english ? 'East' : 'ตะวันออก'}</option><option value="west">{english ? 'West' : 'ตะวันตก'}</option><option value="north">{english ? 'North' : 'เหนือ'}</option><option value="flat">{english ? 'Flat roof' : 'หลังคาแบน'}</option><option value="several">{english ? 'Several directions' : 'หลายทิศ'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
-            <label>{english ? 'Roof slope' : 'ความลาดหลังคา'}<select value={answers.roofSlope ?? 'unsure'} onChange={(event) => update('roofSlope', event.target.value as EstimateAnswers['roofSlope'], english ? 'Roof slope applied to production.' : 'ใช้ความลาดหลังคาปรับผลผลิตแล้ว')}><option value="flat">{english ? 'Flat' : 'แบน'}</option><option value="gentle">{english ? 'Gentle' : 'ลาดเล็กน้อย'}</option><option value="steep">{english ? 'Steep' : 'ลาดชัน'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
-            <label>{english ? 'Electricity phase' : 'ระบบไฟฟ้า'}<select value={answers.electricityPhase ?? 'unsure'} onChange={(event) => update('electricityPhase', event.target.value as EstimateAnswers['electricityPhase'], english ? 'Phase-specific package pricing applied.' : 'ใช้ราคาตามระบบไฟฟ้าแล้ว')}><option value="single">{english ? 'Single phase' : '1 เฟส'}</option><option value="three">{english ? 'Three phase' : '3 เฟส'}</option><option value="unsure">{english ? 'Unsure' : 'ไม่แน่ใจ'}</option></select></label>
             <fieldset className="future-loads"><legend>{english ? 'Planned future electricity use' : 'การใช้ไฟที่วางแผนเพิ่มในอนาคต'}</legend>{([
               ['ev', english ? 'EV' : 'รถไฟฟ้า'], ['air-conditioning', english ? 'More air conditioning' : 'เพิ่มเครื่องปรับอากาศ'], ['pump', english ? 'Pool or water pump' : 'ปั๊มน้ำหรือปั๊มสระ'], ['none', english ? 'None planned' : 'ยังไม่มีแผน'], ['unsure', english ? 'Unsure' : 'ไม่แน่ใจ'],
-            ] as const).map(([value, label]) => <label key={value}><input type="checkbox" checked={answers.futureLoads?.includes(value) ?? false} onChange={() => toggleFutureLoad(value)} /> {label}</label>)}</fieldset>
-          </div>
-          {updateStatus && <p className="calculation-updated" role="status"><RefreshCcw aria-hidden="true" /> {updateStatus}</p>}
-        </details>
-      </section>
-
-      <section className="site-shell results-explanation">
-        <div className="result-chart-card"><div><p className="eyebrow">{english ? 'Monthly effect' : 'ผลต่อค่าไฟต่อเดือน'}</p><h2>{english ? 'Estimated monthly bill before and after solar' : 'ค่าไฟต่อเดือนโดยประมาณก่อนและหลังติดโซลาร์'}</h2></div><SavingsChart currentBill={result.currentMonthlyBillThb} estimatedBill={afterSolarBill} locale={locale} /><table className="sr-only"><caption>{english ? 'Monthly bill comparison' : 'เปรียบเทียบค่าไฟต่อเดือน'}</caption><tbody><tr><th>{english ? 'Before solar' : 'ก่อนติดโซลาร์'}</th><td>{money(result.currentMonthlyBillThb, locale)}</td></tr><tr><th>{english ? 'After solar estimate' : 'หลังติดโซลาร์โดยประมาณ'}</th><td>{money(afterSolarBill, locale)}</td></tr></tbody></table></div>
-        <div className="result-chart-card"><div><p className="eyebrow">{english ? '25-year view' : 'มุมมอง 25 ปี'}</p><h2>{english ? 'Estimated cumulative cost with and without solar' : 'ต้นทุนสะสมโดยประมาณเมื่อติดและไม่ติดโซลาร์'}</h2></div><LifetimeCostChart data={result.lifetimeCostSeries} locale={locale} /><p className="chart-method-note">{english ? 'With-solar costs include the planning cash price and annual maintenance reserve and reflect 0.5% yearly module degradation. Export income, tax relief, finance costs and future electricity-price changes are excluded.' : 'ต้นทุนเมื่อติดโซลาร์รวมราคาเงินสดเพื่อวางแผนและเงินสำรองค่าบำรุงรักษารายปี พร้อมคำนวณการเสื่อมของแผง 0.5% ต่อปี โดยไม่รวมรายได้จากการขายไฟ สิทธิภาษี ต้นทุนทางการเงิน และการเปลี่ยนแปลงค่าไฟในอนาคต'}</p><table className="accessible-data-table"><caption>{english ? 'Key lifetime cost points' : 'จุดสำคัญของต้นทุนระยะยาว'}</caption><thead><tr><th>{english ? 'Year' : 'ปี'}</th><th>{english ? 'Without solar' : 'ไม่ติดโซลาร์'}</th><th>{english ? 'With solar' : 'ติดโซลาร์'}</th></tr></thead><tbody>{result.lifetimeCostSeries.filter((row) => [0, 5, 10, 15, 20, 25].includes(row.year)).map((row) => <tr key={row.year}><td>{row.year}</td><td>{money(row.withoutSolarThb, locale)}</td><td>{money(row.withSolarThb, locale)}</td></tr>)}</tbody></table></div>
-      </section>
-
-      <section className="site-shell result-policy-note"><BadgeCheck aria-hidden="true" /><div><h2>{english ? 'You may be eligible for tax relief and surplus payments' : 'คุณอาจมีสิทธิ์ได้รับสิทธิลดหย่อนภาษีและรายได้จากไฟส่วนเกิน'}</h2><p>{legalReviewDisclosures.incentives[locale]}</p><small>{english ? 'Official sources reviewed 2 September 2026: ' : 'ตรวจสอบแหล่งข้อมูลทางการเมื่อ 2 กันยายน 2569: '}<a href="https://myenergy.mea.or.th/project" target="_blank" rel="noreferrer">{english ? 'MEA residential solar programmes' : 'โครงการโซลาร์บ้านของ MEA'}</a></small></div></section>
-
-      <section className="site-shell result-methodology-summary"><div><p className="eyebrow">{english ? 'How the estimate works' : 'ค่าประเมินมาจากไหน'}</p><h2>{english ? 'Every displayed figure has a traceable basis' : 'ทุกตัวเลขที่แสดงมีที่มาที่ตรวจสอบได้'}</h2></div><div className="trace-list">{result.trace.map((item) => <article key={item.labelEn}><strong>{english ? item.labelEn : item.labelTh}</strong><span>{english ? item.value : item.valueTh ?? item.value}</span><small>{english ? item.basisEn : item.basisTh}{item.sourceUrl && <> · <a href={item.sourceUrl} target="_blank" rel="noreferrer">{english ? item.sourceLabelEn : item.sourceLabelTh}</a></>}</small></article>)}</div><p>{english ? `Tariff used: ${result.tariffLabelEn}.` : `อัตราค่าไฟที่ใช้: ${result.tariffLabelTh}`}</p><Link className="text-link" href={localizedPath('/methodology', locale)}>{english ? 'Read the public methodology' : 'อ่านวิธีคำนวณฉบับสาธารณะ'} <ArrowRight /></Link></section>
-    </main></ScreenTransition>
-  );
+            ] as const).map(([value, label]) => <label key={value}><input type="checkbox" checked={answers.futureLoads?.includes(value) ?? false} onChange={() => toggleFutureLoad(value)} /> {label}</label>)}</fieldset></div></details></section>
+    </div><div className="col">
+      <section className="card nextsteps"><h2>{text.nsTitle}</h2><div className="row"><button className="btn btn-primary btn-sm" type="button" onClick={shareLine}><MessageCircle aria-hidden="true"/>{text.nsLine}</button><button className="btn btn-soft btn-sm" type="button" onClick={copyShare}><Copy aria-hidden="true"/>{text.nsCopy}</button></div><p className="note">{english?'The link contains your coarse area, bill and selected assessment and roof inputs. It is not anonymous or encrypted. Contact details, exact location and custom text are excluded; figures may differ if excluded details affected the original estimate.':'ลิงก์มีพื้นที่โดยคร่าว ค่าไฟ และคำตอบเกี่ยวกับบ้านและหลังคาที่เลือกไว้ ไม่ใช่ข้อมูลนิรนามหรือข้อมูลที่เข้ารหัส โดยไม่รวมข้อมูลติดต่อ ตำแหน่งที่แน่นอน หรือข้อความที่กรอกเอง ตัวเลขอาจต่างไปหากข้อมูลที่ไม่แชร์มีผลต่อผลประเมินเดิม'}</p>{shareStatus&&<p role="status">{shareStatus}</p>}{manualShareLink&&<label className="v2-share-fallback">{english?'Estimate link':'ลิงก์ผลประเมิน'}<textarea readOnly value={manualShareLink} onFocus={event=>event.currentTarget.select()}/></label>}<details className="disc"><summary>{text.qaTitle}</summary><div className="in"><ul className="checklist">{text.qa.map(q=><li key={q}>{q}</li>)}</ul></div></details><div className="setrow"><div className="t"><b>{text.mtTitle}</b><span>{text.mtP}</span></div><span className="chip chip-gold">{text.soon}</span></div></section>
+      <section className="card"><h2>{text.dfTitle}</h2><p className="muted">{text.dfP}</p></section>
+      <section className="card v2-breakdown"><details className="disc"><summary>{text.bdTitle}</summary><div className="in"><p>{recommendation[1]}</p><div className="kv">{[[text.bd.use,number(result.estimatedMonthlyConsumptionKwh)+' kWh'],[text.bd.gen,number(result.planningAnnualProductionKwh)+' kWh'],[text.bd.self,number(result.planningAnnualSelfConsumedKwh)+' kWh'],[text.bd.exp,number(result.planningAnnualExportedKwh)+' kWh'],[text.bd.after,money(result.planningAfterSolarMonthlyBillThb,locale)],[text.bd.maint,money(result.planningAnnualMaintenanceReserveThb,locale)],[text.bd.net,baht(result.planningTwentyFiveYearNetBenefitThb)],[text.bd.tariff,english?result.tariffLabelEn:result.tariffLabelTh],[text.bd.method,result.assumptionVersion]].map(([label,value])=><div key={label}><span>{label}</span><b>{value}</b></div>)}</div><h3>{english?'Every displayed figure has a traceable basis':'ทุกตัวเลขที่แสดงมีที่มาที่ตรวจสอบได้'}</h3><div className="trace-list">{result.trace.map(item=><article key={item.labelEn}><strong>{english?item.labelEn:item.labelTh}</strong><span>{english?item.value:item.valueTh??item.value}</span><small>{english?item.basisEn:item.basisTh}{item.sourceUrl&&<> · <a href={item.sourceUrl} target="_blank" rel="noreferrer">{english?item.sourceLabelEn:item.sourceLabelTh}</a></>}</small></article>)}</div><table className="accessible-data-table"><caption>{english?'Key lifetime cost points':'จุดสำคัญของต้นทุนระยะยาว'}</caption><thead><tr><th>{english?'Year':'ปี'}</th><th>{text.cWithout}</th><th>{text.cWith}</th></tr></thead><tbody>{result.lifetimeCostSeries.filter(row=>[0,5,10,15,20,25].includes(row.year)).map(row=><tr key={row.year}><td>{row.year}</td><td>{baht(row.withoutSolarThb)}</td><td>{baht(row.withSolarThb)}</td></tr>)}</tbody></table><p>{legalReviewDisclosures.estimate[locale]}</p><p>{prelaunchNotice[locale]}</p>{answers.projectType==='expand-existing'&&<p>{english?'Existing-system project: use these figures as a general planning reference only. An installer must assess the existing equipment, electrical design, warranties and available expansion capacity.':'โครงการระบบเดิม: ใช้ตัวเลขเหล่านี้เป็นข้อมูลอ้างอิงเบื้องต้นเท่านั้น ผู้ติดตั้งต้องตรวจสอบอุปกรณ์เดิม การออกแบบระบบไฟฟ้า การรับประกัน และความสามารถในการขยายระบบ'}</p>}</div></details></section>
+      <div className="v2-result-actions"><Link className="btn btn-ghost btn-sm" href={localizedPath('/estimate',locale)}>{text.change}</Link><button type="button" className="btn btn-ghost btn-sm" onClick={restartEstimate}>{text.restart}</button></div>
+    </div></div>{updateStatus&&<div className="toast show" role="status"><RefreshCcw size={16} aria-hidden="true"/>{updateStatus}</div>}
+  </main></ScreenTransition>;
 }
