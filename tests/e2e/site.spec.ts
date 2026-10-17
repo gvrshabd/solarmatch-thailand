@@ -278,24 +278,51 @@ test('optional precision details visibly recalculate results', async ({ page }) 
   const productionCard = page.locator('.kv > div').filter({ hasText: 'Yearly generation' });
   await expect(productionCard).toBeVisible({ timeout: 10_000 });
   const production = productionCard.locator('b');
-  const before = await production.textContent();
-  await page.getByText('More optional details',{exact:true}).click();
-  await page.getByLabel('Main roof direction').selectOption('north');
-  await page.getByLabel('Roof slope').selectOption('steep');
-  await expect(page.locator('.toast[role="status"]')).toContainText('Roof slope applied');
-  await expect(production).not.toHaveText(before ?? '');
+  await expect(page.locator('.calculator-model-details')).toContainText('Saved legacy estimate');
+  const legacyProduction = await production.textContent();
+  await page.getByRole('button', { name: 'Recalculate with current model', exact: true }).click();
+  await expect(page.locator('.calculator-model-details')).toContainText('residential-hourly-2026-10-17-v3');
+  await expect(production).not.toHaveText(legacyProduction ?? '');
+  const modernProduction = await production.textContent();
+  await page.getByRole('spinbutton', { name: 'Panel tilt from horizontal (0–90°)', exact: true }).fill('60');
+  await page.getByRole('spinbutton', { name: /^Panel compass direction/ }).fill('0');
+  await expect(page.locator('.toast[role="status"]')).toContainText('Estimate updated from the revised inputs');
+  await expect(production).not.toHaveText(modernProduction ?? '');
+  const saved = await page.evaluate(() => JSON.parse(sessionStorage.getItem('solarmatch:estimate')!));
+  expect(saved.estimateModelVersion).toBe('energy-v3');
+  expect(saved.panelTiltDegrees).toBe(60);
+  expect(saved.panelAzimuthDegrees).toBe(0);
 });
 
-test('optional map never sends the typed address to a geocoder', async ({ page }) => {
+test('optional map removal keeps a saved legacy address private through render and recalculation', async ({ page }) => {
   const requests: string[] = [];
-  page.on('request', (request) => requests.push(request.url()));
-  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), savedEstimate);
+  const address = '777 Privacy Test Lane Bangkok';
+  page.on('request', (request) => requests.push(request.url() + ' ' + (request.postData() ?? '')));
+  await page.addInitScript((estimate) => sessionStorage.setItem('solarmatch:estimate', JSON.stringify(estimate)), {
+    ...savedEstimate, location: { address, latitude: 13.712345, longitude: 100.512345, province: 'bangkok', source: 'manual-map', confirmed: true },
+  });
   await page.goto('/en/estimate/results');
-  await page.getByText('More optional details',{exact:true}).click();
-  await page.getByLabel('Exact address (optional)').fill('777 Privacy Test Lane Bangkok');
-  await page.getByRole('button', { name: 'Position on map' }).click();
-  await expect(page.getByRole('button', { name: 'Put marker at map centre' })).toBeVisible();
-  expect(requests.some((url) => decodeURIComponent(url).includes('777 Privacy Test Lane'))).toBe(false);
+  await expect(page.locator('.calculator-model-details')).toContainText('Saved legacy estimate');
+  for (const modern of [false, true]) {
+    if (modern) {
+      await page.getByRole('button', { name: 'Recalculate with current model', exact: true }).click();
+      await expect(page.locator('.calculator-model-details')).toContainText('residential-hourly-2026-10-17-v3');
+    }
+    await expect(page.getByRole('textbox', { name: 'Exact address (optional)', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Position on map|Put marker at map centre|current location/i })).toHaveCount(0);
+    await expect(page.locator('main')).not.toContainText(address);
+    await page.getByRole('button', { name: 'Copy link', exact: true }).click();
+    const link = await page.getByRole('textbox', { name: 'Estimate link', exact: true }).inputValue();
+    const payload = JSON.parse(decodeURIComponent(new URL(link).hash.slice('#sm-estimate='.length)));
+    expect(payload.version).toBe(modern ? 2 : 1);
+    expect(payload.inputs.location).toBeUndefined();
+    expect(JSON.stringify(payload)).not.toContain(address);
+    expect(JSON.stringify(payload)).not.toMatch(/13\.712345|100\.512345/);
+  }
+  const saved = await page.evaluate(() => JSON.parse(sessionStorage.getItem('solarmatch:estimate')!));
+  expect(saved.location.address).toBe(address);
+  expect(requests.some(value => decodeURIComponent(value).includes(address))).toBe(false);
+  expect(requests.filter(value => /nominatim|geocod|maps\.google|api\.mapbox/i.test(value))).toEqual([]);
 });
 
 test('disabled contact release requests no personal information', async ({ page }) => {

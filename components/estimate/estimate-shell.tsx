@@ -35,6 +35,23 @@ function freshDraft(questionnaire: QuestionnaireDocument, referenceDate = curren
   return questionnaire.schemaVersion >= 10 ? { estimateModelVersion: 'energy-v3', calculationReferenceDate: referenceDate, consumptionInput: 'bill' } : {};
 }
 
+function isMatchingReadOnlyModernConfiguration(configuration: PublicAssessmentConfig): boolean {
+  return configuration.questionnaire.id === calculatorV3Questionnaire.id
+    && configuration.questionnaire.schemaVersion === calculatorV3Questionnaire.schemaVersion
+    && configuration.questionnaireVersionId === calculatorV3Questionnaire.id
+    && configuration.calculatorModelVersion === 'energy-v3'
+    && configuration.assessmentToken === null
+    && configuration.assessmentTokenExpiresAt === null
+    && configuration.liveLeadSubmissions === false
+    && configuration.publicCollectionEnabled === false
+    && configuration.restrictedSiteCollectionEnabled === false
+    && configuration.contact.mode === 'disabled'
+    && configuration.contact.enabled === false
+    && configuration.contact.publicCollectionEnabled === false
+    && configuration.contact.restrictedSiteCollectionEnabled === false
+    && configuration.contact.operationalDistributionEnabled === false;
+}
+
 function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
   const privacyLabel = locale === 'en' ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว';
   const privacyIndex = copy.lastIndexOf(privacyLabel);
@@ -264,7 +281,16 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
       .then(async (response) => response.ok ? response.json() as Promise<PublicAssessmentConfig> : Promise.reject(new Error('unavailable')))
       .then((configuration) => {
-        if (!active || interactionRef.current || restoredModernRef.current) return;
+        if (!active) return;
+        if (interactionRef.current || restoredModernRef.current) {
+          if (!isMatchingReadOnlyModernConfiguration(configuration)) return;
+          // Restore facts and test-copy availability without changing the active
+          // questionnaire, answers, reference date or collection permissions.
+          const readOnlyContext = { ...configuration, calculationReferenceDate: undefined };
+          setAssessmentConfig(readOnlyContext);
+          writeSessionValue(assessmentContextStorageKey, readOnlyContext);
+          return;
+        }
         setAssessmentConfig(configuration);
         setQuestionnaire(configuration.questionnaire);
         setDraft(current => configuration.questionnaire.schemaVersion < 10

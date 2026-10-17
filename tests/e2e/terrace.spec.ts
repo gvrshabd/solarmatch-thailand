@@ -15,9 +15,21 @@ test('Terrace static surfaces retain accessibility and stay within the viewport'
   const requests: string[] = [];
   page.on('request', (request) => requests.push(request.url()));
   for (const route of ['/en', '/', '/en/estimate', '/estimate', '/en/estimate/results', '/estimate/results', '/en/privacy', '/privacy']) {
+    const configurationResponse = route.endsWith('/estimate')
+      ? page.waitForResponse(response => new URL(response.url()).pathname === '/api/assessment/config' && response.ok()) : null;
     await page.goto(route);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
+    if (route.endsWith('/estimate')) {
+      const response = await configurationResponse!;
+      await response.finished();
+      const configuration = await response.json();
+      const locale = route.startsWith('/en') ? 'en' : 'th';
+      await expect(page.locator('#estimate-question')).toHaveText(configuration.questionnaire.questions[0].title[locale]);
+      // Axe must inspect the settled question, not its translucent entry frame.
+      await expect(page.locator('.hydration-fieldset')).toBeEnabled();
+      await expect(page.locator('.question-stage')).toHaveCSS('opacity', '1');
+    }
     if (route.includes('results')) {
       await expect(page.locator('.rstats > div')).toHaveCount(3, { timeout: 15_000 });
       await expect(page.locator('.results-page')).toHaveCSS('opacity', '1');

@@ -2,6 +2,8 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { calculatorV3Questionnaire, initialQuestionnaire } from '../../config/assessment';
 import { contactContent } from '../../config/contact-content';
+import { contactReviewCopy } from '../../config/contact-review';
+import { initialLoadingFactSet } from '../../config/loading-facts';
 import type { EstimateAnswers } from '../../lib/calculator/types';
 import type { PublicAssessmentConfig } from '../../lib/questionnaire/types';
 import { calculateFinanceScenario } from '../../lib/calculator/scenarios';
@@ -64,13 +66,12 @@ function legacyConfiguration(): PublicAssessmentConfig {
   };
 }
 
-async function holdLegacyConfiguration(page: Page) {
+async function holdLegacyConfiguration(page: Page, configuration = legacyConfiguration()) {
   await localApis(page);
   let release!: () => void;
   let requested!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
   const seen = new Promise<void>(resolve => { requested = resolve; });
-  const configuration = legacyConfiguration();
   await page.route('**/api/assessment/config', async route => {
     requested();
     await gate;
@@ -163,6 +164,43 @@ test('a restored modern v10 journey rejects q6 questionnaire, release and token'
   expect(JSON.stringify(storage)).not.toContain(held.configuration.releaseId);
   expect(JSON.stringify(storage)).not.toContain(held.configuration.assessmentToken!);
   expect(saved.questionnaireVersionId).not.toBe(initialQuestionnaire.id);
+});
+
+test('a restored modern v10 journey hydrates matching read-only q7 facts without moving its step or reference date', async ({ page }) => {
+  const configuration: PublicAssessmentConfig = {
+    ...legacyConfiguration(), calculatorModelVersion: 'energy-v3', calculationReferenceDate: '2026-10-18',
+    questionnaire: calculatorV3Questionnaire, questionnaireVersionId: calculatorV3Questionnaire.id,
+    releaseId: 'synthetic-read-only-q7-release', assessmentToken: null, assessmentTokenExpiresAt: null,
+    loadingFactSetVersionId: initialLoadingFactSet.id,
+    loadingFacts: initialLoadingFactSet.facts.map(fact => ({ ...fact, imageUrl: `/images/loading-facts/${fact.sketchId}.svg` })),
+  };
+  const held = await holdLegacyConfiguration(page, configuration);
+  const step = calculatorV3Questionnaire.questions.length - 1;
+  await page.addInitScript(({ answers, step, questionnaireVersionId }) => sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({
+    version: 10, step, answers, questionnaireVersionId,
+  })), { answers: modern, step, questionnaireVersionId: calculatorV3Questionnaire.id });
+  await page.goto('/en/estimate');
+  await held.requested;
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(step + 1));
+  const before = await page.evaluate(() => JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft')!));
+  await held.release();
+  await expect(page.getByRole('radio').filter({ has: page.getByText(contactReviewCopy.label.en, { exact: true }) })).toBeVisible();
+  await expect(page.locator('#estimate-question')).toHaveText(calculatorV3Questionnaire.questions[step].title.en);
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(step + 1));
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuemax', String(calculatorV3Questionnaire.questions.length));
+  const storage = await browserStorage(page);
+  const saved = JSON.parse(storage.session['solarmatch:estimate-draft']);
+  const context = JSON.parse(storage.session['solarmatch:assessment-context']);
+  expect(saved.step).toBe(step);
+  expect(saved.answers).toEqual(before.answers);
+  expect(saved.answers.calculationReferenceDate).toBe('2026-10-17');
+  expect(context.calculationReferenceDate).toBeUndefined();
+  expect(context.loadingFactSetVersionId).toBe(initialLoadingFactSet.id);
+  expect(context.loadingFacts).toEqual(configuration.loadingFacts);
+  expect(context.contact.mode).toBe('disabled');
+  expect(context.assessmentToken).toBeNull();
+  expect(context.liveLeadSubmissions).toBe(false);
+  await expect(page.locator('input[autocomplete="tel"]')).toHaveCount(0);
 });
 
 test('a q6 response arriving after q7 interaction cannot replace its question sequence or token scope', async ({ page }) => {
@@ -530,6 +568,11 @@ for (const locale of ['en', 'th'] as const) {
     }
     await expect(page).toHaveURL(new RegExp((locale === 'en' ? '/en' : '') + '/estimate/results$'));
     await expect(page.locator('.calculator-model-details')).toContainText('residential-hourly-2026-10-17-v3', { timeout: 20_000 });
+    const modeledBill = page.locator('section.card').filter({ has: page.getByRole('heading', {
+      name: locale === 'en' ? 'Modeled monthly bill' : 'ค่าไฟรายเดือนตามแบบจำลอง', exact: true,
+    }) });
+    await expect(modeledBill.getByText(locale === 'en' ? 'Without solar' : 'ไม่ติดโซลาร์', { exact: true })).toBeVisible();
+    await expect(modeledBill.getByText(locale === 'en' ? 'Today' : 'ตอนนี้', { exact: true })).toHaveCount(0);
     await expect(page.locator('input[autocomplete="tel"]')).toHaveCount(0);
     const saved = await page.evaluate(() => JSON.parse(sessionStorage.getItem('solarmatch:estimate')!));
     expect(saved.estimateModelVersion).toBe('energy-v3');
