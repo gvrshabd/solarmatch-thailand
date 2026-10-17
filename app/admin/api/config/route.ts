@@ -5,6 +5,7 @@ import type { LoadingFact, LoadingFactSet } from '@/lib/loading-facts/types';
 import { validateScoringConfiguration } from '@/lib/qualification/scoring';
 import type { ContactCollectionMode, QuestionnaireDocument } from '@/lib/questionnaire/types';
 import { questionnaireDocumentSchema, scoringConfigurationSchema } from '@/lib/questionnaire/validation';
+import { assessmentReleaseContract } from '@/lib/questionnaire/release-contract';
 import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { assessContactReadiness, type ContactConfigurationRow } from '@/lib/server/contact-mode';
@@ -202,6 +203,15 @@ async function createRelease(
     recipientUrl = resolvedMode === 'named_installer_handoff' && row.receiving_company_privacy_url ? String(row.receiving_company_privacy_url) : null;
     retention = row.retention_days === null || row.retention_days === undefined ? null : Number(row.retention_days);
   }
+  const candidateQuestionnaire = await database.prepare('SELECT document_json FROM questionnaire_versions WHERE id = ?')
+    .bind(questionnaire).first<{ document_json: string }>();
+  const candidateRules = await database.prepare('SELECT configuration_json FROM rule_versions WHERE id = ?')
+    .bind(rules).first<{ configuration_json: string }>();
+  if (!candidateQuestionnaire || !candidateRules) throw new Error('assessment_release_contract_incompatible');
+  const contract = assessmentReleaseContract(JSON.parse(candidateQuestionnaire.document_json) as QuestionnaireDocument, questionnaire, rules);
+  if (contract.calculatorModelVersion === 'energy-v3' && JSON.parse(candidateRules.configuration_json).id !== rules) {
+    throw new Error('assessment_rules_version_mismatch');
+  }
   await database.batch([
     database.prepare(`UPDATE ${versionTable} SET state = 'archived', archived_at = CURRENT_TIMESTAMP WHERE state = 'published' AND id <> ?`).bind(versionId),
     database.prepare(`UPDATE ${versionTable} SET state = 'published', published_by = ?, published_at = CURRENT_TIMESTAMP WHERE id = ? AND state = 'draft'`).bind(identityEmail, versionId),
@@ -365,6 +375,8 @@ export async function POST(request: Request) {
     const releaseId = await createRelease(database, identity.email, body.kind, body.versionId, descriptor.table);
     return NextResponse.json({ ok: true, releaseId });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'release_publish_failed' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'release_publish_failed';
+    const incompatible = ['assessment_release_contract_incompatible', 'assessment_questionnaire_version_mismatch', 'assessment_rules_version_mismatch'].includes(message);
+    return NextResponse.json({ error: message }, { status: incompatible ? 409 : 500 });
   }
 }

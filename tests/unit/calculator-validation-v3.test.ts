@@ -96,12 +96,13 @@ describe('calculator v3 schema and historic compatibility', () => {
 });
 
 describe('read-only protected staging questionnaire preview', () => {
-  it('returns v7 with no database initialization, tokens, live contact or operational sharing', async () => {
+  it('returns bill-first v8 with no database initialization, tokens, live contact or operational sharing', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-16T17:00:00Z'));
     const request = new Request(`${runtime.INSTALLER_BASE_URL}/api/assessment/config`);
     const config = await getPublicAssessmentConfig({ restrictedAccess: true, request });
-    expect(config).toMatchObject({ questionnaireVersionId: 'residential-questionnaire-v7', calculatorModelVersion: 'energy-v3', calculationReferenceDate: '2026-10-17',
+    expect(config).toMatchObject({ questionnaireVersionId: 'residential-questionnaire-v8', calculatorModelVersion: 'energy-v3', calculationReferenceDate: '2026-10-17',
+      contactReviewAvailable: true,
       assessmentToken: null, assessmentTokenExpiresAt: null, liveLeadSubmissions: false, restrictedSiteCollectionEnabled: false, publicCollectionEnabled: false,
       contact: { enabled: false, preview: true, mode: 'disabled', operationalDistributionEnabled: false, sharedFields: [], permittedContactMethods: [] } });
     expect(databaseCall).not.toHaveBeenCalled();
@@ -112,7 +113,7 @@ describe('read-only protected staging questionnaire preview', () => {
     vi.setSystemTime(new Date('2026-12-31T17:00:00Z'));
     const request = new Request(`${runtime.INSTALLER_BASE_URL}/api/assessment/config`);
     const config = await calculatorV3StagingPreviewConfiguration({ restrictedAccess: true, request }, runtime);
-    expect(config).toMatchObject({ calculationReferenceDate: '2027-01-01', questionnaireVersionId: 'residential-questionnaire-v7', assessmentToken: null });
+    expect(config).toMatchObject({ calculationReferenceDate: '2027-01-01', questionnaireVersionId: 'residential-questionnaire-v8', assessmentToken: null });
     expect(databaseCall).not.toHaveBeenCalled();
   });
 

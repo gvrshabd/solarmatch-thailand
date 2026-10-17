@@ -22,7 +22,7 @@ const optionSchema = z.object({
 
 export const questionnaireDocumentSchema = z.object({
   id: z.string().min(1).max(100),
-  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10)]),
+  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10), z.literal(11)]),
   questions: z.array(z.object({
     id: z.enum(['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'quoteContactRequested', 'installationTimeframe']),
     type: z.enum(['province', 'bill', 'choice', 'multichoice']),
@@ -68,6 +68,11 @@ export const questionnaireDocumentSchema = z.object({
     const expected = ['projectType', 'province', 'monthlyBillThb', 'daytimePattern', 'roofArea', 'shade', 'propertyType', 'ownershipStatus', 'activelyPlanningSolar', 'daytimeLoads', 'roofMaterial', 'quoteContactRequested'];
     if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 10 must preserve the twelve-step calculator accuracy order.' });
     if (!document.questions.find(question => question.id === 'roofArea')?.required) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 10 requires a roof-area answer, including an explicit unsure option.' });
+  }
+  if (document.schemaVersion === 11) {
+    const expected = ['monthlyBillThb', 'projectType', 'province', 'daytimePattern', 'roofArea', 'shade', 'propertyType', 'ownershipStatus', 'activelyPlanningSolar', 'daytimeLoads', 'roofMaterial', 'quoteContactRequested'];
+    if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 11 must use the bill-first twelve-step homeowner order.' });
+    if (document.questions.some(question => !question.required)) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 11 preserves every required assessment fact, including roof area and installed appliances.' });
   }
   document.questions.forEach((question, questionIndex) => {
     const values = question.options?.map((option) => option.value) ?? [];

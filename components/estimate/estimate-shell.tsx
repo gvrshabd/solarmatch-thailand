@@ -8,19 +8,20 @@ import {
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
 import { EnergyInputFields } from './energy-input-fields';
-import { DistrictCombobox } from './district-combobox';
 import { LeadCapture } from '@/components/lead/lead-capture';
 import { CalculationLoading } from '@/components/results/calculation-loading';
 import Link from '@/components/site/internal-link';
+import { AssessmentFocusHeader } from '@/components/site/site-header';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
-import { calculatorV3Questionnaire, initialQuestionnaire } from '@/config/assessment';
+import { homeownerDesignV3Questionnaire } from '@/config/assessment';
+import { restoredQuestionPosition } from '@/lib/questionnaire/draft-position';
 import { currentCalculationDate } from '@/config/electricity-tariffs';
 import { lockedSharedConsentCopy } from '@/config/contact-content';
 import { contactReviewCopy } from '@/config/contact-review';
 import { prelaunchNotice } from '@/config/legal-review';
 import { localizedDistrictOptions } from '@/config/districts';
 import { localizedPath, type Locale } from '@/config/i18n';
-import { provinceOptions,initialLaunchProvinces } from '@/config/provinces';
+import { provinceOptions } from '@/config/provinces';
 import {designText} from '@/config/design-v2-copy';
 import { track } from '@/lib/analytics/track';
 import { calculateEstimate } from '@/lib/calculator';
@@ -30,15 +31,22 @@ import type { PublicLoadingFact } from '@/lib/loading-facts/types';
 import type { AssessmentQuestion, ConditionalField, PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questionnaire/types';
 
 type Draft = Partial<EstimateAnswers>;
+const summaryLabels: Partial<Record<AssessmentQuestion['id'], Record<Locale, string>>> = {
+  monthlyBillThb: { en: 'Electricity use', th: 'การใช้ไฟ' }, province: { en: 'Location', th: 'พื้นที่' },
+  projectType: { en: 'Project', th: 'โครงการ' }, propertyType: { en: 'Home', th: 'ที่พักอาศัย' },
+  ownershipStatus: { en: 'Relationship', th: 'สถานะต่อบ้าน' }, activelyPlanningSolar: { en: 'Timeframe', th: 'ช่วงเวลา' },
+  daytimePattern: { en: 'Daytime use', th: 'ใช้ไฟกลางวัน' }, daytimeLoads: { en: 'Appliances', th: 'เครื่องใช้ไฟฟ้า' },
+  roofArea: { en: 'Roof area', th: 'พื้นที่หลังคา' }, shade: { en: 'Shade', th: 'เงาบัง' }, roofMaterial: { en: 'Roof', th: 'หลังคา' },
+};
 
 function freshDraft(questionnaire: QuestionnaireDocument, referenceDate = currentCalculationDate()): Draft {
   return questionnaire.schemaVersion >= 10 ? { estimateModelVersion: 'energy-v3', calculationReferenceDate: referenceDate, consumptionInput: 'bill' } : {};
 }
 
 function isMatchingReadOnlyModernConfiguration(configuration: PublicAssessmentConfig): boolean {
-  return configuration.questionnaire.id === calculatorV3Questionnaire.id
-    && configuration.questionnaire.schemaVersion === calculatorV3Questionnaire.schemaVersion
-    && configuration.questionnaireVersionId === calculatorV3Questionnaire.id
+  return configuration.questionnaire.id === homeownerDesignV3Questionnaire.id
+    && configuration.questionnaire.schemaVersion === homeownerDesignV3Questionnaire.schemaVersion
+    && configuration.questionnaireVersionId === homeownerDesignV3Questionnaire.id
     && configuration.calculatorModelVersion === 'energy-v3'
     && configuration.assessmentToken === null
     && configuration.assessmentTokenExpiresAt === null
@@ -60,7 +68,7 @@ function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
 }
 
 type SavedDraft = {
-  version: 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  version: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
   answers: Draft;
   step: number;
   questionnaireVersionId?: string;
@@ -240,13 +248,12 @@ function AssessmentConditionalField({ field, question, draft, locale, setValue }
 
 export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale?: Locale; questionnaireOverride?: QuestionnaireDocument }) {
   const english = locale === 'en';
-  const [questionnaire, setQuestionnaire] = useState<QuestionnaireDocument>(questionnaireOverride ?? calculatorV3Questionnaire);
+  const [questionnaire, setQuestionnaire] = useState<QuestionnaireDocument>(questionnaireOverride ?? homeownerDesignV3Questionnaire);
   const [assessmentConfig, setAssessmentConfig] = useState<PublicAssessmentConfig | null>(null);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft>({});
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
-  const [showOtherProvince,setShowOtherProvince]=useState(false);
   const autoAdvanceRef=useRef<number|null>(null);
   const text=designText(locale);
   const [direction, setDirection] = useState<ScreenDirection>('forward');
@@ -328,15 +335,10 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     const completed = estimateAnswersSchema.safeParse(parseJson(readSessionValue(resultStorageKey)));
     const starter = migrateSaved(parseJson(readSessionValue(starterStorageKey)));
     starterAnswersRef.current = starter?.answers ?? null;
-    const restored = starter?.answers ?? savedDraft?.answers ?? (completed.success ? completed.data : {});
-    const startingQuestions = (questionnaireOverride ?? calculatorV3Questionnaire).questions;
+    const restored = starter?.answers ?? savedDraft?.answers ?? (completed.success ? sanitizeEstimateDraftAnswers(completed.data) : {});
+    const startingQuestions = (questionnaireOverride ?? homeownerDesignV3Questionnaire).questions;
     const firstUnanswered = startingQuestions.findIndex((item) => Boolean(firstQuestionError(item, restored, english)));
-    const oldStepId = savedDraft && savedDraft.version < 10
-      ? initialQuestionnaire.questions[savedDraft.step]?.id
-      : undefined;
-    const mappedStep = oldStepId
-      ? startingQuestions.findIndex(item => item.id === oldStepId)
-      : savedDraft?.step ?? 0;
+    const mappedStep = savedDraft ? restoredQuestionPosition(savedDraft.version, savedDraft.step, questionnaireOverride ?? homeownerDesignV3Questionnaire) : 0;
     let restoredStep = 0;
     if (starter) restoredStep = Math.max(0, firstUnanswered);
     else if (savedDraft) restoredStep = Math.max(0, Math.min(mappedStep, startingQuestions.length - 1));
@@ -344,13 +346,13 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       ? startingQuestions[restoredStep]?.id ?? null
       : null;
     // A persisted modern journey must not acquire another release's questionnaire/token.
-    restoredModernRef.current = starter?.version === 10
-      || savedDraft?.version === 10
+    restoredModernRef.current = (starter?.version ?? 0) >= 10
+      || (savedDraft?.version ?? 0) >= 10
       || restored.estimateModelVersion === 'energy-v3';
     removeSessionValue(starterStorageKey);
     track('estimate_started', { source: starter ? 'home' : savedDraft ? 'resume' : completed.success ? 'edit' : 'estimate' });
     queueMicrotask(() => {
-      setDraft(Object.keys(restored).length ? restored : freshDraft(questionnaireOverride ?? calculatorV3Questionnaire));
+      setDraft(Object.keys(restored).length ? restored : freshDraft(questionnaireOverride ?? homeownerDesignV3Questionnaire));
       setStep(restoredStep);
       setReady(true);
     });
@@ -359,14 +361,14 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   useEffect(() => {
     if (!ready) return;
     const saved: SavedDraft = {
-      version: energyQuestionnaire ? 10 : 9, answers: draft, step,
+      version: questionnaire.schemaVersion >= 11 ? 11 : energyQuestionnaire ? 10 : 9, answers: sanitizeEstimateDraftAnswers(draft), step,
       questionnaireVersionId: assessmentConfig?.questionnaireVersionId,
       releaseId: assessmentConfig?.releaseId,
       assessmentToken: assessmentConfig?.assessmentToken ?? undefined,
       assessmentTokenExpiresAt: assessmentConfig?.assessmentTokenExpiresAt ?? undefined,
     };
     writeSessionValue(draftStorageKey, saved);
-  }, [assessmentConfig, draft, energyQuestionnaire, ready, step]);
+  }, [assessmentConfig, draft, energyQuestionnaire, questionnaire.schemaVersion, ready, step]);
 
   const persistCompletionView = useCallback((journey: CompletionJourney, patch: Partial<ResultViewState>) => {
     const signature = answerSignature(journey.answers);
@@ -518,7 +520,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       setError(english ? 'Tick the consent box before continuing to the contact form.' : 'กรุณาทำเครื่องหมายในช่องความยินยอมก่อนกรอกข้อมูลติดต่อ');
       return;
     }
-    const collectionUnavailable = question.id === 'quoteContactRequested' && (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
+    const collectionUnavailable = question.id === 'quoteContactRequested' && (draft.consumptionInput === 'kwh' || !assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
     const validationDraft = collectionUnavailable || reviewingContact ? { ...calculationDraft, quoteContactRequested: false, quoteConsentAccepted: undefined } : calculationDraft;
     const questionError = firstQuestionError(question, validationDraft, english);
     if (questionError) { setError(questionError); return; }
@@ -584,12 +586,6 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
 
-  function restart() {
-    cancelAutoAdvance();
-    [starterStorageKey, draftStorageKey, resultStorageKey, assessmentContextStorageKey].forEach(removeSessionValue);
-    setDirection('backward'); setDraft(freshDraft(questionnaire)); setStep(0); setError(''); setShowContactForm(false); setContactReview(false); setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); window.scrollTo({ top: 0, behavior: 'auto' });
-  }
-
   function toggleDaytimeLoad(value: DaytimeLoad) {
     interactionRef.current = true;
     const current = draft.daytimeLoads ?? [];
@@ -609,10 +605,10 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   const completedAnswers = estimateAnswersSchema.safeParse(calculationDraft);
   const contactPermissionUnavailable = question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet';
-  const contactCollectionUnavailable = question.id === 'quoteContactRequested' && (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
+  const contactCollectionUnavailable = question.id === 'quoteContactRequested' && (draft.consumptionInput === 'kwh' || !assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
   const visibleOptions = question.id === 'quoteContactRequested' ? [
     ...(question.options ?? []).filter((option) => option.value !== 'yes' || (!contactPermissionUnavailable && !contactCollectionUnavailable)),
-    ...(assessmentConfig ? [{ value: 'test', label: contactReviewCopy.label, description: contactReviewCopy.help }] : []),
+    ...(assessmentConfig?.contactReviewAvailable === true && assessmentConfig.accessRestrictedSession ? [{ value: 'test', label: contactReviewCopy.label, description: contactReviewCopy.help }] : []),
   ] : question.options;
   const districtOptions = localizedDistrictOptions(draft.province ?? '', locale);
   const summaryValue=(item:AssessmentQuestion)=>{const value=item.id==='activelyPlanningSolar'?draft.planningTimeframe:draft[item.id as keyof Draft];if(item.id==='province')return [districtOptions.find(d=>d.value===draft.district)?.label,provinceOptions.find(p=>p.value===draft.province)?.[locale]].filter(Boolean).join(', ');if(item.id==='monthlyBillThb'){if(energyQuestionnaire&&draft.consumptionInput==='kwh')return draft.monthlyConsumptionKwh===undefined?'':draft.monthlyConsumptionKwh.toLocaleString('en-US')+' kWh';return typeof value==='number'?'฿'+value.toLocaleString('en-US'):'';}if(Array.isArray(value))return value.map(v=>item.options?.find(o=>o.value===v)?.label[locale]??v).join(', ');return item.options?.find(o=>o.value===value)?.label[locale]??'';};
@@ -625,23 +621,23 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     calculated={calculationComplete}
     prepared={calculationComplete&&submissionComplete}
     savingRequest={completionJourney.waitsForSubmission&&!submissionComplete}
-  /></ScreenTransition>}<main hidden={Boolean(completionJourney)} className="estimate-page" aria-hidden={Boolean(completionJourney)}><div className="site-shell estimate-focus-layout">
-
-    <section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
-    <p className="flow-count">{step===questions.length-1?text.almost:text.qOf.replace('{n}',String(step+1)).replace('{t}',String(questions.length-1))}</p>
+  /></ScreenTransition>}<main hidden={Boolean(completionJourney)} className="estimate-page" aria-hidden={Boolean(completionJourney)}><div className="site-shell assessment-flow-shell">
+    <AssessmentFocusHeader locale={locale} count={showContactForm?undefined:step===questions.length-1?text.almost:text.qOf.replace('{n}',String(step+1)).replace('{t}',String(questions.length-1))}/>
+    <div className="assessment-flow-progress" hidden={showContactForm}>
     <div className="segment-progress" role="progressbar" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-label={english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}>{questions.map((item, index) => <span key={item.id} className={index <= step ? 'active' : ''} />)}</div>
     <p className="sr-only" aria-live="polite">{english ? `Step ${step + 1} of ${questions.length}` : `ขั้นตอน ${step + 1} จาก ${questions.length}`}</p>
+    </div>
+    <div className="estimate-focus-layout">
+    <section hidden={showContactForm} className="estimate-card focus-card" aria-labelledby="estimate-question" aria-hidden={showContactForm}>
     <fieldset className="hydration-fieldset" disabled={!ready||transitioning} aria-busy={!ready||transitioning}><ScreenTransition transitionKey={`${locale}-${question.id}`} direction={direction} className="question-stage" onEntered={()=>{navigationLockRef.current=false;setTransitioning(false);if(transitionTimerRef.current!==null)window.clearTimeout(transitionTimerRef.current);const active=document.activeElement;if(!active||active===document.body||active===questionHeadingRef.current||active.closest('.estimate-actions'))questionHeadingRef.current?.focus({preventScroll:true});}}>
       <div className="question-heading"><h1 id="estimate-question" ref={questionHeadingRef} tabIndex={-1}>{question.title[locale]}</h1>{question.help[locale] && <p><CircleHelp size={17} aria-hidden="true" /> {question.help[locale]}</p>}</div>
       {question.type === 'province' && <div className="location-fields">
-        <div className="pchips" role="group" aria-label={english?'Province':'จังหวัด'}>{initialLaunchProvinces.map(option=><button className="pchip" key={option.value} type="button" aria-pressed={draft.province===option.value} onClick={()=>{setShowOtherProvince(false);setValue('province',option.value);}}>{option[locale]}</button>)}<button type="button" className="pchip" aria-pressed={draft.province==='other'} onClick={()=>setShowOtherProvince(true)}>{text.otherProv}</button></div>
-        <div hidden={!showOtherProvince&&draft.province!=='other'}><label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Select a province or area' : 'เลือกจังหวัดหรือพื้นที่'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label></div>
+        <div className="location-pair"><label className="estimate-province-select" htmlFor="estimate-province"><span>{english ? 'Province' : 'จังหวัด'}</span><select id="estimate-province" value={draft.province ?? ''} onChange={(event) => setValue('province', event.target.value)}><option value="" disabled>{english ? 'Choose a province' : 'เลือกจังหวัด'}</option>{provinceOptions.map((option) => <option value={option.value} key={option.value}>{option[locale]}</option>)}</select></label>
+        <label htmlFor="estimate-district"><span>{english ? 'District' : 'เขต / อำเภอ'}</span>{draft.province === 'other' ? <input id="estimate-district" maxLength={100} value={draft.district ?? ''} placeholder={english ? 'e.g. Bang Lamung' : 'เช่น บางละมุง'} onChange={(event) => setValue('district', event.target.value)} /> : <select id="estimate-district" disabled={!draft.province} value={draft.district ?? ''} onChange={event => setValue('district', event.target.value)}><option value="" disabled>{english ? 'Choose a district' : 'เลือกเขต / อำเภอ'}</option>{districtOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>}</label></div>
         {draft.province === 'other' && <label htmlFor="estimate-custom-province"><span>{english ? 'Province or area' : 'จังหวัดหรือพื้นที่'}</span><input id="estimate-custom-province" maxLength={100} value={draft.customProvince ?? ''} placeholder={english ? 'e.g. Chonburi' : 'เช่น ชลบุรี'} onChange={(event) => setValue('customProvince', event.target.value)} /></label>}
-        {draft.province && draft.province !== 'other' && <DistrictCombobox locale={locale} options={districtOptions} value={draft.district} onChange={(value) => setValue('district', value)} />}
-        {draft.province === 'other' && <label htmlFor="estimate-district"><span>{english ? 'District or local area' : 'อำเภอ เขต หรือพื้นที่'}</span><input id="estimate-district" maxLength={100} value={draft.district ?? ''} placeholder={english ? 'e.g. Bang Lamung' : 'เช่น บางละมุง'} onChange={(event) => setValue('district', event.target.value)} /></label>}
       </div>}
-      {question.type === 'bill' && energyQuestionnaire && <EnergyInputFields section="consumption" answers={draft} locale={locale} onChange={setValue} />}
-      {question.type === 'bill' && (!energyQuestionnaire || draft.consumptionInput !== 'kwh') && <><BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} /><div className="quick">{[2000,4000,6000,10000,15000].map(value=><button type="button" key={value} aria-pressed={draft.monthlyBillThb===value} onClick={()=>setValue('monthlyBillThb',value)}>฿{value.toLocaleString('en-US')}</button>)}</div></>}
+      {question.type === 'bill' && (!energyQuestionnaire || draft.consumptionInput !== 'kwh') && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
+      {question.type === 'bill' && energyQuestionnaire && <details className="energy-bill-details" open={draft.consumptionInput === 'kwh' || undefined}><summary>{english ? 'Use actual kWh or add bill details' : 'กรอกหน่วยไฟจริง หรือเพิ่มรายละเอียดบิล'}</summary><EnergyInputFields section="consumption" answers={draft} locale={locale} onChange={setValue} /></details>}
       {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{visibleOptions?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = visibleOptions?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
       {question.id === 'ownershipStatus' && draft.ownershipStatus !== undefined && draft.ownershipStatus !== 'owner' && <fieldset className="inline-followup"><legend id="owner-permission-title">{english ? 'Do you have the property owner’s permission to request contact from solar installers?' : 'คุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อจากผู้ติดตั้งโซลาร์แล้วหรือไม่?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="owner-permission-title" onKeyDown={handleRadioKeys}>{([['yes', english ? 'Yes' : 'ได้รับอนุญาตแล้ว'], ['not-yet', english ? 'Not yet' : 'ยังไม่ได้รับอนุญาต']] as const).map(([value, label], index) => <button key={value} type="button" role="radio" aria-checked={draft.ownerPermission === value} tabIndex={draft.ownerPermission === value || (!draft.ownerPermission && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.ownerPermission === value ? 'selected' : ''}`} onClick={() => setValue('ownerPermission', value)}><Home className="choice-icon" aria-hidden="true" /><strong>{label}</strong><span className="choice-indicator" aria-hidden="true">{draft.ownerPermission === value && <Check />}</span></button>)}</div></fieldset>}
       {contactPermissionUnavailable && <div className="permission-result-notice"><p>{english ? 'You can still view your estimate. To request installer contact, you will first need the property owner’s permission.' : 'คุณยังดูผลประเมินได้ตามปกติ หากต้องการให้ผู้ติดตั้งติดต่อ คุณต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ก่อน'}</p></div>}
@@ -655,11 +651,12 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {energyQuestionnaire && question.id === 'daytimeLoads' && <EnergyInputFields section="loads" answers={draft} locale={locale} onChange={setValue} />}
       {energyQuestionnaire && question.id === 'roofArea' && <EnergyInputFields section="roof" answers={draft} locale={locale} onChange={setValue} />}
       {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
+      {question.id === 'quoteContactRequested' && draft.consumptionInput === 'kwh' && <p role="status">{english ? 'Contact requests for kWh-based assessments are not available. Your full estimate is still available without contact details.' : 'ยังไม่เปิดรับคำขอติดต่อจากแบบประเมินที่ใช้หน่วยไฟ kWh คุณยังดูผลประเมินทั้งหมดได้โดยไม่ต้องให้ข้อมูลติดต่อ'}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
     </ScreenTransition>
       <div className="estimate-actions">{step>0&&<button className="button button-secondary" type="button" disabled={!ready||transitioning} aria-label={english?'Back':'ย้อนกลับ'} onClick={previous}><ArrowLeft aria-hidden="true"/><span className="sr-only">{english?'Back':'ย้อนกลับ'}</span></button>}<button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{contactReview ? (english ? 'Continue' : 'ถัดไป') : (contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
     </fieldset>
-    <div className="estimate-privacy-line"><span>{contactReview ? contactReviewCopy.notice[locale] : english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span><button type="button" className="estimate-restart" onClick={restart}>{english ? 'Clear and start over' : 'ล้างข้อมูลและเริ่มใหม่'}</button></div>
+    {question.id==='quoteContactRequested'&&<div className="estimate-privacy-line"><span>{contactReview ? contactReviewCopy.notice[locale] : english ? 'Assessment progress stays in this browser. Contact details are sent only when you explicitly submit them.' : 'ความคืบหน้าของแบบประเมินจะเก็บไว้ในเบราว์เซอร์นี้ และจะส่งข้อมูลติดต่อเมื่อคุณกดส่งโดยชัดแจ้งเท่านั้น'}</span></div>}
   </section>
   {assessmentConfig && completedAnswers.success && <LeadCapture
     locale={locale}
@@ -678,6 +675,6 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       else beginCompletion(completedAnswers.data, 'skipped', false);
     }}
   />}
-  {!showContactForm&&<aside className="aside assessment-summary" aria-label={text.yourAnswers}><div className="card"><h3>{text.yourAnswers}</h3><dl className="summary">{questions.filter(item=>item.id!=='quoteContactRequested'&&summaryValue(item)).map(item=><div key={item.id}><dt>{item.title[locale]}</dt><dd>{summaryValue(item)} <button type="button" onClick={()=>moveStep(questions.indexOf(item),questions.indexOf(item)<step?'backward':'forward')}>{text.edit}</button></dd></div>)}</dl></div><div className="card band-sage"><p className="eyebrow">{text.youGet}</p><ul className="checks">{text.yg.map(value=><li key={value}><Check aria-hidden="true"/>{value}</li>)}</ul><p className="note">{text.saved}</p></div></aside>}
-  </div></main></>;
+  {!showContactForm&&<aside className="aside assessment-summary" aria-label={text.yourAnswers}><div className="card"><h3>{text.yourAnswers}</h3>{!questions.some(item => item.id !== 'quoteContactRequested' && summaryValue(item)) && <p className="note">{english ? 'Your answers will appear here as you go.' : 'คำตอบของคุณจะแสดงที่นี่เมื่อทำแบบประเมิน'}</p>}<dl className="summary">{questions.filter(item=>item.id!=='quoteContactRequested'&&summaryValue(item)).map(item=><div key={item.id}><dt>{summaryLabels[item.id]?.[locale] ?? item.title[locale]}</dt><dd>{summaryValue(item)} <button type="button" disabled={transitioning} aria-label={`${text.edit}: ${summaryLabels[item.id]?.[locale] ?? item.title[locale]}`} onClick={()=>moveStep(questions.indexOf(item),questions.indexOf(item)<step?'backward':'forward')}>{text.edit}</button></dd></div>)}</dl><p className="note">{text.saved}</p></div></aside>}
+  </div></div></main></>;
 }

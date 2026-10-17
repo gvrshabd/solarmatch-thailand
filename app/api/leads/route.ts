@@ -16,6 +16,8 @@ import { localTestContact } from '@/lib/installer/local-collection';
 import {trustedShareAddress} from '@/lib/installer/rate-limit';
 import { submissionContext } from '@/lib/installer/submission-context';
 import { submissionAttributionStatements } from '@/lib/analytics/submission-attribution';
+import { assessmentReleaseContract, submissionMatchesAssessmentContract } from '@/lib/questionnaire/release-contract';
+import type { QuestionnaireDocument } from '@/lib/questionnaire/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +90,13 @@ export async function POST(request: NextRequest) {
   if (!contact.enabled || contact.mode === 'disabled') return jsonError('submissions_unavailable', 503);
   const classification = submissionContext(platformMode, restrictedAccess, contact.operationalDistributionEnabled);
   if (token.releaseId !== release.release_id || token.questionnaireVersionId !== release.questionnaire_version_id || token.ruleVersionId !== release.rule_version_id) return jsonError('assessment_version_expired', 409);
+
+  try {
+    const questionnaire = JSON.parse(release.questionnaire_json) as QuestionnaireDocument;
+    const contract = assessmentReleaseContract(questionnaire, release.questionnaire_version_id, release.rule_version_id);
+    if (contract.calculatorModelVersion === 'energy-v3' && parseScoringConfiguration(release).id !== release.rule_version_id) return jsonError('submissions_unavailable', 503);
+    if (!submissionMatchesAssessmentContract(parsed.data.answers, questionnaire)) return jsonError('assessment_answers_version_mismatch', 422);
+  } catch { return jsonError('submissions_unavailable', 503); }
 
   const assessment = calculateLeadAssessment(parsed.data.answers, parseScoringConfiguration(release));
   const phoneDisplay = parsed.data.phone;

@@ -11,6 +11,9 @@ import './terrace.css';
 import './design-v2-tokens.css';
 import './design-v2.css';
 import './design-v2-controls.css';
+import './homeowner-home-v3.css';
+import './homeowner-flow-v3.css';
+import './homeowner-results-v3.css';
 
 const anuphan = Anuphan({
   variable: '--font-anuphan',

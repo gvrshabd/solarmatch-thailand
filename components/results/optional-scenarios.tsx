@@ -95,10 +95,10 @@ export function OptionalScenarios(props: OptionalScenariosProps) {
     setExportVerified(false); setExportRate(''); setExportStart(''); setExportEnd(''); setExportCap('');
   };
 
-  return <section className="card" aria-labelledby="optional-scenarios-title">
-    <h2 id="optional-scenarios-title">{t('Explore optional tax, finance and export scenarios', 'ลองประเมินภาษี การผ่อนชำระ และการขายไฟส่วนเกิน')}</h2>
+  return <section className="card xcard" aria-labelledby="optional-scenarios-title">
+    <h2 id="optional-scenarios-title">{t('Extras you may qualify for', 'สิทธิประโยชน์ที่คุณอาจได้รับ')}</h2>
     <p className="note">{t('These scenarios are separate from your electricity savings and installation invoice. Optional inputs stay in this page’s memory and are excluded from saved estimates, share links and enquiries.', 'ผลจำลองแยกจากยอดประหยัดค่าไฟและราคาในใบเสนอราคา ข้อมูลที่กรอกส่วนนี้อยู่ในหน่วยความจำของหน้านี้ ไม่รวมในผลประเมินที่บันทึก ลิงก์แชร์ หรือคำขอใบเสนอราคา')}</p>
-    <details className="disc"><summary>{t('Personal solar tax relief (optional)', 'สิทธิภาษีโซลาร์บุคคลธรรมดา (ไม่บังคับ)')}</summary><div className="in">
+    <details className="disc scenario-disclosure"><summary className="xrow"><span className="t"><b>{t('Personal solar tax relief (optional)', 'สิทธิภาษีโซลาร์บุคคลธรรมดา (ไม่บังคับ)')}</b><span>{t('Conditional, one-time income exemption', 'ยกเว้นเงินได้ครั้งเดียวตามเงื่อนไข')}</span></span><i className="scenario-switch" aria-hidden="true"/></summary><div className="in">
       <p>{t('This is an exemption from taxable income, up to ฿200,000 of qualifying spending, not a cash rebate. It applies to qualifying events from 3 March 2026 to 31 December 2028; the claim year is the year grid connection succeeds. This model covers ordinary progressive income tax only.', 'เป็นการยกเว้นเงินได้ตามค่าใช้จ่ายที่เข้าเงื่อนไข สูงสุด 200,000 บาท ไม่ใช่เงินคืนค่าติดตั้ง เหตุการณ์ที่เข้าเงื่อนไขต้องอยู่ในช่วง 3 มีนาคม 2569 ถึง 31 ธันวาคม 2571 ใช้สิทธิในปีที่เชื่อมต่อโครงข่ายสำเร็จ แบบจำลองนี้คำนวณเฉพาะภาษีเงินได้อัตราก้าวหน้าปกติ')}</p>
       <p className="note">{t('For a future purchase, “Yes” means a planned condition, not completed evidence or guaranteed approval. Leave anything unknown as “Unsure”. Joint/spouse claims and special filing cases need individual review.', 'หากยังไม่ได้ซื้อ การเลือก “ใช่” หมายถึงเงื่อนไขที่วางแผนไว้ ยังไม่ใช่หลักฐานที่ทำสำเร็จหรือการรับรองสิทธิ หากไม่ทราบให้เลือก “ไม่แน่ใจ” กรณีคู่สมรสหรือการยื่นภาษีเป็นกรณีพิเศษต้องตรวจสอบแยก')}</p>
       <p className="note">{t('For e-Tax invoices issued from 30 September 2026, the additional solar equipment/installation description is required. Confirm that your invoice meets the rules for its issue date.', 'ใบกำกับภาษีอิเล็กทรอนิกส์ที่ออกตั้งแต่ 30 กันยายน 2569 ต้องมีข้อความเพิ่มเติมระบุอุปกรณ์และการติดตั้งโซลาร์ โปรดตรวจสอบเอกสารตามเกณฑ์ของวันที่ออก')}</p>
@@ -138,7 +138,7 @@ export function OptionalScenarios(props: OptionalScenariosProps) {
       <p className="note">{t('Rule checked 17 October 2026. ', 'ตรวจสอบเกณฑ์เมื่อ 17 ตุลาคม 2569 ')}<a href="https://ratchakitcha.soc.go.th/documents/104277.pdf" target="_blank" rel="noreferrer">{t('Royal Decree 805', 'พระราชกฤษฎีกาฯ ฉบับที่ 805')}</a>{' · '}<a href="https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg470A.pdf" target="_blank" rel="noreferrer">{t('RD conditions 470', 'ประกาศอธิบดีฯ ฉบับที่ 470')}</a>{' · '}<a href="https://www.rd.go.th/59670.html" target="_blank" rel="noreferrer">{t('Tax brackets', 'อัตราภาษี')}</a></p>
     </div></details>
 
-    <details className="disc"><summary>{t('Financing from your actual quote (optional)', 'จำลองการผ่อนจากใบเสนอราคาของคุณ (ไม่บังคับ)')}</summary><div className="in">
+    <details className="disc scenario-disclosure"><summary className="xrow"><span className="t"><b>{t('Financing from your actual quote (optional)', 'จำลองการผ่อนจากใบเสนอราคาของคุณ (ไม่บังคับ)')}</b><span>{t('Use your deposit, rate and repayment terms', 'ใช้เงินดาวน์ อัตราดอกเบี้ยและเงื่อนไขผ่อนจริง')}</span></span><i className="scenario-switch" aria-hidden="true"/></summary><div className="in">
       <p>{t('Enter the deposit, term and stated rate basis from your quote. Flat-rate and reducing-balance rates are different calculations. No lender or approval is assumed.', 'กรอกเงินดาวน์ ระยะเวลาผ่อน และวิธีคิดดอกเบี้ยตามใบเสนอราคา ดอกเบี้ยแบบคงที่กับแบบลดต้นลดดอกคำนวณต่างกัน ผลนี้ไม่ได้สมมติผู้ให้กู้หรือการอนุมัติสินเชื่อ')}</p>
       <div className="grid accuracy-fields">
         <label>{t('Deposit (THB)', 'เงินดาวน์ (บาท)')}<input type="number" min="0" inputMode="decimal" value={deposit} onChange={event => setDeposit(event.target.value)} /></label>
@@ -166,7 +166,7 @@ export function OptionalScenarios(props: OptionalScenariosProps) {
       </> : <p role="status">{t('Enter a valid deposit, whole-month term, annual rate and rate basis to calculate.', 'กรอกเงินดาวน์ ระยะเวลาจำนวนเต็มเดือน อัตรารายปี และวิธีคิดดอกเบี้ยให้ถูกต้องเพื่อคำนวณ')}</p>}
     </div></details>
 
-    <details className="disc"><summary>{t('Export under a verified purchase contract (optional)', 'ขายไฟตามสัญญารับซื้อที่ตรวจสอบแล้ว (ไม่บังคับ)')}</summary><div className="in">
+    <details className="disc scenario-disclosure"><summary className="xrow"><span className="t"><b>{t('Export under a verified purchase contract (optional)', 'ขายไฟตามสัญญารับซื้อที่ตรวจสอบแล้ว (ไม่บังคับ)')}</b><span>{t('Only interval surplus within your contract', 'เฉพาะไฟส่วนเกินรายช่วงเวลาภายในสัญญา')}</span></span><i className="scenario-switch" aria-hidden="true"/></summary><div className="in">
       <p>{t('A programme announcement does not establish your contract. Enter only the verified rate, exact term and AC export limit in your own contract. The base estimate includes no export income.', 'ประกาศโครงการไม่ได้ยืนยันว่าคุณมีสัญญารับซื้อ ให้กรอกเฉพาะอัตรา ช่วงวันที่ และเพดานกำลังไฟส่งออก AC ที่ตรวจสอบจากสัญญาของคุณ ผลประเมินพื้นฐานไม่รวมรายได้ขายไฟ')}</p>
       <p className="note">{t('This page uses synthetic intervals for the representative year 2027, not measured export or a forecast. The scenario does not establish contract approval.', 'หน้านี้ใช้ข้อมูลรายช่วงเวลาจำลองของปีตัวแทน 2027 ไม่ใช่ไฟส่งออกที่วัดจริงหรือการพยากรณ์ ผลจำลองไม่ได้ยืนยันการอนุมัติสัญญารับซื้อ')}</p>
       <p className="note">{t('PEA’s 2026 programme announcement states ฿2.20/kWh for 10 years and up to 5 kW AC, subject to application and programme conditions. These are not automatic contract values.', 'ประกาศโครงการ กฟภ. ปี 2569 ระบุ 2.20 บาทต่อหน่วย ระยะเวลา 10 ปี และไม่เกิน 5 กิโลวัตต์ AC โดยต้องสมัครและเข้าเงื่อนไขโครงการ ข้อมูลนี้ไม่ได้ถูกใช้แทนเงื่อนไขสัญญาของคุณโดยอัตโนมัติ')}{' '}<a href="https://www.pea.co.th/news/corporate-news/2133" target="_blank" rel="noreferrer">{t('Official announcement', 'ประกาศทางการ')}</a></p>
@@ -185,6 +185,6 @@ export function OptionalScenarios(props: OptionalScenariosProps) {
         ? t('Insufficient information: interval surplus data is unavailable. Entering contract terms alone cannot establish export income.', 'ข้อมูลยังไม่พอ: ไม่มีข้อมูลไฟส่วนเกินแยกตามช่วงเวลา เงื่อนไขสัญญาเพียงอย่างเดียวยังใช้คำนวณรายได้ขายไฟไม่ได้')
         : t('Insufficient information: verify all contract terms and valid surplus intervals to calculate.', 'ข้อมูลยังไม่พอ: ต้องยืนยันเงื่อนไขสัญญาครบถ้วนและมีข้อมูลไฟส่วนเกินแต่ละช่วงที่ถูกต้องเพื่อคำนวณ')}</p>}
     </div></details>
-    <button type="button" className="btn btn-soft btn-sm" onClick={reset}>{t('Clear optional scenario inputs', 'ล้างข้อมูลจำลองเพิ่มเติม')}</button>
+    <button type="button" className="btn btn-soft btn-sm clear-optional" onClick={reset}>{t('Clear optional scenario inputs', 'ล้างข้อมูลจำลองเพิ่มเติม')}</button>
   </section>;
 }

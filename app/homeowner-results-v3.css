@@ -1,0 +1,69 @@
+/* Final prototype result cascade (including v3.1 numeral sizes). Homeowner only. */
+.homeowner-v3 .v2-results{background:var(--sm-stone)}
+.homeowner-v3 .v2-results .rhero{background:var(--sm-pine);color:#fff;border-radius:0 0 32px 32px;padding-block:28px 40px;position:relative;overflow:hidden}
+.homeowner-v3 .v2-results .rgrid{display:grid;gap:28px;position:relative}
+.homeowner-v3 .v2-results .ba{display:flex;align-items:flex-end;gap:12px;flex-wrap:nowrap;min-width:0;margin-top:14px}
+.homeowner-v3 .v2-results .ba .was{font-size:clamp(28px,7.4vw,40px);padding-bottom:.08em;font-weight:700;color:#FF9C87;text-decoration:line-through;text-decoration-thickness:3px;line-height:1}
+.homeowner-v3 .v2-results .ba .now{font-size:clamp(37px,9.8vw,54px);font-weight:700;color:var(--sm-lime);line-height:1}
+.homeowner-v3 .v2-results .rsub{font-size:clamp(19px,2vw,24px);font-weight:600;margin-top:12px;letter-spacing:-.02em;line-height:1.06}
+.homeowner-v3 .v2-results .rsub .muted{font-weight:500;color:var(--ondark,#B8C7BE)}
+.homeowner-v3 .v2-results .verdict{max-width:100%;white-space:normal;line-height:1.5}
+.homeowner-v3 .v2-results .verdict svg{flex:none}
+.homeowner-v3 .v2-results .rstats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.homeowner-v3 .v2-results .rstats b{font-size:clamp(20px,2.4vw,30px);white-space:nowrap}
+.homeowner-v3 .v2-results .rbody{display:grid;gap:20px;padding-block:28px 64px}
+.homeowner-v3 .v2-results .col{display:grid;gap:20px;align-content:start;min-width:0}
+.homeowner-v3 .v2-results .card{background:#fff;border-radius:24px;padding:22px;box-shadow:var(--shadow)}
+.homeowner-v3 .v2-results .card h2{font-size:20px;letter-spacing:-.025em;line-height:1.06}
+html[lang=th] .homeowner-v3 .v2-results .card h2{letter-spacing:0;line-height:1.35;font-weight:600}
+html[lang=th] .homeowner-v3 .v2-results .rsub{letter-spacing:0;line-height:1.35}
+.homeowner-v3 .v2-results .card-head{margin-bottom:6px}
+.homeowner-v3 .v2-results .results-precise,.homeowner-v3 .v2-results .v2-breakdown{padding-block:4px}
+.homeowner-v3 .v2-results .results-precise>.disc,.homeowner-v3 .v2-results .v2-breakdown>.disc{border-top:0}
+.homeowner-v3 .v2-results .opt-tag{font-size:12px;font-weight:700;color:var(--sm-muted);background:var(--stone-2,#EEEDE6);padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:2px;white-space:nowrap}
+.homeowner-v3 .v2-results .nextsteps{display:grid;gap:12px}
+.homeowner-v3 .v2-results .nextsteps .row{display:flex;flex-wrap:nowrap;gap:10px}
+.homeowner-v3 .v2-results .nextsteps .row .btn{padding-inline:16px;min-width:0}
+.homeowner-v3 .v2-results .nextsteps .setrow{flex-wrap:nowrap;border-top:1px solid var(--sm-line);padding-top:14px}
+.homeowner-v3 .v2-results .nextsteps .setrow .t b{font-size:17px}
+.homeowner-v3 .v2-results .nextsteps .setrow .chip{flex:none}
+.homeowner-v3 .v2-results .share-contents summary{font-size:13px;padding-block:8px}
+.homeowner-v3 .v2-results .share-contents{border-top:0}
+.homeowner-v3 .v2-results .actions2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.homeowner-v3 .v2-results .actions2 .btn{min-width:0;padding-inline:12px}
+.homeowner-v3 .v2-results .calculator-model-details{padding:0;box-shadow:none;border-radius:0}
+.homeowner-v3 .v2-results .calculator-model-details>h2{font-size:17px}
+.homeowner-v3 .v2-results .kv>div,.homeowner-v3 .v2-results .trace-list article{overflow-wrap:anywhere}
+.homeowner-v3 .v2-results .kv b{min-width:0}
+.homeowner-v3 .v2-results .reference-scenario{margin-top:8px}
+.homeowner-v3 .v2-results .xcard{display:grid;gap:14px}
+.homeowner-v3 .v2-results .xcard>.note{margin-top:4px}
+.homeowner-v3 .v2-results .xcard>.scenario-disclosure{border-top:1px solid var(--sm-line)}
+.homeowner-v3 .v2-results .xrow{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 0 0;border-top:0}
+.homeowner-v3 .v2-results .xrow::after{display:none}
+.homeowner-v3 .v2-results .xrow .t{min-width:0}
+.homeowner-v3 .v2-results .xrow .t b{display:block;font-size:16px}
+.homeowner-v3 .v2-results .xrow .t span{display:block;font-size:13.5px;font-weight:400;color:var(--sm-muted);margin-top:2px}
+.homeowner-v3 .v2-results .xrow .scenario-switch{width:52px;height:32px;flex:none;border-radius:16px;background:#B8C1B4;position:relative;transition:background .2s}
+.homeowner-v3 .v2-results .xrow .scenario-switch::after{content:"";position:absolute;width:26px;height:26px;left:3px;top:3px;border-radius:50%;background:white;box-shadow:0 1px 3px #0003;transition:transform .2s}
+.homeowner-v3 .v2-results .scenario-disclosure[open]>.xrow .scenario-switch{background:#2F8A57}
+.homeowner-v3 .v2-results .scenario-disclosure[open]>.xrow .scenario-switch::after{transform:translateX(20px)}
+.homeowner-v3 .v2-results .scenario-disclosure>.in{padding-top:14px}
+.homeowner-v3 .v2-results .xcard>.clear-optional{justify-self:start}
+.homeowner-v3 .v2-results :is(.refine,.xcard) :is(input,select){max-width:100%;min-width:0}
+.homeowner-v3 .v2-results :is(.refine,.xcard) fieldset{min-width:0}
+@media(min-width:600px){.homeowner-v3 .v2-results .rsub .pct::before{content:" · "}}
+@media(max-width:599px){.homeowner-v3 .v2-results .rsub .muted{display:block;font-size:16px;margin-top:4px}}
+@media(min-width:900px){.homeowner-v3 .v2-results .rhero{padding-block:48px 64px}}
+@media(min-width:960px){
+  .homeowner-v3 .v2-results .rgrid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:48px;align-items:end}
+  .homeowner-v3 .v2-results .rbody{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;padding-block:40px 96px}
+}
+@media(max-width:959px){.homeowner-v3 .v2-results .rbody{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:399px){
+  /* Minimum readable type when the actual three-digit price exceeds mock data. */
+  .homeowner-v3 .v2-results .rstats b{font-size:18px}
+  .homeowner-v3 .v2-results .nextsteps .row .btn,.homeowner-v3 .v2-results .actions2 .btn{font-size:13px;padding-inline:8px;gap:6px}
+}
+@media(max-width:374px){.homeowner-v3 .v2-results .rstats>div{padding:18px 10px}}
+@media(prefers-reduced-motion:reduce){.homeowner-v3 .v2-results .scenario-switch,.homeowner-v3 .v2-results .scenario-switch::after{transition:none}}

@@ -1,4 +1,4 @@
-import { calculatorV3Questionnaire, initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4, legacyQuestionnaireV5 } from '@/config/assessment';
+import { homeownerDesignV3Questionnaire, initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4, legacyQuestionnaireV5 } from '@/config/assessment';
 import { contactContent } from '@/config/contact-content';
 import { legalLaunchDraft } from '@/config/legal-content';
 import { initialLoadingFactSet } from '@/config/loading-facts';
@@ -15,6 +15,7 @@ import { getRuntimeEnv } from './runtime';
 import type { SolarMatchRuntimeEnv } from './runtime';
 import { stagingIdentity, stagingRoute } from './staging-access';
 import { currentCalculationDate } from '@/config/electricity-tariffs';
+import { assessmentReleaseContract, actualBillContactInputSupport } from '@/lib/questionnaire/release-contract';
 
 const seedActor = 'system:initial-migration';
 const questionnaireId = legacyQuestionnaireV1.id;
@@ -740,6 +741,11 @@ export async function getCurrentRelease(database = requireDatabase()) {
   await ensureStandaloneProjectRelease(database);
   await ensureProductionCopyRelease(database);
   await ensureInstalledApplianceRelease(database);
+  return getPublishedRelease(database);
+}
+
+/** Public configuration reads must not bootstrap or publish a release. */
+export async function getPublishedRelease(database = requireDatabase()) {
   return database.prepare(`SELECT
       r.id AS release_id, r.questionnaire_version_id, r.rule_version_id,
       q.document_json AS questionnaire_json, rv.configuration_json AS rules_json,
@@ -767,6 +773,86 @@ export async function getCurrentRelease(database = requireDatabase()) {
     LEFT JOIN contact_configuration_versions cc ON cc.id = r.contact_configuration_version_id
     WHERE r.is_current = 1 AND q.state = 'published' AND rv.state = 'published' AND c.state = 'published' AND l.state = 'published'
     LIMIT 1`).first<ReleaseRow>();
+}
+
+export const homeownerDesignV3ReleaseId = 'residential-release-v9';
+export const homeownerDesignV3ContactId = 'contact-configuration-homeowner-v3-disabled';
+
+/**
+ * Explicit administrative publication only. The caller must authorize the write
+ * and supply the reviewed current release. Never call this from a public read.
+ * No schema migration, lead rewrite, provider action or operational setting change.
+ */
+export async function publishHomeownerDesignV3Release(
+  database: D1Database,
+  options: { actor: string; expectedCurrentReleaseId: string; backupSha256?: string; requireOperationalHolds?: boolean },
+) {
+  if (!options.actor.trim() || !options.expectedCurrentReleaseId) throw new Error('release_publication_context_required');
+  const source = await getPublishedRelease(database);
+  if (!source || source.release_id !== options.expectedCurrentReleaseId) throw new Error('release_publication_source_changed');
+  const rules = parseScoringConfiguration(source);
+  assessmentReleaseContract(homeownerDesignV3Questionnaire, homeownerDesignV3Questionnaire.id, source.rule_version_id);
+  if (rules.id !== source.rule_version_id) throw new Error('assessment_rules_version_mismatch');
+  const occupied = await database.prepare(`SELECT id FROM public_releases WHERE id = ? OR release_number >= 9
+    UNION ALL SELECT id FROM questionnaire_versions WHERE id = ? OR version_number >= 8
+    UNION ALL SELECT id FROM contact_configuration_versions WHERE id = ? LIMIT 1`)
+    .bind(homeownerDesignV3ReleaseId, homeownerDesignV3Questionnaire.id, homeownerDesignV3ContactId).first();
+  if (occupied) throw new Error('homeowner_release_version_already_allocated');
+  const contactVersion = await database.prepare('SELECT COALESCE(MAX(version_number), 0) + 1 AS value FROM contact_configuration_versions').first<{ value: number }>();
+  const actor = options.actor;
+  const questionnaire = homeownerDesignV3Questionnaire;
+  const statements: D1PreparedStatement[] = [
+    // The NOT NULL schema constraint is the atomic compare-and-swap guard: a
+    // concurrent publication after the read aborts this complete D1 batch.
+    database.prepare(`INSERT INTO questionnaire_versions
+      (id, version_number, state, schema_version, document_json, created_by, published_by, published_at)
+      VALUES (?, 8, 'published', CASE WHEN EXISTS(SELECT 1 FROM public_releases WHERE id = ? AND is_current = 1)
+        AND (? = 0 OR (EXISTS(SELECT 1 FROM installer_platform_settings WHERE id=1
+          AND json_extract(config_json,'$.collectionEnabled')=0 AND json_extract(config_json,'$.paymentsEnabled')=0
+          AND json_extract(config_json,'$.notificationsEnabled')=0 AND json_extract(config_json,'$.platformPaused')=1
+          AND json_extract(config_json,'$.deliveryPaused')=1)
+          AND EXISTS(SELECT 1 FROM installer_test_clock WHERE id=1 AND fixed_at IS NULL)))
+        THEN 11 ELSE NULL END, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(questionnaire.id, source.release_id, options.requireOperationalHolds ? 1 : 0, JSON.stringify(questionnaire), actor, actor),
+    database.prepare(`INSERT INTO contact_configuration_versions
+      (id, version_number, state, contact_collection_mode, contact_collection_mode_v2, contact_collection_enabled,
+       restricted_site_collection_enabled, public_collection_enabled, permitted_contact_methods_json, shared_fields_json,
+       readiness_state, readiness_issues_json, restored_from_id, created_by, published_by, published_at)
+      VALUES (?, ?, 'published', 'disabled', 'disabled', 0, 0, 0, '[]', '[]', 'incomplete',
+        '["Collection remains disabled; kWh submission storage and scoring are unavailable"]', ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(homeownerDesignV3ContactId, contactVersion?.value ?? 1, source.contact_configuration_version_id, actor, actor),
+  ];
+  for (const [index, question] of questionnaire.questions.entries()) {
+    const questionId = `${questionnaire.id}:${question.id}`;
+    statements.push(database.prepare(`INSERT INTO assessment_questions
+      (id, questionnaire_version_id, question_key, display_order, question_type, required, title_en, title_th, help_en, help_th, conditional_json, relevance_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(questionId, questionnaire.id, question.id, index, question.type, question.required ? 1 : 0,
+        question.title.en, question.title.th, question.help.en, question.help.th,
+        question.conditionalFields ? JSON.stringify(question.conditionalFields) : null, JSON.stringify(question.relevance)));
+    for (const [optionIndex, option] of (question.options ?? []).entries()) statements.push(database.prepare(`INSERT INTO assessment_options
+      (id, question_id, option_value, display_order, label_en, label_th, description_en, description_th, exclusive)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(`${questionId}:${option.value}`, questionId, option.value, optionIndex, option.label.en, option.label.th,
+        option.description?.en ?? null, option.description?.th ?? null, option.exclusive ? 1 : 0));
+  }
+  statements.push(
+    database.prepare('UPDATE public_releases SET is_current = 0 WHERE id = ? AND is_current = 1').bind(source.release_id),
+    database.prepare(`INSERT INTO public_releases
+      (id, release_number, questionnaire_version_id, rule_version_id, content_version_id, legal_document_version_id,
+       live_lead_submissions, is_current, contact_configuration_version_id, fact_set_version_id, created_by, published_by, published_at)
+      VALUES (?, 9, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(homeownerDesignV3ReleaseId, questionnaire.id, source.rule_version_id, source.content_version_id,
+        source.legal_document_version_id, homeownerDesignV3ContactId, source.fact_set_version_id, actor, actor),
+    database.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,previous_json,next_json)
+      VALUES (?, ?, 'homeowner-design-v3.published-disabled', 'public-release', ?, ?, ?)`)
+      .bind(crypto.randomUUID(), actor, homeownerDesignV3ReleaseId, JSON.stringify({ releaseId: source.release_id }),
+        JSON.stringify({ questionnaireVersionId: questionnaire.id, ruleVersionId: source.rule_version_id,
+          liveLeadSubmissions: false, contactInputPolicy: actualBillContactInputSupport.policyVersion, kwhContactSupported: false,
+          ...(options.backupSha256 ? { backupSha256: options.backupSha256 } : {}) })),
+  );
+  await database.batch(statements);
+  return { releaseId: homeownerDesignV3ReleaseId, previousReleaseId: source.release_id, questionnaireVersionId: questionnaire.id };
 }
 
 export async function getPublishedLoadingFacts(factSetVersionId: string, database = requireDatabase()): Promise<PublicLoadingFact[]> {
@@ -820,9 +906,11 @@ export async function calculatorV3StagingPreviewConfiguration(
   });
   return {
     calculatorModelVersion: 'energy-v3', calculationReferenceDate: currentCalculationDate(),
+    contactInputSupport: { ...actualBillContactInputSupport },
+    contactReviewAvailable: true,
     privatePreview: true, accessRestrictedSession: true, restrictedSiteCollectionEnabled: false, publicCollectionEnabled: false,
-    releaseId: 'residential-calculator-v3-staging-preview', questionnaireVersionId: calculatorV3Questionnaire.id,
-    ruleVersionId: initialScoringConfiguration.id, questionnaire: calculatorV3Questionnaire,
+    releaseId: 'residential-homeowner-v3-staging-preview', questionnaireVersionId: homeownerDesignV3Questionnaire.id,
+    ruleVersionId: initialScoringConfiguration.id, questionnaire: homeownerDesignV3Questionnaire,
     assessmentToken: null, assessmentTokenExpiresAt: null, liveLeadSubmissions: false, receivingCompany: null,
     contact: { ...contact, preview: true }, loadingFactSetVersionId: initialLoadingFactSet.id,
     loadingFacts: currentPublicFacts(initialLoadingFactSet.facts.map(fact => ({ ...fact, imageUrl: `/images/loading-facts/${fact.sketchId}.svg` }))),
@@ -830,11 +918,16 @@ export async function calculatorV3StagingPreviewConfiguration(
 }
 
 export async function getPublicAssessmentConfig(options: { restrictedAccess?: boolean; request?:Request } = {}): Promise<PublicAssessmentConfig> {
-  // This check precedes getCurrentRelease, whose legacy bootstrap may write.
+  // Preview and ordinary configuration never initialize or publish database releases.
   const preview = await calculatorV3StagingPreviewConfiguration(options);
   if (preview) return preview;
-  const release = await getCurrentRelease();
+  const release = await getPublishedRelease();
   if (!release) throw new Error('No published SolarMatch release is available.');
+  const questionnaire = JSON.parse(release.questionnaire_json) as QuestionnaireDocument;
+  const contract = assessmentReleaseContract(questionnaire, release.questionnaire_version_id, release.rule_version_id);
+  if (contract.calculatorModelVersion === 'energy-v3' && parseScoringConfiguration(release).id !== release.rule_version_id) {
+    throw new Error('assessment_rules_version_mismatch');
+  }
   const accessRestrictedSession = Boolean(options.restrictedAccess);
   const localContact=await localTestContact(options.request,release,requireDatabase());
   const configuredContact = localContact ?? (accessRestrictedSession
@@ -856,6 +949,9 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
   const loadingFactSetVersionId = release.fact_set_version_id ?? factSetId;
   const loadingFacts = await getPublishedLoadingFacts(loadingFactSetVersionId);
   return {
+    ...contract,
+    contactReviewAvailable: false,
+    ...(contract.calculatorModelVersion === 'energy-v3' ? { calculationReferenceDate: currentCalculationDate() } : {}),
     privatePreview: Boolean(localContact),
     attribution: publicAttributionConfig(getRuntimeEnv()),
     accessRestrictedSession,
@@ -864,7 +960,7 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
     releaseId: release.release_id,
     questionnaireVersionId: release.questionnaire_version_id,
     ruleVersionId: release.rule_version_id,
-    questionnaire: JSON.parse(release.questionnaire_json) as QuestionnaireDocument,
+    questionnaire,
     assessmentToken: token?.token ?? null,
     assessmentTokenExpiresAt: token?.expiresAt ?? null,
     liveLeadSubmissions,

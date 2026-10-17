@@ -52,7 +52,7 @@ export type AssessmentQuestion = {
 
 export type QuestionnaireDocument = {
   id: string;
-  schemaVersion: 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  schemaVersion: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
   questions: AssessmentQuestion[];
 };
 
@@ -99,6 +99,15 @@ export type PublicContactConfiguration = {
 export type PublicAssessmentConfig = {
   calculatorModelVersion?: 'energy-v3' | 'legacy-v5';
   calculationReferenceDate?: string;
+  /** Legal Test preview is exposed only by the exact protected staging override. */
+  contactReviewAvailable?: boolean;
+  /** Input support is distinct from collection availability and never enables it. */
+  contactInputSupport?: {
+    policyVersion: 'actual-bill-v1';
+    bill: boolean;
+    kwh: false;
+    kwhUnavailableReason: 'versioned-storage-and-scoring-unavailable';
+  };
   attribution?: import('@/lib/analytics/attribution').PublicAttributionConfig;
   privatePreview: boolean;
   accessRestrictedSession: boolean;

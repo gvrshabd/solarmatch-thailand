@@ -367,6 +367,17 @@ export const calculatorV3Questionnaire: QuestionnaireDocument = {
   ],
 };
 
+// Bill-first Design v3 document. The qv6 and qv7 documents above remain frozen
+// for their existing release/draft contracts; this is published explicitly.
+export const homeownerDesignV3Questionnaire: QuestionnaireDocument = {
+  id: 'residential-questionnaire-v8',
+  schemaVersion: 11,
+  questions: [
+    structuredClone(calculatorV3Questionnaire.questions.find(question => question.id === 'monthlyBillThb')!),
+    ...structuredClone(calculatorV3Questionnaire.questions.filter(question => question.id !== 'monthlyBillThb')),
+  ],
+};
+
 export const legacyQuestionnaireV2: QuestionnaireDocument = {
   id: 'residential-questionnaire-v2',
   schemaVersion: 5,

@@ -14,7 +14,7 @@ const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 const env:StagingAccessEnv={INSTALLER_PLATFORM_MODE:'sandbox',INSTALLER_BASE_URL:origin,STAGING_ACCESS_AUD:'staging-site',ACCESS_AUD:'staging-admin',ACCESS_TEAM_DOMAIN:'https://team.example.test',ADMIN_EMAILS:'owner@example.test'};
 beforeEach(()=>{verify.mockReset();});
 it('limits staging management to the exact repository and explicit integration branches',()=>{
- for(const branch of ['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).not.toThrow();
+ for(const branch of ['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3','feature/homeowner-design-v3-integration'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).not.toThrow();
  for(const branch of ['main','unrelated'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).toThrow();
  expect(()=>assertStagingCheckout('https://github.com/example/other.git','feature/design-v2-integration')).toThrow();
 });
@@ -35,6 +35,7 @@ it('publishes only allowlisted review assets behind verified owner Access',async
  expect(stagingDesignAsset('/design-review/evidence/private.jpg')).toBe(false);
  for(const path of ['estimate-en','estimate-th','estimate-en.html','estimate-th.html','open-example.js'])expect(stagingDesignAsset('/design-review/'+path)).toBe(true);
  expect(stagingDesignAsset('/design-review/images/implementation-results-en-390.png')).toBe(true);
+ for(const width of [360,390,768,1440])expect(stagingDesignAsset(`/design-review/images/implementation-results-en-${width}.png`)).toBe(true);
  for(const path of ['/design-review/backup.sql','/design-review/secret.json','/design-review/../admin','/design-review/prototype/../../api/leads'])expect(stagingDesignAsset(path)).toBe(false);
  expect(reviewContentSecurityPolicy).toContain("connect-src 'none'");expect(reviewContentSecurityPolicy).toContain("form-action 'none'");
 });

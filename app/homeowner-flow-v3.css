@@ -1,0 +1,79 @@
+/* Homeowner-only v3 boundary: no installer/admin tokens or selectors change. */
+.homeowner-v3{--sm-font:var(--font-manrope),var(--font-anuphan),system-ui,sans-serif;--sm-font-th:var(--font-anuphan),var(--font-manrope),system-ui,sans-serif}
+.homeowner-v3 .brand-wordmark small{display:block;font-size:9px;letter-spacing:.16em}
+.homeowner-v3 .estimate-page{padding:0;min-height:100svh}
+.homeowner-v3 .assessment-flow-shell{max-width:680px;min-height:100svh}
+.homeowner-v3 .assessment-flow-header-inner{display:flex;align-items:center;gap:14px;min-height:64px;flex-wrap:wrap}
+.homeowner-v3 .assessment-flow-header .brand-link{margin-right:auto}
+.homeowner-v3 .assessment-flow-header .focus-header-actions{gap:14px}
+.homeowner-v3 .assessment-flow-header .flow-count{font-size:14px;font-weight:700;margin:0;text-align:right}
+.homeowner-v3 .assessment-flow-exit{width:44px;height:44px;border-radius:50%;border:0;background:white;box-shadow:inset 0 0 0 1px var(--sm-line);display:grid;place-items:center;color:var(--sm-pine);text-decoration:none}
+.homeowner-v3 .assessment-flow-progress .segment-progress{margin:0 0 28px;height:5px;gap:4px}
+.homeowner-v3 .assessment-flow-shell .estimate-focus-layout{padding:0 0 120px;max-width:none}
+.homeowner-v3 .estimate-focus-layout .assessment-summary{display:none}
+.homeowner-v3 .estimate-focus-layout .bill-direct-input{width:100%;max-width:none;background:var(--sm-stone);margin-top:28px;height:72px;min-height:72px;gap:6px}
+.homeowner-v3 .estimate-focus-layout .bill-direct-input small{display:block;font-size:13px}
+.homeowner-v3 .estimate-focus-layout .bill-direct-input input{padding:0;background:transparent;box-shadow:none}
+.homeowner-v3 .estimate-focus-layout .bill-direct-input>span{color:var(--sm-muted);font-weight:700}
+.homeowner-v3 .estimate-focus-layout .bill-slider{display:block;width:100%}
+.homeowner-v3 .estimate-focus-layout .bill-range{appearance:auto;-webkit-appearance:auto;width:100%;height:28px;min-height:28px;margin-top:20px;accent-color:var(--sm-pine)}
+.homeowner-v3 .estimate-focus-layout .bill-range::-webkit-slider-runnable-track{all:revert}
+.homeowner-v3 .estimate-focus-layout .bill-range::-webkit-slider-thumb{all:revert}
+.homeowner-v3 .estimate-focus-layout .bill-range::-moz-range-track{all:revert}
+.homeowner-v3 .estimate-focus-layout .bill-range::-moz-range-progress{all:revert}
+.homeowner-v3 .estimate-focus-layout .bill-range::-moz-range-thumb{all:revert}
+.homeowner-v3 .estimate-focus-layout .bill-range-labels{display:none}
+.homeowner-v3 .estimate-focus-layout .visual-choice{align-items:center}
+.homeowner-v3 .estimate-focus-layout .visual-choice strong{font-size:16.5px;font-weight:700;line-height:1.6;letter-spacing:-.01em}
+html[lang=th] .homeowner-v3 .estimate-focus-layout .visual-choice strong{font-weight:600}
+.homeowner-v3 .estimate-focus-layout .visual-choice small{font-size:14px;line-height:1.6;margin:0}
+.homeowner-v3 .estimate-focus-layout .choice-indicator svg{width:14px;height:14px}
+.homeowner-v3 .estimate-focus-layout .location-fields{display:block;width:100%;margin:0}
+.homeowner-v3 .estimate-focus-layout .location-fields>.location-pair{width:100%}
+.homeowner-v3 .estimate-focus-layout .location-fields>label{display:grid;gap:8px;margin-top:24px}
+.homeowner-v3 .estimate-focus-layout .location-pair :is(select,input){font-weight:600}
+.homeowner-v3 .estimate-focus-layout .choice-indicator{border:0;box-shadow:inset 0 0 0 2px var(--sm-line-2)}
+.homeowner-v3 .estimate-focus-layout .selected .choice-indicator{box-shadow:none}
+.homeowner-v3 .estimate-focus-layout .assessment-summary>.card>.note:last-child:not(:first-child){display:none}
+.homeowner-v3 .assessment-summary .summary button{min-height:24px;padding:0;font-size:13px}
+.homeowner-v3 .assessment-summary .summary{margin:16px 0 0}
+.homeowner-v3 .estimate-focus-layout .estimate-actions>.button{font-size:16px;font-weight:700;letter-spacing:-.01em;gap:10px;padding-inline:24px}
+.homeowner-v3 .estimate-focus-layout .estimate-actions>.button svg{width:18px;height:18px}
+.homeowner-v3 .estimate-focus-layout .estimate-actions>.button-secondary{border:0;box-shadow:inset 0 0 0 1.5px var(--sm-line-2)}
+@media(max-width:999px){
+  .homeowner-v3 .assessment-flow-header .flow-count{order:3;flex-basis:100%;padding-bottom:12px}
+  .homeowner-v3 .assessment-flow-header-inner{row-gap:0}
+  .homeowner-v3 .estimate-focus-layout .estimate-actions{border-radius:0;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+}
+@media(min-width:1000px){
+  .homeowner-v3 .assessment-flow-shell{max-width:1100px}
+  .homeowner-v3 .assessment-flow-shell .estimate-focus-layout{padding-bottom:64px}
+  .homeowner-v3 .estimate-focus-layout .assessment-summary{display:grid;top:96px}
+}
+.homeowner-v3 .estimate-focus-layout{max-width:680px;margin-inline:auto;grid-template-columns:minmax(0,1fr);gap:32px}
+.homeowner-v3 .estimate-focus-layout .focus-card{max-width:none;width:100%}
+.homeowner-v3 .location-pair{display:grid;gap:14px;margin-top:28px}
+.homeowner-v3 .location-pair label{display:grid;gap:8px;margin:0;min-width:0;font-size:14.5px;font-weight:700}
+.homeowner-v3 .location-pair :is(select,input){width:100%;min-width:0;height:56px;border:0;border-radius:var(--sm-r-md);box-shadow:inset 0 0 0 1.5px var(--sm-line);background-color:white;padding:0 16px;color:var(--sm-pine);font-size:16px}
+.homeowner-v3 .location-pair select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--sm-muted) 50%),linear-gradient(135deg,var(--sm-muted) 50%,transparent 50%);background-position:calc(100% - 22px) 25px,calc(100% - 16px) 25px;background-size:6px 6px;background-repeat:no-repeat;padding-right:40px}
+.homeowner-v3 .location-pair select:disabled{opacity:.55}
+.homeowner-v3 .location-pair :is(select,input):focus-visible{outline:2px solid var(--sm-pine);outline-offset:3px}
+.homeowner-v3 .assessment-summary .summary dd{display:flex;gap:10px;justify-content:flex-end;align-items:baseline;flex-wrap:wrap;overflow-wrap:anywhere}
+.homeowner-v3 .energy-bill-details{margin-top:22px;border-top:1px solid var(--sm-line);padding-top:12px}
+.homeowner-v3 .energy-bill-details summary{min-height:44px;cursor:pointer;font-weight:600}
+.homeowner-v3 .energy-bill-details .inline-followup{margin-top:8px}
+.homeowner-v3 .bill-direct-input{height:72px;margin-top:28px}
+.homeowner-v3 .bill-direct-input input{font-size:32px}
+.homeowner-v3 .bill-range-labels{gap:12px;font-size:12px}
+.homeowner-v3 .bill-range-labels>span:nth-child(2){text-align:center}
+.homeowner-v3 .accuracy-fields>*{min-width:0}
+.homeowner-v3 .footer-grid-v3{display:grid;grid-template-columns:1fr 1fr;gap:24px 16px}
+.homeowner-v3 .footer-grid-v3 .footer-brand{grid-column:1/-1}
+.homeowner-v3 .footer-grid-v3 .footer-brand p{max-width:24em;margin-top:12px}
+.homeowner-v3 .footer-service-details{margin-top:12px;max-width:85ch}
+.homeowner-v3 .footer-service-details summary{min-height:44px;cursor:pointer}
+.homeowner-v3 .footer-service-details p{margin-block:12px}
+.homeowner-v3 .footer-service-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+@media(min-width:600px){.homeowner-v3 .location-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(min-width:860px){.homeowner-v3 .footer-grid-v3{grid-template-columns:2fr 1fr 1fr}.homeowner-v3 .footer-grid-v3 .footer-brand{grid-column:auto}}
+@media(min-width:1000px){.homeowner-v3 .estimate-focus-layout{max-width:1100px;grid-template-columns:minmax(0,640px) 340px;gap:64px;justify-content:space-between}}

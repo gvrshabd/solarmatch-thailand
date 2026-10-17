@@ -17,33 +17,32 @@ export function SiteFooter() {
 
   return (
     <footer className="site-footer footer">
-      <div className="wrap footer-grid-v2">
+      <div className="wrap footer-grid-v3">
         <div className="footer-brand">
           <BrandMark />
           <p>{english ? 'A free residential solar planning estimate for Thai homeowners.' : 'ผลประเมินโซลาร์เบื้องต้นฟรีเพื่อวางแผนสำหรับเจ้าของบ้านในไทย'}</p>
         </div>
         <div>
-          <h2>{english ? 'Estimate' : 'ประเมิน'}</h2>
+          <h2>SolarMatch</h2>
           <Link href={link('/estimate')}>{english ? 'Solar estimate' : 'ประเมินโซลาร์'}</Link>
           <Link href={link('/how-it-works')}>{english ? 'How it works' : 'วิธีการทำงาน'}</Link>
-          <Link href={link('/solar-guide')}>{english ? 'Solar guide' : 'คู่มือโซลาร์'}</Link>
-          <Link href={'/installers' + (english ? '?lang=en' : '')}>{english ? 'For solar installers' : 'สำหรับบริษัทติดตั้งโซลาร์'}</Link>
-        </div>
-        <div>
-          <h2>{english ? 'Information' : 'ข้อมูล'}</h2>
           <Link href={link('/methodology')}>{english ? 'Methodology' : 'วิธีคำนวณ'}</Link>
-          <Link href={link('/resources')}>{english ? 'Resources' : 'แหล่งข้อมูล'}</Link>
-          <Link href={link('/contact')}>{english ? 'Contact' : 'ติดต่อ'}</Link>
+          <Link href={link('/solar-guide')}>{english ? 'Solar guide' : 'คู่มือโซลาร์'}</Link>
         </div>
         <div>
-          <h2>{english ? 'Legal' : 'ข้อกำหนด'}</h2>
+          <h2>{english ? 'Company' : 'บริษัท'}</h2>
+          <Link href={'/installers' + (english ? '?lang=en' : '')}>{english ? 'For solar installers' : 'สำหรับบริษัทติดตั้งโซลาร์'}</Link>
+          <Link href={link('/contact')}>{english ? 'Contact' : 'ติดต่อ'}</Link>
           <Link href={link('/privacy')}>{english ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว'}</Link>
           <Link href={link('/terms')}>{english ? 'Terms of Use' : 'ข้อกำหนดการใช้บริการ'}</Link>
-          <Link href={link('/cookies')}>{english ? 'Cookie and Browser Storage Policy' : 'นโยบายคุกกี้และพื้นที่จัดเก็บของเบราว์เซอร์'}</Link>
         </div>
       </div>
       <div className="site-shell footer-bottom">
-        <div><span>{english ? 'All figures are preliminary estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา'}</span><p>{prelaunchNotice[locale]}</p><p>{legalReviewDisclosures.operator[locale]}</p></div>
+        <div><span>{english ? 'All figures are preliminary estimates, not quotations. Contact requests are not currently available.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา ขณะนี้ยังไม่เปิดรับคำขอติดต่อ'}</span>
+          <p>{legalReviewDisclosures.operator[locale]}</p>
+          <details className="footer-service-details"><summary>{english ? 'About this service' : 'เกี่ยวกับบริการนี้'}</summary><p>{prelaunchNotice[locale]}</p></details>
+          <div className="footer-service-links"><Link href={link('/cookies')}>{english ? 'Cookie and Browser Storage Policy' : 'นโยบายคุกกี้และพื้นที่จัดเก็บของเบราว์เซอร์'}</Link><Link href={link('/resources')}>{english ? 'Sources and resources' : 'แหล่งข้อมูลอ้างอิง'}</Link></div>
+        </div>
       </div>
     </footer>
   );

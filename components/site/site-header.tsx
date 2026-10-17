@@ -18,6 +18,16 @@ function LanguageSwitch({locale,pathname}:{locale:Locale;pathname:string}) {
   return <div className="lang" role="group" aria-label="Language"><a href={locale==='th'?pathname:alternate} lang="th" aria-label="View this page in Thai" aria-current={locale==='th'?'true':undefined}>ไทย</a><a href={locale==='en'?pathname:alternate} lang="en" aria-label="View this page in English" aria-current={locale==='en'?'true':undefined}>EN</a></div>;
 }
 
+/** Assessment-owned header keeps its live progress beside the real route controls. */
+export function AssessmentFocusHeader({locale,count}:{locale:Locale;count?:string}) {
+  const english=locale==='en',pathname=localizedPath('/estimate',locale);
+  return <header className="assessment-flow-header"><div className="assessment-flow-header-inner">
+    <Link className="brand-link" href={localizedPath('/',locale)} aria-label={english?'SolarMatch Thailand home':'SolarMatch Thailand หน้าหลัก'}><BrandMark/></Link>
+    {count&&<p className="flow-count" aria-live="polite">{count}</p>}
+    <div className="focus-header-actions"><LanguageSwitch locale={locale} pathname={pathname}/><Link className="assessment-flow-exit" href={localizedPath('/',locale)} aria-label={english?'Exit estimate':'ออกจากแบบประเมิน'}><X size={20} aria-hidden="true"/></Link></div>
+  </div></header>;
+}
+
 function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
   event.currentTarget.closest('details')?.removeAttribute('open');
 }
@@ -35,21 +45,7 @@ export function SiteHeader() {
   if (pathname.startsWith('/admin') || pathname.startsWith('/installers') || pathname === '/enquiry') return null;
 
   if (focusMode) {
-    return (
-      <header className="site-header focus-header hdr">
-        <div className="site-shell header-inner">
-          <Link className="brand-link" href={localizedPath('/', locale)} aria-label={english ? 'SolarMatch Thailand home' : 'SolarMatch Thailand หน้าหลัก'}>
-            <BrandMark />
-          </Link>
-          <div className="focus-header-actions">
-            <LanguageSwitch locale={locale} pathname={pathname}/>
-            <Link className="focus-exit" href={localizedPath('/', locale)} aria-label={english ? 'Exit estimate' : 'ออกจากแบบประเมิน'}>
-              <span className="focus-exit-label">{english ? 'Exit estimate' : 'ออกจากแบบประเมิน'}</span> <X size={18} aria-hidden="true" />
-            </Link>
-          </div>
-        </div>
-      </header>
-    );
+    return null;
   }
 
   return (

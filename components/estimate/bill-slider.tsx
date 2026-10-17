@@ -1,14 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
 import type { Locale } from '@/config/i18n';
-
-function sliderMaximum(value: number) {
-  if (value <= 25000) return 25000;
-  if (value <= 50000) return Math.ceil(value / 10000) * 10000;
-  if (value <= 250000) return Math.ceil(value / 25000) * 25000;
-  return Math.ceil(value / 100000) * 100000;
-}
 
 export function BillSlider({
   value,
@@ -27,8 +19,8 @@ export function BillSlider({
   const textValue=value?String(value):'';
 
   const numericValue = Number(textValue) || 0;
-  const maximum = useMemo(() => sliderMaximum(numericValue), [numericValue]);
-  const step = maximum <= 25000 ? 100 : maximum <= 50000 ? 500 : 1000;
+  const maximum = 25000;
+  const step = 100;
 
   function updateText(next: string) {
     if (next !== '' && !/^\d+$/.test(next)) return;
@@ -46,7 +38,8 @@ export function BillSlider({
           autoComplete="off"
           aria-invalid={invalid}
           value={textValue?Number(textValue).toLocaleString('en-US'):''}
-          placeholder="3,500"
+          aria-label={english ? 'Monthly electricity bill amount' : 'ยอดค่าไฟต่อเดือน'}
+          placeholder="4,000"
           onChange={(event) => updateText(event.target.value.replaceAll(',', '').trim())}
         />
         <small>{english ? 'per month' : 'ต่อเดือน'}</small>
@@ -58,12 +51,12 @@ export function BillSlider({
         min="500"
         max={maximum}
         step={step}
-        value={Math.min(numericValue, maximum)}
+        value={Math.max(500, Math.min(numericValue, maximum))}
         onChange={(event) => updateText(event.target.value)}
       />
       <div className="bill-range-labels" aria-hidden="true">
         <span>฿500</span>
-        <span>{english ? 'Slider expands for larger bills' : 'สไลเดอร์ขยายตามยอดที่สูงขึ้น'}</span>
+        <span>{english ? 'Type a larger amount if needed' : 'พิมพ์ยอดที่สูงกว่านี้ได้'}</span>
         <span>฿{maximum.toLocaleString('en-US')}</span>
       </div>
     </div>

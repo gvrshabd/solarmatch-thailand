@@ -160,7 +160,7 @@ export const estimateAnswersSchema = estimateAnswerFieldsSchema.superRefine((ans
 });
 
 /** Partial drafts use the same bounded fields, without completed-answer requirements. */
-export const estimateDraftAnswersSchema = estimateAnswerFieldsSchema.partial();
+export const estimateDraftAnswersSchema = estimateAnswerFieldsSchema.omit({ quoteConsentAccepted: true }).partial();
 
 /** Restore only recognized, individually valid values; never retain arbitrary draft keys. */
 export function sanitizeEstimateDraftAnswers(raw: unknown): Partial<EstimateAnswers> {
@@ -176,7 +176,7 @@ export function sanitizeEstimateDraftAnswers(raw: unknown): Partial<EstimateAnsw
 }
 
 export const estimateDraftSchema = z.object({
-  version: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10)]),
+  version: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10), z.literal(11)]),
   answers: z.record(z.string(), z.unknown()).transform(sanitizeEstimateDraftAnswers),
   step: z.number().int().nonnegative(),
   questionnaireVersionId: z.string().optional(),
