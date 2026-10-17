@@ -1,0 +1,156 @@
+SolarMatch calculator v3 verification — 17 October 2026
+
+Final application source:953507f992e5f011ec4551d4c9282132ca076e44.
+Core implementation:b5d3443b93aee56fe46760782e0d78e78556f333.
+Staging guard/review package:b21524b8b11e5c73640b7ec1c9fa0697dd7e35d1.
+Branch: feature/calculator-energy-accuracy-v3
+Baseline/main remains3571f357e469bddc43db287b67ec22c4358f0061.
+No Git push, main merge, production operation or Milly's operation.
+
+Completed checks
+- Full unit suite:556tests/63files passed with maxWorkers2. Exact final numerical
+  source, tariff/source snapshots and validation are covered. Earlier unbounded
+  parallel resource-contention timeouts are retained in local diagnostic logs.
+- Typecheck passed; lint passed with two existing next/image warnings in homepage
+  and installer portal. No lint error.
+- Clean ordinary production build passed (.wrangler/calculator-v3-final-reviewed-build.log).
+- Final full unit repeat:556/63 passed in42.94s after the final UI changes
+  (.wrangler/calculator-v3-final-all-unit.log).
+- Final release-tooling repeat:569 tests/64 files passed in19.35s, including
+  split-bundle staging guard regressions; typecheck and lint passed again.
+  Lint retains only the same two pre-existing next/image warnings.
+  (.wrangler/calculator-v3-release-final-unit.log).
+- New calculator browser suite:72/72 passed continuously, zero retries,3.7minutes
+  (.wrangler/calculator-v3-readonly-final-browser.log).
+  Desktop Chromium, Android Chromium and mobile WebKit; both locales, real kWh
+  no-contact journeys, legacy freeze/recalculation, four config-refresh races,
+  exact quotation cents, privacy, tax, actual financing/export inputs, keyboard,
+  320/390px expanded layouts and axe WCAG2/2.1/2.2-oriented checks.
+- Independent narrow boundary review:63tests/5files passed; no source changes.
+- Exact JRC snapshot hash and read-only official API reproduction verified.
+- Existing legal/consent/admin/migrations/production bindings unchanged; LINE
+  repair63b656d remains in ancestry. No historical questionnaire overwritten.
+
+Failures found and corrected, not concealed
+- No-investment lifetime baseline incorrectly repeated year-one demand despite
+  deferred loads: now recomputes each year's no-PV demand/bill.
+- Exact quotation input previously lost cents: step0.01 and full-precision model.
+- Delayed result focus could steal input focus: focus now respects active input.
+- Horizontal lifetime/cash tables lacked keyboard focus: now focusable; axe kept.
+- Late q6 configuration could replace an interacted/resumed q7 journey. Fresh,
+  legacy-restored, modern-restored and homepage starter flows are distinguished;
+  accepted q6 normalizes draft model metadata. No mixed release/token scope.
+- Strictly matching read-only q7 metadata restores facts/Test availability after
+  refresh without changing answers, step, questionnaire or reference date.
+  Collection-enabled, token-bearing and mismatched configurations stay rejected.
+- Modern charts say modeled monthly bill/without solar, not an actual bill paid
+  today. Legacy labels and calculations remain unchanged.
+- New homepage assumption note failed dark-background contrast: corrected.
+- Several new test locators treated wrapped help text as an exact label; corrected
+  to the actual accessible input, without changing timeouts or field assertions.
+- Initial test seed overwrote recalculated saved answers after every reload:
+  synthetic initializer now seeds only absent storage, retaining reload assertions.
+- Privacy test matched an income-digit substring inside unrelated numeric values:
+  now checks complete before/after storage and nested keys/exact scalar values.
+
+Broader legacy/browser follow-up
+Initial site/terrace run:50passed,1intentional skip,6failed. Four failures still
+targeted replaced optional-refinement/map controls; expected coverage must follow
+the deliberate legacy recalculation path and preserve no-location-leak assertions.
+Other failures: one30s navigation timeout; one district-label contrast snapshot.
+Trace established that axe inspected a question at opacity0 during a q7-to-q6
+configuration transition, not stable text styling. The audit now waits for the
+actual configuration response, matching question title, enabled fieldset and
+opacity1. All axe rules remain. Navigation passed unchanged on the serial run.
+Revised precision coverage asserts deliberate legacy-to-modern recalculation
+and real panel-plane changes. Revised privacy coverage preserves a legacy
+address locally while proving no address UI/geocoding/network/share disclosure.
+Initial focused mobile run:7passed,1failed at30s WebKit homepage navigation.
+All eight mobile audits passed serially with unchanged timeouts. Final focused
+public/mobile rerun:16passed,1intentional desktop-only navigation skip on mobile,
+zero failures,1.9minutes, including three Terrace/axe browser audits.
+Log:.wrangler/calculator-v3-readonly-final-public-browser.log.
+Initial failed/interrupted logs and traces remain ignored/private; successful
+focused follow-up is not misrepresented as a fresh complete57-case broad run.
+
+Visual evidence and limits
+EN/TH390px inspected. Extremely tall expanded EN Chromium full-page PNG repeats
+pixels after roughly16kpx; normal bottom viewport shows a proper footer and DOM
+counts main=1/hero=1/h1=1 in both locales. WebKit full-page output is normal. Original
+PNG preserved; this is a capture limitation, not a hidden duplicate component.
+Normal bottom captures and diagnostic log are in ignored .wrangler/. Browser
+emulation/axe do not establish physical-device, screen-reader or native-language
+acceptance. No measured household predictive accuracy or legal approval claimed.
+
+Protected staging publication — completed 17 October 2026
+Deployed Worker:74b553a0-9686-4a02-a612-3e32b94b62dd, serving100%.
+https://solarmatch-installer-staging.deluxejahseh.workers.dev
+Application source953507f; guard/review packageb21524b. Normal production build
+and separate protected staging build both passed. The deployment used only the
+existing direct staging helper; there was no Git push or production deployment.
+Previous Worker4548abeb-b785-4328-983a-a9f655c59a4e is the application rollback point.
+Dedicated DB153b8867-e7ad-40ad-8a63-c2bde2338b43 has all19migrations, none pending.
+No migration is required or authorized by this calculator change. Existing
+encrypted staging recovery material retained; no new database restore/seed.
+Read-only before/after metadata:2leads,2enquiries,1delivery,2ledgerrows,1creditaccount,
+3legalversions; foreign-key errors0. Every selected consent/business/financial
+metadata fingerprint matched. This is not a hash of every PII column or an R2
+restore rehearsal. There were no R2 object writes/deletes. Existing synthetic
+records were not reseeded or modified. Before/after evidence is ignored/private
+under .wrangler/calculator-v3-review/ (after timestamp00:57:46UTC).
+All collection/payments/notifications/attribution/outbound/allocation remain off
+or paused; clock overrideNULL. No messages, charges or real enquiries created.
+The first deploy preflight returned401 from the existing Wrangler OAuth session;
+ordinary whoami refreshed that session without changing its scopes. A subsequent
+preflight stopped before upload because the old entry-file string check could
+not see Access code extracted into an imported bundle chunk. The repaired guard
+parses only reachable imports and verifies the built staging identity, all safety
+variables, bindings and entry protection markers.194 reachable modules passed;
+21 focused staging/guard tests passed, followed by the569-test complete suite.
+Stale unimported chunks cannot satisfy the guard. No protection was bypassed.
+
+Actual authenticated staging checks
+- Complete EN desktop and TH390px kWh-only calculator journeys reached real
+  results through No, without contact fields or a submission. Both used1200kWh
+  over30days; modeled baseline5578THB/month,10.45kWp candidate273920THB,
+  reduction3243THB/month, simple payback7.6years, lifetime benefit622112THB.
+  These are synthetic examples, not measured-household performance claims.
+- Configuration API returns qv7/schema10/12screens, energy-v3, assessmentTokenNULL,
+  mode disabled, collectionfalse, distributionfalse, liveLeadSubmissionsfalse.
+  Quote screen retains No and legal Test preview; no collection was enabled.
+- Frozen EN and TH example links calculate residential-hourly-2026-10-17-v3.
+  TH survives reload; EN example displays5.005kWp,170130THB,2755THB/month,
+  5.4year simple payback and approximately575000THB lifetime benefit.
+- Language switch preserved the current result. Thai390px result has no
+  horizontal overflow; English desktop image and Thai mobile image inspected.
+- EN/TH home, Methodology, Resources, Privacy, Terms and Cookies rendered their
+  expected headings with no internal-server-error page or horizontal overflow.
+- Existing synthetic installer session still authenticates after reload and
+  displays its existing one delivered enquiry. No installer actions mutated data.
+- Anonymous /, /en, /en/estimate, /api/assessment/config, /admin and /design-review/
+  each return302 to the established Cloudflare Access team host. No policies or
+  audiences were changed. Shared team hostname is not a Milly's resource action.
+- Protected viewer loads and clearly labels screenshots as archived Design v2
+  comparisons, not current-v3 proof. Current example links are separate. Original
+  prototype and reference screenshots were preserved.
+- Screenshot evidence (synthetic only, ignored/local):
+  .wrangler/calculator-v3-staging-th-result-390.png
+  .wrangler/calculator-v3-staging-en-example-desktop.png
+  Deployment log:.wrangler/calculator-v3-staging-deploy.log.
+
+Application rollback, only if required:
+pnpm exec wrangler rollback 4548abeb-b785-4328-983a-a9f655c59a4e --config staging/wrangler.jsonc --message "Rollback calculator v3 staging review"
+Do not restore a database for an application-only regression. This command was
+documented, not executed. No database migration or data recovery was necessary.
+
+Remaining readiness decisions
+See IMPLEMENTATION_AND_LIMITS.txt for the complete evidence boundary. In
+particular, live kWh contact needs versioned storage/scoring/release integration;
+it currently rejects safely422. Do not activate it based on this preview.
+The staging override is not a production questionnaire/release publication.
+Any future rollout must explicitly publish a compatible versioned release;
+collection activation additionally requires the kWh storage/scoring integration.
+TOU, battery dispatch and existing-system expansion need separate supported
+models. Measured household/weather calibration, real quotes/VAT/scope, independent
+MEA-page verification and normal company/legal/provider decisions remain.
+Verified tariff date coverage ends31December2026; do not silently extend it.
