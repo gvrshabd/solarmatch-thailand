@@ -191,4 +191,26 @@ describe('modern residential hourly estimator integration', () => {
     expect(tou.selectedSystem).toBeUndefined();
     expect(battery.planningPaybackYears).toBeNull();
   });
+
+  it('uses unchanged solar-only arithmetic for explicit battery interest and preserves original answers',()=>{
+    const input={...modern,projectType:'solar-with-battery' as const,solarOnlyIllustration:true};
+    const reference=modernEstimator.calculate({...modern,projectType:'new-rooftop'});
+    const battery=modernEstimator.calculate(input);
+    expect(battery.selectedSystem).toEqual(reference.selectedSystem);
+    expect(battery.lifetimeCostSeries).toEqual(reference.lifetimeCostSeries);
+    expect(battery.planningMonthlySavingsThb).toBe(reference.planningMonthlySavingsThb);
+    expect(input.projectType).toBe('solar-with-battery');
+    expect(battery.warnings?.some(w=>w.code==='solar-only-illustration')).toBe(true);
+  });
+  it.each([false,true])('never models an existing upgrade with a saved illustration flag %s',solarOnlyIllustration=>{
+    const result=modernEstimator.calculate({...modern,projectType:'expand-existing',solarOnlyIllustration});
+    expect(result.modelStatus).toBe('unsupported');expect(result.selectedSystem).toBeUndefined();
+    expect(result.planningPaybackYears).toBeNull();expect(result.planningAnnualSavingsThb).toBe(0);
+  });
+  it.each(['new-rooftop','unsure'] as const)('keeps the selectable %s project usable',projectType=>{
+    expect(modernEstimator.calculate({...modern,projectType}).selectedSystem).toBeDefined();
+  });
+  it('a battery opt-in cannot bypass an unsupported tariff',()=>{
+    expect(modernEstimator.calculate({...modern,projectType:'solar-with-battery',solarOnlyIllustration:true,tariffCategory:'tou'}).modelStatus).toBe('unsupported');
+  });
 });

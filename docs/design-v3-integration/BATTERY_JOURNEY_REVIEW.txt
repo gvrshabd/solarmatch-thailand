@@ -1,0 +1,67 @@
+BATTERY JOURNEY REVIEW — 17 OCTOBER 2026
+
+Live baseline inspected before editing: main ef6732907e5417011473ffde4370189add899164.
+The earlier generic screenshot was outdated: production already had a battery-
+specific heading, a solar-only checkbox, and no empty unsupported metric cards.
+The checkbox was not the requested prominent action, and expansion could still
+opt into a new-installation scenario without existing-system information.
+
+Behavior of this release
+Battery interest shows the exact requested English limitation and equivalent Thai:
+"We can estimate your solar panels. Battery costs, savings and backup performance
+aren't included yet." (The rendered copy uses the requested curly apostrophe.)
+The prominent "See my solar-only estimate" button is an explicit opt-in. The
+original projectType remains solar-with-battery; solarOnlyIllustration is separate.
+Results use the existing supported panel-only calculations and visibly exclude
+battery costs/savings/backup. The existing model, tariff, prices and numeric
+assumptions are unchanged. No contact consent is inferred by this action.
+
+"Edit my project choice" opens the existing questionnaire at its project question,
+using the latest completed answers/refinements, without restart or data in URLs.
+Changing project choice clears the separate illustration selection. Browser Back
+returns to the saved result; no contact data is submitted.
+
+Existing-system upgrades remain unsupported even with a saved illustration flag.
+Earlier frozen modern expansion illustrations are not reused as upgrade economics.
+Their answers/preferences are retained. No database/historic lead record is edited.
+The screen explains the missing panel, inverter, generation and pre-solar-demand
+information and offers editing or an installer assessment. It does not pretend an
+upgrade is a new installation. Legacy saved-model regression coverage is retained.
+
+New installation and unsure choices remain usable. TOU/unsupported tariffs,
+out-of-range demand, unknown battery quotation scope and invalid equipment retain
+specific safe recovery actions; no solar-only shortcut bypasses those blockers.
+No-feasible/no-economic results hide empty statistic cards and offer review of
+optional details. A battery opt-in can still be reversed when no package fits.
+
+Design/accessibility
+Claude's existing hero, cards, palette, typography and responsive layout retained.
+The review reproduced a 35px header overflow at 320px after font loading. A scoped
+homeowner-only compact header rule fixes this without shrinking control targets
+below 44px. Installer/admin styles are unchanged. Keyboard focus stays on the
+action after calculation; invalid quote review focuses the existing details.
+
+Verification history (do not treat failures as passes)
+- Initial unit run: one obsolete Thai link assertion expected /estimate rather
+  than the new direct /estimate#projectType link; corrected, not removed.
+- Full unit suite: 626/626 passed across 75 files.
+- Initial Chrome browser run: 27 passed, 3 failed. One failure exposed the 320px
+  header overflow; two used an English warning assertion on the Thai page.
+- Review of new looped scenarios also caught fixture reuse. Tests now explicitly
+  replace only synthetic scenario data and assert the intended inputs were used.
+- Final typecheck and production build passed after repairs. Lint: zero errors,
+  14 existing warnings. Final full unit rerun: 626/626 in 75 files.
+- Final browser runs: 32/32 desktop/mobile Chromium and 12/12 mobile WebKit.
+  Deployed receipts are reported in the task handoff/private release receipt.
+- Tests include every selectable project type, no-contact completion, explicit
+  opt-in/undo, restored expansion flags/snapshots, project editing, Back, reload,
+  keyboard focus, axe checks, and overflow at 320/390/1440px.
+- Screenshot fixtures are synthetic only. Browser emulation is not a physical
+  device or screen-reader certification. Screenshots are not seeded production data.
+
+Safety/release boundary
+No schema, migration, account, provider, legal/consent, Access or collection-setting
+changes. No synthetic production records. No Milly's operations. Publishing this
+repair does not enable any business operation.
+Rollback: normally revert this application commit and redeploy; retain previous
+main ef6732907e5417011473ffde4370189add899164. Do not restore D1 for a UI rollback.

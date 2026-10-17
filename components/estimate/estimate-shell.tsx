@@ -335,14 +335,18 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     const completed = estimateAnswersSchema.safeParse(parseJson(readSessionValue(resultStorageKey)));
     const starter = migrateSaved(parseJson(readSessionValue(starterStorageKey)));
     starterAnswersRef.current = starter?.answers ?? null;
-    const restored = starter?.answers ?? savedDraft?.answers ?? (completed.success ? sanitizeEstimateDraftAnswers(completed.data) : {});
+    const editProject=window.location.hash==='#projectType';
+    // An explicit edit from results uses the latest result answers/refinements,
+    // not an older questionnaire draft. The fragment carries no personal data.
+    const restored = editProject&&completed.success ? sanitizeEstimateDraftAnswers(completed.data) : starter?.answers ?? savedDraft?.answers ?? (completed.success ? sanitizeEstimateDraftAnswers(completed.data) : {});
     const startingQuestions = (questionnaireOverride ?? homeownerDesignV3Questionnaire).questions;
     const firstUnanswered = startingQuestions.findIndex((item) => Boolean(firstQuestionError(item, restored, english)));
     const mappedStep = savedDraft ? restoredQuestionPosition(savedDraft.version, savedDraft.step, questionnaireOverride ?? homeownerDesignV3Questionnaire) : 0;
     let restoredStep = 0;
     if (starter) restoredStep = Math.max(0, firstUnanswered);
     else if (savedDraft) restoredStep = Math.max(0, Math.min(mappedStep, startingQuestions.length - 1));
-    restoredQuestionIdRef.current = starter || savedDraft
+    if(editProject)restoredStep=Math.max(0,startingQuestions.findIndex(item=>item.id==='projectType'));
+    restoredQuestionIdRef.current = starter || savedDraft || editProject
       ? startingQuestions[restoredStep]?.id ?? null
       : null;
     // A persisted modern journey must not acquire another release's questionnaire/token.
@@ -496,7 +500,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       setError('');
       return;
     }
-    setDraft(current=>{const next={...current,[id]:value};if(id==='propertyType'&&value!=='other-residential')delete next.customPropertyType;if(id==='ownershipStatus'&&value==='owner')delete next.ownerPermission;if(id==='roofMaterial'&&value!=='other')delete next.customRoofMaterial;return next;});
+    setDraft(current=>{const next={...current,[id]:value};if(id==='projectType'&&value!==current.projectType)delete next.solarOnlyIllustration;if(id==='propertyType'&&value!=='other-residential')delete next.customPropertyType;if(id==='ownershipStatus'&&value==='owner')delete next.ownerPermission;if(id==='roofMaterial'&&value!=='other')delete next.customRoofMaterial;return next;});
     setError('');
   }
 
@@ -638,7 +642,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       </div>}
       {question.type === 'bill' && (!energyQuestionnaire || draft.consumptionInput !== 'kwh') && <BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} />}
       {question.type === 'bill' && energyQuestionnaire && <details className="energy-bill-details" open={draft.consumptionInput === 'kwh' || undefined}><summary>{english ? 'Use actual kWh or add bill details' : 'กรอกหน่วยไฟจริง หรือเพิ่มรายละเอียดบิล'}</summary><EnergyInputFields section="consumption" answers={draft} locale={locale} onChange={setValue} /></details>}
-      {energyQuestionnaire&&question.id==='projectType'&&<p className="note project-model-scope">{english?'This calculator estimates new rooftop solar panels. Battery and existing-system projects need a separate assessment; you can choose a clearly labelled solar-only illustration at the end.':'เครื่องคำนวณนี้ประเมินระบบแผงโซลาร์บนหลังคาใหม่ โครงการที่มีแบตเตอรี่หรือระบบเดิมต้องประเมินแยก โดยคุณเลือกดูตัวอย่างเฉพาะโซลาร์ที่ระบุขอบเขตชัดเจนได้ในขั้นตอนสุดท้าย'}</p>}
+      {energyQuestionnaire&&question.id==='projectType'&&<p className="note project-model-scope">{english?'We estimate new solar-panel systems. If you’re interested in a battery, you can explicitly choose a solar-only estimate at the end; battery costs, savings and backup performance are not included. Upgrades need information about the existing system and a separate assessment.':'เราประเมินระบบแผงโซลาร์ใหม่ หากสนใจแบตเตอรี่ คุณเลือกดูผลประเมินเฉพาะโซลาร์ได้ในขั้นตอนสุดท้าย โดยไม่รวมต้นทุน ผลประหยัด และประสิทธิภาพการสำรองไฟของแบตเตอรี่ ส่วนการปรับปรุงระบบเดิมต้องมีข้อมูลระบบเดิมและประเมินแยกต่างหาก'}</p>}
       {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{visibleOptions?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = visibleOptions?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
       {question.id === 'ownershipStatus' && draft.ownershipStatus !== undefined && draft.ownershipStatus !== 'owner' && <fieldset className="inline-followup"><legend id="owner-permission-title">{english ? 'Do you have the property owner’s permission to request contact from solar installers?' : 'คุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อจากผู้ติดตั้งโซลาร์แล้วหรือไม่?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="owner-permission-title" onKeyDown={handleRadioKeys}>{([['yes', english ? 'Yes' : 'ได้รับอนุญาตแล้ว'], ['not-yet', english ? 'Not yet' : 'ยังไม่ได้รับอนุญาต']] as const).map(([value, label], index) => <button key={value} type="button" role="radio" aria-checked={draft.ownerPermission === value} tabIndex={draft.ownerPermission === value || (!draft.ownerPermission && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.ownerPermission === value ? 'selected' : ''}`} onClick={() => setValue('ownerPermission', value)}><Home className="choice-icon" aria-hidden="true" /><strong>{label}</strong><span className="choice-indicator" aria-hidden="true">{draft.ownerPermission === value && <Check />}</span></button>)}</div></fieldset>}
       {contactPermissionUnavailable && <div className="permission-result-notice"><p>{english ? 'You can still view your estimate. To request installer contact, you will first need the property owner’s permission.' : 'คุณยังดูผลประเมินได้ตามปกติ หากต้องการให้ผู้ติดตั้งติดต่อ คุณต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ก่อน'}</p></div>}

@@ -233,8 +233,13 @@ test('a q6 response arriving after q8 bill interaction cannot replace its questi
   expect(JSON.stringify(storage)).not.toContain(held.configuration.assessmentToken!);
 });
 
-async function seed(page: Page, answers: EstimateAnswers, locale: 'en' | 'th' = 'en', waitForHeadingFocus = true) {
+async function seed(page: Page, answers: EstimateAnswers, locale: 'en' | 'th' = 'en', waitForHeadingFocus = true, replaceSyntheticScenario = false) {
   await localApis(page);
+  if(replaceSyntheticScenario&&page.url().startsWith('http'))await page.evaluate(value=>{
+    sessionStorage.setItem('solarmatch:estimate',JSON.stringify(value));
+    sessionStorage.removeItem('solarmatch:result-view-state');
+    sessionStorage.removeItem('solarmatch:assessment-context');
+  },answers);
   await page.addInitScript(value => {
     // Seed only a fresh page. Reload must exercise the user's persisted edits,
     // rather than overwrite an explicit legacy-to-modern recalculation.
@@ -321,54 +326,118 @@ test('historic saved inputs stay on the legacy engine until explicit recalculati
 
 test('no feasible roof option does not display an invented system, price or payback', async ({ page }) => {
   await seed(page, { ...modern, exactRoofAreaSqm: 1 });
-  await expect(page.locator('.rhero h1')).toHaveText('No suitable economic installation identified');
+  await expect(page.locator('.rhero h1')).toHaveText('Let’s review what can fit your home');
   await expect(page.locator('.rhero .ba')).toHaveCount(0);
-  await expect(page.locator('.rstats > div').nth(0).locator('b')).toHaveText('—');
-  await expect(page.locator('.rstats > div').nth(1).locator('b')).toHaveText('—');
+  await expect(page.locator('.rstats')).toHaveCount(0);
+  await page.getByRole('button',{name:'Review optional details',exact:true}).click();
+  await expect(page.locator('.results-precise summary')).toBeFocused();
   await expect(page.locator('.calculator-model-details')).toContainText('No evidenced package fits');
 });
 
-test('unsupported battery project requires an explicit labelled solar-only illustration', async ({ page }) => {
-  await seed(page, { ...modern, projectType: 'solar-with-battery' });
-  await expect(page.locator('.rhero h1')).toHaveText('A battery system needs a separate estimate');
-  await expect(page.locator('.rhero .result-model-recovery')).toBeVisible();
+test('a battery illustration with no feasible package keeps an actionable and focused recovery',async({page})=>{
+  await seed(page,{...modern,projectType:'solar-with-battery',exactRoofAreaSqm:1});
+  const action=page.locator('.solar-only-action');await action.focus();await action.press('Enter');
+  await expect(page.locator('.rhero h1')).toHaveText('Let’s review what can fit your home');
   await expect(page.locator('.rhero .rstats')).toHaveCount(0);
-  await expect(page.locator('.rhero .ba')).toHaveCount(0);
-  await expect(page.locator('.lifetime-chart')).toHaveCount(0);
-  await expect(page.locator('.bars')).toHaveCount(0);
-  await expect(page.locator('#optional-scenarios-title')).toHaveCount(0);
-  await page.getByRole('checkbox', { name: 'Show a new-system solar-only illustration. This does not model my battery or existing system.' }).check();
-  await expect(page.locator('.calculator-model-details')).toContainText('NEW-SYSTEM SOLAR-ONLY ILLUSTRATION');
-  await expect(page.locator('.rhero .ba .now')).toBeVisible();
+  await expect(action).toBeFocused();await expect(action).toHaveText('Back to my battery request');
+  await expect(page.locator('.result-model-recovery')).toContainText('No recommended installation meets');
+  await action.click();await expect(action).toHaveText('See my solar-only estimate');
 });
 
-for(const locale of ['en','th'] as const)for(const projectType of ['solar-with-battery','expand-existing'] as const){
-  test(`model recovery stays prominent and preserves ${projectType} answers ${locale}`,async({page})=>{
-    await page.setViewportSize({width:390,height:844});
-    await seed(page,{...modern,consumptionInput:'bill',projectType},locale);
-    await page.locator('.v2-breakdown > details > summary').click();
-    const optIn=page.locator('.result-model-recovery input[type=checkbox]');
-    await expect(optIn).toBeVisible();await expect(optIn).not.toBeChecked();
-    await expect(page.locator('.rhero .rstats')).toHaveCount(0);
-    await expect(page.locator('.rhero .verdict')).toHaveCount(0);
-    await expect(page.locator('.lifetime-chart')).toHaveCount(0);
+for(const locale of ['en','th'] as const){
+  test(`battery action preserves interest, reload and project editing ${locale}`,async({page},testInfo)=>{
+    const mobile=testInfo.project.name.includes('mobile');
+    await page.setViewportSize({width:mobile?390:1440,height:900});
+    await seed(page,{...modern,consumptionInput:'bill',projectType:'solar-with-battery'},locale);
+    const hero=page.locator('.rhero');
+    await expect(hero.locator('h1')).toHaveText(locale==='en'?'Your solar-panel estimate':'ผลประเมินเฉพาะแผงโซลาร์ของคุณ');
+    await expect(hero).toContainText(locale==='en'?'We can estimate your solar panels. Battery costs, savings and backup performance aren’t included yet.':'เราประเมินระบบแผงโซลาร์ให้คุณได้');
+    await expect(hero.locator('.rstats,.verdict')).toHaveCount(0);
+    await expect(page.locator('.lifetime-chart,#optional-scenarios-title')).toHaveCount(0);
+    const action=hero.locator('.solar-only-action');
+    await expect(action).toHaveText(locale==='en'?'See my solar-only estimate':'ดูผลประเมินเฉพาะโซลาร์ของฉัน');
     expect((await new AxeBuilder({page}).include('.rhero').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
-    for(const width of [320,390,1440]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
-    await page.setViewportSize({width:390,height:844});
-    await optIn.focus();await optIn.press('Space');
-    await expect(page.locator('.rhero .ba .now')).toBeVisible();
-    await expect(optIn).toBeFocused();
-    await expect(page.locator('.rhero')).toContainText(locale==='en'?'excludes batteries, backup power and your existing system':'ไม่รวมแบตเตอรี่ ไฟสำรอง และระบบเดิม');
+    for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth})),`Overflow at ${width}px`).toEqual({width,scroll:width});}
+    await page.setViewportSize({width:mobile?390:1440,height:900});
+    if(process.env.BATTERY_REVIEW_SCREENSHOTS){await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${process.env.BATTERY_REVIEW_SCREENSHOTS}/battery-before-${locale}-${mobile?'mobile':'desktop'}.png`});}
+    await action.focus();await action.press('Enter');
+    await expect(hero.locator('.ba .now')).toBeVisible();
+    await expect(action).toBeFocused();
+    await expect(hero).toContainText(locale==='en'?'Your original project preference is unchanged':'ประเภทโครงการที่คุณเลือกไว้ยังไม่เปลี่ยน');
+    await expect(page.locator('.calculator-model-details')).toContainText(locale==='en'?'NEW-SYSTEM SOLAR-ONLY ILLUSTRATION':'ตัวอย่างระบบใหม่เฉพาะโซลาร์');
     await page.reload();
-    await expect(page.locator('.rhero .ba .now')).toBeVisible();
+    await expect(hero.locator('.ba .now')).toBeVisible();
     const saved=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate')!));
-    expect(saved.projectType).toBe(projectType);expect(saved.solarOnlyIllustration).toBe(true);expect(saved.monthlyBillThb).toBe(modern.monthlyBillThb);expect(saved.quoteContactRequested).toBe(false);
-    await page.locator('.v2-breakdown > details > summary').click();
-    const checked=page.locator('.result-model-recovery input[type=checkbox]');
-    await expect(checked).toBeChecked();await checked.uncheck();
-    await expect(page.locator('.result-model-recovery')).toBeVisible();
-    await expect(page.locator('.rhero .ba')).toHaveCount(0);
-    if(process.env.MODEL_RECOVERY_SCREENSHOTS==='1'){await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`.wrangler/model-recovery-${projectType}-${locale}.png`,fullPage:false});}
+    expect(saved.projectType).toBe('solar-with-battery');expect(saved.solarOnlyIllustration).toBe(true);expect(saved.monthlyBillThb).toBe(modern.monthlyBillThb);expect(saved.quoteContactRequested).toBe(false);
+    if(process.env.BATTERY_REVIEW_SCREENSHOTS){await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${process.env.BATTERY_REVIEW_SCREENSHOTS}/battery-after-${locale}-${mobile?'mobile':'desktop'}.png`});}
+    await hero.getByRole('link',{name:locale==='en'?'Edit my project choice':'แก้ไขประเภทโครงการ'}).click();
+    await expect(page.locator('#estimate-question')).toHaveText(locale==='en'?'What kind of solar project are you considering?':'คุณกำลังพิจารณาโครงการโซลาร์แบบใด?');
+    await expect(page.getByRole('radio',{name:locale==='en'?'Solar panels with battery storage':'แผงโซลาร์พร้อมระบบกักเก็บพลังงาน',exact:true})).toHaveAttribute('aria-checked','true');
+    const draft=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft')!).answers);
+    expect(draft.monthlyBillThb).toBe(modern.monthlyBillThb);expect(draft.exactRoofAreaSqm).toBe(modern.exactRoofAreaSqm);
+    await page.goBack();await expect(hero.locator('.ba .now')).toBeVisible();
+    await hero.locator('.solar-only-action').click();
+    await expect(hero.locator('.ba,.rstats')).toHaveCount(0);
+    await page.reload();await expect(hero.locator('.solar-only-action')).toHaveText(locale==='en'?'See my solar-only estimate':'ดูผลประเมินเฉพาะโซลาร์ของฉัน');
+  });
+
+  test(`existing upgrades cannot restore a new-system shortcut ${locale}`,async({page})=>{
+    await seed(page,{...modern,projectType:'expand-existing',solarOnlyIllustration:true},locale);
+    // Reproduce the previous release's frozen new-system snapshot with matching answers.
+    await page.evaluate(()=>{
+      const raw=JSON.parse(sessionStorage.getItem('solarmatch:result-view-state')!);
+      raw.resultSnapshot.modelStatus='conditional';raw.resultSnapshot.planningInstalledCostThb=123456;
+      raw.resultSnapshot.planningMonthlySavingsThb=1234;
+      sessionStorage.setItem('solarmatch:result-view-state',JSON.stringify(raw));
+    });
+    await page.reload();
+    await expect(page.locator('.rhero h1')).toHaveText(locale==='en'?'Let’s check your existing solar system':'มาดูข้อมูลระบบโซลาร์เดิมของคุณ');
+    await expect(page.locator('.rhero .solar-only-action,.rhero .rstats,.rhero .ba,.lifetime-chart')).toHaveCount(0);
+    await expect(page.locator('.rhero')).toContainText(locale==='en'?'Your current bill alone cannot tell us':'ค่าไฟปัจจุบันอย่างเดียวไม่เพียงพอ');
+    await page.locator('.rhero').getByRole('link',{name:locale==='en'?'Edit my project choice':'แก้ไขประเภทโครงการ'}).click();
+    await expect(page.locator('#estimate-question')).toHaveText(locale==='en'?'What kind of solar project are you considering?':'คุณกำลังพิจารณาโครงการโซลาร์แบบใด?');
+    await page.getByRole('radio',{name:locale==='en'?'A new rooftop solar system':'ระบบโซลาร์รูฟท็อปใหม่',exact:true}).click();
+    await expect.poll(()=>page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft')!).answers.projectType)).toBe('new-rooftop');
+    expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate-draft')!).answers.solarOnlyIllustration)).toBeUndefined();
+    await page.goBack();await expect(page.locator('.rhero .solar-only-action,.rhero .rstats')).toHaveCount(0);
+  });
+}
+
+for(const locale of ['en','th'] as const){
+  test(`selecting battery in the calculator reaches an explicit solar-only action ${locale}`,async({page})=>{
+    await seed(page,modern,locale);
+    await page.goto((locale==='en'?'/en':'')+'/estimate#projectType');
+    await expect(page.locator('.project-model-scope')).toBeVisible();
+    await page.getByRole('radio',{name:locale==='en'?'Solar panels with battery storage':'แผงโซลาร์พร้อมระบบกักเก็บพลังงาน',exact:true}).click();
+    for(const question of homeownerDesignV3Questionnaire.questions.slice(2)){
+      await expect(page.locator('#estimate-question')).toHaveText(question.title[locale]);
+      await page.locator('.estimate-actions .button').last().click();
+    }
+    await expect(page).toHaveURL(/estimate\/results/);
+    await expect(page.locator('.solar-only-action')).toHaveText(locale==='en'?'See my solar-only estimate':'ดูผลประเมินเฉพาะโซลาร์ของฉัน');
+    await expect(page.locator('.rhero .rstats')).toHaveCount(0);
+    await page.locator('.solar-only-action').click();
+    await expect(page.locator('.rhero .ba .now')).toBeVisible();
+    expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate')!).projectType)).toBe('solar-with-battery');
+  });
+  test(`new and unsure project choices remain usable ${locale}`,async({page})=>{
+    for(const projectType of ['new-rooftop','unsure'] as const){
+      await seed(page,{...modern,projectType},locale,true,true);
+      expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate')!).projectType)).toBe(projectType);
+      await expect(page.locator('.rhero .rstats')).toBeVisible();
+      await expect(page.locator('.rhero .ba .now')).toBeVisible();
+      await expect(page.locator('.solar-only-action')).toHaveCount(0);
+    }
+  });
+  test(`other model boundaries offer safe recovery ${locale}`,async({page})=>{
+    for(const overrides of [{tariffCategory:'tou' as const},{monthlyConsumptionKwh:7000},{quoteSystemKw:5,quoteCashPriceThb:120000}]){
+      await seed(page,{...modern,projectType:'solar-with-battery',...overrides},locale,true,true);
+      const saved=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate')!));
+      for(const [key,value] of Object.entries(overrides))expect(saved[key]).toBe(value);
+      await expect(page.locator('.result-model-recovery')).toBeVisible();
+      await expect(page.locator('.solar-only-action,.rhero .rstats,.rhero .ba')).toHaveCount(0);
+      await expect(page.locator('.result-model-recovery a')).toHaveAttribute('href',locale==='en'?'/en/estimate':'/estimate');
+    }
   });
 }
 

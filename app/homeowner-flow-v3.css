@@ -1,6 +1,15 @@
 /* Homeowner-only v3 boundary: no installer/admin tokens or selectors change. */
 .homeowner-v3{--sm-font:var(--font-manrope),var(--font-anuphan),system-ui,sans-serif;--sm-font-th:var(--font-anuphan),var(--font-manrope),system-ui,sans-serif}
 .homeowner-v3 .brand-wordmark small{display:block;font-size:9px;letter-spacing:.16em}
+/* Keep the approved single-row header usable at 320px, including loaded fonts. */
+@media(max-width:359px){
+  .homeowner-v3 .hdr .header-inner{gap:8px}
+  .homeowner-v3 .hdr .brand-mark{gap:6px}
+  .homeowner-v3 .hdr .brand-symbol{width:26px;height:26px}
+  .homeowner-v3 .hdr .brand-wordmark strong{font-size:17px}
+  .homeowner-v3 .hdr .header-actions{gap:6px}
+  .homeowner-v3 .hdr .lang a{padding-inline:6px;min-width:44px}
+}
 .homeowner-v3 .estimate-page{padding:0;min-height:100svh}
 .homeowner-v3 .assessment-flow-shell{max-width:680px;min-height:100svh}
 .homeowner-v3 .assessment-flow-header-inner{display:flex;align-items:center;gap:14px;min-height:64px;flex-wrap:wrap}

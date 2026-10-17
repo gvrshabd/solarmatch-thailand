@@ -12,10 +12,12 @@ describe('model recovery explanations do not remove calculation safeguards',()=>
       const battery=modelRecovery({...designV2Example,projectType:'solar-with-battery'},blocked('unsupported-project'),locale);
       const expansion=modelRecovery({...designV2Example,projectType:'expand-existing'},blocked('unsupported-project'),locale);
       expect(battery.title).not.toBe(expansion.title);
-      expect(battery.illustrate).toBe(true);expect(expansion.illustrate).toBe(true);
+      expect(battery.illustrate).toBe(true);expect(expansion.illustrate).toBe(false);
       const html=renderToStaticMarkup(createElement(ModelRecovery,{guidance:battery,locale,onIllustrate:()=>{throw Error('must not auto-accept');},onReviewQuotation:()=>{}}));
-      expect(html).toContain('type="checkbox"');expect(html).not.toContain('checked=""');
-      expect(html).toContain(locale==='en'?'/en/estimate':'href="/estimate"');
+      expect(html).toContain('type="button"');expect(html).not.toContain('checkbox');
+      expect(html).toContain(locale==='en'?'See my solar-only estimate':'ดูผลประเมินเฉพาะโซลาร์ของฉัน');
+      if(locale==='en')expect(html).toContain('We can estimate your solar panels. Battery costs, savings and backup performance aren’t included yet.');
+      expect(html).toContain(locale==='en'?'href="/en/estimate#projectType"':'href="/estimate#projectType"');
       expect(html).not.toContain('rstats');
     });
   }
