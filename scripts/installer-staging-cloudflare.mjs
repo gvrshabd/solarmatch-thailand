@@ -5,6 +5,7 @@ import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {triggerSafeStatement} from './installer-staging-migration-transport.mjs';
+import {assertProtectedStagingBuild} from './installer-staging-build-guard.mjs';
 
 export const account='e364d5c7864e07143bd229b367b95637';
 export const workerName='solarmatch-installer-staging';
@@ -146,8 +147,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
     execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','secret','bulk',`${privateDirectory}/secrets.json`,'--config','staging/wrangler.jsonc'],{stdio:['ignore','inherit','inherit']});
   }else if(action==='deploy'){
     const config=await verifiedConfiguration();
-    const compiled=await readFile('dist/server/index.js','utf8');
-    if(!compiled.includes('STAGING_ACCESS_AUD')||!compiled.includes('SolarMatch HTTPS staging'))throw Error('Build is not the protected staging entrypoint.');
+    await assertProtectedStagingBuild(process.cwd(),config);
     let configPath='staging/wrangler.jsonc';
     if(process.argv.includes('--design-review')){
       const {prepareReviewAssets}=await import('./design-v2-review-assets.mjs');
