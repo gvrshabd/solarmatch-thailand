@@ -66,4 +66,8 @@ html[lang=th] .homeowner-v3 .v2-results .rsub{letter-spacing:0;line-height:1.35}
   .homeowner-v3 .v2-results .nextsteps .row .btn,.homeowner-v3 .v2-results .actions2 .btn{font-size:13px;padding-inline:8px;gap:6px}
 }
 @media(max-width:374px){.homeowner-v3 .v2-results .rstats>div{padding:18px 10px}}
+/* Preserve exact quotation cents without crossing the adjacent statistic. */
+.homeowner-v3 .v2-results .rstats>.long-price-stat{padding-inline:12px}
+.homeowner-v3 .v2-results .rstats>.long-price-stat b{font-size:clamp(16px,2vw,24px);white-space:normal;overflow-wrap:anywhere}
+@media(max-width:600px){.homeowner-v3 .v2-results .rstats>.long-price-stat{padding-inline:8px}.homeowner-v3 .v2-results .rstats>.long-price-stat b{font-size:16px;white-space:normal;overflow-wrap:anywhere}}
 @media(prefers-reduced-motion:reduce){.homeowner-v3 .v2-results .scenario-switch,.homeowner-v3 .v2-results .scenario-switch::after{transition:none}}

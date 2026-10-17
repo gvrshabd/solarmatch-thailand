@@ -359,6 +359,20 @@ test('editing a quotation cash-price field preserves typed cents through live re
   await expect(price).toHaveValue('150123.45');
   await expect(page.locator('.rstats > div').nth(1).locator('b')).toHaveText('฿150,123.45');
   await expect.poll(() => page.evaluate(() => JSON.parse(sessionStorage.getItem('solarmatch:estimate')!).quoteCashPriceThb)).toBe(150_123.45);
+  for (const width of [320, 360, 390, 414, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    const bounds = await page.locator('.rstats > div').nth(1).locator('b').evaluate(node => {
+      const range = document.createRange(); range.selectNodeContents(node);
+      const text = range.getBoundingClientRect(), cell = node.parentElement!.getBoundingClientRect();
+      return { textLeft: text.left, textRight: text.right, textBottom: text.bottom,
+        cellLeft: cell.left, cellRight: cell.right, cellBottom: cell.bottom };
+    });
+    expect(bounds.textLeft).toBeGreaterThanOrEqual(bounds.cellLeft);
+    expect(bounds.textRight).toBeLessThanOrEqual(bounds.cellRight + 1);
+    expect(bounds.textBottom).toBeLessThanOrEqual(bounds.cellBottom + 1);
+    await expect(page.locator('.rstats > div').nth(1).locator('b')).toHaveText('฿150,123.45');
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  }
 });
 
 for (const invalidQuote of [
