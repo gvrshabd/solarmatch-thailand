@@ -1,0 +1,118 @@
+SolarMatch calculator v3 — implementation / review scope
+
+Repository: gvrshabd/solarmatch-thailand
+Baseline: 3571f357e469bddc43db287b67ec22c4358f0061
+Feature: feature/calculator-energy-accuracy-v3
+No main push, merge, production deployment, production data operation or Milly's
+operation is authorized or performed. Existing LINE repair remains in ancestry.
+
+Implementation plan / execution
+1. Preserve immutable historical questionnaire, estimator, tariffs and consent.
+2. Resolve dated ordinary tariffs; explicitly reject unsupported/out-of-period
+   categories. Capture today's Bangkok date for new estimates; freeze saved dates.
+3. Match solar and demand hourly, compare finite sourced physical packages, and
+   calculate degradation through generation and progressive bill differences.
+4. Add actual meter units/periods, seasonal records, timing and quantified future
+   changes within existing Design v2 assessment/results components.
+5. Add separate optional personal-tax, actual-loan and verified-contract export
+   scenarios. Keep income and financial scenario controls in React memory only.
+6. Verify numerical, privacy, accessibility, bilingual and browser behavior.
+7. Commit locally and publish only to the existing protected staging Worker.
+
+Version boundaries
+New model: residential-hourly-2026-10-17-v3.
+New questionnaire: residential-questionnaire-v7, schema 10, twelve screens.
+Order: project -> location -> consumption -> weekday/weekend timing -> roof area
+-> shade -> property type -> ownership/authority -> planning -> installed loads
+and operating schedules -> roof material -> optional installer-contact choice.
+Immutable initialQuestionnaire remains v6/schema9. Historical releases and stored
+consent are not edited. Production publication/activation is not performed.
+Protected staging returns v7 before database bootstrap and issues no lead token.
+Shared v2 payloads freeze model and explicit verified reference date; strict
+allowlists exclude contact, consent, free text, exact coordinates and tax/finance.
+Legacy links/results retain the frozen legacy model unless deliberately recalculated.
+
+Energy and financial definitions
+The representative calendar is 2027, with 8,760 one-hour intervals. Self-use is
+min(solar,demand) in every interval; night demand remains grid demand. Existing
+appliances reallocate bill consumption, never add it twice. Contradictory schedules
+are scaled to the bill with a visible warning. Planned loads add quantified use
+from their starting calendar month/year, not a generic percentage; partial-month
+proration is not modeled and the UI says so.
+JRC PVGIS-ERA5 monthly reference: 2005–2023, Bangkok 13.75N/100.5E, 15 degrees
+south, building-integrated crystalline silicon, DEM horizon, 14% system loss.
+Annual yield 1398.23 kWh/kWp; source monthly rounding totals1398.22. Shares are
+normalized, no second generic loss is deducted. Full source JSON and a verified
+read-only reproduction script are included. Hourly disaggregation, household
+profiles and adjustments to other panel planes remain approximate/unvalidated.
+Household coordinates do not falsely select a local weather dataset.
+Package catalogue: four finite CX ENERTECH configurations, source27September2026,
+checked17October2026. Panel DC = module count x Wp; inverter AC is separate.
+Starting prices plus7% contingency are not confirmed VAT or binding quotations.
+Physical fit, phase, budget and positive25-year value determine automatic choices.
+No feasible/economic option is an explicit outcome; no fictitious tiny package.
+Exact quotations retain cents. Unknown battery scope, contradictory specifications
+and unsupported capacity do not receive financial recommendations.
+Annual reserve1.02% includes component/inverter risk once. Generation degrades0.5%
+and each year's energy matching and progressive bills are recalculated. Simple
+payback, cumulative crossing, operating cash flow and discounted value differ.
+Base results exclude export revenue, personal tax relief and finance.
+
+Known model / evidence limits
+- No measured household profile or site-specific weather validation. Smooth hourly
+  representative days can overstate self-use when real generation/load fluctuates.
+- Source mounting configuration is a reference, not proof of a household's mounting,
+  shading, structural fit, clipping, string design or utility approval.
+- One supplier's starting catalogue is not a competitive market average. Real site
+  quotations and VAT/included-scope confirmation remain necessary.
+- Independent MEA page verification failed; PEA tables and official Ft were checked.
+- Bill date is a bill-month tariff reference, not meter-interval tariff proration.
+  Welfare/free-electricity credits, utility classification changes, arrears and
+  line-item rounding are not replicated. Tariff-category selection needs the bill.
+- TOU, battery dispatch/backup and existing-system expansion are unsupported.
+  Explicit solar-only illustrations must not be mistaken for those project models.
+- Other provinces use a clearly conditional regional illustration, not local yield.
+- Sensitivity cases are authored assumptions, not statistical confidence intervals.
+- Tax status is conditional, not a refund/approval; complex tax cases are outside
+  ordinary progressive PIT. Contract export uses supplied intervals only. Finance
+  uses actual entered terms, not lender offers or an effective-APR calculation.
+
+Contact readiness — intentional safety boundary, not completed activation
+Collection, payments, notifications, attribution and automatic allocation remain
+disabled/paused. No real message or charge is sent.
+The historical lead-storage/scoring contract requires a positive actual bill.
+Meter-only calculator input uses zero only as a legacy numeric compatibility
+sentinel, never a fictitious bill. /api/leads explicitly rejects kWh contact mode
+with safe422 before token/proof/database work, rather than returning a SQL500.
+Live meter-input enquiries need a deliberate versioned storage/qualification
+decision and compatible published release. Do not publish/activate v7 for real
+collection on the assumption this work implements that separate integration.
+Owner plus four installed AC hard gates are unchanged. Daylight operating counts
+must not substitute for installed counts. Existing bill-based authenticated
+submission remains on its original validation/security path.
+
+Staging / recovery
+Only Worker solarmatch-installer-staging is a permitted preview destination.
+D1 solarmatch-installer-staging-db /153b8867-e7ad-40ad-8a63-c2bde2338b43.
+Private R2 solarmatch-installer-staging-private. Owner Access and separate admin
+Access are retained. No secrets, provider credentials or private database are
+included in review artifacts. No schema change is required; existing19migrations
+are checked, not replayed. Existing encrypted recovery material is preserved.
+Read-only before/after business-record fingerprints and holds are generated under
+ignored .wrangler/calculator-v3-review/. Prior staging Worker rollback point:
+4548abeb-b785-4328-983a-a9f655c59a4e. Use the existing guarded staging-only Wrangler
+version rollback if an application rollback is needed; do not restore a database
+for an application-only regression. No production rollback operation is authorized.
+
+Verification history
+Initial parallel unit runs exposed a new historical-document test assumption and
+resource-contention timeouts (comparison test and existing Workerd LINE transport).
+Historic assertions were retained, documented legacy-validator limits separated,
+and the full suite rerun with two workers, not relaxed assertions/timeouts.
+The complete post-PVGIS run passed546tests/62files before final UI polish.
+Earlier browser failures included hidden-menu selector, wrapped-label selector,
+fixture overwriting answers on reload, substring income false positive, and a
+real delayed-focus race / unfocusable scroll table. No axe rule was disabled.
+Final exact-application results and staging version are recorded separately after
+the final complete runs. Browser emulation is not physical-device or screen-reader
+acceptance, and passing arithmetic is not measured predictive calibration.

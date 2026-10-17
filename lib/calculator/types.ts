@@ -39,6 +39,34 @@ export type EstimateLocation = {
 };
 
 export type EstimateAnswers = {
+  estimateModelVersion?: 'energy-v3' | 'legacy-v5';
+  solarOnlyIllustration?: boolean;
+  calculationReferenceDate?: string;
+  consumptionInput?: 'bill' | 'kwh';
+  monthlyConsumptionKwh?: number;
+  billingPeriodDays?: number;
+  billDate?: string;
+  tariffCategory?: 'ordinary-1.1' | 'ordinary-1.2' | 'tou' | 'unknown';
+  utility?: 'MEA' | 'PEA' | 'unknown';
+  monthlyRecords?: Array<{ month: number; kwh: number; periodDays: number; billDate?: string }>;
+  weekendDaytimePattern?: DaytimePattern;
+  daylightAcUnits?: number;
+  daylightAcHours?: number;
+  acPowerKw?: number;
+  existingEvMonthlyKwh?: number;
+  evHomeChargingFraction?: number;
+  evDaytimeFraction?: number;
+  pumpPowerKw?: number;
+  pumpHoursPerDay?: number;
+  pumpStartHour?: number;
+  plannedLoadChanges?: Array<{kind:'ev'|'air-conditioning'|'pump';startDate:string;monthlyKwh?:number;homeChargingFraction?:number;daytimeFraction?:number;powerKw?:number;units?:number;hoursPerDay?:number;startHour?:number}>;
+  panelTiltDegrees?: number;
+  panelAzimuthDegrees?: number;
+  quoteModuleCount?: number;
+  quoteModuleWp?: number;
+  quoteInverterAcKw?: number;
+  budgetThb?: number;
+  discountRatePct?: number;
   province: string;
   customLocation?: string;
   customProvince?: string;
@@ -91,6 +119,19 @@ export type CalculationTrace = {
 };
 
 export type EstimateResult = {
+  modelVersion?: string;
+  modelStatus?: 'supported'|'conditional'|'unsupported'|'no-feasible-option'|'no-economic-option'|'infeasible-quote';
+  calculationReferenceDate?: string;
+  warnings?: Array<{code:string;en:string;th:string}>;
+  selectedSystem?: CandidateSystem;
+  candidateSystems?: CandidateSystem[];
+  energy?: {demandKwh:number;generationKwh:number;selfConsumedKwh:number;gridImportKwh:number;surplusKwh:number;futureDemandKwh:number;monthly:Array<{month:number;demandKwh:number;generationKwh:number;selfConsumedKwh:number;gridImportKwh:number;surplusKwh:number}>};
+  annualFinancials?: Array<{year:number;generationKwh:number;selfConsumedKwh:number;gridImportKwh:number;surplusKwh:number;grossSavingsThb:number;reserveThb:number;netCashFlowThb:number;baselineBillThb:number;withSolarBillThb:number}>;
+  recommendationReason?: {en:string;th:string};
+  uncertaintyScenarios?: Array<{id:'lower'|'central'|'higher';annualGenerationKwh:number;annualSavingsThb:number;lifetimeBenefitThb:number;basisEn:string;basisTh:string}>;
+  discountedValueThb?: number;
+  historicalTariffVersion?: string;
+  baselineFutureMonthlyBillThb?: number;
   currentMonthlyBillThb: number;
   estimatedMonthlyConsumptionKwh: number;
   planningSystemKw: number;
@@ -128,6 +169,12 @@ export type EstimateResult = {
   estimatedAnnualSelfConsumedKwh: Range;
   estimatedAnnualExportedKwh: Range;
   estimatedLifetimeNetBenefitThb: Range;
+};
+
+export type CandidateSystem = {
+  id:string;labelEn:string;labelTh:string;dcKwp:number;moduleCount:number;moduleWp:number;inverterAcKw:number;
+  phase:'single'|'three'|'unknown';requiredRoofAreaSqm:number;priceThb:number;sourceUrl?:string;
+  feasible:boolean;conditional:boolean;reasons:string[];annualSavingsThb:number;lifetimeBenefitThb:number;paybackYears:number|null;
 };
 
 export type LifetimeCostPoint = {

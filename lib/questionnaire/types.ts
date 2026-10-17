@@ -52,7 +52,7 @@ export type AssessmentQuestion = {
 
 export type QuestionnaireDocument = {
   id: string;
-  schemaVersion: 4 | 5 | 6 | 7 | 8 | 9;
+  schemaVersion: 4 | 5 | 6 | 7 | 8 | 9 | 10;
   questions: AssessmentQuestion[];
 };
 
@@ -97,6 +97,8 @@ export type PublicContactConfiguration = {
 };
 
 export type PublicAssessmentConfig = {
+  calculatorModelVersion?: 'energy-v3' | 'legacy-v5';
+  calculationReferenceDate?: string;
   attribution?: import('@/lib/analytics/attribution').PublicAttributionConfig;
   privatePreview: boolean;
   accessRestrictedSession: boolean;

@@ -1,207 +1,122 @@
-import {
-  calculateResidentialBill,
-  estimateKwhFromBill,
-  selectResidentialTariff,
-} from '@/config/electricity-tariffs';
-import { solarAssumptions } from '@/config/solar-assumptions';
-import type { EstimateAnswers, EstimateResult, Estimator, LifetimeCostPoint, Range } from './types';
+import {calculateResidentialBill,estimateKwhFromBill,resolveResidentialTariff,currentCalculationDate,type ResidentialTariff} from '@/config/electricity-tariffs';
+import {solarAssumptions} from '@/config/solar-assumptions';
+import {solarPackages,SOLAR_PACKAGE_CATALOG_VERSION} from '@/config/solar-packages';
+import {solarResourceV3} from '@/config/solar-resource-v3';
+import {modelEnergyYear,type EnergyModelInput,type EnergyYearResult,type ScheduledLoad,type FutureLoadIncrement} from './energy-model';
+import {legacyResidentialEstimator} from './legacy-residential-estimator';
+import type {CandidateSystem,EstimateAnswers,EstimateResult,Estimator,LifetimeCostPoint} from './types';
 
-function clamp(value: number, minimum: number, maximum: number) {
-  return Math.min(maximum, Math.max(minimum, value));
+export const CALCULATOR_MODEL_VERSION='residential-hourly-2026-10-17-v3';
+const DAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+const warn=(code:string,en:string,th:string)=>({code,en,th});
+const sum=(a:readonly number[])=>a.reduce((s,n)=>s+n,0);
+const point=(n:number)=>({min:n,max:n});
+export function consumptionMonths(a:EstimateAnswers):number[]{
+ const historical=resolveResidentialTariff({province:a.province,utility:a.utility,category:a.tariffCategory,billingDate:a.billDate,referenceDate:a.calculationReferenceDate??currentCalculationDate(),purpose:'historical-bill'});
+ const period=a.billingPeriodDays??365/12,kwh=a.consumptionInput==='kwh'?a.monthlyConsumptionKwh??0:historical.tariff?estimateKwhFromBill(a.monthlyBillThb,historical.tariff):0;
+ const monthly=DAYS.map(d=>Number.isFinite(kwh)&&kwh>=0&&period>0?kwh/period*d:0);
+ for(const r of a.monthlyRecords??[])if(r.month>=1&&r.month<=12&&Number.isFinite(r.kwh)&&r.kwh>=0&&r.periodDays>0)monthly[r.month-1]=r.kwh/r.periodDays*DAYS[r.month-1];
+ return monthly;
 }
+export function availableRoofArea(a:EstimateAnswers){return a.exactRoofAreaSqm??({'under-30':15,'30-60':30,'60-100':60,'100-200':100,'over-200':200,unsure:null} as const)[a.roofArea??'unsure'];}
 
-function round(value: number, step = 1) {
-  return Math.round(value / step) * step;
+export function energyInput(a:EstimateAnswers,monthly:readonly number[],system:{dcKwp:number;inverterAcKw:number}):EnergyModelInput{
+ const existingLoads:ScheduledLoad[]=[];
+ if(a.daylightAcUnits!==undefined&&a.daylightAcHours!==undefined)existingLoads.push({kind:'air-conditioning',units:a.daylightAcUnits,powerKw:a.acPowerKw??1,hoursPerDay:a.daylightAcHours,startHour:9});
+ if(a.existingEvMonthlyKwh!==undefined)existingLoads.push({kind:'ev',monthlyKwh:a.existingEvMonthlyKwh,homeChargingFraction:a.evHomeChargingFraction??1,daytimeFraction:a.evDaytimeFraction??0});
+ if(a.pumpPowerKw!==undefined&&a.pumpHoursPerDay!==undefined)existingLoads.push({kind:'pump',powerKw:a.pumpPowerKw,units:1,hoursPerDay:a.pumpHoursPerDay,startHour:a.pumpStartHour??10});
+ const futureLoads:FutureLoadIncrement[]=[];
+ for(const c of a.plannedLoadChanges??[]){const d=new Date(c.startDate+'T00:00:00Z');if(!Number.isFinite(d.getTime()))continue;const startYearOffset=Math.max(0,d.getUTCFullYear()-2027),startMonth=d.getUTCFullYear()<2027?1:d.getUTCMonth()+1;
+  if(c.kind==='ev'&&c.monthlyKwh!==undefined)futureLoads.push({kind:'ev',monthlyKwh:c.monthlyKwh,homeChargingFraction:c.homeChargingFraction??1,daytimeFraction:c.daytimeFraction??0,startMonth,startYearOffset});
+  else if(c.kind!=='ev'&&c.powerKw!==undefined&&c.hoursPerDay!==undefined)futureLoads.push({kind:c.kind,powerKw:c.powerKw,units:c.units??1,hoursPerDay:c.hoursPerDay,startHour:c.startHour??9,startMonth,startYearOffset});}
+ const azimuth=({east:90,west:270,north:0,'south-group':180,flat:180,several:180,unsure:180} as const)[a.roofDirection??'unsure'];
+ return{monthlyConsumptionKwh:monthly,weekdayPattern:a.daytimePattern,weekendPattern:a.weekendDaytimePattern??a.daytimePattern,existingLoads,futureLoads,province:a.province,...system,panelTiltDegrees:a.panelTiltDegrees??(a.roofSlope==='flat'?0:a.roofSlope==='steep'?35:15),panelAzimuthDegrees:a.panelAzimuthDegrees??azimuth,shadeFactor:solarAssumptions.shadeFactor[a.shade],calendarYear:2027};
 }
-
-function point(value: number): Range {
-  return { min: value, max: value };
+function evaluate(input:EnergyModelInput,tariff:ResidentialTariff,cost:number,yieldFactor=1,loadFactor=1){
+ const reserve=cost*0.0102,annual:NonNullable<EstimateResult['annualFinancials']>=[],series:LifetimeCostPoint[]=[{year:0,withoutSolarThb:0,withSolarThb:cost}];
+ let avoided=0,baseline=0,first:EnergyYearResult|undefined;
+ for(let year=1;year<=25;year++){const energy=modelEnergyYear({...input,monthlyConsumptionKwh:input.monthlyConsumptionKwh.map(n=>n*loadFactor),degradationFactor:yieldFactor*0.995**(year-1),yearOffset:year-1});if(year===1)first=energy;
+  const before=sum(energy.monthly.map(m=>calculateResidentialBill(m.demandKwh,tariff))),after=sum(energy.monthly.map(m=>calculateResidentialBill(m.gridImportKwh,tariff))),saving=before-after;avoided+=saving;baseline+=before;
+  annual.push({year,generationKwh:energy.totals.generationKwh,selfConsumedKwh:energy.totals.selfConsumedKwh,gridImportKwh:energy.totals.gridImportKwh,surplusKwh:energy.totals.surplusKwh,grossSavingsThb:saving,reserveThb:reserve,netCashFlowThb:saving-reserve,baselineBillThb:before,withSolarBillThb:after});series.push({year,withoutSolarThb:baseline,withSolarThb:cost+baseline-avoided+reserve*year});}
+ return{annual,series,energy:first!,reserve,net:avoided-reserve*25-cost};
 }
+type Evaluation=ReturnType<typeof evaluate>;
 
-function planningPrice(sizeKwp: number, phase: EstimateAnswers['electricityPhase']) {
-  const anchors = solarAssumptions.planningPriceAnchorsThb;
-  const priceKey = phase === 'three' ? 'three' : 'single';
-  if (sizeKwp <= anchors[0].kwp) return anchors[0][priceKey];
-  for (let index = 1; index < anchors.length; index += 1) {
-    const left = anchors[index - 1];
-    const right = anchors[index];
-    if (sizeKwp <= right.kwp) {
-      const ratio = (sizeKwp - left.kwp) / (right.kwp - left.kwp);
-      return round(left[priceKey] + (right[priceKey] - left[priceKey]) * ratio, 5000);
-    }
-  }
-  const left = anchors[anchors.length - 2];
-  const right = anchors[anchors.length - 1];
-  const evidencedMarginalPrice = (right[priceKey] - left[priceKey]) / (right.kwp - left.kwp);
-  return round(right[priceKey] + (sizeKwp - right.kwp) * evidencedMarginalPrice, 5000);
+export function calculateModernEstimate(a:EstimateAnswers):EstimateResult{
+ // Public forms validate through Zod; direct engine callers must not turn NaN,
+ // impossible dates or invalid physical inputs into plausible recommendations.
+ for(const[key,value]of Object.entries(a))if(typeof value==='number'&&(!Number.isFinite(value)||value<0))throw new RangeError(`Invalid calculator number: ${key}`);
+ if(a.billingPeriodDays!==undefined&&a.billingPeriodDays<=0)throw new RangeError('Invalid billing period');
+ if(a.exactRoofAreaSqm!==undefined&&a.exactRoofAreaSqm<=0)throw new RangeError('Invalid roof area');
+ if((a.panelTiltDegrees??0)>90||(a.panelAzimuthDegrees??0)>360)throw new RangeError('Invalid panel geometry');
+ const validDate=(value:string)=>/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;
+ for(const row of [...a.monthlyRecords??[],...a.plannedLoadChanges??[]]){
+  for(const[key,value]of Object.entries(row))if(typeof value==='number'&&(!Number.isFinite(value)||value<0))throw new RangeError(`Invalid load/record number: ${key}`);
+  if('startDate'in row&&!validDate(row.startDate))throw new RangeError('Invalid future-load date');
+  if('month'in row&&(row.month<1||row.month>12||!Number.isInteger(row.month)||row.periodDays<=0))throw new RangeError('Invalid monthly record');
+ }
+ const date=a.calculationReferenceDate??currentCalculationDate(),warnings:NonNullable<EstimateResult['warnings']>=[];
+ const history=resolveResidentialTariff({province:a.province,utility:a.utility,category:a.tariffCategory,billingDate:a.billDate,referenceDate:date,purpose:'historical-bill'}),future=resolveResidentialTariff({province:a.province,utility:a.utility,category:a.tariffCategory,billingDate:date,referenceDate:date,purpose:'future-reference'}),tariff=future.tariff;
+ const actual=a.consumptionInput==='kwh'&&a.monthlyConsumptionKwh!==undefined,period=a.billingPeriodDays??365/12;
+ const kwh=actual?a.monthlyConsumptionKwh!:history.tariff?estimateKwhFromBill(a.monthlyBillThb,history.tariff):0,monthly=consumptionMonths(a);
+ if(!a.billDate&&!actual)warnings.push(warn('assumed-bill-date','Bill date unknown: consumption uses the explicit reference tariff, not a verified historical bill tariff.','ไม่ทราบวันที่ใบแจ้งค่าไฟ จึงคำนวณย้อนด้วยอัตราอ้างอิงที่ระบุ ไม่ใช่อัตราย้อนหลังที่ยืนยันแล้ว'));
+ if(!a.tariffCategory)warnings.push(warn('assumed-category','Ordinary residential 1.2 is assumed. Select the tariff on your bill; TOU is not modeled.','สมมติเป็นบ้านอยู่อาศัยอัตราปกติ 1.2 โปรดเลือกประเภทจากใบแจ้งค่าไฟ โดยยังไม่คำนวณ TOU'));
+ const incompleteQuote=Boolean(a.quoteSystemKw&&a.quoteCashPriceThb&&a.quoteBatteryIncluded===undefined);
+ const projectUnsupported=Boolean((a.projectType==='solar-with-battery'||a.projectType==='expand-existing'||a.quoteBatteryIncluded)&&!a.solarOnlyIllustration)||incompleteQuote;
+ if(incompleteQuote)warnings.push(warn('quote-scope-unknown','Confirm whether the quotation includes a battery. An unknown scope cannot be treated as a solar-only price.','โปรดยืนยันว่าใบเสนอราคารวมแบตเตอรี่หรือไม่ หากยังไม่ทราบจะไม่ถือว่าราคานั้นเป็นราคาเฉพาะโซลาร์'));
+ if(projectUnsupported)warnings.push(warn('unsupported-project','This project needs a separate battery/expansion model. No personalized estimate is calculated. You can explicitly open a new-system solar-only illustration below.','โครงการนี้ต้องใช้แบบจำลองแบตเตอรี่หรือระบบเดิมแยกต่างหาก จึงไม่คำนวณผลเฉพาะโครงการ คุณเลือกดูตัวอย่างระบบใหม่เฉพาะโซลาร์ด้านล่างได้'));
+ if(a.solarOnlyIllustration)warnings.push(warn('solar-only-illustration','NEW-SYSTEM SOLAR-ONLY ILLUSTRATION: no battery, backup or existing generation/equipment is modeled. This is not a battery or expansion estimate.','ตัวอย่างระบบใหม่เฉพาะโซลาร์ ไม่รวมแบตเตอรี่ ระบบสำรอง หรือการผลิตและอุปกรณ์เดิม ไม่ใช่ผลประเมินแบตเตอรี่หรือการขยายระบบ'));
+ if(!tariff||(!actual&&!history.tariff))warnings.push(warn('unsupported-tariff','No verified tariff covers this category/date. Choose a supported ordinary tariff/date; no financial recommendation is calculated.','ไม่มีอัตราที่ตรวจสอบแล้วสำหรับประเภทหรือวันที่นี้ โปรดเลือกอัตราปกติและวันที่ในช่วงที่รองรับ จึงจะคำนวณการเงินได้'));
+ const futureDemand=modelEnergyYear({...energyInput(a,monthly,{dcKwp:0,inverterAcKw:0}),yearOffset:24});
+ const outside=!Number.isFinite(kwh)||kwh<0||period<=0||(a.consumptionInput==='kwh'&&(!actual||kwh<=0))||monthly.some(n=>n>6000)||futureDemand.monthly.some(m=>m.demandKwh>6000);
+ if(outside)warnings.push(warn('residential-boundary','Demand exceeds the supported residential reference range. No factory/commercial estimate is supplied.','โหลดอยู่นอกช่วงอ้างอิงสำหรับบ้าน จึงไม่แสดงค่าประเมินสำหรับโรงงานหรืออาคารพาณิชย์'));
+ if(a.province==='other')warnings.push(warn('regional-illustration','Solar resource is a Greater Bangkok illustration, not measured site data for this province.','ข้อมูลแสงอาทิตย์เป็นตัวอย่างอ้างอิงกรุงเทพฯ และปริมณฑล ไม่ใช่ข้อมูลหน้างานของจังหวัดนี้'));
+ warnings.push(warn('assumed-profiles','Hourly load and solar shapes are synthetic assumptions, not measured household data or a site weather extraction. Coordinates and installed AC count alone do not personalize production.','โหลดและแสงอาทิตย์รายชั่วโมงเป็นสมมติฐาน ไม่ใช่ข้อมูลมิเตอร์หรืออากาศหน้างาน พิกัดและจำนวนแอร์ที่ติดตั้งเพียงอย่างเดียวไม่ได้ทำให้ผลผลิตเป็นข้อมูลเฉพาะบ้าน'));
+ if(history.warnings.includes('mea-primary-page-unavailable-at-check')||future.warnings.includes('mea-primary-page-unavailable-at-check'))warnings.push(warn('mea-source-limitation','MEA primary page was unavailable at review; the ordinary schedule is cross-checked against PEA/official Ft. Independent MEA-page verification remains outstanding.','หน้าแหล่งข้อมูล กฟน. เปิดไม่ได้ขณะตรวจ ใช้ตรวจเทียบตารางปกติกับ กฟภ. และ Ft ทางการ ยังต้องยืนยันหน้า กฟน. โดยตรง'));
+ const roof=availableRoofArea(a),phase=a.electricityPhase??'unsure';
+ if(phase==='unsure')warnings.push(warn('phase-unconfirmed','Phase unknown: each price is CONDITIONAL on the package’s stated phase, not a confirmed cheaper single-phase installation. Compare both phase options and verify your connection.','ยังไม่ทราบระบบไฟฟ้า ราคาทุกชุดมีเงื่อนไขตามจำนวนเฟสที่ระบุ ไม่ได้ยืนยันว่าติดตั้งแบบ 1 เฟสราคาถูกกว่าได้ ต้องตรวจระบบไฟจริง'));
+ if(roof===null)warnings.push(warn('roof-unconfirmed','Usable roof area unknown; physical fit must be confirmed.','ยังไม่ทราบพื้นที่หลังคาที่ใช้ได้ ต้องยืนยันว่าติดตั้งแผงได้จริง'));
+ if(a.futureLoads?.some(x=>!['none','unsure'].includes(x))&&!a.plannedLoadChanges?.length)warnings.push(warn('future-unquantified','An appliance name alone adds no assumed kWh. Enter energy/power, hours and a start date to model a future load.','ชื่ออุปกรณ์อย่างเดียวจะไม่เพิ่มหน่วยไฟโดยเดา ต้องระบุพลังงานหรือกำลังไฟ ชั่วโมง และวันที่เริ่มใช้'));
+ if(a.location)warnings.push(warn('coordinates-unused','Coordinates do not change this regional solar assumption. No site-specific accuracy is claimed.','พิกัดไม่เปลี่ยนสมมติฐานแสงอาทิตย์ระดับภูมิภาคนี้ และไม่ได้อ้างความแม่นยำเฉพาะหน้างาน'));
+ const quoted=!!(a.quoteSystemKw&&a.quoteCashPriceThb&&a.quoteBatteryIncluded===false),canEvaluate=!!tariff&&!projectUnsupported&&!outside&&(actual||!!history.tariff);
+ const definitions:CandidateSystem[]=quoted?[{id:'user-quotation',labelEn:'Your solar-only quotation',labelTh:'ใบเสนอราคาเฉพาะโซลาร์ของคุณ',dcKwp:a.quoteSystemKw!,moduleCount:a.quoteModuleCount??0,moduleWp:a.quoteModuleWp??0,inverterAcKw:a.quoteInverterAcKw??a.quoteSystemKw!,phase:phase==='unsure'?'unknown':phase,requiredRoofAreaSqm:a.quoteSystemKw!*5.5,priceThb:a.quoteCashPriceThb!,feasible:true,conditional:false,reasons:[],annualSavingsThb:0,lifetimeBenefitThb:0,paybackYears:null}]:solarPackages.map(p=>({...p,priceThb:p.planningPriceThb,feasible:true,conditional:false,reasons:[],annualSavingsThb:0,lifetimeBenefitThb:0,paybackYears:null}));
+ if(quoted&&(!a.quoteModuleCount||!a.quoteModuleWp||!a.quoteInverterAcKw))warnings.push(warn('quote-specs-missing','Quote price/DC size are retained exactly. Module/inverter details are incomplete: DC is used as the provisional AC cap and roof fit is only an area allowance.','เก็บราคาและขนาด DC ตามใบเสนอราคาไว้ตรงตามจริง แต่ข้อมูลแผงหรืออินเวอร์เตอร์ยังไม่ครบ จึงสมมติขีดจำกัด AC เท่ากับ DC และใช้พื้นที่เป็นเพียงเกณฑ์คร่าว ๆ'));
+ const candidates:CandidateSystem[]=[],evaluations=new Map<string,Evaluation>();
+ for(const item of definitions){const c={...item,reasons:[] as string[]};if(roof!==null&&c.requiredRoofAreaSqm>roof+1e-9)c.reasons.push('roof-too-small');if(phase!=='unsure'&&c.phase!=='unknown'&&c.phase!==phase)c.reasons.push('phase-mismatch');if(c.dcKwp>20||c.inverterAcKw>15)c.reasons.push('unsupported-capacity');if(quoted&&c.moduleCount&&c.moduleWp&&Math.abs(c.moduleCount*c.moduleWp/1000-c.dcKwp)>0.001)c.reasons.push('module-dc-mismatch');if(a.budgetThb!==undefined&&c.priceThb>a.budgetThb)c.reasons.push('over-budget');c.feasible=!c.reasons.length;c.conditional=roof===null||phase==='unsure'||a.province==='other'||Boolean(quoted&&(!a.quoteModuleCount||!a.quoteModuleWp||!a.quoteInverterAcKw));
+  if(canEvaluate&&(c.feasible||quoted)&&!c.reasons.some(r=>r==='unsupported-capacity'||r==='module-dc-mismatch')){const f=evaluate(energyInput(a,monthly,c),tariff!,c.priceThb);evaluations.set(c.id,f);c.annualSavingsThb=f.annual[0].grossSavingsThb;c.lifetimeBenefitThb=f.net;c.paybackYears=c.annualSavingsThb>f.reserve?c.priceThb/(c.annualSavingsThb-f.reserve):null;}candidates.push(c);}
+ const eligible=candidates.filter(c=>c.feasible&&evaluations.has(c.id));
+ const best=eligible.filter(c=>c.lifetimeBenefitThb>0).sort((a,b)=>b.lifetimeBenefitThb-a.lifetimeBenefitThb||a.priceThb-b.priceThb)[0];
+ const invalidQuote=quoted&&candidates[0].reasons.some(r=>r==='unsupported-capacity'||r==='module-dc-mismatch');
+ if(invalidQuote)warnings.unshift(warn('unsupported-quote','Quotation capacity is outside this residential model or module DC totals conflict. Correct the equipment details; no financial estimate is provided.','ขนาดในใบเสนอราคาอยู่นอกขอบเขตบ้านที่รองรับ หรือกำลังรวมแผงไม่ตรงกัน โปรดแก้ข้อมูลอุปกรณ์ จึงจะคำนวณการเงินได้'));
+ const chosen=quoted&&canEvaluate&&!invalidQuote?candidates[0]:!invalidQuote?best:undefined;
+ const emptyEnergy=modelEnergyYear(energyInput(a,monthly,{dcKwp:0,inverterAcKw:0}));
+ const emptyAnnual=Array.from({length:25},(_,i)=>{const e=i===0?emptyEnergy:modelEnergyYear({...energyInput(a,monthly,{dcKwp:0,inverterAcKw:0}),yearOffset:i});const bill=future.tariff?sum(e.monthly.map(m=>calculateResidentialBill(m.demandKwh,future.tariff!))):0;return{year:i+1,generationKwh:0,selfConsumedKwh:0,gridImportKwh:e.totals.demandKwh,surplusKwh:0,grossSavingsThb:0,reserveThb:0,netCashFlowThb:0,baselineBillThb:bill,withSolarBillThb:bill};});
+ let cumulative=0;
+ const empty:Evaluation={energy:emptyEnergy,annual:emptyAnnual,series:[{year:0,withoutSolarThb:0,withSolarThb:0},...emptyAnnual.map(f=>{cumulative+=f.baselineBillThb;return{year:f.year,withoutSolarThb:cumulative,withSolarThb:cumulative};})],reserve:0,net:0};
+ const selected=chosen?evaluations.get(chosen.id)!:empty;
+ const status:NonNullable<EstimateResult['modelStatus']>=!canEvaluate||invalidQuote?'unsupported':quoted&&!chosen?.feasible?'infeasible-quote':!chosen?(eligible.length?'no-economic-option':'no-feasible-option'):chosen.conditional||a.solarOnlyIllustration?'conditional':'supported';
+ if(!chosen&&canEvaluate)warnings.unshift(warn(status,status==='no-economic-option'?'No suitable economic option identified under these assumptions. No installation is the baseline; compare the evaluated packages below.':'No evidenced package fits the roof, phase and budget constraints. No system is recommended.',status==='no-economic-option'?'ยังไม่พบตัวเลือกที่คุ้มค่าภายใต้สมมติฐานนี้ ใช้กรณีไม่ติดตั้งเป็นฐาน และดูผลเปรียบเทียบชุดด้านล่างได้':'ไม่มีชุดอ้างอิงที่ตรงกับข้อจำกัดหลังคา ระบบไฟ และงบประมาณ จึงไม่แนะนำระบบ'));
+ if(status==='infeasible-quote')warnings.unshift(warn('infeasible-quote','Quoted system fails roof/phase/budget constraints. Financial figures are hypothetical, not an installation recommendation.','ระบบในใบเสนอราคาไม่ผ่านข้อจำกัดหลังคา ระบบไฟ หรืองบประมาณ ตัวเลขการเงินเป็นกรณีสมมติ ไม่ใช่คำแนะนำให้ติดตั้ง'));
+ const first=selected.annual[0],price=chosen?.priceThb??0,netFirst=first.grossSavingsThb-selected.reserve,payback=price>0&&netFirst>0?price/netFirst:null,e=selected.energy;
+ if(e.diagnostics.some(d=>d.includes('existing-schedules-scaled-to-bill')))warnings.push(warn('existing-schedules-scaled','Entered existing-appliance schedules exceed the bill consumption in some months and were scaled down to that measured total. Check power, hours and whether the bill period is representative.','ตารางใช้อุปกรณ์เดิมที่กรอกสูงกว่ายอดหน่วยไฟในบางเดือน จึงลดสัดส่วนให้เท่ากับยอดบิล โปรดตรวจสอบกำลังไฟ ชั่วโมง และช่วงบิลที่ใช้เป็นตัวแทน'));
+ const sensitivity:NonNullable<EstimateResult['uncertaintyScenarios']>=[];
+ if(chosen&&canEvaluate)for(const[id,y,l]of [['lower',0.85,0.9],['central',1,1],['higher',1,1.1]] as const){const f=id==='central'?selected:evaluate(energyInput(a,monthly,chosen),tariff!,price,y,l);sensitivity.push({id,annualGenerationKwh:f.energy.totals.generationKwh,annualSavingsThb:f.annual[0].grossSavingsThb,lifetimeBenefitThb:f.net,basisEn:id==='lower'?'15% lower generation and 10% lower baseline load.':id==='higher'?'10% higher baseline load; unchanged generation.':'Central synthetic load/generation.',basisTh:id==='lower'?'ผลผลิตลด 15% และโหลดพื้นฐานลด 10%':id==='higher'?'โหลดพื้นฐานเพิ่ม 10% ผลผลิตเท่าเดิม':'สมมติฐานโหลดและผลผลิตกลาง'});}
+ const recommendation=a.shade==='a-lot'||status==='infeasible-quote'||status==='no-feasible-option'?'site-check-first':status==='supported'&&selected.net>0?'strong-fit':'worth-comparing',futureBill=first.baselineBillThb/12,pct=futureBill>0?first.grossSavingsThb/(futureBill*12)*100:0;
+ return{
+  modelVersion:CALCULATOR_MODEL_VERSION,modelStatus:status,calculationReferenceDate:date,warnings,selectedSystem:chosen,candidateSystems:candidates,energy:{...e.totals,monthly:e.monthly},annualFinancials:selected.annual,uncertaintyScenarios:sensitivity,discountedValueThb:sum(selected.annual.map((f,i)=>f.netCashFlowThb/(1+(a.discountRatePct??0)/100)**(i+1)))-price,
+  recommendationReason:{en:'Compare finite sourced packages; reject roof/phase/budget failures; maximise undiscounted 25-year net value against no installation. Prices are one supplier’s starting references plus a 7% contingency—not confirmed VAT or a market quotation.',th:'เปรียบเทียบชุดอ้างอิงตามข้อจำกัดหลังคา ระบบไฟและงบประมาณ แล้วเลือกผลประโยชน์สุทธิ 25 ปีเทียบกับไม่ติดตั้ง ราคาเป็นราคาเริ่มต้นของผู้ให้บริการรายเดียวบวกเงินเผื่อ 7% ไม่ใช่ VAT ที่ยืนยันหรือใบเสนอราคาตลาด'},
+  currentMonthlyBillThb:a.monthlyBillThb,baselineFutureMonthlyBillThb:futureBill,estimatedMonthlyConsumptionKwh:sum(monthly)/12,planningSystemKw:chosen?.dcKwp??0,planningAnnualProductionKwh:e.totals.generationKwh,planningMonthlySavingsThb:first.grossSavingsThb/12,planningAnnualSavingsThb:first.grossSavingsThb,planningAfterSolarMonthlyBillThb:first.withSolarBillThb/12,planningInstalledCostThb:price,planningAnnualMaintenanceReserveThb:selected.reserve,planningPaybackYears:payback,planningAnnualSelfConsumedKwh:e.totals.selfConsumedKwh,planningAnnualExportedKwh:e.totals.surplusKwh,planningTwentyFiveYearNetBenefitThb:selected.net,planningBillReductionPct:pct,
+  roofFeasibility:roof===null?'unconfirmed':chosen&&chosen.requiredRoofAreaSqm>roof?'limited':!chosen?'limited':'likely',recommendation,loadProfile:['very-low','low'].includes(a.daytimePattern)?'low':['high','very-high'].includes(a.daytimePattern)?'high':'medium',tariffVersion:tariff?.id??'unsupported',historicalTariffVersion:history.tariff?.id,tariffLabelEn:tariff?`${tariff.authorityLabelEn} · ${tariff.labelEn}`:'Unsupported tariff',tariffLabelTh:tariff?`${tariff.authorityLabelTh} · ${tariff.labelTh}`:'ไม่รองรับอัตรานี้',assumptionVersion:CALCULATOR_MODEL_VERSION+' / '+SOLAR_PACKAGE_CATALOG_VERSION+' / '+solarResourceV3.id,calculatedAt:date+'T00:00:00Z',
+  assumptionsUsed:[...e.assumptions,'The reference tariff is held constant for the 25-year scenario, not forecast or assumed legally effective for 25 years.','1.02% annual maintenance/component reserve includes inverter risk once. No additional replacement is double-counted.','Base result excludes export revenue, personal tax and financing. Sensitivities are assumptions, not statistical confidence.'],
+  trace:[{labelEn:'Historical consumption input',labelTh:'ข้อมูลการใช้ไฟย้อนหลัง',value:actual?`${kwh} kWh / ${period.toFixed(2)} days`:`฿${a.monthlyBillThb} / ${period.toFixed(2)} days`,basisEn:actual?'Meter kWh normalized to a representative year.':`Bill inferred with ${history.tariff?.id??'unsupported'}, date ${a.billDate??'unknown: explicit reference assumed'}.`,basisTh:actual?'หน่วยจากมิเตอร์ปรับตามวันเป็นปีตัวแทน':`คำนวณย้อนด้วย ${history.tariff?.id??'อัตราที่ไม่รองรับ'} วันที่ ${a.billDate??'ไม่ทราบ ใช้วันอ้างอิง'}`,sourceUrl:history.tariff?.source,sourceLabelEn:'Historical tariff source',sourceLabelTh:'แหล่งอัตราค่าไฟย้อนหลัง'},
+   {labelEn:'Future reference tariff',labelTh:'อัตราอ้างอิงอนาคต',value:tariff?`${tariff.authority} · ${tariff.effectiveFrom}–${tariff.effectiveTo}`:'Unsupported',basisEn:'Progressive before/after bills include service, Ft and VAT. Constant-tariff scenario only.',basisTh:'คิดขั้นบันได ค่าบริการ Ft และ VAT ก่อนและหลังใช้โซลาร์ โดยสมมติอัตราคงที่เท่านั้น',sourceUrl:tariff?.source,sourceLabelEn:'Official tariff source',sourceLabelTh:'แหล่งอัตราค่าไฟทางการ'},
+   {labelEn:'Tariff evidence dates',labelTh:'วันที่หลักฐานอัตราค่าไฟ',value:`Checked ${future.metadata.checkedAt}; expires ${future.metadata.expiresAt??'no verified schedule'}`,basisEn:'Source date, effective period and review date are separate. Expired dates are rejected for a new calculation; a saved reference is not a tariff forecast.',basisTh:'วันแหล่งข้อมูล ช่วงที่มีผล และวันตรวจเป็นคนละข้อมูล วันนอกช่วงจะไม่ใช้คำนวณใหม่ และอัตราที่บันทึกไม่ใช่การพยากรณ์',sourceUrl:tariff?.ftSource,sourceLabelEn:'Official Ft source',sourceLabelTh:'แหล่ง Ft ทางการ'},
+   {labelEn:'Solar resource reference',labelTh:'ข้อมูลอ้างอิงพลังงานแสงอาทิตย์',value:`PVGIS-ERA5 2005–2023 · ${solarResourceV3.annualYieldKwhPerKwp} kWh/kWp/year · checked ${solarResourceV3.retrievedDate}`,basisEn:'Bangkok reference 13.75°N, 100.5°E, 15° south, building-integrated crystalline silicon. PVGIS 14% system loss already included; hourly disaggregation and other-plane adjustments are approximations, not site measurements.',basisTh:'จุดอ้างอิงกรุงเทพฯ 13.75°N 100.5°E แผงซิลิคอนผลึกแบบติดกับอาคาร เอียง 15° หันทิศใต้ รวมการสูญเสียระบบ PVGIS 14% แล้ว การกระจายรายชั่วโมงและปรับแนวแผงเป็นการประมาณ ไม่ใช่การวัดหน้างาน',sourceUrl:solarResourceV3.sourceUrl,sourceLabelEn:'Reproduce official PVGIS reference',sourceLabelTh:'คำนวณซ้ำจาก PVGIS ทางการ'},
+   {labelEn:'Panel DC / inverter AC',labelTh:'แผง DC / อินเวอร์เตอร์ AC',value:chosen?`${chosen.moduleCount||'?'} × ${chosen.moduleWp||'?'} Wp = ${chosen.dcKwp} kWp DC / ${chosen.inverterAcKw} kW AC`:'No system selected',basisEn:chosen?.labelEn??'No feasible positive-value option.',basisTh:chosen?.labelTh??'ยังไม่มีตัวเลือกที่เหมาะสมและมีมูลค่าเป็นบวก',sourceUrl:chosen?.sourceUrl,sourceLabelEn:'Package specifications',sourceLabelTh:'ข้อมูลชุดอุปกรณ์'},
+   {labelEn:'Installation price',labelTh:'ราคาติดตั้ง',value:`฿${price.toLocaleString('en-US',{maximumFractionDigits:2})}`,basisEn:quoted?'Exact cash quotation, not rounded before calculations.':'Starting price plus explicit 7% contingency, not confirmed VAT.',basisTh:quoted?'ราคาเงินสดตามจริง ไม่ปัดก่อนคำนวณ':'ราคาเริ่มต้นบวกเงินเผื่อ 7% ไม่ใช่ VAT ที่ยืนยัน'},
+   {labelEn:'Energy balance',labelTh:'สมดุลพลังงาน',value:`${Math.round(e.totals.generationKwh)} kWh PV / ${Math.round(e.totals.selfConsumedKwh)} self-use / ${Math.round(e.totals.surplusKwh)} surplus`,basisEn:'Self-use is min(PV,demand) every hour; nighttime grid imports remain. Uncontracted surplus has zero value.',basisTh:'ใช้เองรายชั่วโมงไม่เกินผลผลิตหรือโหลด ไฟกลางคืนยังใช้โครงข่าย ส่วนเกินที่ไม่มีสัญญาไม่มีรายได้'},
+   {labelEn:'Annual maintenance/component reserve',labelTh:'เงินสำรองบำรุงรักษา/อุปกรณ์ต่อปี',value:`฿${selected.reserve.toLocaleString('en-US',{maximumFractionDigits:2})}`,basisEn:'1.02% of exact installation price/year, component and inverter reserve once.',basisTh:'1.02% ของราคาติดตั้งจริงต่อปี รวมเงินสำรองอุปกรณ์และอินเวอร์เตอร์ครั้งเดียว'}],
+  lifetimeCostSeries:selected.series,recommendedSystemKw:point(chosen?.dcKwp??0),estimatedAnnualProductionKwh:point(e.totals.generationKwh),estimatedMonthlySavingsThb:point(first.grossSavingsThb/12),estimatedBillReductionPct:point(pct),estimatedPaybackYears:payback===null?null:point(payback),estimatedInstalledCostThb:point(price),estimatedAnnualSelfConsumedKwh:point(e.totals.selfConsumedKwh),estimatedAnnualExportedKwh:point(e.totals.surplusKwh),estimatedLifetimeNetBenefitThb:point(selected.net),
+ };
 }
-
-function classifyLoad(answers: EstimateAnswers): EstimateResult['loadProfile'] {
-  const index = ['very-low', 'low', 'moderate', 'high', 'very-high'].indexOf(answers.daytimePattern);
-  if (index <= 1) return 'low';
-  if (index >= 3) return 'high';
-  return 'medium';
-}
-
-function installedLoadUseFactor(answers: EstimateAnswers) {
-  return {
-    'very-low': 0,
-    low: 0,
-    moderate: 0.5,
-    high: 0.8,
-    'very-high': 1,
-  }[answers.daytimePattern];
-}
-
-function roofCapacity(answers: EstimateAnswers) {
-  if (answers.exactRoofAreaSqm) return Math.max(1, Math.floor((answers.exactRoofAreaSqm / solarAssumptions.squareMetresPerKwp) * 2) / 2);
-  if (!answers.roofArea) return null;
-  return solarAssumptions.roofAreaCapacityKwp[answers.roofArea];
-}
-
-export const residentialEstimator: Estimator = {
-  calculate(answers: EstimateAnswers): EstimateResult {
-    const tariff = selectResidentialTariff(answers.province);
-    const monthlyConsumptionKwh = estimateKwhFromBill(answers.monthlyBillThb, tariff);
-    const annualLoadKwh = monthlyConsumptionKwh * 12;
-    const loadProfile = classifyLoad(answers);
-    const provinceYield = solarAssumptions.provinceYieldKwhPerKwp[answers.province as keyof typeof solarAssumptions.provinceYieldKwhPerKwp]
-      ?? solarAssumptions.provinceYieldKwhPerKwp.other;
-    const direction = answers.roofDirection ?? 'unsure';
-    const slope = answers.roofSlope ?? 'unsure';
-    const orientationFactor = solarAssumptions.slopeFactor[direction][slope];
-    const shadeFactor = solarAssumptions.shadeFactor[answers.shade];
-    const futureLoadAdjustment = answers.futureLoads?.some((load) => !['none', 'unsure'].includes(load)) ? 0.04 : 0;
-    const targetShare = clamp(
-      solarAssumptions.sizingTargetAnnualLoadShare[answers.daytimePattern] + futureLoadAdjustment,
-      0.24,
-      0.52,
-    );
-
-    const billLedSystemKw = Math.max(1.5, round((annualLoadKwh * targetShare) / provinceYield, 0.5));
-    const capacity = roofCapacity(answers);
-    const roofLimitedSystemKw = capacity === null ? billLedSystemKw : Math.min(billLedSystemKw, capacity);
-    const systemKw = answers.quoteSystemKw
-      ? round(answers.quoteSystemKw, 0.1)
-      : Math.max(1, round(roofLimitedSystemKw, 0.5));
-
-    const annualProduction = systemKw * provinceYield * orientationFactor * shadeFactor;
-    const pvLoadRatio = annualProduction / Math.max(1, annualLoadKwh);
-    const selfConsumptionBase = solarAssumptions.selfConsumptionAtBalancedSize[answers.daytimePattern];
-    const hasInstalledHighUseLoad = answers.daytimeLoads.some((load) => ['other-high-use', 'ev'].includes(load));
-    const loadBonus = hasInstalledHighUseLoad ? 0.03 * installedLoadUseFactor(answers) : 0;
-    const selfConsumptionRatio = clamp(
-      selfConsumptionBase + loadBonus - Math.max(0, pvLoadRatio - targetShare) * 0.25,
-      0.35,
-      0.9,
-    );
-
-    const monthlyProduction = solarAssumptions.monthlyProductionShare.map((share) => annualProduction * share);
-    const monthlySelfConsumed = monthlyProduction.map((production) => Math.min(monthlyConsumptionKwh, production * selfConsumptionRatio));
-    const annualSelfConsumed = monthlySelfConsumed.reduce((sum, value) => sum + value, 0);
-    const annualExported = Math.max(0, annualProduction - annualSelfConsumed);
-    const annualAvoidedBill = monthlySelfConsumed.reduce((sum, selfConsumedKwh) => {
-      const before = calculateResidentialBill(monthlyConsumptionKwh, tariff);
-      const after = calculateResidentialBill(Math.max(0, monthlyConsumptionKwh - selfConsumedKwh), tariff);
-      return sum + before - after;
-    }, 0);
-    const modeledAnnualBill = answers.monthlyBillThb * 12;
-
-    const assumedPhase = answers.electricityPhase === 'three' ? 'three' : 'single';
-    const marketPlanningCost = planningPrice(systemKw, assumedPhase);
-    const comparableQuote = Boolean(answers.quoteCashPriceThb && answers.quoteSystemKw && !answers.quoteBatteryIncluded);
-    const planningCost = round(comparableQuote ? answers.quoteCashPriceThb! : marketPlanningCost, 5000);
-    const annualReserve = planningCost * solarAssumptions.annualMaintenanceAndComponentReserveRate;
-    const firstYearNetValue = annualAvoidedBill - annualReserve;
-    const payback = firstYearNetValue > 0 ? planningCost / firstYearNetValue : null;
-
-    const lifetimeCostSeries: LifetimeCostPoint[] = [{ year: 0, withoutSolarThb: 0, withSolarThb: planningCost }];
-    let cumulativeAvoidedBill = 0;
-    for (let year = 1; year <= solarAssumptions.analysisYears; year += 1) {
-      const degradation = (1 - solarAssumptions.annualPanelDegradationRate) ** (year - 1);
-      const avoided = annualAvoidedBill * degradation;
-      cumulativeAvoidedBill += avoided;
-      const withoutSolar = modeledAnnualBill * year;
-      const withSolar = planningCost + withoutSolar - cumulativeAvoidedBill + annualReserve * year;
-      lifetimeCostSeries.push({
-        year,
-        withoutSolarThb: round(withoutSolar, 100),
-        withSolarThb: round(withSolar, 100),
-      });
-    }
-
-    const finalWithoutSolar = modeledAnnualBill * solarAssumptions.analysisYears;
-    const finalWithSolar = planningCost + finalWithoutSolar - cumulativeAvoidedBill + annualReserve * solarAssumptions.analysisYears;
-    const lifetimeNet = round(finalWithoutSolar - finalWithSolar, 1000);
-    const monthlySavings = round(annualAvoidedBill / 12);
-    const annualSavings = round(annualAvoidedBill);
-    const afterSolarMonthlyBill = round(Math.max(0, answers.monthlyBillThb - monthlySavings));
-    const billReductionPct = round((annualAvoidedBill / Math.max(1, modeledAnnualBill)) * 100, 0.1);
-    const selectedRoofLimited = capacity !== null && capacity + 0.01 < billLedSystemKw;
-    const roofFeasibility = capacity === null ? 'unconfirmed' : selectedRoofLimited ? 'limited' : 'likely';
-    const recommendation = answers.shade === 'a-lot' || (selectedRoofLimited && systemKw < billLedSystemKw * 0.6)
-      ? 'site-check-first'
-      : lifetimeNet > 0 && payback !== null && payback <= 15
-        ? 'strong-fit'
-        : 'worth-comparing';
-
-    const roundedSystem = round(systemKw, 0.1);
-    const roundedProduction = round(annualProduction, 100);
-    const roundedSelfConsumed = round(annualSelfConsumed, 100);
-    const roundedExported = round(annualExported, 100);
-    const roundedCost = round(planningCost, 1000);
-    const roundedPayback = payback === null ? null : round(payback, 0.1);
-
-    return {
-      currentMonthlyBillThb: answers.monthlyBillThb,
-      estimatedMonthlyConsumptionKwh: round(monthlyConsumptionKwh),
-      planningSystemKw: roundedSystem,
-      planningAnnualProductionKwh: roundedProduction,
-      planningMonthlySavingsThb: monthlySavings,
-      planningAnnualSavingsThb: annualSavings,
-      planningAfterSolarMonthlyBillThb: afterSolarMonthlyBill,
-      planningInstalledCostThb: roundedCost,
-      planningAnnualMaintenanceReserveThb: round(annualReserve),
-      planningPaybackYears: roundedPayback,
-      planningAnnualSelfConsumedKwh: roundedSelfConsumed,
-      planningAnnualExportedKwh: roundedExported,
-      planningTwentyFiveYearNetBenefitThb: lifetimeNet,
-      planningBillReductionPct: billReductionPct,
-      roofFeasibility,
-      recommendation,
-      loadProfile,
-      tariffVersion: tariff.id,
-      tariffLabelEn: `${tariff.authorityLabelEn} · ${tariff.labelEn}`,
-      tariffLabelTh: `${tariff.authorityLabelTh} · ${tariff.labelTh}`,
-      assumptionVersion: solarAssumptions.version,
-      calculatedAt: new Date().toISOString(),
-      assumptionsUsed: [
-        `Monthly consumption is reverse-calculated from the entered bill using the applicable ${tariff.authority} residential tariff schedule.`,
-        'System sizing is led by the bill, property type, and stated daytime-use band, then constrained by optional usable roof-area information when supplied.',
-        'Installed appliances influence the self-consumption profile only in proportion to the stated daytime-use band; installation alone does not imply daytime operation.',
-        'Production uses province-level solar yield and the stated shade, direction and slope information; no clear-sky assumption is used.',
-        'The base result values self-consumed electricity only and excludes export payments, tax relief, finance and tariff escalation.',
-        'The 25-year figure subtracts installation cost and a 1.02% annual maintenance/component reserve, including inverter-related risk, and applies 0.5% annual module degradation.',
-      ],
-      trace: [
-        { labelEn: 'Monthly bill', labelTh: 'ค่าไฟต่อเดือน', value: `฿${round(answers.monthlyBillThb).toLocaleString('en-US')}`, basisEn: 'Your answer', basisTh: 'คำตอบของคุณ' },
-        { labelEn: 'Tariff', labelTh: 'อัตราค่าไฟ', value: `${tariff.authority} · ${tariff.effectiveFrom}–${tariff.effectiveTo}`, basisEn: `${tariff.authorityLabelEn}, including the applicable residential tiers, Ft and VAT.`, basisTh: `${tariff.authorityLabelTh} รวมอัตราขั้นบันได ค่า Ft และ VAT ที่ใช้บังคับ`, sourceUrl: tariff.source, sourceLabelEn: `${tariff.authority} residential tariff source`, sourceLabelTh: `แหล่งอัตราค่าไฟบ้านของ ${tariff.authority}` },
-        { labelEn: 'Estimated monthly use', labelTh: 'การใช้ไฟต่อเดือนโดยประมาณ', value: `${round(monthlyConsumptionKwh).toLocaleString('en-US')} kWh`, basisEn: 'Reverse-calculated from your bill using the stated residential tariff.', basisTh: 'คำนวณย้อนกลับจากยอดค่าไฟของคุณด้วยอัตราค่าไฟบ้านที่ระบุ' },
-        { labelEn: 'Estimated starting system size', labelTh: 'ขนาดระบบเริ่มต้นโดยประมาณ', value: `${roundedSystem} kWp`, basisEn: 'Monthly bill, daytime use, property type and any optional roof-area details.', basisTh: 'ค่าไฟต่อเดือน การใช้ไฟช่วงกลางวัน ประเภทบ้าน และข้อมูลพื้นที่หลังคาเสริม (ถ้ามี)' },
-        { labelEn: 'Estimated first-year solar generation', labelTh: 'การผลิตไฟโซลาร์ปีแรกโดยประมาณ', value: `${roundedProduction.toLocaleString('en-US')} kWh`, basisEn: 'Province, solar resource, visible shade and any optional roof details.', basisTh: 'จังหวัด ข้อมูลพลังงานแสงอาทิตย์ เงาบังที่มองเห็น และข้อมูลหลังคาเสริม (ถ้ามี)' },
-        { labelEn: 'Planning price', labelTh: 'ราคาเพื่อวางแผน', value: `฿${roundedCost.toLocaleString('en-US')}`, basisEn: comparableQuote ? 'Your comparable cash quote.' : 'Current Thai planning-price evidence; not a quotation.', basisTh: comparableQuote ? 'ใบเสนอราคาเงินสดที่เปรียบเทียบได้ของคุณ' : 'หลักฐานราคาเพื่อวางแผนในไทยปัจจุบัน ไม่ใช่ใบเสนอราคา' },
-        { labelEn: 'Annual maintenance/component reserve', labelTh: 'เงินสำรองค่าบำรุงรักษา/อุปกรณ์ต่อปี', value: `฿${round(annualReserve).toLocaleString('en-US')}/year`, basisEn: '1.02% of the planning price each year.', basisTh: '1.02% ของราคาเพื่อวางแผนในแต่ละปี' },
-      ],
-      lifetimeCostSeries,
-      recommendedSystemKw: point(roundedSystem),
-      estimatedAnnualProductionKwh: point(roundedProduction),
-      estimatedMonthlySavingsThb: point(monthlySavings),
-      estimatedBillReductionPct: point(billReductionPct),
-      estimatedPaybackYears: roundedPayback === null ? null : point(roundedPayback),
-      estimatedInstalledCostThb: point(roundedCost),
-      estimatedAnnualSelfConsumedKwh: point(roundedSelfConsumed),
-      estimatedAnnualExportedKwh: point(roundedExported),
-      estimatedLifetimeNetBenefitThb: point(lifetimeNet),
-    };
-  },
-};
+export const residentialEstimator:Estimator={calculate:a=>a.estimateModelVersion==='legacy-v5'?legacyResidentialEstimator.calculate(a):calculateModernEstimate(a)};

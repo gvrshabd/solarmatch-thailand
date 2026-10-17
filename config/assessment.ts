@@ -343,6 +343,30 @@ export const initialQuestionnaire: QuestionnaireDocument = {
   ],
 };
 
+// Separate immutable preview document. Never retarget the historic v8 release
+// initializer's `initialQuestionnaire` dependency to this version.
+export const calculatorV3Questionnaire: QuestionnaireDocument = {
+  id: 'residential-questionnaire-v7',
+  schemaVersion: 10,
+  questions: [
+    withoutQuestionHelp(projectTypeQuestion),
+    withoutQuestionHelp(currentQuestion('province')),
+    { ...currentQuestion('monthlyBillThb'),
+      title: { en: 'How much electricity does the home use?', th: 'บ้านนี้ใช้ไฟฟ้ามากแค่ไหน?' },
+      help: { en: 'Use actual kWh and the billing period if available, or a typical monthly bill amount.', th: 'กรอกหน่วย kWh และจำนวนวันในรอบบิลหากทราบ หรือใช้ค่าไฟต่อเดือนตามปกติ' },
+    },
+    withoutQuestionHelp(currentQuestion('daytimePattern')),
+    { ...withoutQuestionHelp(currentQuestion('roofArea')), required: true },
+    withoutQuestionHelp(currentQuestion('shade')),
+    withoutQuestionHelp(currentQuestion('propertyType')),
+    withoutQuestionHelp(currentQuestion('ownershipStatus')),
+    withoutQuestionHelp(activePlanningQuestion),
+    withoutQuestionHelp(installedAppliancesQuestion),
+    withoutQuestionHelp(currentQuestion('roofMaterial')),
+    withoutQuestionHelp(quoteContactQuestion),
+  ],
+};
+
 export const legacyQuestionnaireV2: QuestionnaireDocument = {
   id: 'residential-questionnaire-v2',
   schemaVersion: 5,

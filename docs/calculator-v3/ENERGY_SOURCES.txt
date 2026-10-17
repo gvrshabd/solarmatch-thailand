@@ -1,0 +1,179 @@
+ENERGY MODEL AND FINITE PACKAGE EVIDENCE — checked 2026-10-17
+
+Status
+This is a reproducible planning approximation, not measured accuracy, an engineering
+simulation, a site survey, a purchase offer or validation against smart-meter data.
+All numeric answers and defaults must be disclosed as supplied or assumed.
+
+Reference production and its limits
+The previous 1380 kWh/kWp/year and unauditable monthly shares are SUPERSEDED.
+On 2026-10-17 an independent direct HTTPS fetch returned HTTP200 from the official
+European Commission Joint Research Centre PVGIS5.3 API:
+https://re.jrc.ec.europa.eu/api/v5_3/PVcalc?lat=13.75&lon=100.5&peakpower=1&loss=14&angle=15&aspect=0&pvtechchoice=crystSi&mountingplace=building&outputformat=json&usehorizon=1&raddatabase=PVGIS-ERA5
+Complete response: docs/calculator-v3/pvgis-era5-bangkok-2026-10-17.json
+Snapshot file SHA256:
+07DBE82E621E3D579A968469B89E34FF62E5DB79B29EB51595CA796AF8F37574
+Versioned application calibration: config/solar-resource-v3.ts
+Read-only reproduction: scripts/reproduce-solar-resource-v3.ps1 -Check
+The script re-fetches the fixed public API, compares scientific inputs and outputs
+with the snapshot, prints the full JSON and never overwrites files or reads user
+data. It fails if the source calibration changes; review/version any such change.
+
+Source inputs: latitude13.75N, longitude100.5E, elevation9m; PVGIS-ERA5 radiation,
+ERA5 meteorology; calculation/weather years2005–2023; crystalline-silicon array,
+1kWp; fixed tilt15deg; PVGIS aspect0=south=compass180deg; building-integrated
+mounting; 14% configured system loss; horizon shadows enabled with DEM calculation.
+These inputs and all API metadata are preserved in the response snapshot.
+
+PVGIS output annual E_y=1398.23 kWh per reference kWp. Rounded monthly E_m:
+Jan131.07; Feb123.93; Mar137.39; Apr125.83; May114.89; Jun104.78;
+Jul101.73; Aug105.48; Sep99.74; Oct109.50; Nov116.88; Dec127.00 kWh.
+Monthly rounded total=1398.22. Model monthly shares=each E_m/1398.22; scale by
+annual1398.23, distributing the 0.01kWh rounding discrepancy proportionally.
+These are long-term modeled monthly averages, not measured household generation.
+Reported interannual SD_y=27.48kWh is variation in the PVGIS reference's annual
+output, NOT a confidence interval for this calculator, its timing or household fit.
+
+Reported PVGIS incidence loss=-2.66%, spectral adjustment=+0.86%, temperature/
+irradiance loss=-14.53%, and total loss=-27.83% are outputs, not additional factors
+to apply again. The configured14% system loss is already included in E_y/E_m.
+
+This single Bangkok reference supplies every province. Province, district,
+address and map coordinates do not change modeled irradiance. No interpolation,
+address-specific API call or site-personalization claim is made. Other provinces,
+mountings, module technologies and shade require site/resource evidence. Nearby
+provincial yield variations from the inherited configuration remain omitted.
+
+Hourly generation construction (lib/calculator/energy-model.ts)
+Use 2027 as the fixed representative calendar: 8760 one-hour bins. Each month
+repeats its mean solar day. Solar position uses latitude 13.75 degrees as an
+explicit reference, declination 23.45*sin(2*pi*(284+dayOfYear)/365), and hour angle
+15*(hourMidpoint-12) degrees. Day-of-year is the 15th of each month in a non-leap
+year. Generation is zero before 06:00 and from 18:00 solar time and whenever solar
+elevation is non-positive. This is not a civil-time sunrise/sunset forecast.
+Irradiance weight = .7*max(0,sunVector dot panelNormal) +
+.3*max(0,sunUp)*(1+cos(panelTilt))/2. The 70/30 split is an authored approximation,
+not a measured diffuse fraction or a validated transposition model. There is no
+cloud variability or direct/diffuse meteorological input.
+
+Normalize each reference month's weights (15-degree south-facing panel) to
+1398.23*monthlyShare per kWp. Compute the chosen panel geometry against the same
+reference normalization; never renormalize the chosen geometry to erase its
+effect. Horizontal panels have tilt=0 and are exactly independent of azimuth.
+Azimuth uses compass degrees N=0,E=90,S=180,W=270. Roof slope and panel tilt are
+different quantities. The engine may translate a pitched flush-mounted roof to
+a stated panel plane; a flat roof requires an explicit mounting assumption.
+Apply the entered shade factor and generation degradation once, then cap each
+hour's AC energy to inverterACkW*1h. The PVGIS production reference already includes
+its configured14% and modeled losses; no second generic inverter/temperature/
+wiring/system-loss percentage is deducted. Other panel tilts/azimuths use an
+unvalidated analytical adjustment, not a fresh PVGIS calculation. Model hourly
+shapes are synthetic disaggregation, NOT PVGIS hourly weather/production records.
+Additional modeled clipping is reported separately; real clipping needs weather
+and inverter data. Bifacial gain is not added to catalogue bifacial modules.
+
+Demand construction and conservation
+Each supplied month stays exactly at its kWh baseline before future additions.
+Absent measured profiles, daytime answers allocate residual baseline energy to
+08:00–18:00: very-low .12, low .25, moderate .40, high .55, very-high .70.
+These shares and intra-window noon/evening weight curves are authored assumptions,
+not appliance telemetry or Thai population estimates. Weekday/weekend answers
+use their own shapes; the same total daily residual is used across day types.
+Public holidays, occupancy changes and seasonal appliances are not inferred.
+
+Existing AC, pump and EV schedules describe energy ALREADY INSIDE the bill.
+Their calculated scheduled kWh are subtracted from each month's baseline; only
+the residual follows the generic shape. If scheduled energy exceeds bill kWh,
+scale all existing schedules proportionally down to that month's bill and expose
+a diagnostic. No negative residual or bill double counting is possible.
+AC/pump kWh = average electric-input kW * units * operating hours on selected days.
+AC input power should reflect cycling; cooling capacity/BTU is not input power.
+Fractional hours and midnight wrap are included as one-hour bin overlaps.
+EV monthly kWh is wall charging energy; multiply by home-charging fraction. Home
+charging's daylight fraction is spread 09:00–17:00 and its remainder 20:00–06:00.
+No charging loss is added again to wall-energy input. Energy/charging power and
+sub-hourly coincidence are not independently modeled.
+
+Only quantified future increments add kWh. Each includes startMonth 1–12 and
+startYearOffset (0=current scenario year), then persists from that month. Future
+EV home fraction/timing and AC/pump input power/count/hours are handled explicitly.
+A future-load checkbox by itself adds no generic bonus or inferred consumption.
+Lifetime calls reuse the same representative calendar to isolate degradation,
+load changes and economics from arbitrary future weekday/year differences.
+
+For each hour: selfUse=min(demand,generation), import=demand-selfUse,
+surplus=generation-selfUse. Thus demand=selfUse+import and
+generation=selfUse+surplus for every interval, month and year. No battery exists
+in this model. Surplus is physical energy; financial export eligibility/payment
+must be handled separately. Degradation changes generation before hourly matching,
+not the monetary savings or self-consumption total after calculation.
+
+Finite package sources — primary installer pages, not endorsements
+Supplier: CX ENERTECH. Retrieved 2026-10-17. Page effective date 2026-09-27.
+Each page explicitly calls the amount a database starting reference, not a real
+quotation. Equipment is installer-published catalogue information, not independently
+confirmed manufacturer compatibility, availability, string design or approval.
+
+1) https://www.cxenertech.com/solar/rooftop/packages/cx-og-hw-3-1p-aik550
+   6 x 550 Wp AIKO = 3.30 kWp DC; Huawei 3 kW AC; single phase;
+   published area16.8 m²; starting THB105000; no battery listed in base.
+2) https://www.cxenertech.com/solar/rooftop/packages/cx-og-sgg-5-1p
+   7 x 715 Wp JA = 5.005 kWp DC; Sigenergy SigenStor EC5.0SP 5 kW AC;
+   single phase; published area19.6 m²; starting THB159000; no battery in base.
+3) https://www.cxenertech.com/solar/rooftop/packages/cx-og-hw-5-3p-aik550
+   10 x 550 Wp AIKO = 5.50 kWp DC; Huawei 5 kW AC; three phase;
+   published area28 m²; starting THB153000; no battery in base.
+4) https://www.cxenertech.com/solar/rooftop/packages/cx-og-hw-10-3p-aik550
+   19 x 550 Wp AIKO = 10.45 kWp DC; Huawei 10 kW AC; three phase;
+   published area53.2 m²; starting THB256000; no battery in base.
+
+Shared stated scope: modules/inverter; mounts; DC/AC equipment; monitoring;
+earthing; installation/testing/handover; drawings/application documents.
+Huawei pages also list three years cleaning/O&M. Permit fees, structural works,
+roof repairs, special roofs, site distances and switchboard upgrades are not
+confirmed as included. VAT treatment is not stated. Planning prices add one
+explicit 7% uncertainty contingency to the published reference (112350;170130;
+163710;273920 THB). This contingency is NOT asserted to be confirmed VAT and
+must not be added again by the economics engine. Actual complete cost needs a
+dated tax-inclusive site quotation. These are finite configuration comparisons;
+there is no proportional low-cost 0.3–2 kWp package or arbitrary capacity scaling.
+Published installation areas may omit access/setbacks; use max(published area,
+5.5 m²/DC-kWp) as a conservative MODEL allowance, not guaranteed roof feasibility.
+The 5.5 factor is inherited planning judgment, not a code-mandated clearance.
+
+Original inherited pricing sources investigated
+https://peashopping.com/product/pea-solar-5kw-1-phase-standard-package/
+  2026-10-17 retrieval: 404. Cannot reconfirm old THB175000 price or DC contents.
+https://peashopping.com/product/pea-solar-10kw-3-phase-standard-package/
+  2026-10-17 retrieval: timeout. Cannot reconfirm old THB300000 or DC contents.
+https://peashopping.com/
+  2026-10-17 retrieval: timeout. This is a retrieval limit, not evidence of closure.
+No usable original 3 kW/THB130000 primary package with module count and Wp was
+recovered; old anchor prices are not used as verified current configurations.
+
+https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf
+  Retrieved successfully, two-page GRoof by Gunkul brochure. This is Gunkul/GRoof,
+  not evidence of a Gulf-branded package. It distinguishes single-phase 3/5 kW
+  and three-phase 5/10 kW marketing columns, module counts6/8/10/16 and inverter
+  AC3/5/5/10 kW; VAT-inclusive prices differ by equipment/optimizer group.
+  No explicit module Wp was recoverable, so actual DC kWp is not inferred from
+  marketing kW. This brochure is retained as market context, excluded from the
+  modeled selectable configuration catalogue. It does not verify the old prices.
+  Brochure scope includes application work/fees and excludes structural/roof work
+  and extra site-distance costs. Its published savings/payback are NOT used.
+
+Rejected additional page
+https://www.cxenertech.com/solar/rooftop/packages/cx-og-hw-5-1p-aik550
+  Intro says no battery but equipment/scope mention battery+BMS. This internally
+  inconsistent package is excluded; the separately sourced Sigenergy single-phase
+  option avoids assuming battery scope. No battery benefit enters the model.
+
+Verification
+tests/unit/energy-model-v3.test.ts exercises interval/monthly conservation,
+night generation zero, declared yield/monthly shares, baseline reallocation,
+contradictory schedules, measured-month totals, weekday/weekend variation,
+future start month/year and quantified kWh, EV home/timing, fractional schedules,
+horizontal-panel azimuth invariance, omitted spatial variation, generation-side
+degradation, malformed inputs, and package DC/AC/module/roof/price consistency.
+Passing these tests verifies arithmetic and declared behavior only. It does not
+establish predictive accuracy or replace meter/weather validation.

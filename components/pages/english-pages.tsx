@@ -15,7 +15,6 @@ import { ResultsShell } from '@/components/results/results-shell';
 import { PageHero } from '@/components/content/page-hero';
 import { PublishedLegalDocument } from '@/components/content/published-legal-document';
 import { legalReviewDisclosures, prelaunchNotice } from '@/config/legal-review';
-import { solarAssumptions } from '@/config/solar-assumptions';
 
 const en = (path = '') => `/en${path}`;
 
@@ -39,69 +38,6 @@ function EnglishSolarGuide() {
 }
 
 function EnglishMethodology() {
-  const legacyMethodology = (
-    <main>
-      <PageHero eyebrow="Methodology" title="How we calculate your estimate">
-        <p>This result is an estimated range for asking better questions before requesting a quotation. It is not an engineering design, quotation, or savings guarantee.</p>
-        <p className="updated-date">Assumption version {solarAssumptions.version} · policy sources last checked 2026-08-28</p>
-      </PageHero>
-
-      <section className="site-shell methodology-grid">
-        <article className="prose">
-          <h2>Estimation sequence</h2>
-          <ol>
-            <li>Estimate monthly consumption from the bill using the versioned progressive residential tariff, fuel-adjustment charge (Ft), service charge, and VAT described below.</li>
-            <li>Estimate system capacity from annual consumption, the selected daytime-use share, and reference production of about 1,400 kWh per kWp per year. Widen the range when roof or shade information is unclear.</li>
-            <li>Value electricity used by the home first. Avoided cost is the difference between utility bills before and after solar, rather than a flat value for every unit generated.</li>
-            <li>Estimate installation cost by interpolating between observed 3, 5, and 10 kW package ranges. This is a market reference, not a quotation.</li>
-            <li>The long-term view uses 0.5% annual production degradation, annual operations and maintenance of 0.4–0.8% of installation cost, and no electricity-price escalation in the base case.</li>
-          </ol>
-
-          <h2>Electricity tariff used as the base</h2>
-          <p>For August 2026, the model uses the residential schedule for consumption above 150 kWh/month that took effect in May 2023: ฿3.2484/kWh for 0–150 kWh, ฿4.2218 for 151–400 kWh, and ฿4.4217 above 400 kWh, plus a ฿24.62 monthly service charge, Ft of ฿0.1623/kWh, and 7% VAT. A household’s actual customer class and bill details may differ.</p>
-          <p>The announced September 2026 schedule changes the tiers to ฿3.0000/kWh for 0–200 kWh, ฿4.1584 for 201–400 kWh, and ฿4.3583 above 400 kWh, with the same ฿24.62 service charge, Ft of ฿0.1623/kWh for September–December, and 7% VAT. It is documented for the next model update but is not treated as active before its effective date.</p>
-
-          <h2>Installation-cost references</h2>
-          <p>Package observations collected in May–August 2026 suggest roughly ฿115,000–156,000 for 3 kW, ฿145,000–237,000 for 5 kW, and ฿230,000–362,000 for 10 kW. The model interpolates between the lower and upper bounds of those reference points and retains the uncertainty range. Equipment, structural work, cable runs, warranties, and site conditions can materially change a real price.</p>
-
-          <h2>Self-consumption and surplus electricity</h2>
-          <p>The base result values solar electricity used within the home first. Surplus-purchase income is excluded from base savings, payback, and the long-term cost chart.</p>
-          <p>The surplus-purchase programme opened on 1 July 2026 for Type 1 residential customers. It specifies ฿2.20/kWh for 10 years and limits export to 5 kW AC per meter/applicant. Eligibility remains subject to quota, inspection, technical conditions, and MEA or PEA approval. A system larger than 5 kW may serve self-consumption, but export must be controlled under the utility’s conditions. The purchase rate therefore must not be added automatically to a household result.</p>
-
-          <h2>Tax treatment excluded from the result</h2>
-          <p>Royal Decree No. 805 provides a personal-income-tax exemption/deduction based on actual qualifying expenditure, capped at ฿200,000, for an eligible grid-connected system successfully connected by 31 December 2028. Conditions include installed capacity of no more than 10 kWp per meter, a VAT-registered seller, a full electronic tax invoice, and one system per claim. It is not a ฿200,000 refund; the tax effect depends on individual eligibility and taxable income. SolarMatch therefore excludes it from the estimate.</p>
-
-          <h2>Direct sources</h2>
-          <ul>
-            <li><a href="https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766" target="_blank" rel="noreferrer">PEA surplus-purchase programme details</a></li>
-            <li><a href="https://myenergy.mea.or.th/project/6a38ac8d329d02001dd7024e" target="_blank" rel="noreferrer">MEA programme and technical conditions</a></li>
-            <li><a href="https://erc.or.th/web-upload/200xf869baf82be74c18cc110e974eea8d5c/202606/m_news/9090/3441/file_download/ae5c0f3369d23b692064262036b1725f.pdf" target="_blank" rel="noreferrer">Energy Regulatory Commission programme notice (PDF)</a></li>
-            <li><a href="https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dc805.pdf" target="_blank" rel="noreferrer">Royal Decree No. 805 (PDF)</a></li>
-            <li><a href="https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf" target="_blank" rel="noreferrer">Electricity tariff used for the August 2026 base (PDF)</a></li>
-            <li><a href="https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf" target="_blank" rel="noreferrer">Electricity tariff effective from September 2026 (PDF)</a></li>
-            <li><a href="https://www.erc.or.th/th/automatic" target="_blank" rel="noreferrer">ERC fuel-adjustment charge (Ft)</a></li>
-          </ul>
-        </article>
-
-        <aside className="assumption-table">
-          <h2>Current settings</h2>
-          <dl>
-            <div><dt>Reference production</dt><dd>1,400 kWh/kWp/year</dd></div>
-            <div><dt>Base value</dt><dd>Electricity used within the home</dd></div>
-            <div><dt>Production degradation</dt><dd>0.5% per year</dd></div>
-            <div><dt>Operations and maintenance</dt><dd>0.4–0.8% of installation cost/year</dd></div>
-            <div><dt>Base tariff escalation</dt><dd>0%</dd></div>
-            <div><dt>Surplus purchase</dt><dd>฿2.20/kWh · conditional · excluded from base</dd></div>
-            <div><dt>Export limit</dt><dd>5 kW AC · not a system-size limit</dd></div>
-            <div><dt>Purchase term</dt><dd>10 years · subject to quota and approval</dd></div>
-            <div><dt>Tax qualifying-spend cap</dt><dd>฿200,000 · not a refund · excluded</dd></div>
-            <div><dt>Sources last checked</dt><dd>2026-08-28</dd></div>
-          </dl>
-        </aside>
-      </section>
-    </main>
-  );
-  void legacyMethodology;
   return <MethodologyContent locale="en" />;
 }
 
@@ -120,7 +56,7 @@ const resources = [
   { name: 'PEA · May 2023 electricity tariff (PDF)', note: 'Base residential tariff referenced for August 2026', href: 'https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf' },
   { name: 'PEA · September 2026 electricity tariff (PDF)', note: 'Residential tariff structure announced to take effect from September 2026', href: 'https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf' },
   { name: 'Energy Regulatory Commission · Automatic Ft', note: 'Official source for checking current fuel-adjustment charges and periods', href: 'https://www.erc.or.th/th/automatic' },
-  { name: 'European Commission JRC · PVGIS', note: 'Solar-resource evidence used to establish the province-level production anchors', href: 'https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en' },
+  { name: 'European Commission JRC · PVGIS', note: 'Long-run monthly solar reference for Bangkok; hourly timing and other locations remain approximations', href: 'https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en' },
   { name: 'OpenStreetMap · Tile policy', note: 'Terms for the map used to confirm a location without sending typed address text to a geocoder', href: 'https://operations.osmfoundation.org/policies/tiles/' },
   { name: 'Greener Bangkok · Home solar installation guide', note: 'Reference information on production, roof review, and installation steps', href: 'https://greener.bangkok.go.th/en/solarcity/solar-installation-guide-for-homes/' },
   { name: 'GRoof · May 2026 package brochure (PDF)', note: 'Package-price input used to build a planning anchor; not an installer endorsement', href: 'https://groof-public.s3.ap-southeast-1.amazonaws.com/pdfs/GRoofPackage_Brochure_May2026.pdf' },

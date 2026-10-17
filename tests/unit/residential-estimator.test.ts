@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { residentialEstimator } from '@/lib/calculator/residential-estimator';
+import { legacyResidentialEstimator as residentialEstimator } from '@/lib/calculator/legacy-residential-estimator';
+import { residentialEstimator as modernEstimator } from '@/lib/calculator/residential-estimator';
+import { solarPackages } from '@/config/solar-packages';
 import type { EstimateAnswers } from '@/lib/calculator/types';
 
 const base: EstimateAnswers = {
@@ -21,7 +23,7 @@ const base: EstimateAnswers = {
   quoteContactRequested: false,
 };
 
-describe('Thailand bill-led planning estimator', () => {
+describe('frozen legacy Thailand bill-led planning estimator', () => {
   it('always returns every headline metric after the required eight answers', () => {
     const result = residentialEstimator.calculate(base);
     for (const value of [
@@ -133,5 +135,60 @@ describe('Thailand bill-led planning estimator', () => {
     expect(result.lifetimeCostSeries[25]?.withSolarThb).toBeGreaterThanOrEqual(1324000);
     expect(result.lifetimeCostSeries[25]?.withSolarThb).toBeLessThanOrEqual(1326000);
     expect(result.planningTwentyFiveYearNetBenefitThb).toBe(115000);
+  });
+});
+
+describe('modern residential hourly estimator integration', () => {
+  const modern: EstimateAnswers = { ...base, estimateModelVersion: 'energy-v3',
+    calculationReferenceDate: '2026-10-17', consumptionInput: 'kwh', monthlyConsumptionKwh: 1_200,
+    billingPeriodDays: 30, tariffCategory: 'ordinary-1.2', utility: 'MEA',
+    exactRoofAreaSqm: 100, electricityPhase: 'three' };
+
+  it('uses actual kWh and finite evidenced equipment rather than scaling a price curve from the bill', () => {
+    const normal = modernEstimator.calculate(modern);
+    const changedMoneyOnly = modernEstimator.calculate({ ...modern, monthlyBillThb: 500_000 });
+    expect(normal.modelVersion).toBe('residential-hourly-2026-10-17-v3');
+    expect(normal.calculationReferenceDate).toBe('2026-10-17');
+    expect(normal.candidateSystems?.map(candidate => candidate.id)).toEqual(solarPackages.map(item => item.id));
+    expect(normal.selectedSystem?.feasible).toBe(true);
+    expect(solarPackages.some(item => item.dcKwp === normal.planningSystemKw)).toBe(true);
+    expect(changedMoneyOnly.energy).toEqual(normal.energy);
+    expect(changedMoneyOnly.planningMonthlySavingsThb).toBe(normal.planningMonthlySavingsThb);
+    expect(normal.energy!.generationKwh).toBeCloseTo(normal.energy!.selfConsumedKwh + normal.energy!.surplusKwh, 6);
+    expect(normal.energy!.demandKwh).toBeCloseTo(normal.energy!.selfConsumedKwh + normal.energy!.gridImportKwh, 6);
+  });
+
+  it('reports no feasible package on a tiny roof rather than shrinking an arbitrary system', () => {
+    const result = modernEstimator.calculate({ ...modern, exactRoofAreaSqm: 1 });
+    expect(result.modelStatus).toBe('no-feasible-option');
+    expect(result.selectedSystem).toBeUndefined();
+    expect(result.planningSystemKw).toBe(0);
+    expect(result.planningPaybackYears).toBeNull();
+    expect(result.candidateSystems?.every(candidate => !candidate.feasible)).toBe(true);
+  });
+
+  it('evaluates a quote at its exact cash price and reconciles reserves with lifetime benefit', () => {
+    const result = modernEstimator.calculate({ ...modern, quoteSystemKw: 5.5, quoteModuleCount: 10,
+      quoteModuleWp: 550, quoteInverterAcKw: 5, quoteCashPriceThb: 150_123.45, quoteBatteryIncluded: false });
+    expect(result.selectedSystem?.id).toBe('user-quotation');
+    expect(result.planningInstalledCostThb).toBe(150_123.45);
+    expect(result.selectedSystem?.inverterAcKw).toBe(5);
+    expect(result.planningAnnualMaintenanceReserveThb).toBeCloseTo(150_123.45 * 0.0102, 8);
+    expect(result.lifetimeCostSeries).toHaveLength(26);
+    const final = result.lifetimeCostSeries[25];
+    expect(final.withoutSolarThb - final.withSolarThb).toBeCloseTo(result.planningTwentyFiveYearNetBenefitThb, 6);
+  });
+
+  it('does not add guessed EV energy or silently treat battery and TOU projects as ordinary solar', () => {
+    const labelled = modernEstimator.calculate({ ...modern, futureLoads: ['ev'] });
+    expect(labelled.energy?.futureDemandKwh).toBe(0);
+    expect(labelled.warnings?.some(warning => warning.code === 'future-unquantified')).toBe(true);
+    const battery = modernEstimator.calculate({ ...modern, projectType: 'solar-with-battery' });
+    const tou = modernEstimator.calculate({ ...modern, tariffCategory: 'tou' });
+    expect(battery.modelStatus).toBe('unsupported');
+    expect(tou.modelStatus).toBe('unsupported');
+    expect(battery.selectedSystem).toBeUndefined();
+    expect(tou.selectedSystem).toBeUndefined();
+    expect(battery.planningPaybackYears).toBeNull();
   });
 });

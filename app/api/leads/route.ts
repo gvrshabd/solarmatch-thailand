@@ -59,6 +59,15 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return jsonError('invalid_submission', 400);
   if (parsed.data.website) return NextResponse.json({ ok: true }, { status: 202 });
 
+  // Meter-only estimates are available without contact. The published contact
+  // storage/scoring contract still requires an actual bill; a v6 token must not
+  // authorize a new kWh submission mode, even with an accompanying bill amount.
+  // Reject before token/proof/database work, rather than inventing a user bill
+  // or letting the positive-bill database constraint fail during insertion.
+  if (parsed.data.answers.consumptionInput === 'kwh' || Math.round(parsed.data.answers.monthlyBillThb) <= 0) {
+    return jsonError('contact_consumption_input_not_supported', 422);
+  }
+
   const token = await verifyAssessmentToken(parsed.data.assessmentToken);
   if (!token || Date.now() - token.issuedAt < 1_500) return jsonError('invalid_assessment_session', 403);
 

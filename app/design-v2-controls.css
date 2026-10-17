@@ -34,6 +34,7 @@ html[lang=th] .terrace-public :is(h1,h2,h3,h4),.installer-shell[lang=th] :is(h1,
 .terrace-public .hero-photo .example .muted{font-size:13px;font-weight:600}
 .terrace-public .v2-mini-result{background:var(--sm-pine);color:white;padding:26px;border-radius:var(--sm-r-xl);box-shadow:var(--sm-shadow-lift)}
 .terrace-public .v2-mini-result .eyebrow{color:var(--sm-lime)}
+.terrace-public .v2-mini-result>p.note{color:#d8e6df;font-weight:400}
 .terrace-public .v2-mini-figure{font-size:64px;font-weight:700;color:var(--sm-lime);line-height:1;margin-top:16px}
 .terrace-public .v2-mini-result>p{font-weight:600;margin-top:8px}.terrace-public .v2-mini-result .rstats{margin-top:18px}
 .terrace-public .v2-mini-chart{margin-top:16px;background:white;border-radius:var(--sm-r-md);padding:12px 12px 4px}

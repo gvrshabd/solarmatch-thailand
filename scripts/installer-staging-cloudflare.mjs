@@ -15,7 +15,7 @@ const stateFile=`${privateDirectory}/resources.json`;
 const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 let token;
 export function assertStagingCheckout(remote,branch){
-  if(remote!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/installer-shared-workflow','feature/design-v2-integration'].includes(branch))throw Error('Wrong repository/branch.');
+  if(remote!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3'].includes(branch))throw Error('Wrong repository/branch.');
 }
 function verifyCheckout(){assertStagingCheckout(execFileSync('git',['remote','get-url','origin'],{encoding:'utf8'}).trim(),execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim());}
 export async function cloudflare(suffix,method='GET',body){

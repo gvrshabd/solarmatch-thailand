@@ -1,0 +1,34 @@
+Reproduced 2026-10-17 from calculator-comparison-v3.test.ts
+Reference date: 2026-10-17. Frozen legacy-v5 versus residential-hourly-2026-10-17-v3.
+Synthetic inputs, not measured households or evidence of predictive accuracy.
+The full fixtures and exact assertions are in the named test; figures below are
+rounded for readability only. Calculations retain full precision.
+
+Scenario                     Old DC / price       New DC / price
+Daytime home, THB6000 bill    4.5 / 165000          5.005 / 170130
+Small bill, THB2000           1.5 / 130000          3.3 / 112350
+Evening home, THB6000 bill    2.5 / 130000          3.3 / 112350
+Tiny roof, exact1 square m   1.0 / 130000          No feasible installation
+Exact solar-only quotation   5.0 / 170000          5.0 / 169999.99
+Future EV, July2027          4.5 / 165000          5.005 / 170130
+
+Scenario                     Annual bill saving   25-year net benefit
+                             Old -> New (THB)     Old -> New (THB)
+Daytime home                 19975 -> 33062        263000 -> 574776
+Small bill                   6562 -> 14378         -9000 -> 215250
+Evening home                 7927 -> 10151         24000 -> 110084
+Tiny roof                    4439 -> no investment -59000 -> no investment
+Exact quotation              22045 -> 33038        306000 -> 574286
+Future EV                    19975 -> 33130        263000 -> 579672
+
+Typical daytime model: first-year generation6998.14115kWh, immediate
+self-use6835.16279kWh, simple payback5.43084years. The future-EV fixture
+adds900kWh of first-year home demand from its specified month; installed or
+unquantified appliance names alone add none.
+
+These differences combine corrected timing, dated tariffs, sourced package
+selection, roof feasibility and generation-based degradation. They do not
+isolate one causal correction or establish that these systems are appropriate
+for an actual property. High smooth-profile coincidence requires validation
+against measured load/weather variability; financial precision is not a
+prediction guarantee. Source/evidence limits remain in ENERGY_SOURCES.txt.

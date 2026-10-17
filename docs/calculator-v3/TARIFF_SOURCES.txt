@@ -1,0 +1,71 @@
+SolarMatch calculator v3 tariff evidence
+Checked: 2026-10-17. Planning reference: 2026-10-17.
+Supported bill dates: 2026-05-01 through 2026-12-31 inclusive.
+Snapshots expire with their Ft periods: 2026-08-31 and 2026-12-31.
+
+Primary sources actually read
+
+PEA tariff publication page:
+https://www.pea.co.th/our-services/tariff
+Links the September 2026 schedule and the 14 August 2026 old/new comparison.
+
+PEA September 2026 tariff PDF, printed residential table on PDF page 3:
+https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf
+Ordinary 1.1.2: first 200 kWh 3.0000; next 200 4.1584; rest 4.3583 THB/kWh;
+monthly service 24.62 THB. Ordinary 1.1.1: first 15 2.3488; next 10 2.9882;
+next 175 3.0000; next 200 4.1584; rest 4.3583; monthly service 8.19.
+These existing current numbers were correct and have been preserved.
+Category is taken from the bill. Meter size and three consecutive months of
+usage control assignment; one month's usage cannot establish category.
+Internal ordinary-1.1/ordinary-1.2 names correspond to MEA 1.1/1.2 and PEA
+1.1.1/1.1.2, respectively; they are not PEA TOU category identifiers.
+
+PEA 14 August 2026 old/new comparison, PDF page 1:
+https://www.pea.co.th/sites/default/files/users/user34/attachments/ประชาสัมพันธ์อัตราค่าไฟฟ้า%20บ้านอยู่อาศัย.pdf
+Confirms the change starts with September 2026 bills and verifies previous
+ordinary base tiers (including the small-meter 15/25/35/100/150/400 bands).
+Legacy May 2023 schedule URL retained:
+https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf
+The web reader timed out on this URL; a direct read-only HTTP request returned
+200. Previous base values were cross-checked using the comparison above.
+
+PEA Ft publication and period-specific documents:
+https://www.pea.co.th/our-services/tariff/ft
+https://www.pea.co.th/sites/default/files/ft/2026/Ft%20surcharge%20MAY-AUG%202026_Final_0.pdf
+https://www.pea.co.th/sites/default/files/ft/2026/Ft%20surcharge%20SEP-DEC%202026_Final.pdf
+Both periods explicitly collect 0.1623 THB/kWh excluding VAT. The September
+document records the ERC decision of 22 July 2026. May-August records 1 April.
+
+Source access limitation
+
+MEA residential primary URL:
+https://www.mea.or.th/our-services/service-rates/other/D5xEaEwgU
+MEA comparison and Ft URLs:
+https://www.mea.or.th/our-services/service-rates/other/-qHgNeDsBEyRH-uhayAshkwfDX
+https://www.mea.or.th/our-services/service-rates/latestft/NacsLP49z
+These pages rejected the web request; a direct request also failed TLS. Do not
+claim an independent MEA page verification. Existing shared ordinary MEA
+rates remain unchanged and a resolver warning records this limitation. PEA
+primary publications verify the numeric schedule and nationally set Ft.
+
+Model boundaries
+
+VAT remains the existing 7% modeling assumption. This is a monthly standard
+charge estimate, not a billing replica: welfare credits, free-electricity
+eligibility, arrears, penalties, and utility line-item rounding are excluded.
+No TOU calculation: voltage, interval loads, utility holiday/substitute-holiday
+calendar and full exception rules would be required. Explicit TOU or unknown
+category returns unsupported. An omitted legacy category assumes ordinary
+1.2 with a recorded warning; it does not infer category from bill amount.
+
+Historical inversion resolves by the supplied bill calendar date. A missing bill
+date uses the captured calculation-reference date as an explicit assumption, not
+as a claim about the actual historical tariff. New assessments capture today's
+Bangkok date; saved estimates retain their original explicit reference date.
+Future savings uses that separate reference date; a constant tariff is a scenario,
+not a price forecast. The low-level legacy resolver's omitted-date reference is
+still frozen, but new calculation flows always supply today's or the saved date.
+No date outside the supported period silently chooses a nearest tariff.
+Invalid calendar dates are rejected. Dates are bill-month references, not
+proration of a meter-reading interval. An old snapshot can describe its valid
+historical bill after expiry; expiry prohibits extrapolating it to new dates.

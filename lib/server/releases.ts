@@ -1,4 +1,4 @@
-import { initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4, legacyQuestionnaireV5 } from '@/config/assessment';
+import { calculatorV3Questionnaire, initialQuestionnaire, legacyQuestionnaireV1, legacyQuestionnaireV2, legacyQuestionnaireV3, legacyQuestionnaireV4, legacyQuestionnaireV5 } from '@/config/assessment';
 import { contactContent } from '@/config/contact-content';
 import { legalLaunchDraft } from '@/config/legal-content';
 import { initialLoadingFactSet } from '@/config/loading-facts';
@@ -12,6 +12,9 @@ import { requireDatabase } from './runtime';
 import { localTestContact } from '@/lib/installer/local-collection';
 import { publicAttributionConfig } from '@/lib/analytics/attribution';
 import { getRuntimeEnv } from './runtime';
+import type { SolarMatchRuntimeEnv } from './runtime';
+import { stagingIdentity, stagingRoute } from './staging-access';
+import { currentCalculationDate } from '@/config/electricity-tariffs';
 
 const seedActor = 'system:initial-migration';
 const questionnaireId = legacyQuestionnaireV1.id;
@@ -795,7 +798,41 @@ export async function getPublishedLoadingFacts(factSetVersionId: string, databas
   }));
 }
 
+/** Read-only preview: exact protected staging origin only; no release initialization or token. */
+export async function calculatorV3StagingPreviewConfiguration(
+  options: { restrictedAccess?: boolean; request?: Request },
+  runtime: SolarMatchRuntimeEnv = getRuntimeEnv(),
+): Promise<PublicAssessmentConfig | null> {
+  const request = options.request;
+  if (!request || runtime.INSTALLER_PLATFORM_MODE !== 'sandbox'
+    || runtime.INSTALLER_BASE_URL !== 'https://solarmatch-installer-staging.deluxejahseh.workers.dev'
+    || !runtime.STAGING_ACCESS_AUD || !runtime.ACCESS_AUD || !runtime.ACCESS_TEAM_DOMAIN
+    || !runtime.ADMIN_EMAILS?.split(',').some(email => email.trim())
+    || stagingRoute(request, runtime) !== 'access') return null;
+  const restricted = Boolean(options.restrictedAccess) || await stagingIdentity(request, runtime);
+  if (!restricted) return null;
+  const contact = publicContactConfiguration({
+    contact_configuration_version_id: 'calculator-v3-preview-no-collection', contact_collection_mode: 'disabled',
+    contact_collection_enabled: 0, restricted_site_collection_enabled: 0, public_collection_enabled: 0,
+    retention_days: null, receiving_company_en: null, receiving_company_th: null, receiving_company_privacy_url: null,
+    permitted_contact_methods_json: '[]', shared_fields_json: '[]', legal_complete: 0,
+    content_version_id: 'calculator-v3-preview-static-copy', legal_document_version_id: 'preview-no-legal-release', content_json: '{}',
+  });
+  return {
+    calculatorModelVersion: 'energy-v3', calculationReferenceDate: currentCalculationDate(),
+    privatePreview: true, accessRestrictedSession: true, restrictedSiteCollectionEnabled: false, publicCollectionEnabled: false,
+    releaseId: 'residential-calculator-v3-staging-preview', questionnaireVersionId: calculatorV3Questionnaire.id,
+    ruleVersionId: initialScoringConfiguration.id, questionnaire: calculatorV3Questionnaire,
+    assessmentToken: null, assessmentTokenExpiresAt: null, liveLeadSubmissions: false, receivingCompany: null,
+    contact: { ...contact, preview: true }, loadingFactSetVersionId: initialLoadingFactSet.id,
+    loadingFacts: currentPublicFacts(initialLoadingFactSet.facts.map(fact => ({ ...fact, imageUrl: `/images/loading-facts/${fact.sketchId}.svg` }))),
+  };
+}
+
 export async function getPublicAssessmentConfig(options: { restrictedAccess?: boolean; request?:Request } = {}): Promise<PublicAssessmentConfig> {
+  // This check precedes getCurrentRelease, whose legacy bootstrap may write.
+  const preview = await calculatorV3StagingPreviewConfiguration(options);
+  if (preview) return preview;
   const release = await getCurrentRelease();
   if (!release) throw new Error('No published SolarMatch release is available.');
   const accessRestrictedSession = Boolean(options.restrictedAccess);

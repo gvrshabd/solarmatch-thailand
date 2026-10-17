@@ -9,7 +9,7 @@ export const designV2Copy = {
     "ctaLong": "estimate",
     "heroEyebrow": "Free home solar estimate · Bangkok & nearby",
     "heroH1": "How much could solar save your home?",
-    "heroLede": "Enter your monthly electricity bill and answer 10 short questions. You’ll see the right system size, the price and when it pays for itself.",
+    "heroLede": "Answer a short assessment using your electricity bill or actual usage. Explore a preliminary system size, planning price and possible payback.",
     "billLabel": "Your typical monthly electricity bill",
     "perMonth": "per month",
     "perMo": " / month",
@@ -36,7 +36,7 @@ export const designV2Copy = {
     "pvTry": "Try it with your bill",
     "howEyebrow": "How it works",
     "howH2": "Three calm steps. Contact is your choice.",
-    "h1t": "Answer 10 short questions",
+    "h1t": "Complete a short assessment",
     "h1p": "Your bill, home, roof and daytime use. “Not sure” is always an answer.",
     "h2t": "See your full estimate",
     "h2p": "Every number, with the method behind it. No phone number needed.",
@@ -86,7 +86,7 @@ export const designV2Copy = {
       ],
       [
         "Does it still work in the rainy season?",
-        "Yes, with lower output on cloudy days. Your estimate uses long-run solar data for your province, so the rainy months are already counted in the yearly figure."
+        "Yes, with lower output on cloudy days. The current model uses long-run monthly solar data for a Bangkok reference location, including seasonal variation. It is not a weather forecast or a measurement at your home."
       ],
       [
         "How long do panels and inverters last?",
@@ -518,7 +518,7 @@ export const designV2Copy = {
     "ctaLong": "",
     "heroEyebrow": "ประเมินโซลาร์บ้านฟรี · กรุงเทพฯ และปริมณฑล",
     "heroH1": "โซลาร์ช่วยบ้านคุณประหยัดได้เท่าไร?",
-    "heroLede": "กรอกค่าไฟต่อเดือนแล้วตอบคำถามสั้น ๆ 10 ข้อ คุณจะเห็นขนาดระบบที่เหมาะสม ราคา และระยะเวลาคืนทุน",
+    "heroLede": "ทำแบบประเมินสั้น ๆ โดยใช้ค่าไฟหรือหน่วยไฟที่ใช้จริง เพื่อดูขนาดระบบเบื้องต้น ราคาเพื่อวางแผน และระยะเวลาคืนทุนที่อาจเป็นไปได้",
     "billLabel": "ค่าไฟต่อเดือนโดยประมาณของคุณ",
     "perMonth": "ต่อเดือน",
     "perMo": " / เดือน",
@@ -545,7 +545,7 @@ export const designV2Copy = {
     "pvTry": "ลองกับค่าไฟของคุณ",
     "howEyebrow": "วิธีการทำงาน",
     "howH2": "3 ขั้นตอนง่าย ๆ เลือกเองว่าจะให้ติดต่อหรือไม่",
-    "h1t": "ตอบคำถามสั้น ๆ 10 ข้อ",
+    "h1t": "ทำแบบประเมินสั้น ๆ",
     "h1p": "ค่าไฟ ประเภทบ้าน หลังคา และการใช้ไฟช่วงกลางวัน ตอบ “ไม่แน่ใจ” ได้เสมอ",
     "h2t": "ดูผลประเมินฉบับเต็ม",
     "h2p": "เห็นทุกตัวเลขพร้อมวิธีคำนวณ ไม่ต้องให้เบอร์โทร",
@@ -595,7 +595,7 @@ export const designV2Copy = {
       ],
       [
         "หน้าฝนยังผลิตไฟได้ไหม?",
-        "ได้ แต่ผลิตไฟได้น้อยลงในวันที่ฟ้าครึ้ม ผลประเมินใช้ข้อมูลแสงแดดระยะยาวของจังหวัดคุณ จึงนับรวมเดือนหน้าฝนไว้ในตัวเลขรายปีแล้ว"
+        "ได้ แต่ผลิตไฟได้น้อยลงในวันที่ฟ้าครึ้ม แบบจำลองปัจจุบันใช้ข้อมูลแสงอาทิตย์เฉลี่ยรายเดือนระยะยาว ณ จุดอ้างอิงกรุงเทพฯ ซึ่งรวมความแตกต่างตามฤดูกาล ไม่ใช่พยากรณ์อากาศหรือข้อมูลที่วัดจริง ณ บ้านคุณ"
       ],
       [
         "แผงและอินเวอร์เตอร์ใช้ได้นานแค่ไหน?",

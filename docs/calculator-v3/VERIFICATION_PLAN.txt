@@ -1,0 +1,87 @@
+SolarMatch calculator accuracy v3 verification
+Scope: local synthetic inputs only; no remote database/provider operations.
+
+Automated evidence
+- tests/unit/calculator-accuracy-v3.test.ts integrates calculateEstimate with
+  explicit utility, bill/reference dates, tariff category, usable roof and phase.
+  Physical checks: 1 m² rejects every real package; a 20 kWp quote cannot fit a
+  20 m² roof; unknown phase remains conditional; finite candidate selection
+  maximizes positive 25-year net value over no investment; low demand selects
+  no investment. Exact cash quotation cents reach costs, reserve and cash flow.
+  Energy checks: monthly/annual demand and generation conservation; bill and
+  meter kWh/day normalization; existing appliance schedules reallocate the
+  original bill demand; quantified future EV, AC and pump use their own units
+  and first active month/year. Appliance names alone add no guessed demand.
+  Tariff checks: August historical inversion is separate from October future
+  bill valuation; unsupported TOU/category/date withholds recommendation.
+  Financial check: independently rebuild year-25 energy and progressive bills,
+  demonstrating that degraded money is not a scaled year-one savings value.
+  Limits: horizontal azimuth invariance, coordinates and installed count alone
+  do not create site-specific production or demand.
+- tests/unit/energy-model-v3.test.ts verifies all 8760 hourly intervals,
+  monthly/annual conservation, zero night generation, inverter clipping,
+  calendar weekday/weekend shapes, existing-load capping, timed future-load
+  increments, solar geometry, explicit synthetic resource limits and catalogue
+  equipment/price/source consistency. Do not duplicate hourly loops in the
+  integration suite.
+- tests/unit/tariff-accuracy-v3.test.ts checks every tier boundary and reverse
+  calculation, category distinctions, date boundaries, missing-date warnings,
+  source/effective/checked/expiry metadata and absence of indefinite fallback.
+
+Local commands (use bundled Node >=22 on this Windows host)
+pnpm exec vitest run tests/unit/calculator-accuracy-v3.test.ts tests/unit/energy-model-v3.test.ts tests/unit/tariff-accuracy-v3.test.ts
+pnpm run typecheck
+
+Observed local results, 2026-10-17
+Integrated energy/tariff run: 3 files, 52 tests passed. The added no-investment
+future-start regression exposed a first-year-only fallback and now passes
+after the parent engine repair. Latest combined calculator/schema/share and
+historic scoring/contact run: 5 files, 75 tests passed. TypeScript typecheck
+passed. These are local checks; no staging/provider operations were performed.
+New schema tests also check read-only exact-origin protected staging preview,
+absence of DB bootstrap/token/contact, partial-draft field whitelisting and
+unknown/nested tax-income stripping. Historic generic validation's rejection
+of v1-v3 province conditional external options is pre-existing; no historic
+documents or schema-4-through-9 rules were rewritten for this change.
+
+Broader regression checks before handoff
+Run the whole existing unit suite. Historic estimator expectations must remain
+assertions about their original model, not be weakened to accept new outputs.
+Verify legacy model dispatch, saved old questionnaire compatibility and admin
+eligibility (owner plus at least four installed AC units). New future-load
+inputs must not substitute for installed AC qualification.
+
+UI checks on local/protected staging only
+Confirm all twelve questions, new roof input and navigation preserve answers.
+Check visible unsupported/no-economic/no-feasible/infeasible-quote states,
+conditional phase pricing and bilingual warnings. Reconcile visible annual and
+monthly energy/financial values against engine outputs, including service
+charge, Ft and VAT. Test phone viewport and keyboard focus.
+Keep tax income in component memory: no answer/schema, session storage, result
+snapshot, share URL, analytics, lead payload, exports or installer projection.
+Staging collection/provider gates must remain closed. Any deployment or real
+operation is separate from these local checks.
+
+Interpretation limits
+Live contact readiness: qv7 is a read-only calculator preview, not a published
+collection release. The current leads table requires a positive actual bill,
+and published scoring uses actual-bill bands. /api/leads returns 422
+contact_consumption_input_not_supported before token/proof/database work for
+every kWh contact payload, including one accompanied by a positive bill; an
+old questionnaire token cannot authorize a new consumption submission mode.
+The free no-contact meter-only estimate remains available. No user bill is
+fabricated and owner plus four installed AC qualification is unchanged.
+Real meter-only contact collection requires an explicit versioned storage and
+published scoring integration plus normal questionnaire/release publication;
+neither activation nor a migration is part of this work.
+When consumptionInput is explicitly kwh with positive monthlyConsumptionKwh,
+an absent monthlyBillThb becomes zero solely as the legacy numeric-field
+compatibility sentinel. It is not a supplied or inferred bill; meter kWh is
+authoritative. Bill mode still requires a positive supplied amount. The
+existing qualification bill factor consequently remains zero/conservative for
+meter-only inputs; staging collection is disabled. Never label this sentinel
+as the homeowner's actual bill or use it to infer meter consumption.
+Passing checks establishes internal model consistency for declared synthetic
+assumptions, not meter or weather validation, site-specific yield prediction,
+installation feasibility certification, utility approval or a binding quote.
+See TARIFF_SOURCES.txt and package/model evidence for provenance and expiry.

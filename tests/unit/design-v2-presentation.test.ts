@@ -1,8 +1,11 @@
 import {describe,it,expect} from 'vitest';
-import {designV2Example} from '@/config/design-v2-example';
+import {designV2Example as currentExample} from '@/config/design-v2-example';
 import {calculateEstimate} from '@/lib/calculator';
 import {lifetimeCrossing,payback} from '@/lib/design-v2/figures';
 import {permittedEstimateInputs,restoreSharedEstimate,sharedEstimateUrl} from '@/lib/design-v2/share-estimate';
+
+// Exact historic presentation regressions remain attached to the frozen v5 engine.
+const designV2Example={...currentExample,estimateModelVersion:'legacy-v5' as const};
 describe('Design v2 real calculator presentation',()=>{
  it('retains the full Sathon example and negative-net model without rewriting verdicts',()=>{
   const normal=calculateEstimate(designV2Example),low=calculateEstimate({...designV2Example,monthlyBillThb:2000});
@@ -11,6 +14,13 @@ describe('Design v2 real calculator presentation',()=>{
   const crossing=lifetimeCrossing(normal.lifetimeCostSeries);expect(crossing?.year).toBeGreaterThan(normal.planningPaybackYears!);expect(payback(null)).toBe('—');
   const unavailable=calculateEstimate({...designV2Example,monthlyBillThb:1});
   expect(unavailable.planningPaybackYears).toBeNull();expect(payback(unavailable.planningPaybackYears)).toBe('—');
+ });
+ it('uses the modern engine only when explicitly recalculating the historic presentation',()=>{
+  const modern=calculateEstimate({...designV2Example,estimateModelVersion:'energy-v3',calculationReferenceDate:'2026-10-17',electricityPhase:'unsure'});
+  expect(modern.modelVersion).toBe('residential-hourly-2026-10-17-v3');
+  expect(modern.calculationReferenceDate).toBe('2026-10-17');
+  expect(modern.candidateSystems?.length).toBeGreaterThan(0);
+  expect(modern.warnings?.some(warning=>warning.code==='phase-unconfirmed')).toBe(true);
  });
  it('round-trips allowed answers/refinements without contact or consent',()=>{
   const source={...designV2Example,roofDirection:'east' as const,exactRoofAreaSqm:62,electricityPhase:'three' as const,quoteContactRequested:true,quoteConsentAccepted:true};

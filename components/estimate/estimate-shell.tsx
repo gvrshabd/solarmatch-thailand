@@ -7,12 +7,14 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { BillSlider } from './bill-slider';
+import { EnergyInputFields } from './energy-input-fields';
 import { DistrictCombobox } from './district-combobox';
 import { LeadCapture } from '@/components/lead/lead-capture';
 import { CalculationLoading } from '@/components/results/calculation-loading';
 import Link from '@/components/site/internal-link';
 import { ScreenTransition, type ScreenDirection } from '@/components/ui/screen-transition';
-import { initialQuestionnaire } from '@/config/assessment';
+import { calculatorV3Questionnaire, initialQuestionnaire } from '@/config/assessment';
+import { currentCalculationDate } from '@/config/electricity-tariffs';
 import { lockedSharedConsentCopy } from '@/config/contact-content';
 import { contactReviewCopy } from '@/config/contact-review';
 import { prelaunchNotice } from '@/config/legal-review';
@@ -22,12 +24,16 @@ import { provinceOptions,initialLaunchProvinces } from '@/config/provinces';
 import {designText} from '@/config/design-v2-copy';
 import { track } from '@/lib/analytics/track';
 import { calculateEstimate } from '@/lib/calculator';
-import { estimateAnswersSchema, estimateDraftSchema } from '@/lib/validation/estimate';
+import { estimateAnswersSchema, estimateDraftSchema, sanitizeEstimateDraftAnswers } from '@/lib/validation/estimate';
 import type { DaytimeLoad, EstimateAnswers, EstimateResult } from '@/lib/calculator/types';
 import type { PublicLoadingFact } from '@/lib/loading-facts/types';
 import type { AssessmentQuestion, ConditionalField, PublicAssessmentConfig, QuestionnaireDocument } from '@/lib/questionnaire/types';
 
 type Draft = Partial<EstimateAnswers>;
+
+function freshDraft(questionnaire: QuestionnaireDocument, referenceDate = currentCalculationDate()): Draft {
+  return questionnaire.schemaVersion >= 10 ? { estimateModelVersion: 'energy-v3', calculationReferenceDate: referenceDate, consumptionInput: 'bill' } : {};
+}
 
 function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
   const privacyLabel = locale === 'en' ? 'Privacy Notice' : 'ประกาศความเป็นส่วนตัว';
@@ -37,7 +43,7 @@ function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
 }
 
 type SavedDraft = {
-  version: 4 | 5 | 6 | 7 | 8 | 9;
+  version: 4 | 5 | 6 | 7 | 8 | 9 | 10;
   answers: Draft;
   step: number;
   questionnaireVersionId?: string;
@@ -130,22 +136,11 @@ function removeSessionValue(key: string) {
 
 function migrateSaved(raw: unknown): SavedDraft | null {
   const parsed = estimateDraftSchema.safeParse(raw);
-  if (parsed.success) return { ...parsed.data, answers: parsed.data.answers as Draft };
+  if (parsed.success) return { ...parsed.data, answers: sanitizeEstimateDraftAnswers(parsed.data.answers) };
   if (!raw || typeof raw !== 'object') return null;
-  const source = ((raw as Record<string, unknown>).answers ?? raw) as Record<string, unknown>;
-  const answers: Draft = {};
-  const allowedProvinces = new Set<string>(provinceOptions.map((option) => option.value));
-  if (typeof source.province === 'string' && allowedProvinces.has(source.province)) answers.province = source.province;
-  if (typeof source.monthlyBillThb === 'number' && source.monthlyBillThb > 0) answers.monthlyBillThb = source.monthlyBillThb;
-  if (['detached-home', 'townhouse', 'large-home'].includes(String(source.propertyType))) answers.propertyType = source.propertyType as EstimateAnswers['propertyType'];
-  if (typeof source.roofArea === 'string') answers.roofArea = source.roofArea as EstimateAnswers['roofArea'];
-  if (typeof source.daytimePattern === 'string') answers.daytimePattern = source.daytimePattern as EstimateAnswers['daytimePattern'];
-  if (Array.isArray(source.daytimeLoads)) {
-    const allowedLoads = new Set<DaytimeLoad>(['air-conditioning', 'pump', 'ev', 'home-office-equipment', 'laundry-cooking', 'other-high-use', 'none']);
-    answers.daytimeLoads = source.daytimeLoads.filter((item): item is DaytimeLoad => allowedLoads.has(item as DaytimeLoad));
-  }
-  if (typeof source.roofMaterial === 'string') answers.roofMaterial = source.roofMaterial === 'unknown' ? 'unsure' : source.roofMaterial;
-  if (typeof source.shade === 'string') answers.shade = source.shade as EstimateAnswers['shade'];
+  const source = ((raw as Record<string, unknown>).answers ?? raw);
+  const answers = sanitizeEstimateDraftAnswers(source);
+  if (answers.roofMaterial === 'unknown') answers.roofMaterial = 'unsure';
   return Object.keys(answers).length ? { version: 4, answers, step: 0 } : null;
 }
 
@@ -155,18 +150,27 @@ function conditionalActive(field: ConditionalField, question: AssessmentQuestion
 }
 
 function firstQuestionError(question: AssessmentQuestion, draft: Draft, english: boolean) {
-  const value = draft[question.id as keyof Draft];
+  const value = question.id === 'monthlyBillThb' && draft.consumptionInput === 'kwh' ? draft.monthlyConsumptionKwh : draft[question.id as keyof Draft];
   if (question.id === 'province') {
     if (!draft.province) return english ? 'Choose a province or area before continuing.' : 'กรุณาเลือกจังหวัดหรือพื้นที่ก่อนดำเนินการต่อ';
     if (draft.province === 'other' && !draft.customProvince?.trim()) return english ? 'Enter the province or area.' : 'กรุณาระบุจังหวัดหรือพื้นที่';
     if (!draft.district?.trim()) return english ? 'Choose or enter the district before continuing.' : 'กรุณาเลือกหรือระบุเขตหรืออำเภอก่อนดำเนินการต่อ';
     if (draft.postcode && !/^\d{5}$/u.test(draft.postcode)) return english ? 'Enter a five-digit postcode or leave it blank.' : 'กรอกรหัสไปรษณีย์ 5 หลัก หรือเว้นว่างไว้';
   }
-  if (question.id === 'monthlyBillThb' && (!draft.monthlyBillThb || draft.monthlyBillThb <= 0)) {
-    return english ? 'Enter a typical bill amount greater than zero.' : 'กรอกค่าไฟของเดือนปกติที่มากกว่าศูนย์';
+  if (question.id === 'monthlyBillThb') {
+    if (draft.consumptionInput === 'kwh') {
+      if (draft.monthlyConsumptionKwh === undefined || !Number.isFinite(draft.monthlyConsumptionKwh) || draft.monthlyConsumptionKwh <= 0) return english ? 'Enter actual electricity use greater than zero, in kWh.' : 'กรุณาระบุหน่วยไฟที่ใช้จริงเป็น kWh มากกว่าศูนย์';
+    } else if (!draft.monthlyBillThb || !Number.isFinite(draft.monthlyBillThb) || draft.monthlyBillThb <= 0) {
+      return english ? 'Enter a typical bill amount greater than zero.' : 'กรอกค่าไฟของเดือนปกติที่มากกว่าศูนย์';
+    }
   }
   if (question.id === 'daytimeLoads' && (!draft.daytimeLoads?.length)) {
     return english ? 'Select at least one answer.' : 'เลือกอย่างน้อยหนึ่งข้อ';
+  }
+  if (question.id === 'daytimeLoads') {
+    if ((draft.daylightAcUnits === undefined) !== (draft.daylightAcHours === undefined)) return english ? 'For an AC schedule, enter both daytime units and hours, or clear both.' : 'หากระบุเวลาใช้แอร์ กรุณากรอกทั้งจำนวนเครื่องและชั่วโมงกลางวัน หรือเว้นว่างทั้งคู่';
+    if (draft.daylightAcUnits !== undefined && draft.airConditionerCount !== undefined && draft.daylightAcUnits > draft.airConditionerCount) return english ? 'Daytime AC units cannot exceed the installed total.' : 'จำนวนแอร์ที่เปิดกลางวันต้องไม่เกินจำนวนที่ติดตั้งทั้งหมด';
+    if ((draft.pumpPowerKw === undefined) !== (draft.pumpHoursPerDay === undefined)) return english ? 'For a pump schedule, enter both power and hours, or clear both.' : 'หากระบุเวลาใช้ปั๊ม กรุณากรอกทั้งกำลังไฟและชั่วโมงใช้งาน หรือเว้นว่างทั้งคู่';
   }
   if (question.id === 'ownershipStatus' && draft.ownershipStatus !== 'owner' && !draft.ownerPermission) {
     return english ? 'Tell us whether you have the property owner’s permission.' : 'กรุณาระบุว่าคุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์แล้วหรือไม่';
@@ -206,7 +210,7 @@ function AssessmentConditionalField({ field, question, draft, locale, setValue }
       <label htmlFor="air-conditioner-count">{field.label[locale]}<span aria-hidden="true">*</span></label>
       {field.help && <p>{field.help[locale]}</p>}
       <div className="ac-count-controls">
-        <div className="stepper"><button type="button" aria-label={english?'Fewer installed air conditioners':'ลดจำนวนเครื่องปรับอากาศที่ติดตั้ง'} disabled={count===undefined||count<=1} onClick={()=>setValue('airConditionerCount',Math.max(1,(count??1)-1))}>−</button><input id="air-conditioner-count" type="number" inputMode="numeric" min="1" max="100" value={count??''} placeholder="—" onChange={event=>setValue('airConditionerCount',event.target.value===''?undefined:Math.min(100,Math.max(1,Number(event.target.value))))}/><button type="button" aria-label={english?'More installed air conditioners':'เพิ่มจำนวนเครื่องปรับอากาศที่ติดตั้ง'} disabled={count===100} onClick={()=>setValue('airConditionerCount',Math.min(100,(count??0)+1))}>+</button></div>
+        <div className="stepper"><button type="button" aria-label={english?'Fewer installed air conditioners':'ลดจำนวนเครื่องปรับอากาศที่ติดตั้ง'} disabled={count===undefined||count<=1} onClick={()=>setValue('airConditionerCount',Math.max(1,(count??1)-1))}>−</button><input id="air-conditioner-count" type="number" inputMode="numeric" min="1" max="100" value={count??''} placeholder="—" onChange={event=>{const raw=event.currentTarget.value;if(raw===''){setValue('airConditionerCount',undefined);return;}const number=Number(raw);if(Number.isFinite(number))setValue('airConditionerCount',Math.min(100,Math.max(1,Math.round(number))));}}/><button type="button" aria-label={english?'More installed air conditioners':'เพิ่มจำนวนเครื่องปรับอากาศที่ติดตั้ง'} disabled={count===100} onClick={()=>setValue('airConditionerCount',Math.min(100,(count??0)+1))}>+</button></div>
       </div>
     </div>;
   }
@@ -219,7 +223,7 @@ function AssessmentConditionalField({ field, question, draft, locale, setValue }
 
 export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale?: Locale; questionnaireOverride?: QuestionnaireDocument }) {
   const english = locale === 'en';
-  const [questionnaire, setQuestionnaire] = useState<QuestionnaireDocument>(questionnaireOverride ?? initialQuestionnaire);
+  const [questionnaire, setQuestionnaire] = useState<QuestionnaireDocument>(questionnaireOverride ?? calculatorV3Questionnaire);
   const [assessmentConfig, setAssessmentConfig] = useState<PublicAssessmentConfig | null>(null);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft>({});
@@ -240,12 +244,19 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [minimumLoadingElapsed, setMinimumLoadingElapsed] = useState(false);
   const initializedRef = useRef(false);
+  const restoredQuestionIdRef = useRef<AssessmentQuestion['id'] | null>(null);
+  const starterAnswersRef = useRef<Draft | null>(null);
+  const restoredModernRef = useRef(false);
+  // Once a person starts this questionnaire, its release and consent scope stay fixed.
+  const interactionRef = useRef(false);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const navigationLockRef = useRef(false);
   const completionRoutedRef = useRef(false);
   const transitionTimerRef = useRef<number | null>(null);
   const questions = questionnaire.questions;
   const question = questions[Math.min(step, questions.length - 1)];
+  const energyQuestionnaire = questionnaire.schemaVersion >= 10;
+  const calculationDraft: Draft = energyQuestionnaire ? { ...draft, estimateModelVersion: 'energy-v3', calculationReferenceDate: draft.calculationReferenceDate ?? assessmentConfig?.calculationReferenceDate ?? currentCalculationDate() } : { ...draft, estimateModelVersion: 'legacy-v5', consumptionInput: 'bill' };
 
   useEffect(() => {
     if (questionnaireOverride) return;
@@ -253,9 +264,31 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
       .then(async (response) => response.ok ? response.json() as Promise<PublicAssessmentConfig> : Promise.reject(new Error('unavailable')))
       .then((configuration) => {
-        if (!active) return;
+        if (!active || interactionRef.current || restoredModernRef.current) return;
         setAssessmentConfig(configuration);
         setQuestionnaire(configuration.questionnaire);
+        setDraft(current => configuration.questionnaire.schemaVersion < 10
+          ? { ...current, estimateModelVersion: 'legacy-v5', consumptionInput: 'bill', calculationReferenceDate: undefined }
+          : {
+              ...current,
+              estimateModelVersion: 'energy-v3',
+              calculationReferenceDate: current.calculationReferenceDate
+                ?? configuration.calculationReferenceDate
+                ?? currentCalculationDate(),
+            });
+        setStep(() => {
+          const starterAnswers = starterAnswersRef.current;
+          if (starterAnswers) {
+            const firstIncomplete = configuration.questionnaire.questions.findIndex(item =>
+              Boolean(firstQuestionError(item, starterAnswers, true)));
+            return firstIncomplete >= 0 ? firstIncomplete : 0;
+          }
+          const restoredId = restoredQuestionIdRef.current;
+          const mapped = restoredId
+            ? configuration.questionnaire.questions.findIndex(item => item.id === restoredId)
+            : -1;
+          return mapped >= 0 ? mapped : 0;
+        });
         writeSessionValue(assessmentContextStorageKey, configuration);
       })
       .catch(() => { /* The static published baseline keeps the estimator available; contact submission stays closed. */ });
@@ -268,28 +301,46 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     const savedDraft = migrateSaved(parseJson(readSessionValue(draftStorageKey)));
     const completed = estimateAnswersSchema.safeParse(parseJson(readSessionValue(resultStorageKey)));
     const starter = migrateSaved(parseJson(readSessionValue(starterStorageKey)));
+    starterAnswersRef.current = starter?.answers ?? null;
     const restored = starter?.answers ?? savedDraft?.answers ?? (completed.success ? completed.data : {});
-    const firstUnanswered = initialQuestionnaire.questions.findIndex((item) => Boolean(firstQuestionError(item, restored, english)));
+    const startingQuestions = (questionnaireOverride ?? calculatorV3Questionnaire).questions;
+    const firstUnanswered = startingQuestions.findIndex((item) => Boolean(firstQuestionError(item, restored, english)));
+    const oldStepId = savedDraft && savedDraft.version < 10
+      ? initialQuestionnaire.questions[savedDraft.step]?.id
+      : undefined;
+    const mappedStep = oldStepId
+      ? startingQuestions.findIndex(item => item.id === oldStepId)
+      : savedDraft?.step ?? 0;
+    let restoredStep = 0;
+    if (starter) restoredStep = Math.max(0, firstUnanswered);
+    else if (savedDraft) restoredStep = Math.max(0, Math.min(mappedStep, startingQuestions.length - 1));
+    restoredQuestionIdRef.current = starter || savedDraft
+      ? startingQuestions[restoredStep]?.id ?? null
+      : null;
+    // A persisted modern journey must not acquire another release's questionnaire/token.
+    restoredModernRef.current = starter?.version === 10
+      || savedDraft?.version === 10
+      || restored.estimateModelVersion === 'energy-v3';
     removeSessionValue(starterStorageKey);
     track('estimate_started', { source: starter ? 'home' : savedDraft ? 'resume' : completed.success ? 'edit' : 'estimate' });
     queueMicrotask(() => {
-      setDraft(restored);
-      setStep(starter ? Math.max(0, firstUnanswered) : savedDraft ? Math.min(savedDraft.step, initialQuestionnaire.questions.length - 1) : 0);
+      setDraft(Object.keys(restored).length ? restored : freshDraft(questionnaireOverride ?? calculatorV3Questionnaire));
+      setStep(restoredStep);
       setReady(true);
     });
-  }, [english]);
+  }, [english, questionnaireOverride]);
 
   useEffect(() => {
     if (!ready) return;
     const saved: SavedDraft = {
-      version: 9, answers: draft, step,
+      version: energyQuestionnaire ? 10 : 9, answers: draft, step,
       questionnaireVersionId: assessmentConfig?.questionnaireVersionId,
       releaseId: assessmentConfig?.releaseId,
       assessmentToken: assessmentConfig?.assessmentToken ?? undefined,
       assessmentTokenExpiresAt: assessmentConfig?.assessmentTokenExpiresAt ?? undefined,
     };
     writeSessionValue(draftStorageKey, saved);
-  }, [assessmentConfig, draft, ready, step]);
+  }, [assessmentConfig, draft, energyQuestionnaire, ready, step]);
 
   const persistCompletionView = useCallback((journey: CompletionJourney, patch: Partial<ResultViewState>) => {
     const signature = answerSignature(journey.answers);
@@ -344,6 +395,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   useEffect(()=>()=>{if(autoAdvanceRef.current!==null)window.clearTimeout(autoAdvanceRef.current);},[step,locale,showContactForm]);
   function cancelAutoAdvance(){if(autoAdvanceRef.current!==null){window.clearTimeout(autoAdvanceRef.current);autoAdvanceRef.current=null;}}
   function moveStep(nextStep: number, nextDirection: ScreenDirection) {
+    interactionRef.current = true;
     cancelAutoAdvance();
     if (navigationLockRef.current) return;
     navigationLockRef.current = true;
@@ -358,6 +410,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function setValue<K extends keyof EstimateAnswers>(key: K, value: EstimateAnswers[K] | undefined) {
+    interactionRef.current = true;
     cancelAutoAdvance();
     setDraft((current) => {
       const next = { ...current, [key]: value };
@@ -369,6 +422,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       if (key === 'propertyType' && value !== 'other-residential') delete next.customPropertyType;
       if (key === 'ownershipStatus' && value === 'owner') delete next.ownerPermission;
       if (key === 'roofMaterial' && value !== 'other') delete next.customRoofMaterial;
+      if (key === 'airConditionerCount' && typeof value === 'number' && next.daylightAcUnits !== undefined) next.daylightAcUnits = Math.min(next.daylightAcUnits, value);
       return next;
     });
     setError('');
@@ -382,10 +436,11 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function chooseOption(id: string, value: string) {
+    interactionRef.current = true;
     cancelAutoAdvance();
     if(navigationLockRef.current)return;
     const candidate:Draft=id==='activelyPlanningSolar'?{...draft,planningTimeframe:value as EstimateAnswers['planningTimeframe'],activelyPlanningSolar:value!=='researching'}:{...draft,[id]:value};
-    const needsFollowup=id==='quoteContactRequested'||(id==='ownershipStatus'&&value!=='owner')||question.conditionalFields?.some(field=>field.whenOption===value);
+    const needsFollowup=id==='quoteContactRequested'||(energyQuestionnaire&&['roofArea','daytimePattern'].includes(id))||(id==='ownershipStatus'&&value!=='owner')||question.conditionalFields?.some(field=>field.whenOption===value);
     if(!needsFollowup&&!firstQuestionError(question,candidate,english)&&step<questions.length-1){autoAdvanceRef.current=window.setTimeout(()=>{autoAdvanceRef.current=null;if(navigationLockRef.current)return;track('estimate_step_completed',{stepId:id,stepNumber:step+1});moveStep(step+1,'forward');window.scrollTo({top:0,behavior:'auto'});},260);}
     if (id === 'activelyPlanningSolar') {
       setDraft((current) => ({
@@ -429,6 +484,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   }
 
   function next() {
+    interactionRef.current = true;
     cancelAutoAdvance();
     if (navigationLockRef.current) return;
     const reviewingContact = question.id === 'quoteContactRequested' && contactReview;
@@ -437,7 +493,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       return;
     }
     const collectionUnavailable = question.id === 'quoteContactRequested' && (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
-    const validationDraft = collectionUnavailable || reviewingContact ? { ...draft, quoteContactRequested: false, quoteConsentAccepted: undefined } : draft;
+    const validationDraft = collectionUnavailable || reviewingContact ? { ...calculationDraft, quoteContactRequested: false, quoteConsentAccepted: undefined } : calculationDraft;
     const questionError = firstQuestionError(question, validationDraft, english);
     if (questionError) { setError(questionError); return; }
     track('estimate_step_completed', { stepId: question.id, stepNumber: step + 1 });
@@ -505,15 +561,18 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
   function restart() {
     cancelAutoAdvance();
     [starterStorageKey, draftStorageKey, resultStorageKey, assessmentContextStorageKey].forEach(removeSessionValue);
-    setDirection('backward'); setDraft({}); setStep(0); setError(''); setShowContactForm(false); setContactReview(false); setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); window.scrollTo({ top: 0, behavior: 'auto' });
+    setDirection('backward'); setDraft(freshDraft(questionnaire)); setStep(0); setError(''); setShowContactForm(false); setContactReview(false); setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   function toggleDaytimeLoad(value: DaytimeLoad) {
+    interactionRef.current = true;
     const current = draft.daytimeLoads ?? [];
     const next = current.includes(value) ? current.filter((item) => item !== value) : value === 'none' ? ['none' as const] : [...current.filter((item) => item !== 'none'), value];
     setDraft((currentDraft) => {
       const updated: Draft = { ...currentDraft, daytimeLoads: next };
-      if (!next.includes('air-conditioning')) delete updated.airConditionerCount;
+      if (!next.includes('air-conditioning')) { delete updated.airConditionerCount; delete updated.daylightAcUnits; delete updated.daylightAcHours; delete updated.acPowerKw; }
+      if (!next.includes('ev')) { delete updated.existingEvMonthlyKwh; delete updated.evHomeChargingFraction; delete updated.evDaytimeFraction; }
+      if (!next.includes('pump')) { delete updated.pumpPowerKw; delete updated.pumpHoursPerDay; }
       if (!next.includes('other-high-use')) delete updated.customDaytimeLoad;
       return updated;
     });
@@ -522,7 +581,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   if (!question) return null;
 
-  const completedAnswers = estimateAnswersSchema.safeParse(draft);
+  const completedAnswers = estimateAnswersSchema.safeParse(calculationDraft);
   const contactPermissionUnavailable = question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet';
   const contactCollectionUnavailable = question.id === 'quoteContactRequested' && (!assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
   const visibleOptions = question.id === 'quoteContactRequested' ? [
@@ -530,7 +589,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     ...(assessmentConfig ? [{ value: 'test', label: contactReviewCopy.label, description: contactReviewCopy.help }] : []),
   ] : question.options;
   const districtOptions = localizedDistrictOptions(draft.province ?? '', locale);
-  const summaryValue=(item:AssessmentQuestion)=>{const value=item.id==='activelyPlanningSolar'?draft.planningTimeframe:draft[item.id as keyof Draft];if(item.id==='province')return [districtOptions.find(d=>d.value===draft.district)?.label,provinceOptions.find(p=>p.value===draft.province)?.[locale]].filter(Boolean).join(', ');if(item.id==='monthlyBillThb')return typeof value==='number'?'฿'+value.toLocaleString('en-US'):'';if(Array.isArray(value))return value.map(v=>item.options?.find(o=>o.value===v)?.label[locale]??v).join(', ');return item.options?.find(o=>o.value===value)?.label[locale]??'';};
+  const summaryValue=(item:AssessmentQuestion)=>{const value=item.id==='activelyPlanningSolar'?draft.planningTimeframe:draft[item.id as keyof Draft];if(item.id==='province')return [districtOptions.find(d=>d.value===draft.district)?.label,provinceOptions.find(p=>p.value===draft.province)?.[locale]].filter(Boolean).join(', ');if(item.id==='monthlyBillThb'){if(energyQuestionnaire&&draft.consumptionInput==='kwh')return draft.monthlyConsumptionKwh===undefined?'':draft.monthlyConsumptionKwh.toLocaleString('en-US')+' kWh';return typeof value==='number'?'฿'+value.toLocaleString('en-US'):'';}if(Array.isArray(value))return value.map(v=>item.options?.find(o=>o.value===v)?.label[locale]??v).join(', ');return item.options?.find(o=>o.value===value)?.label[locale]??'';};
 
   return <>{completionJourney && <ScreenTransition transitionKey="journey-preparing" direction="forward" pace="result" className="journey-transition-surface"><CalculationLoading
     facts={assessmentConfig?.loadingFacts ?? []}
@@ -555,7 +614,8 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
         {draft.province && draft.province !== 'other' && <DistrictCombobox locale={locale} options={districtOptions} value={draft.district} onChange={(value) => setValue('district', value)} />}
         {draft.province === 'other' && <label htmlFor="estimate-district"><span>{english ? 'District or local area' : 'อำเภอ เขต หรือพื้นที่'}</span><input id="estimate-district" maxLength={100} value={draft.district ?? ''} placeholder={english ? 'e.g. Bang Lamung' : 'เช่น บางละมุง'} onChange={(event) => setValue('district', event.target.value)} /></label>}
       </div>}
-      {question.type === 'bill' && <><BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} /><div className="quick">{[2000,4000,6000,10000,15000].map(value=><button type="button" key={value} aria-pressed={draft.monthlyBillThb===value} onClick={()=>setValue('monthlyBillThb',value)}>฿{value.toLocaleString('en-US')}</button>)}</div></>}
+      {question.type === 'bill' && energyQuestionnaire && <EnergyInputFields section="consumption" answers={draft} locale={locale} onChange={setValue} />}
+      {question.type === 'bill' && (!energyQuestionnaire || draft.consumptionInput !== 'kwh') && <><BillSlider value={draft.monthlyBillThb} onChange={(value) => setValue('monthlyBillThb', value)} locale={locale} invalid={Boolean(error)} /><div className="quick">{[2000,4000,6000,10000,15000].map(value=><button type="button" key={value} aria-pressed={draft.monthlyBillThb===value} onClick={()=>setValue('monthlyBillThb',value)}>฿{value.toLocaleString('en-US')}</button>)}</div></>}
       {question.type === 'choice' && <div className="choice-grid" role="radiogroup" aria-labelledby="estimate-question" aria-describedby={error ? 'estimate-error' : undefined} onKeyDown={handleRadioKeys}>{visibleOptions?.map((option, index) => { const isSelected = selected(question.id, option.value); const hasSelection = visibleOptions?.some((candidate) => selected(question.id, candidate.value)); const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="radio" aria-checked={isSelected} tabIndex={isSelected || (!hasSelection && index === 0) ? 0 : -1} className={`choice-card visual-choice ${isSelected ? 'selected' : ''}`} onClick={() => chooseOption(question.id, option.value)}><Icon className="choice-icon" aria-hidden="true" /><span><strong>{option.label[locale]}</strong>{option.description && <small>{option.description[locale]}</small>}</span><span className="choice-indicator" aria-hidden="true">{isSelected && <Check />}</span></button>; })}</div>}
       {question.id === 'ownershipStatus' && draft.ownershipStatus !== undefined && draft.ownershipStatus !== 'owner' && <fieldset className="inline-followup"><legend id="owner-permission-title">{english ? 'Do you have the property owner’s permission to request contact from solar installers?' : 'คุณได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ให้ขอรับการติดต่อจากผู้ติดตั้งโซลาร์แล้วหรือไม่?'}</legend><div className="choice-grid compact-choice-grid" role="radiogroup" aria-labelledby="owner-permission-title" onKeyDown={handleRadioKeys}>{([['yes', english ? 'Yes' : 'ได้รับอนุญาตแล้ว'], ['not-yet', english ? 'Not yet' : 'ยังไม่ได้รับอนุญาต']] as const).map(([value, label], index) => <button key={value} type="button" role="radio" aria-checked={draft.ownerPermission === value} tabIndex={draft.ownerPermission === value || (!draft.ownerPermission && index === 0) ? 0 : -1} className={`choice-card visual-choice ${draft.ownerPermission === value ? 'selected' : ''}`} onClick={() => setValue('ownerPermission', value)}><Home className="choice-icon" aria-hidden="true" /><strong>{label}</strong><span className="choice-indicator" aria-hidden="true">{draft.ownerPermission === value && <Check />}</span></button>)}</div></fieldset>}
       {contactPermissionUnavailable && <div className="permission-result-notice"><p>{english ? 'You can still view your estimate. To request installer contact, you will first need the property owner’s permission.' : 'คุณยังดูผลประเมินได้ตามปกติ หากต้องการให้ผู้ติดตั้งติดต่อ คุณต้องได้รับอนุญาตจากเจ้าของอสังหาริมทรัพย์ก่อน'}</p></div>}
@@ -565,6 +625,9 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       </div>}
       {question.type === 'multichoice' && <div className="choice-grid multichoice-grid" aria-labelledby="estimate-question">{question.options?.map((option) => { const checked = draft.daytimeLoads?.includes(option.value as DaytimeLoad) ?? false; const Icon = optionIcons[option.value] ?? CircleHelp; return <button key={option.value} type="button" role="checkbox" aria-checked={checked} className={`choice-card visual-choice ${checked ? 'selected' : ''}`} onClick={() => toggleDaytimeLoad(option.value as DaytimeLoad)}><Icon className="choice-icon" aria-hidden="true" /><strong>{option.label[locale]}</strong><span className="choice-indicator checkbox-indicator" aria-hidden="true">{checked && <Check />}</span></button>; })}</div>}
       {question.conditionalFields?.map((field) => <AssessmentConditionalField key={field.id} field={field} question={question} draft={draft} locale={locale} setValue={setValue} />)}
+      {energyQuestionnaire && question.id === 'daytimePattern' && <EnergyInputFields section="timing" answers={draft} locale={locale} onChange={setValue} />}
+      {energyQuestionnaire && question.id === 'daytimeLoads' && <EnergyInputFields section="loads" answers={draft} locale={locale} onChange={setValue} />}
+      {energyQuestionnaire && question.id === 'roofArea' && <EnergyInputFields section="roof" answers={draft} locale={locale} onChange={setValue} />}
       {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
     </ScreenTransition>

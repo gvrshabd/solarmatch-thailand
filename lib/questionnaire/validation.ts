@@ -22,7 +22,7 @@ const optionSchema = z.object({
 
 export const questionnaireDocumentSchema = z.object({
   id: z.string().min(1).max(100),
-  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9)]),
+  schemaVersion: z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10)]),
   questions: z.array(z.object({
     id: z.enum(['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'roofArea', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade', 'quoteContactRequested', 'installationTimeframe']),
     type: z.enum(['province', 'bill', 'choice', 'multichoice']),
@@ -32,9 +32,10 @@ export const questionnaireDocumentSchema = z.object({
     options: z.array(optionSchema).max(30).optional(),
     conditionalFields: z.array(conditionalFieldSchema).max(5).optional(),
     relevance: z.object({ calculation: z.boolean(), qualification: z.boolean(), scoring: z.boolean() }),
-  })).min(9).max(11),
+  })).min(9).max(12),
 }).superRefine((document, context) => {
   const ids = document.questions.map((question) => question.id);
+  if (document.schemaVersion <= 9 && document.questions.length > 11) context.addIssue({ code: 'custom', path: ['questions'], message: 'Historic questionnaire schemas allow at most eleven questions.' });
   if (new Set(ids).size !== ids.length) context.addIssue({ code: 'custom', path: ['questions'], message: 'Question IDs must be unique.' });
   const requiredIds = ['province', 'monthlyBillThb', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'roofMaterial', 'shade'];
   requiredIds.forEach((id) => { if (!ids.includes(id as never)) context.addIssue({ code: 'custom', path: ['questions'], message: `Missing required question: ${id}` }); });
@@ -62,6 +63,11 @@ export const questionnaireDocumentSchema = z.object({
     const expected = ['province', 'monthlyBillThb', 'activelyPlanningSolar', 'projectType', 'propertyType', 'ownershipStatus', 'daytimePattern', 'daytimeLoads', 'shade', 'roofMaterial', 'quoteContactRequested'];
     if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 9 must preserve the published eleven-step assessment order.' });
     if (ids.includes('roofArea') || ids.includes('installationTimeframe')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 9 keeps roof area optional and excludes the legacy timeframe question.' });
+  }
+  if (document.schemaVersion === 10) {
+    const expected = ['projectType', 'province', 'monthlyBillThb', 'daytimePattern', 'roofArea', 'shade', 'propertyType', 'ownershipStatus', 'activelyPlanningSolar', 'daytimeLoads', 'roofMaterial', 'quoteContactRequested'];
+    if (ids.join('|') !== expected.join('|')) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 10 must preserve the twelve-step calculator accuracy order.' });
+    if (!document.questions.find(question => question.id === 'roofArea')?.required) context.addIssue({ code: 'custom', path: ['questions'], message: 'Version 10 requires a roof-area answer, including an explicit unsure option.' });
   }
   document.questions.forEach((question, questionIndex) => {
     const values = question.options?.map((option) => option.value) ?? [];

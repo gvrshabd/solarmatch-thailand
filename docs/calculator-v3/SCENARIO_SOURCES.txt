@@ -1,0 +1,115 @@
+SOLARMATCH OPTIONAL SCENARIOS — sources and verification limits
+Checked: 2026-10-17. Implementation: lib/calculator/scenarios.ts.
+
+PERSONAL SOLAR TAX RULE VERSION
+th-personal-solar-2026-03-03-v1
+
+1. Royal Gazette, Royal Decree 805 (B.E. 2569)
+https://ratchakitcha.soc.go.th/documents/104277.pdf
+Published 2 March 2026; effective the following day. Personal qualifying
+equipment/installation exemption is capped at THB 200,000, one system/one claim,
+with the window ending 31 December 2028. This is an income exemption, not an
+installation rebate. No entitlement is established by this calculator.
+Verification limit: PDF extraction for this Gazette copy is font-encoded and
+largely unreadable. Gazette metadata is readable; the operative implementation
+details below were directly readable in the Revenue Department implementing PDF.
+
+2. Revenue Department, Director-General income-tax notification 470
+https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg470A.pdf
+Clauses 2–6: qualifying individual, residential type-1 MEA/PEA supply, installed
+capacity at most 10 kW, qualifying building, one system/claim; agreement,
+application and purchase/installation proof within 3 March 2026–31 December 2028.
+Signed 30 September 2026; claim in successful connection year. Same claimant must match account,
+application, approval and invoice taxpayer ID. Eligible supplier e-Tax invoice,
+connection documents and utility notification are required; reuse of expenditure
+for other relief or input-VAT deduction is excluded. Special spouse filing rules
+exist. The additional invoice solar-description requirement applies to invoices
+issued from 30 September 2026, the signing date (clause 8).
+Verification limits: supplier eligibility, full invoice
+compliance, timing of utility notification, document identity and tax filing
+facts are caller-confirmed checklist facts, not verified by the app. Source
+says total installed kW without an explicit DC/AC basis; the calculator does not
+silently relabel it kWp or the export AC limit. Complex joint/spouse allocations
+are outside this single-claimant model. Prospective facts are intentions only.
+
+3. Revenue Department, ordinary personal-income-tax brackets
+https://www.rd.go.th/59670.html
+Title references tax year 2560, with application from that year onward; page
+last updated 2021-01-09. Net-income bands: first THB150,000 exempt; next to
+300,000 at 5%; to 500,000 at 10%; to 750,000 at 15%; to 1m at 20%; to 2m at
+25%; to 5m at 30%; remainder 35%. The implementation taxes the ordinary net
+income before and after min(qualifying spend, 200,000, net income), rather than
+multiplying all expenditure by the top marginal rate. Example: 800,000 gives
+75,000 tax; 600,000 gives 42,500; saving is 32,500, not 40,000 or 200,000.
+Limit: no claim that this old page was revised in 2026, nor that this arithmetic
+models minimum-tax alternatives, tax credits, filing rounding, other allowances,
+or final RD assessment. Input is net taxable income before solar, not gross pay.
+The optional calculation requires explicit ordinary-progressive tax confirmation;
+unknown, alternative-tax, credit and complex-filing cases show no precise amounts.
+This calculation-basis choice is memory-only, separate from legal eligibility.
+
+EXPORT: ACTIVE PROGRAMME VERSUS INDIVIDUAL CONTRACT
+4. PEA announcement dated 3 July 2026
+https://www.pea.co.th/news/corporate-news/2133
+5. PEA programme detail dated 2 July 2026
+https://www.pea.co.th/news/corporate-news/2114
+6. PEA project portal (2026 applications)
+https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766
+Read directly on 17 October 2026: actual application opening from 1 July 2026,
+not merely the earlier policy proposal. Programme describes THB2.20/kWh, 10
+years, up to 5 kW AC per meter, total 500 MW jointly managed by MEA/PEA,
+residential type 1, claimant/account match and first-come consideration. Portal
+mentions SCOD within 2570. No claim of remaining quota, applicant approval,
+available local connection capacity or the user's contract is made.
+
+7. Thai government policy announcement
+https://www.thaigov.go.th/th/news/163685
+Earlier policy approval called for rules and purchase announcements by June
+2026. This is policy evidence, not proof of an individual contract. July PEA
+sources above provide the later actual application/programme evidence.
+
+EXPORT MODEL LIMITS (implementation decisions, not programme entitlements)
+Base export income remains zero. Optional revenue needs explicit verified rate,
+start, inclusive end and AC export limit from the user's contract, plus interval
+surplus after home consumption. Contract calendar uses Thailand UTC+07:00.
+Each interval exports min(surplus, AC limit * interval hours); time outside
+contract is excluded. Partial boundary intervals use an expressly disclosed
+constant interval-average approximation. Overlapping/invalid intervals are
+rejected. This is not a reconstruction of instantaneous peaks from annual
+energy. No annual extrapolation, 20-year extension or automatic programme rate
+is inserted. No intervals means insufficient information, not a made-up income.
+
+FINANCE MODEL LIMITS (implementation arithmetic, not lender information)
+No bank, rate or product is invented. User supplies actual deposit, term,
+annual rate and flat/reducing basis. Principal = cost - deposit + financed fees.
+Flat interest = principal * annual rate * years. Reducing balance uses a fixed
+monthly rate of annual rate / 12 and an equal-payment annuity. Zero rate is
+handled separately. Upfront fees affect initial cash; financed fees affect
+principal. Omitted fees are assumed zero ONLY for arithmetic and flagged unknown.
+An optional actual quoted monthly payment overrides cash-flow payment, not
+modelled interest. If it differs from calculated payment, final instalment,
+fees and residual debt require checking. Scheduled total is payment * months;
+it is not asserted to settle every quote's balloon or irregular schedule.
+Financing is separate from electricity savings. UI net cash flow subtracts
+repayment and average reserve; tax/export are not automatically included.
+
+UI AND PRIVACY
+OptionalScenarios inputs are local React state only, with no form submission,
+storage, URL, logging, analytics, lead fields or API calls. Tax fields are absent
+from EstimateAnswers. Caller must pass only the documented energy/cost props.
+Clear button resets optional fields. Module functions have no side effects.
+Tax benefit is one-time and conditional, shown separately from installation
+invoice and monthly bill, with lifetime benefit both before and after relief.
+
+BILINGUAL LABEL GUIDANCE
+compatible: Compatible with the supplied conditions — conditional /
+ข้อมูลสอดคล้องกับเงื่อนไขเบื้องต้น — ยังมีเงื่อนไข
+ineligible: Ineligible on the supplied facts / ไม่เข้าเงื่อนไขตามข้อมูลที่ระบุ
+insufficient-information: Insufficient information / ข้อมูลยังไม่พอ
+prospective: Future purchase / conditional plans /
+วางแผนซื้อในอนาคต / ยังมีเงื่อนไข
+tax income: Annual net taxable income BEFORE solar relief /
+เงินได้สุทธิทั้งปีก่อนใช้สิทธิโซลาร์
+tax saving: One-time conditional tax saving /
+ภาษีที่อาจประหยัดได้ครั้งเดียวตามเงื่อนไข
+Never label exemption as a cash rebate or subtract it from an installer invoice.

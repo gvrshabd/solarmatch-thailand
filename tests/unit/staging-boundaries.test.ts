@@ -13,8 +13,8 @@ vi.mock('../../worker',()=>({default:{fetch:vi.fn(()=>new Response('Application 
 const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 const env:StagingAccessEnv={INSTALLER_PLATFORM_MODE:'sandbox',INSTALLER_BASE_URL:origin,STAGING_ACCESS_AUD:'staging-site',ACCESS_AUD:'staging-admin',ACCESS_TEAM_DOMAIN:'https://team.example.test',ADMIN_EMAILS:'owner@example.test'};
 beforeEach(()=>{verify.mockReset();});
-it('limits staging management to the exact repository and two integration branches',()=>{
- for(const branch of ['feature/installer-shared-workflow','feature/design-v2-integration'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).not.toThrow();
+it('limits staging management to the exact repository and explicit integration branches',()=>{
+ for(const branch of ['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).not.toThrow();
  for(const branch of ['main','unrelated'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).toThrow();
  expect(()=>assertStagingCheckout('https://github.com/example/other.git','feature/design-v2-integration')).toThrow();
 });

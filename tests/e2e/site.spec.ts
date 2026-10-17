@@ -1,5 +1,8 @@
 import { expect, test, type Page, type TestInfo, type Route } from '@playwright/test';
 import { initialQuestionnaire } from '../../config/assessment';
+import { designV2Example } from '../../config/design-v2-example';
+import { calculateEstimate } from '../../lib/calculator';
+import { baht } from '../../lib/design-v2/figures';
 
 const savedEstimate = {
   province: 'bangkok', district: 'sathon', monthlyBillThb: 6000, activelyPlanningSolar: true, planningTimeframe: 'within-3-months', projectType: 'new-rooftop', propertyType: 'detached-home', roofArea: '60-100',
@@ -164,7 +167,7 @@ test('homepage reflects the supplied design and language spacing',async({page})=
  await page.goto('/');
  await expect(page.getByRole('heading',{level:1})).toHaveText('โซลาร์ช่วยบ้านคุณประหยัดได้เท่าไร?');
  await expect(page.locator('main')).toContainText('ไม่ต้องให้เบอร์โทร');
- await expect(page.locator('.hero-photo .example')).toContainText('฿1,665');
+  await expect(page.locator('.hero-photo .example')).toContainText(baht(calculateEstimate(designV2Example).planningMonthlySavingsThb));
  const switcher=page.getByRole('link',{name:'View this page in English'});
  await expect(switcher).toHaveText('EN');await switcher.click();await expectPath(page,'/en');
 });
