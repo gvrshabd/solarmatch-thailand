@@ -330,7 +330,9 @@ test('no feasible roof option does not display an invented system, price or payb
 
 test('unsupported battery project requires an explicit labelled solar-only illustration', async ({ page }) => {
   await seed(page, { ...modern, projectType: 'solar-with-battery' });
-  await expect(page.locator('.rhero h1')).toHaveText('This project is outside the supported model');
+  await expect(page.locator('.rhero h1')).toHaveText('A battery system needs a separate estimate');
+  await expect(page.locator('.rhero .result-model-recovery')).toBeVisible();
+  await expect(page.locator('.rhero .rstats')).toHaveCount(0);
   await expect(page.locator('.rhero .ba')).toHaveCount(0);
   await expect(page.locator('.lifetime-chart')).toHaveCount(0);
   await expect(page.locator('.bars')).toHaveCount(0);
@@ -339,6 +341,36 @@ test('unsupported battery project requires an explicit labelled solar-only illus
   await expect(page.locator('.calculator-model-details')).toContainText('NEW-SYSTEM SOLAR-ONLY ILLUSTRATION');
   await expect(page.locator('.rhero .ba .now')).toBeVisible();
 });
+
+for(const locale of ['en','th'] as const)for(const projectType of ['solar-with-battery','expand-existing'] as const){
+  test(`model recovery stays prominent and preserves ${projectType} answers ${locale}`,async({page})=>{
+    await page.setViewportSize({width:390,height:844});
+    await seed(page,{...modern,consumptionInput:'bill',projectType},locale);
+    await page.locator('.v2-breakdown > details > summary').click();
+    const optIn=page.locator('.result-model-recovery input[type=checkbox]');
+    await expect(optIn).toBeVisible();await expect(optIn).not.toBeChecked();
+    await expect(page.locator('.rhero .rstats')).toHaveCount(0);
+    await expect(page.locator('.rhero .verdict')).toHaveCount(0);
+    await expect(page.locator('.lifetime-chart')).toHaveCount(0);
+    expect((await new AxeBuilder({page}).include('.rhero').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
+    for(const width of [320,390,1440]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+    await page.setViewportSize({width:390,height:844});
+    await optIn.focus();await optIn.press('Space');
+    await expect(page.locator('.rhero .ba .now')).toBeVisible();
+    await expect(optIn).toBeFocused();
+    await expect(page.locator('.rhero')).toContainText(locale==='en'?'excludes batteries, backup power and your existing system':'ไม่รวมแบตเตอรี่ ไฟสำรอง และระบบเดิม');
+    await page.reload();
+    await expect(page.locator('.rhero .ba .now')).toBeVisible();
+    const saved=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:estimate')!));
+    expect(saved.projectType).toBe(projectType);expect(saved.solarOnlyIllustration).toBe(true);expect(saved.monthlyBillThb).toBe(modern.monthlyBillThb);expect(saved.quoteContactRequested).toBe(false);
+    await page.locator('.v2-breakdown > details > summary').click();
+    const checked=page.locator('.result-model-recovery input[type=checkbox]');
+    await expect(checked).toBeChecked();await checked.uncheck();
+    await expect(page.locator('.result-model-recovery')).toBeVisible();
+    await expect(page.locator('.rhero .ba')).toHaveCount(0);
+    if(process.env.MODEL_RECOVERY_SCREENSHOTS==='1'){await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`.wrangler/model-recovery-${projectType}-${locale}.png`,fullPage:false});}
+  });
+}
 
 test('a user quotation preserves exact cash price and separate DC and AC sizes', async ({ page }) => {
   await seed(page, { ...modern, quoteSystemKw: 5.5, quoteModuleCount: 10, quoteModuleWp: 550,
@@ -381,7 +413,9 @@ for (const invalidQuote of [
 ]) {
   test(`invalid quote with ${invalidQuote.name} has no financial charts or optional revenue`, async ({ page }) => {
     await seed(page, { ...modern, ...invalidQuote, quoteCashPriceThb: 150_123.45, quoteBatteryIncluded: false });
-    await expect(page.locator('.rhero h1')).toHaveText('This project is outside the supported model');
+    await expect(page.locator('.rhero h1')).toHaveText('Check the equipment in your quotation');
+    await page.getByRole('button',{name:'Review quotation details',exact:true}).click();
+    await expect(page.locator('.results-precise summary')).toBeFocused();
     await expect(page.locator('.calculator-model-details')).toContainText('Correct the equipment details; no financial estimate is provided.');
     await expect(page.locator('.rhero .ba')).toHaveCount(0);
     await expect(page.locator('.lifetime-chart')).toHaveCount(0);

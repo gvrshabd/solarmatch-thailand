@@ -21,8 +21,7 @@ export function CalculatorModelDetails({answers,result,locale,onChange,onRecalcu
   <h2 id="model-title">{t('Model, assumptions and alternatives','แบบจำลอง สมมติฐาน และทางเลือก')}</h2>
   <p className="note">{modern?`${result.modelVersion} · ${result.calculationReferenceDate}`:t('Saved legacy estimate. Its original model is retained; it has not silently changed to the new model.','ผลประเมินเดิมยังใช้แบบจำลองเดิม ไม่ได้เปลี่ยนเป็นแบบใหม่โดยอัตโนมัติ')}</p>
   {!modern&&<button className="btn btn-soft btn-sm" type="button" onClick={onRecalculate}>{t('Recalculate with current model','คำนวณใหม่ด้วยแบบจำลองปัจจุบัน')}</button>}
-  {result.warnings?.map(w=><p className="note" key={w.code}><strong>{w[locale]}</strong></p>)}
-  {modern&&(answers.projectType==='solar-with-battery'||answers.projectType==='expand-existing'||answers.quoteBatteryIncluded)&&<label className="consent-row"><input type="checkbox" checked={answers.solarOnlyIllustration??false} onChange={event=>onChange('solarOnlyIllustration',event.target.checked)}/>{t('Show a new-system solar-only illustration. This does not model my battery or existing system.','แสดงตัวอย่างระบบใหม่เฉพาะโซลาร์ โดยไม่ใช่แบบจำลองแบตเตอรี่หรือระบบเดิมของฉัน')}</label>}
+  {result.warnings?.filter(w=>w.code!=='unsupported-project').map(w=><p className="note" key={w.code}><strong>{w[locale]}</strong></p>)}
   {modern&&<>
    <p className="note">{result.recommendationReason?.[locale]}</p>
    <p className="note">{t('An area band uses its conservative lower boundary (under 30 m² uses 15 m²), not a measured roof. Enter exact usable area if available. Prices and physical/electrical suitability require an installer quotation and utility approval.','ช่วงพื้นที่ใช้ขอบล่างอย่างระมัดระวัง (ต่ำกว่า 30 ตร.ม. ใช้ 15 ตร.ม.) ไม่ใช่พื้นที่ที่วัดจริง หากทราบให้ระบุพื้นที่ใช้ได้จริง ราคาและความเหมาะสมต้องตรวจโดยผู้ติดตั้งและขออนุมัติการไฟฟ้า')}</p>

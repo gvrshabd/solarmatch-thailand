@@ -71,3 +71,9 @@ html[lang=th] .homeowner-v3 .v2-results .rsub{letter-spacing:0;line-height:1.35}
 .homeowner-v3 .v2-results .rstats>.long-price-stat b{font-size:clamp(16px,2vw,24px);white-space:normal;overflow-wrap:anywhere}
 @media(max-width:600px){.homeowner-v3 .v2-results .rstats>.long-price-stat{padding-inline:8px}.homeowner-v3 .v2-results .rstats>.long-price-stat b{font-size:16px;white-space:normal;overflow-wrap:anywhere}}
 @media(prefers-reduced-motion:reduce){.homeowner-v3 .v2-results .scenario-switch,.homeowner-v3 .v2-results .scenario-switch::after{transition:none}}
+.homeowner-v3 .v2-results .result-model-recovery{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:24px;display:grid;gap:18px;line-height:1.6;color:#fff}
+.homeowner-v3 .v2-results .result-model-recovery p{margin:0}
+.homeowner-v3 .v2-results .result-model-recovery .consent-row{display:flex;align-items:flex-start;gap:12px;min-height:44px;color:inherit;cursor:pointer}
+.homeowner-v3 .v2-results .result-model-recovery input{flex:0 0 22px;width:22px;height:22px;margin-top:3px;accent-color:#d9ed92;color-scheme:light;box-shadow:0 0 0 1px rgba(255,255,255,.8)}
+.homeowner-v3 .v2-results .result-model-recovery .btn{white-space:normal;min-height:44px;text-align:center}
+@media(max-width:600px){.homeowner-v3 .v2-results .result-model-recovery{padding:20px;border-radius:20px}}

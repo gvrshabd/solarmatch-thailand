@@ -1,0 +1,53 @@
+CALCULATOR MODEL-BOUNDARY RECOVERY — 17 OCTOBER 2026
+
+Reported defect
+The results hero repeated a generic unsupported-model message and showed three
+empty financial cards. The actual saved project selection was solar with battery.
+The engine intentionally does not model batteries or existing-system expansion;
+its explicit solar-only alternative was buried in the detailed breakdown.
+
+Focused repair
+- Explain battery and expansion limits at the project selection, before selection.
+- Replace generic blocked-result copy with the actual reason and relevant action.
+- Put the existing, explicitly unchecked solar-only illustration in the hero.
+- Keep its checkbox mounted and focused when it updates the result; allow undo.
+- Preserve project answers and the illustration choice through reload.
+- Omit duplicate verdict and empty metric cards for unsupported calculations.
+- Direct invalid quotation inputs to the existing refinements, with focus.
+- Keep tariff, residential-boundary and quotation blockers enforced.
+- Thai/English parity; scoped homeowner styling, visible control, mobile layout.
+
+Boundaries
+No calculator arithmetic, model constants, consent, collection controls, installer
+design, database, migrations, Access policy, provider settings or remote data edits.
+This does NOT implement battery sizing, backup-power economics, TOU or expansion.
+An opted-in illustration is visibly labelled as new solar panels only.
+
+Verification record
+Production build and TypeScript passed. Lint: zero errors, 14 existing warnings.
+Full unit suite: 620/620 in 75 files, with maxWorkers=2, unchanged test timeouts.
+An earlier concurrent build/test run had one 5-second timeout in the unchanged
+LINE Workerd transport test (619/620). The complete low-concurrency run passed.
+An initial browser draft exposed checkbox replacement/focus loss after opting in;
+the stable control fixes it. Failed-run evidence is retained locally, not exported.
+Full calculator browser matrix: 87/87 passed in 9.4 minutes (29 each desktop
+Chrome, mobile Chrome and mobile WebKit). Includes actual no-contact journeys,
+legacy saves, invalid quotation recovery, optional scenarios, focus, persistence,
+and EN/TH battery/expansion recovery with axe and 320/390/1440px overflow checks.
+Screenshots were inspected in Thai and English. This is browser emulation, not
+physical-device or screen-reader certification. A final checkbox contrast-only
+adjustment passed a fresh production build, lint/typecheck and all 12 targeted
+recovery cases across the same three profiles. Control contrast was visually
+inspected afterward; no test assertions or timeouts were weakened.
+
+Rollback
+Previous main: fc7106148ca84245371766a647f5e93dbdff57fb.
+Previous production Worker: 70e64af8-e2ca-4986-8099-46e106383279.
+Revert only this application fix normally and redeploy if necessary. No database
+restore or release-pointer change is needed for this UI-only repair.
+Existing encrypted homeowner-v3 release backup is retained privately.
+
+Release preflight: 7 existing leads, 3 legal versions; collection, payments and
+notifications false; platform and allocation paused. No migration/config change.
+Deployment receipt and post-release checks are reported separately after GitHub's
+normal Cloudflare pipeline completes; passing local tests is not deployment proof.
