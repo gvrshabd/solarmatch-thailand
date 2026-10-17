@@ -1,0 +1,124 @@
+Implement the HOMEOWNER portions of SolarMatch Design v3 and the improved homeowner calculator together as ONE coordinated task. Deliver working, tested code and a protected HTTPS staging preview. Preserve Claude's final approved homeowner design. The owner has explicitly deferred all installer design changes.
+
+INPUTS AND SCOPE
+
+Use the attached SolarMatch-homeowner-v3-calculator-executor-pack.zip. It contains design-v3/ (the original Claude package, byte-for-byte unchanged), this EXECUTOR_PROMPT.txt, the calculator audit, and file hashes. If only the original solarmatch-design-v3.zip is available, its prototype/, reference/, V3_SPEC.md and CODEX_PROMPTS_V3.md are the same design inputs; this prompt contains the required integration instructions.
+
+VISUAL SCOPE FREEZE: Implement Claude prompts 1–4 for homeowner home, content/footer, assessment and results. Do not implement the installer VISUAL redesign from prompts 5–6. The For Installers landing, installer application/sign-in, portal, credits, company settings and enquiry workspace must keep their CURRENT appearance, layout, navigation, typography, colours and visual hierarchy. Admin redesign is out of scope. The owner DOES allow installer controls/functionality to be improved where needed; implement those through the existing UI, not Claude's new installer composition. The original archive includes installer mockups; their presence does not authorize their visual rollout.
+
+Work only in gvrshabd/solarmatch-thailand. Inspect repository instructions, branch/worktree state, uncommitted work and recent commits first. Locate any calculator implementation already completed or in progress; integrate and finish it instead of rebuilding or overwriting it. Preserve existing installer, LINE, legal, demo and Design v2 work. Create a suitable feature branch; do not reset another branch or discard changes. Do not touch Milly's or unrelated resources.
+
+Use one GPT-6 Astra coordinator for architecture, conflicts, integration and final review. Use a small number of Sol agents for bounded implementation or verification tasks if available. Be conservative with usage without sacrificing quality: give agents narrow file ownership, share findings, avoid duplicated broad audits and concurrent edits to shared files, and rerun checks when changed code or failures justify it. Do not stop after planning or delegate without integrating the results.
+
+AUTHORITY AND NON-NEGOTIABLE DESIGN FIDELITY
+
+Read V3_SPEC.md sections 0–4 and 8 and CODEX_PROMPTS_V3.md prompts 1–4. Review sections 5–6/prompts 5–6 only for relevant functional requirements and integration risks; do not port their installer layouts, styling or visual simplification. Complete the FOUR homeowner design phases in one coordinated run, not separate approval requests or sessions.
+
+Resolve conflicts in this order:
+1. This integration prompt controls calculator correctness, factual copy, security, persistence and live-operation restrictions.
+2. Claude's FINAL rendered prototype controls visual composition and styling. Inspect the full CSS cascade, including the final v3.1 owner-feedback and v3.2 overrides; do not port only the first block marked "v3 · applied minimalism".
+3. V3_SPEC.md supplies functionality and required content missing from the mock prototype. Use its structure where the prototype has no equivalent screen.
+4. reference/ images are supplementary. Most are NOW/V3 composites and some predate the final frosted hero. Never treat the composite as a target viewport or revert final CSS to an older screenshot.
+
+Copy the original package to docs/design-v3/ without altering its source files. Record hashes. Keep any integration harness and comparison evidence separately.
+
+Preserve the exact supplied assets/crops, typography (Manrope/Anuphan), font weights, spacing, sizes, colours, gradients, glass effects, borders, shadows, icons, card geometry, section composition and responsive breakpoints. Port source styles and markup into real components; do not approximate them from memory, replace photos, restyle components or add decorative sections. Preserve image credits and record available provenance; do not invent licence evidence.
+
+Exclude prototype-only debug/navigation strips, approval simulation controls, fictional customer data and mock authentication from application routes. Preserve the real site's routing, authentication and state. Do not ship the prototype app or its old engine.min.js as the application's calculator.
+
+An exact visual implementation does not require obsolete numbers, fixed question counts or incorrect eligibility statements. Preserve every unaffected design element. Put new conditional fields inside the existing question cards, Extras card, refinement disclosure and breakdown, using Claude's existing control styles. Match the default closed states; expanded states may grow naturally. No clipped content, tiny text or hidden required controls to fake a screenshot match.
+
+IMPLEMENT THE FOUR HOMEOWNER DESIGN AREAS ONLY
+
+1. Home: final dark desktop full-bleed widened hero, pine veil and frosted bill card; phone photo band, H1, solid bill card, lede, then exactly two trust ticks. Input/range synchronization, default 4,000, slider 500–25,000 step 100, valid larger typed values retained with slider pinned. Preserve validation/starter handoff. Implement the single full-width example card, before/after figures and lifetime chart, compact steps, five-row trust table, FAQ image, closing CTA and final footer. Homeowner hero and existing installer hero must remain isolated: do not apply any homeowner v3 hero changes to installer routes.
+
+2. Footer/content: two balanced link groups, short visible status and required legal/operator content in the "About this service" disclosure, verbatim. The prototype omits this disclosure: implement the spec requirement. Preserve any existing requirement for an operator line to remain visible. Retain real legal routes and documents, including access to storage/cookie information. Do not invent operator facts or rewrite consent/legal text. Update methodology facts to describe the new model; the old instruction to preserve obsolete calculation facts is superseded.
+
+3. Assessment: equal province/district native selects and custom-location replacement, bill input/range without quick chips, desktop-only answers panel with Edit actions, phone single column, no repeated notices. Preserve the bill-first intent and consume homepage input only after validation. Use the next available questionnaire/schema version and existing release mechanism; do not assume v10 is unused. Migrate/restore older drafts and share links explicitly. Progress, labels, answer summaries, validation and server eligibility must follow the actual conditional path. Replace fixed "10 questions" claims, including heroLede and inherited h1t, with a truthful short equivalent in both languages. Do not force ten questions or hardcode starter step=1.
+
+4. Results: exact before/after hero, percentage treatment, verdict, stats, lifetime chart, Extras, refinements, next steps, breakdown and actions. Remove the duplicate monthly-bill bar chart, NOT the 25-year lifetime chart. For the documented mobile-order conflict, follow the final prototype/screenshot: hero → lifetime chart → extras → precise → next steps → breakdown → actions. Desktop retains the prototype's two-column composition. Keep the real share functionality and required link-contents disclosure, which the prototype omits. Preserve negative-result handling; handle zero saving, increased bills, no payback, no feasible system and unsupported scenarios without NaN, false positive verdicts or "less each month" for a negative saving.
+
+SHARED-CODE ISOLATION
+
+Homeowner visual changes must not leak into installer screens. Scope new CSS beneath homeowner route/layout classes; avoid unqualified global changes to shared selectors such as .hero3, .card, .footer or .btn. If header/footer components are shared, use a homeowner-only variant or wrapper whose default preserves the installer rendering. Do not edit app/installers-v2.css or installer components for cosmetic alignment. If shared types or utilities need calculator compatibility, preserve existing contracts or provide explicit backward-compatible adapters and verify them. Functional corrections are allowed; preserve business rules, security boundaries and data.
+
+Take baseline installer screenshots before changes and compare after, including the For Installers landing and representative portal states in Thai/English at phone/desktop widths. This establishes that the current design remains intact while functional corrections are verified separately. Preserve permissions, withdrawal/claims, the ledger and established business policy.
+
+Allowed installer functional work, without a visual redesign:
+- Correct effective availability/status handling for approval, company pause and platform pause; a preference switch must not bypass eligibility.
+- Keep existing outcome controls connected to report-outcome with all valid states, including Lost/Not suitable. Do not replace their layout with the new five-segment design.
+- Keep actual notes persistence/revision conflict handling reliable. If adding blur autosave, retain current visible controls/layout and accurate pending/saved/error states; do not copy mock in-memory saving or remove the existing Save control just to follow v3.
+- Keep contact, credit and company controls wired to real authorized operations. Do not invent a LINE destination from a phone number. Do not simplify the credit statement layout, change prices/policies, enable payment methods or replace company controls for this design pass.
+- Make necessary data/validation adapters for new homeowner answers, with legacy-record support. Any visible status/value correction must be factual and fit the current components.
+Limit this work to the relevant control correctness and calculator integration; avoid an unrelated installer rewrite.
+
+Keep existing assessment-field meanings at the delivery boundary. A new daytime-running AC count must not silently replace legacy total-installed AC count. Preserve required qualification fields and backward compatibility; do not add new installer summary UI as part of this task. Tax-income answers never belong in installer records.
+
+CALCULATOR REQUIREMENTS — THESE OVERRIDE OLD V3 ARITHMETIC
+
+The former audit baseline was main commit 3571f357e469bddc43db287b67ec22c4358f0061. Verify current behavior first. The audit is evidence, not an instruction to downgrade to that commit.
+
+A. Physical and financial model
+- Separate consumption, generation, immediate self-use, grid imports, export/curtailment and, only when supported, storage flows/losses.
+- Use a reproducible time-resolved model: preferably an hourly year, or an explicitly documented monthly/hourly weekday/weekend approximation. Without batteries, interval self-use is min(load, solar). Daytime surplus cannot erase nighttime imports. Distinguish assumed profiles from measurements.
+- Accept kWh and billing period where available, retain a bill-money fallback, and support optional additional monthly records. Exclude arrears/non-energy items from consumption inference.
+- Interpret historical bills with their historical tariff, then separately select the forecast tariff. Retain correct before/after progressive billing, Ft, VAT and fixed charges. Support TOU only with appropriate calendar/category inputs; identify unsupported tariffs. Use Bangkok effective dates and stale-data handling.
+- Use reproducible generation evidence: dataset/version, location, roof planes, panel tilt/azimuth, mounting and explicit losses. Do not double-count source losses. Unknown inputs widen uncertainty. Exact coordinates must have a real effect before being advertised as a refinement.
+- Enforce usable roof and electrical constraints for the ACTUAL evaluated system. No minimum-system floor that fabricates roof capacity. Distinguish flat roof with tilted racks from truly horizontal panels.
+- Compare feasible purchasable systems using actual panel DC capacity/module counts, inverter AC size, phase, scope and supported prices. Do not use an unsupported flat price for every system below 3 kWp or invent proportional small-system offers. Consider value, budget and constraints; permit no suitable candidate.
+- Preserve exact entered quote prices. Unknown phase must be explicit, with its cost uncertainty.
+- Model future loads as additional energy at realistic times; do not add consumption already in the bill. Apply degradation to generation and recompute energy/bills. Avoid double-counting inverter replacement already included in maintenance reserves.
+- Separate gross bill savings, operating costs, financing, simple payback, cumulative break-even and undiscounted/discounted value. Provide evidence-based lower/central/higher scenarios; no invented statistical accuracy claim.
+
+B. Adaptive questions inside the approved components
+Keep the common path compact: project type, location/supply, consumption/period, weekday/weekend usage timing, usable roof and shade. Bill-first presentation can precede project routing. Preserve qualification facts where needed for optional contact.
+Ask only material follow-ups: daytime AC operation/hours, EV charging amount/location/timing and planned start date, major scheduled loads, tariff details, roof refinements and actual quotations. Allow unsure.
+Reuse answers and recalculate conditional applicability when earlier answers change; exclude stale hidden answers from calculations. Retain optional contact/OTP/consent inside the calculator and results without contact. Server checks must validate the correct questionnaire version and required facts.
+
+C. Tax inside Claude's Extras card
+Keep the switch/card/summary styling, but replace the old top-rate selector and formula. Do NOT use min(cost,200000) × marginal rate; do NOT place tax relief at year zero; do NOT require property ownership merely because the prototype hides the card for non-owners.
+Verify the current primary rules, including Royal Decree 805 and RD Notification 470:
+https://ratchakitcha.soc.go.th/documents/104277.pdf
+https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg470A.pdf
+https://www.rd.go.th/59670.html
+Reuse known dates/capacity and ask only missing eligibility/claimant/account/prior-claim/document facts. Offer optional annual taxable income AFTER other deductions. Calculate tax before minus tax after the eligible deduction, including bracket crossings. For an uncomplicated case, 800,000 taxable income with a fully eligible 200,000 deduction gives 32,500 tax reduction, not 40,000.
+Use potentially compatible / ineligible / insufficient-information outcomes. Unknown income is not a maximum-benefit assumption. Put any estimated one-off benefit in the applicable tax-year cash flow, separately from today's invoice and recurring savings. Actual cash refund is not established merely by the tax reduction. Handle unsupported complex tax situations honestly.
+Keep income and tax identifiers out of URLs, shared estimates, installer records, analytics and persistent drafts; avoid collecting identifiers when eligibility answers suffice. Use volatile local state for optional income by default.
+
+D. Export inside the same Extras card
+Replace the prototype's whole-system <=5 kW eligibility test with the applicable AC export/connection rule, distinct from panel DC capacity. Calculate interval surplus subject to approved export power; do not sell all annual excess automatically.
+Use verified applicable contract/programme rates and duration. The prior review found a policy-approved 20-year expansion while operational PEA material still described 10 years. Do not blindly assume either for every household. Keep unknown/unapproved export out of the base result and show a conditional scenario.
+Remove the obsolete unit-test expectations of 33,000 tax / 3,960 annual export / about six-year payback / 335,600 lifetime value. Derive new expected values independently from verified rules and fixtures.
+
+E. Other scenarios, snapshots and data
+Provide optional financing from actual deposit, term, interest basis, fees and repayments; distinguish flat-rate from reducing-balance interest and gross saving from net cash flow. No invented lender offers.
+Battery and existing-system requests must route separately. Use precise results only where a separate tested model has sufficient inputs (battery usable capacity/power/dispatch/backup/cost/replacement; existing generation/import/export/equipment for expansion). Otherwise clearly delimit an optional solar-only illustration. Never imply these scenarios were calculated by the ordinary model. Keep factory/commercial or unsupported geography outside precise residential claims.
+Keep unconfirmed extras separate from the base hero/example/chart. Every displayed example and result must derive from the new engine; old 1,665/9-year figures may legitimately change. Optional scenario totals must use the same cash-flow model, not a disconnected widget.
+Version tariff, cost, production, incentive and model evidence separately, with source/effective/checked/expiry information. Current tariffs may already be correct: refresh verified evidence rather than changing values for appearance. Normalize package DC/AC sizes, VAT and included scope; do not treat one promotion as a market average.
+Freeze safe inputs, assumptions and necessary result data for reproducible saved/shared estimates, with a deliberate recalculation path. Do not expose sensitive answers while adding snapshots. Migrate old links/drafts explicitly, validate schemas and preserve existing permission boundaries. Any additive database migration must be justified, tested and staged safely; no production migration.
+
+VERIFICATION AND ACCEPTANCE
+
+Serve the untouched prototype separately. Compare actual rendered reference and implementation at 360, 390, 768 and 1440 px in English and Thai; spot-check around relevant 600/900/1000/1100 breakpoints. Wait for fonts/images, freeze volatile fixture times and use deterministic synthetic data. Inspect final CSS/computed styles, not just screenshots. Exclude only documented prototype tooling from comparisons. Use a separate test harness for matching fixture data; never alter the reference, add production test bypasses or force old calculator numbers to pass visual checks.
+
+Use Claude visual targets only for #home, #estimate (all question/control types), #loading and #results (closed/expanded extras and refinements), mapping to real homeowner application routes. Apply the homeowner content-page requirements in the spec. For installer landing/portal routes, compare against the CURRENT APPLICATION baseline, never against Claude v3 installer references. Preserve real sign-in/content/legal routes absent from the prototype.
+
+Capture side-by-side and overlay/difference evidence. Correct unintended geometry, asset, typography and responsive differences. Record only necessary numeric, factual-copy, accessibility or real-state differences; do not broadly mask content or claim exactness from a passing build. New states should reuse approved components and be identified as extensions without a direct reference screenshot.
+
+At 390×844, the homeowner H1, bill input, slider and primary button must be visible without scrolling. No horizontal overflow, orphaned control rows, obstructed house image, inaccessible disclosures or broken Thai text. Verify keyboard/focus, reduced motion and axe WCAG A/AA checks; do not silently change the design if an essential accessibility correction is necessary—document the smallest correction.
+
+Test ordinary and edge calculator flows, energy conservation, nighttime limits, roof/phase constraints, quote precision, candidate comparisons, tariffs/dates/TOU, future-load double counting, tax brackets/unknowns, export limits, no-payback states, draft migration and frozen sharing. Verify qualification/contact behavior and restricted data boundaries.
+
+Run relevant installer functional tests for any changed controls/adapters plus visual regression against the current application. Verify pauses/approval, actual note persistence and conflicts, authorized outcome/contact actions, legacy assessment rendering and unchanged accounting where affected. Do not expand into unrelated installer work; record pre-existing failures separately. Keep legal-text assertions; open homeowner disclosures before asserting. Update tests for intentional homeowner math or wording changes using independent expected values; never weaken assertions to hide regressions.
+
+Run applicable unit, browser, typecheck, lint, build and accessibility checks. Reuse valid unchanged evidence where appropriate, but do not skip affected checks. Real-world household calibration and unavailable provider/quote evidence remain explicitly unverified; do not claim them from synthetic tests.
+
+DELIVERY
+
+Commit the integrated work on the feature branch. No main merge, production deployment, production migration or enabling of real collection, payments, attribution, messages or allocation.
+
+Use the existing protected isolated staging environment for the completed preview if its authorized workflow and credentials are available. Preserve Access protection, synthetic data, pause switches and secret handling. Inspect any staging migration, backup and recovery requirements before deploying. Do not bypass access controls or request passwords in chat. If an actual access limitation prevents staging, finish the local work and clearly identify that limitation.
+
+Give working mobile-accessible HTTPS links for Thai/English HOMEOWNER home, calculator/results and a protected homeowner comparison viewer. Installer routes on the same staging deployment must retain their existing design; report any authorized functional changes separately and do not present installer v3 as implemented. Do not make the original reference public or expose real personal records. Localhost alone is not a remote preview.
+
+Final handoff: commit/branch, implemented scope of the four homeowner design prompts and calculator requirements, confirmation that installer design work was excluded and its visual baseline preserved, plus any installer functional changes actually made, representative before/after calculations, verification actually run, visual-comparison evidence, documented necessary deviations, remaining external decisions/evidence and rollback instructions for staging. Say plainly what is incomplete. Do not end after a scaffold or an unverified design pass.

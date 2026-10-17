@@ -1,0 +1,131 @@
+{
+  "prepared_bangkok_date": "2026-10-17",
+  "scope": {
+    "visual": "homeowner only",
+    "installer_functionality": "allowed where relevant, preserving current installer design",
+    "production_changes": false
+  },
+  "source_archive": {
+    "filename": "solarmatch-design-v3.zip",
+    "bytes": 7646457,
+    "sha256": "97e19f426f888092aef6b8ed730db62d1fa4ddfa8e81ad56e2e14f93b4e3caca"
+  },
+  "files": {
+    "CALCULATOR_AUDIT.txt": {
+      "bytes": 23692,
+      "sha256": "a29827c96faa594df42a3274562c88ada5189f09f575544799a7ab082cff8d8e"
+    },
+    "EXECUTOR_PROMPT.txt": {
+      "bytes": 22663,
+      "sha256": "4de004d93524f3abfabe626dfda41f20a52e6336e27a8f9e81684aa185c58a48"
+    },
+    "PACKAGE_README.txt": {
+      "bytes": 1662,
+      "sha256": "98dc96b2add69aa41e27190a0cd851c2023a458d5b9f2a08eb390227ad29592b"
+    },
+    "design-v3/CODEX_PROMPTS_V3.md": {
+      "bytes": 8228,
+      "sha256": "8f7d6ca356a514dd5026962f27890bbb7b8b9d1ab1ec6849ee3e720b8c9f7dd2"
+    },
+    "design-v3/README.md": {
+      "bytes": 1049,
+      "sha256": "79997532889888893390a334ad85f53ca4e5575afc7f33265b6646410bdc2348"
+    },
+    "design-v3/V3_SPEC.md": {
+      "bytes": 19017,
+      "sha256": "5869b067b2ce32f2e718e6b519369806ebf35ddb5dbe4feb6d10cb85aae44ce6"
+    },
+    "design-v3/prototype/app.css": {
+      "bytes": 51689,
+      "sha256": "f59d14d19c53b5f4e461bd56b84582ec1e2b326aecc9be5b7baa43379159b577"
+    },
+    "design-v3/prototype/app.js": {
+      "bytes": 127954,
+      "sha256": "44bfe49959a03c4e78fc30543e30fb1c21fa8924fb6f9754d22404280f483e78"
+    },
+    "design-v3/prototype/engine.min.js": {
+      "bytes": 54568,
+      "sha256": "f21eadefeeb8d15f8582033e3dca97d79e5d5219f0695d46c9d76baa79136750"
+    },
+    "design-v3/prototype/img/home-hero-m.jpg": {
+      "bytes": 169243,
+      "sha256": "23ea3a6f69fa186529bea2435815107214bd4dde097782800be834670c94e1e3"
+    },
+    "design-v3/prototype/img/home-hero-wide-m.jpg": {
+      "bytes": 151550,
+      "sha256": "b20482baefa9a9d879ffed5d941a8af94d05d3c424e0408c9d730ed70ac21f54"
+    },
+    "design-v3/prototype/img/home-hero-wide.jpg": {
+      "bytes": 284823,
+      "sha256": "da77ae8fae8d5f08171bca75aa1a10d21b8547ed2715ce99bf14e8a3d6147d4d"
+    },
+    "design-v3/prototype/img/home-hero.jpg": {
+      "bytes": 377612,
+      "sha256": "bb37597b7fc0fa1a62091eee0db2af15e40f8fc23f43e8e6b0989dd2ffbdac25"
+    },
+    "design-v3/prototype/img/installer-tall.jpg": {
+      "bytes": 116863,
+      "sha256": "60584e841d13f861b0f80dbe18dbabcf706997ae8a3ac986f5a8c23a8b8ae40d"
+    },
+    "design-v3/prototype/img/installer.jpg": {
+      "bytes": 110103,
+      "sha256": "752bf7b4e3566a18b515ce903688c4c86dcd2c92fddd35fa82eaf734d0c9945f"
+    },
+    "design-v3/prototype/img/modern-roof.jpg": {
+      "bytes": 234144,
+      "sha256": "a8e4105dec3244c1aead08e9e7b9c0e6ae014fd6259acd5a050d378c1886dcf8"
+    },
+    "design-v3/prototype/img/palms-roof.jpg": {
+      "bytes": 280075,
+      "sha256": "046d5696dc288ac2fa3f14383550395d155e1b218d5f7842b6b248325bb2462a"
+    },
+    "design-v3/prototype/img/roof-tile.jpg": {
+      "bytes": 232134,
+      "sha256": "5cba8c4e8cdbb7df8e234d700335ff3a38b7f5a8ef33f3dfbd476252fd7e635d"
+    },
+    "design-v3/prototype/index.html": {
+      "bytes": 979,
+      "sha256": "6cceb42cfa6191ed751c8e612d9bf73f44abb6ef30d612bc84ffec969f6e101e"
+    },
+    "design-v3/reference/company-phone.png": {
+      "bytes": 323539,
+      "sha256": "610f3da911ac2ecb706b6eb83da91d64e2c5323c2e4bc6410e18815878dcf544"
+    },
+    "design-v3/reference/credits-phone.png": {
+      "bytes": 316304,
+      "sha256": "55cbd3e5d3a0e38ac6be0be3dadc45493bf7bc319faac3827931bd4735fb8317"
+    },
+    "design-v3/reference/enquiry-phone.png": {
+      "bytes": 291591,
+      "sha256": "2280f88e1fda7e7b9f1b306c6085f79a666d76a8bd78acf86e42a80fa76d782c"
+    },
+    "design-v3/reference/estimate-desktop-v3.png": {
+      "bytes": 112149,
+      "sha256": "47c0405143539ea08ec24c1f187fe10f9a9e0bb56868d8fd430670de04e250da"
+    },
+    "design-v3/reference/home-desktop.png": {
+      "bytes": 1209016,
+      "sha256": "5e6b2860bab62feb617f1c5f7245d9ac6d765675e3d546137c4233c97ab64a35"
+    },
+    "design-v3/reference/home-phone.png": {
+      "bytes": 1649291,
+      "sha256": "a4c4dfc40599fe5d0f62af327f6a5b94b660fe177e3a214795d0d3c2374658d1"
+    },
+    "design-v3/reference/installers-phone.png": {
+      "bytes": 863261,
+      "sha256": "c0ccde47ea4dd724f73c8c858f42ca6c58e4f885ade5ca4e32e8c8a61f0667ef"
+    },
+    "design-v3/reference/location-desktop.png": {
+      "bytes": 84409,
+      "sha256": "beff0289c39845015e066ba365132212eac9c26c4440fdb0026a68c7e5a7b5a8"
+    },
+    "design-v3/reference/location-phone.png": {
+      "bytes": 126238,
+      "sha256": "c5a9143f0f947628ad66e7140595bd275dc6795e9b2b582c306b3267ef8d188a"
+    },
+    "design-v3/reference/results-phone.png": {
+      "bytes": 758807,
+      "sha256": "19b6672f1dc291903fc3e6df80f79be80dffa46e2dcdc1d5dd81eab0c55ef503"
+    }
+  }
+}

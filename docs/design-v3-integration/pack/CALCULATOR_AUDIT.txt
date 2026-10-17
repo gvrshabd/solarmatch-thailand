@@ -1,0 +1,238 @@
+SolarMatch calculator: functionality and accuracy review
+Checked 17 October 2026, Bangkok time
+Repository: gvrshabd/solarmatch-thailand
+Reviewed main commit: 3571f357e469bddc43db287b67ec22c4358f0061
+
+Scope: current questionnaire, calculation engine, assumptions, methodology, relevant tests, and current Thai tariff/incentive/price evidence. This is an analysis, not an instruction to deploy or alter the website. No application code, configuration, database, or website was changed. Numerical experiments used an isolated copy of the existing engine. They demonstrate its behavior; they do not validate its real-world predictions. This was not a new physical roof survey or a live-device acceptance test.
+
+1. Main recommendation
+
+Improve the calculation model before making the questionnaire longer. Use a short common route, then ask additional questions only when an answer can materially change the recommended system, savings, eligibility, or uncertainty.
+
+Preserve the useful existing foundations: calculating the difference between before/after progressive electricity bills; including Ft, VAT and fixed charges; distinguishing generation from electricity used on site; including degradation and a maintenance/component reserve; excluding unconfirmed export and tax benefits from the base case; and allowing results without requesting installer contact.
+
+The largest improvements are: matching generation and demand through time; comparing feasible, genuinely purchasable systems; using actual electricity consumption and billing periods; separating new solar, batteries and existing-system upgrades; and adding optional tax/export/finance scenarios only when their conditions are known.
+
+2. Confirmed implementation findings
+
+2.1 System sizing and small-system pricing are inconsistent.
+
+The current engine chooses a system from 24–48% of estimated annual electricity consumption, with a small future-load adjustment. It does not compare alternative feasible systems for financial value. Every single-phase system at or below 3 kWp gets the same 130,000-baht package price.
+
+Reproduction: Bangkok/Sathon, high daytime use, almost no shade, default unknown direction/slope, 2,000-baht monthly bill:
+
+  Current automatic selection: 1.5 kWp; cost 130,000; monthly saving 547;
+  simple net payback 24.8 years; undiscounted 25-year net benefit -9,000 baht.
+
+  Same inputs, engine explicitly evaluates 3 kWp: cost 130,000;
+  monthly saving 968; payback 12.6 years; 25-year net benefit +111,000 baht.
+
+This does NOT establish that 3 kWp is right for that house. Both cases use the current approximate self-consumption model. It establishes that the automatic choice can lose to another option under its own assumptions. The financial verdict should describe the evaluated design, not conclude that all solar options are poor for that household.
+
+Correction: obtain real package specifications and small-system prices; fix time matching; compare feasible package sizes, including doing nothing. Consider total value, budget and site constraints as well as shortest payback. Do not invent a proportional small-system price if installers do not sell it.
+
+2.2 The monthly self-consumption heuristic can credit solar against nighttime demand.
+
+The engine multiplies monthly generation by a percentage, then caps it against the whole month's consumption. It does not check whether that consumption happens while the panels produce power. In a deliberately oversized engine test, a 50 kWp quote and very-low daytime use still remove 99.6% of a 6,000-baht bill without a battery. Automatic residential sizing generally does not choose such an extreme size; the stress case exposes the model's missing physical limit.
+
+Correction: calculate simultaneous load and generation. Without storage, self-use in each interval is the smaller of load and solar generation. Nighttime imports cannot be eliminated by surplus daytime production. A full hourly year is a useful target; monthly hourly profiles with weekday/weekend differences are an intermediate approximation. Actual 15/30-minute meter data is better where available.
+
+2.3 Roof constraints have confirmed defects.
+
+Entering an exact usable roof area of 1 square metre still permits a 1 kWp system, although the model assumes 5.5 square metres per kWp. A quoted 20 kWp system with 33 square metres of roof can be marked as likely feasible because the feasibility check compares the roof with the automatically sized system, not the quoted system.
+
+Correction: permit a genuine insufficient-space outcome. Check the actual evaluated design against usable roof planes, panel dimensions and access/setbacks. Separate a requested quote evaluation from confirmation that it physically fits. Broad roof-area bands are uncertainty inputs, not measured upper capacities.
+
+2.4 Several inputs do not change the numerical result.
+
+Changing installed AC count from 1 to 100, property type, roof material, exact coordinates within the same province, or project type produces identical numerical results in the engine. A province change can change yield; moving a map pin within a province does not. Property and roof details may still be useful for qualification and surveying, but should not be presented as numerical refinements unless they are actually used.
+
+Correction: replace installed AC count with meaningful usage information when needed. Use property type for eligibility/routing; material for mounting/roof-work scope when evidenced. Either connect map coordinates to an appropriate production dataset or stop implying that precise pin placement improves the solar calculation.
+
+2.5 Batteries and existing-system expansion are not modeled as distinct investments.
+
+The project-type answer does not change calculations. Existing-solar expansion receives an explanatory note but not an incremental energy model. Battery selection does not introduce battery price, efficiency, usable capacity, replacement, dispatch or backup constraints.
+
+Correction: branch early. Until separate models exist, identify the unsupported calculation scope and label any solar-only illustration clearly. Do not present a new, battery-free system's economics as a battery or expansion result.
+
+2.6 Future loads are represented by a generic sizing adjustment.
+
+One future EV, additional AC, a pump, or all three produce the same four-percentage-point sizing adjustment. Estimated household consumption does not increase. Night charging is not distinguished from daylight charging.
+
+Correction: calculate additional kWh and its timing. Keep today's and future-use scenarios separate. Do not add a load again if it is already included in the supplied bill.
+
+2.7 Other corrections worth making together.
+
+- Preserve an entered quotation price exactly. The current engine rounds a 222,000-baht quote to 220,000 before calculating economics.
+- Unknown electricity phase silently uses the cheaper single-phase cost. Show the assumption and phase-sensitive alternatives; it is not a conservative financial assumption.
+- Clarify roof slope versus panel slope. For panels truly at zero tilt, compass direction cannot change generation. For a flat roof with tilted mounting, the panel orientation matters.
+- Apply degradation to generation, then recompute electricity flows and bills. Current code directly degrades the avoided-baht result.
+- Use the entered bill's historical tariff when inferring kWh, then separately select a tariff for the forecast. Current code uses calculation-day rates for both.
+- Handle tariff effective dates in Bangkok time, and flag expired schedules instead of silently continuing indefinitely.
+- Restrict precise residential estimates to supported sizes, tariff categories and geography. Very large/factory inputs and other provinces need separate supported assumptions rather than unlimited extrapolation.
+
+3. A shorter, higher-value questionnaire
+
+The current configured sequence has 11 screens, including location, bill, timeframe, project type, property, ownership, daytime pattern, appliances, shade, roof material and optional installer contact. Roof area and several refinements are optional after results. Older methodology documents do not perfectly match this sequence.
+
+Recommended common topics, grouped into roughly six steps if practical:
+
+1) Project: first solar installation, already have solar, or solar with battery/backup interest. Route unsupported project types honestly.
+2) Location and electricity supply: province; relevant utility and ordinary/TOU/unknown tariff. Confirm a household meter rather than a landlord markup, multiple meters, or a business tariff.
+3) Electricity consumption: prefer kWh and billing month/days. Accept baht as a fallback. Offer additional monthly bills or optional bill-photo extraction, with user confirmation of extracted values and unnecessary account details excluded. Do not force twelve bills for a quick estimate.
+4) Timing: weekday and weekend use, particularly daylight AC and other major loads. Ask simple time-band questions, not an exhaustive appliance inventory.
+5) Usable roof space: area or a practical size band, with unsure allowed. Distinguish usable installation area from house floor area.
+6) Shading: none/some/heavy, and morning/midday/afternoon when the user knows. Optional direction/tilt and multiple roof planes refine production.
+
+Keep ownership/authority and buying timeframe wherever required for installer qualification, but they need not interrupt the core energy estimate. Keep contact optional within the calculator, consistent with the existing product decision. Do not delete server-side qualification controls merely because questions move.
+
+Appliances should be conditional. For AC, ask how many normally run during daylight and for how long, not how many are installed. A pool pump running several hours is different from a short-cycle household booster pump. EV ownership alone does not establish daytime solar demand. More detailed appliance inputs should refine the shape of measured electricity consumption, not add the same energy twice.
+
+Allow unsure throughout. Missing data should produce a stated assumption and wider uncertainty. It should not produce artificial precision or block a preliminary result unnecessarily.
+
+4. Adaptive branches and useful decisions
+
+EV: existing or planned; energy/distance driven; share charged at home; daylight availability; expected start date. Compare night-only with realistically shiftable charging.
+
+TOU tariff: peak/off-peak kWh and utility calendar. Do not classify every daytime hour as peak: weekends and holiday rules matter.
+
+Battery: bill savings, backup, or both; critical-load power and required hours; usable battery capacity, efficiency, reserve, replacement and compatible equipment. Compare solar-only against solar-plus-storage. Ordinary grid-tied solar alone does not imply blackout backup.
+
+Existing solar: current panel/inverter size, generation, remaining grid purchases, exports, storage and available roof. The post-solar electricity bill is not total household demand. Model the additional benefit of an upgrade, not a second independent new installation.
+
+Actual quotation: exact module count/wattage, inverter AC size, total installed price, VAT, battery, exclusions and warranties. Treat quoted price as input, not a rounded market assumption.
+
+Financing: cash or loan, deposit, term, fees, interest basis and payments. Distinguish flat-rate advertising from reducing-balance APR. Show installation cost, loan payments and net household cash flow separately from electricity savings.
+
+Low daytime demand: compare a smaller array and feasible load shifting before assuming a battery is economic.
+
+Roof replacement/heavy shade: compare surveying, roof work or a smaller usable plane first. Do not calculate as if a known constraint has disappeared.
+
+Short expected occupancy: compare break-even with likely years of use. Do not invent a solar resale premium.
+
+Export and tax: separate conditional scenarios described below. A larger financial incentive does not automatically make the most expensive design best.
+
+An effective question-selection rule is: ask the next question when its answer could materially change system choice, cost, benefit or uncertainty. A tax question can be valuable; a tenth irrelevant appliance question is not.
+
+5. Tax: the proposed branch is worthwhile, but calculate a tax reduction
+
+Royal Decree 805 is enacted, and Revenue Department Notification 470, signed 30 September 2026, adds detailed implementation conditions after the calculator's August assumptions review. The existing 200,000-baht cap and 2028 end date alone are insufficient to calculate eligibility.
+
+The measure concerns qualifying personal rooftop-solar expenditure up to 200,000 baht, effective 3 March 2026 through 31 December 2028. It is a deduction/exemption from taxable income, not a refund equal to the installation cost. The new rules include a residential electricity account, a one-system/one-claim limit, installed capacity at or below 10 kW, claimant/account/application matching, qualifying dates, successful connection, and the required e-tax documentation. Reuse known inputs; flag uncertain technical-capacity definitions and complex tax cases for verification. Do not assume all battery expenditure qualifies, that spouses automatically double the allowance, or that roof ownership on the land title is mandatory.
+
+Offer an optional check to appropriate individual household users; do not infer eligibility or income from postcode, bill size or perceived wealth.
+
+Suggested branch:
+- Would you like to estimate a possible personal tax saving?
+- Who pays and claims: you, another household member, a company, or unsure?
+- Have you already used this solar benefit?
+- Ask only missing relevant facts about account/applicant identity, dates and required documents.
+- If desired, ask estimated annual taxable income after other deductions: amount, range or unsure.
+
+Result states should be: conditions appear compatible; a specific condition fails; or insufficient information. For a prospective purchase, use a conditional scenario because final invoices/connection cannot yet be verified.
+
+For uncomplicated progressive-tax cases:
+
+  Estimated tax saving = tax before the solar deduction - tax after it.
+
+Example: annual taxable income of 800,000 baht before a fully eligible 200,000-baht solar deduction gives an estimated tax reduction of 32,500 baht, holding other deductions fixed. Multiplying the whole deduction by the top 20% bracket would incorrectly give 40,000. Low taxable income can mean little or no benefit.
+
+Show it as a one-off tax-year benefit, alongside economics without that benefit. Do not reduce today's installer invoice or add it to recurring monthly electricity savings. A cash refund depends on tax already paid/withheld and the final return. Income unknown means benefit unknown, not the maximum 70,000 baht. Keep these optional financial inputs out of installer enquiries and shared result URLs by default.
+
+6. What needs updating in the figures
+
+Electricity: the current September–December 2026 normal higher-use residential tariff is already aligned with the official PEA schedule. The more important gaps are tariff category, bill date, TOU, and stale-data handling. Current base blocks are 3.0000 baht/kWh for the first 200 units, 4.1584 for the next 200 and 4.3583 thereafter, plus Ft 0.1623, service charge 24.62 and applicable VAT. Other meter categories differ; do not automatically change category when simulated imports fall after solar.
+
+Installation prices: evidence supports a range, not a blanket assertion that current prices are too high. GRoof currently advertises a single-phase '5 kW' package at 145,000/150,000 baht including VAT, depending on inverter. However, its eight 590 W panels are actually 4.72 kWp DC, with a 5 kW AC inverter. SCG's October offer lists a 5 kW single-phase package at 189,000 baht, with promotion conditions and VAT treatment needing confirmation. These are different specifications, not a national market average.
+
+Collect 3–5 comparable current quotations for each commonly offered configuration. Normalize panel DC capacity, inverter AC power, phase, VAT, permit/meter work, mounting, safety equipment, maintenance, warranty, travel and exclusions. The owner's uncle's company is a useful datapoint, not the sole market benchmark. Refresh quarterly and when partner packages change.
+
+Solar production: province values are approximately 1,357–1,398 kWh/kWp/year. They are not proven wrong by this review, but the repository lacks a complete reproducible weather/model run behind them. Save dataset/version, years, location, mounting, tilt, loss assumptions and returned output. Model multiple roof planes and avoid double-counting losses already included in source data.
+
+Maintenance: current 1.02% of installation cost per year is a US benchmark used as a maintenance AND component reserve. Do not add inverter replacement on top without removing its reserved portion. Replace the placeholder progressively with local service/replacement evidence and bundled free-service years.
+
+Export: the live PEA application page still publishes 2.20 baht/kWh over 10 years, while a September government policy approval expands the intended term to 20 years and programme capacity to 10,000 MW. Operative amended utility/contract terms were not established in this review. Describe this as approved policy awaiting verified implementation/contract application, not an unapproved rumour and not a guaranteed 20-year income stream. Use the homeowner's actual approved contract where available. Keep zero export income in the unapproved base case and show a conditional export comparison.
+
+The 5 kW AC offered-export limit is not automatically a 5 kWp panel-size limit. Model export per interval after on-site use, subject to the approved power limit. Do not assume retail-rate net metering or unlimited sale of all annual surplus.
+
+7. Outputs that would make the calculation more useful
+
+- Recommended feasible package and why it was chosen, alongside a smaller/larger option where meaningful.
+- Electricity generated, used directly, purchased from the grid, exported/curtailed and lost in storage, as applicable.
+- Gross bill reduction distinct from maintenance, financing and net household cash flow.
+- Installation-cost range and clearly itemized conditional costs.
+- Simple payback distinct from cumulative break-even; 25-year undiscounted benefit distinct from optional discounted present value.
+- Base case without unconfirmed tax/export, with optional conditional comparisons.
+- Plausible lower/central/higher scenarios tied to specific uncertainties. Do not label an arbitrary +/-10% as a validated confidence interval.
+- The single most useful missing input: for example, a summer bill or daylight EV-charging schedule.
+
+Do not label all solar unsuitable because one selected package has negative value. Conversely, do not recommend solar when no feasible tested option provides a reasonable outcome under the chosen objectives.
+
+8. Implementation order and proof of improvement
+
+First: repair physical/scope defects, exact quote handling and unsupported-input behavior. Correct stale methodology claims. Preserve ordinary before/after tariff calculation.
+
+Second: implement better bill-period/kWh inputs and load timing, versioned price/package evidence, and a reproducible production model. Then compare feasible system candidates. Optimization must not magnify a flawed self-consumption model.
+
+Third: add the optional tax and verified export scenarios. Add finance where exact loan inputs exist. Keep batteries and existing-system expansion explicitly outside precise results until their separate models are ready.
+
+Fourth: calibrate and maintain. Compare against independent installer designs and itemized quotations, then consenting households' actual generation, imports/exports and bills. Start with a diverse pilot set, retain some households for validation, and measure errors by household/roof/load category. Control for weather, occupancy, tariff and equipment changes. Tests passing and more questions do not establish predictive accuracy.
+
+Necessary automated checks include: energy conservation; no nighttime solar offset without storage; insufficient roof area; roof checks on quoted size; exact quote prices; panel tilt/azimuth consistency; tariff boundaries and bill dates; TOU calendars; present/future load double-counting; project-type routing; tax bracket crossings and unknown/ineligible outcomes; export power limits and contract terms; and frozen reference cases.
+
+Track separate effective/checked/expiry dates for tariffs, policy, prices and weather assumptions. Review Ft before January/May/September periods; monitor official policy notices; refresh package evidence at least quarterly. Flag expired data. Source-change monitoring can propose updates, but verify extracted numbers before activating them.
+
+Save each estimate's inputs, model version and assumptions snapshot. An old shared result should not silently change after an update; offer a newly dated recalculation.
+
+9. Source and reproduction references
+
+Current source, pinned:
+https://github.com/gvrshabd/solarmatch-thailand/blob/3571f357e469bddc43db287b67ec22c4358f0061/lib/calculator/residential-estimator.ts
+https://github.com/gvrshabd/solarmatch-thailand/blob/3571f357e469bddc43db287b67ec22c4358f0061/config/solar-assumptions.ts
+https://github.com/gvrshabd/solarmatch-thailand/blob/3571f357e469bddc43db287b67ec22c4358f0061/config/electricity-tariffs.ts
+https://github.com/gvrshabd/solarmatch-thailand/blob/3571f357e469bddc43db287b67ec22c4358f0061/config/assessment.ts
+
+PEA official September 2026 tariff:
+https://www.pea.co.th/sites/default/files/users/user34/attachments/Electricity_Tariff_SEP_2026_3.pdf
+ERC Ft history:
+https://www.erc.or.th/th/automatic
+
+Royal Decree 805:
+https://ratchakitcha.soc.go.th/documents/104277.pdf
+Revenue Department Notification 470:
+https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dg470A.pdf
+Revenue Department personal income tax bands:
+https://www.rd.go.th/59670.html
+
+PEA operational export application:
+https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766
+ERC June 2026 export announcement:
+https://www.erc.or.th/th/news-release/3441
+Government September policy approval:
+https://www.thaigov.go.th/th/news/169035
+MEA existing-solar/export FAQ:
+https://myenergy.mea.or.th/?lang=th
+
+GRoof current package:
+https://www.gunkulroof.com/packages/5?phase=1
+SCG service and October promotion:
+https://www.scghome.com/homesolution/home-cooling-air-solar/solar-rooftop/solar-rooftop-onnex-scg
+Additional installer offers, not a representative market average:
+https://www.weservesolar.com/
+PEAshopping 3 kW listing:
+https://peashopping.com/product/pea-solar-3kw-1-phase-standard-package/
+
+PVGIS model documentation:
+https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/using-pvgis-5/pvgis-5-user-manual_en
+PVWatts V8 API documentation:
+https://developer.nlr.gov/docs/solar/pvwatts/v8/
+PEA load research:
+https://www.pea.co.th/about-pea/load-research
+NREL residential PV maintenance benchmark:
+https://atb.nrel.gov/electricity/2024/residential_pv
+
+Local experiment evidence:
+/workspace/solarmatch-calculator-experiments/sizing-counterfactuals.json
+/workspace/solarmatch-calculator-experiments/model-audit/run.mjs
+
+No site-specific external solar-production simulation or measured-household calibration was performed in this review. Those are recommended follow-up validation steps, not completed evidence.
