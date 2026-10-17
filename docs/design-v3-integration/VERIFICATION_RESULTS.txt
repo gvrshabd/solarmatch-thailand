@@ -34,6 +34,7 @@ Checks actually performed before publication
 - Full unit suite: 607 tests in 72 files passed.
   Two additional review-link tests passed separately, verifying the synthetic
   fixture, safe allowlisted share fields and negative/unavailable edge links.
+  Final full run: 609/609 tests in 73 files passed (112.94s).
 - Independent final release/security review: 34 tests in five boundary files
   passed; no concrete release blocker found.
 - Typecheck passed including the final new live-smoke test.
