@@ -1,0 +1,172 @@
+LIFETIME BENEFIT ATTRIBUTION — synthetic daytime THB6000 fixture
+Local investigation, 17 October 2026. No calculator model changes.
+
+Result
+The published THB263000 -> THB574776.42 comparison is reproducible. It does
+not establish a defect or an accuracy improvement. Most of the increase is
+the change from a 70% self-consumption assumption to the hourly model's very
+high coincidence of smooth, repeated solar and demand curves. The source
+documents explicitly call those hourly curves unvalidated assumptions.
+Tax relief, export income, finance and tariff escalation contribute zero.
+
+Reproduction from repository root (existing dependencies only)
+  pnpm exec vitest run tests/unit/calculator-benefit-attribution-v3.test.ts --maxWorkers=1 --silent=false --reporter=verbose
+Diagnostic implementation: scripts/calculator-benefit-attribution-v3.ts.
+It prints BENEFIT_ATTRIBUTION_JSON with full precision, both paths, every
+factor's all-subset marginal range and Shapley average, and pair interactions.
+It does not write files, invoke services, change prices or select a new system.
+
+Endpoints, before rounding
+                                      Legacy             v3
+DC kWp                                4.5                5.005
+CAPEX THB                             165000             170130
+Annual O&M/component reserve THB       1683               1735.326
+Year-one generation kWh               5899.5             6998.14115
+Year-one immediate self-use kWh        4129.65            6835.16278551
+Year-one self-use / PV                 70%                97.6711% approximately
+Year-one avoided bill THB              19975.2904953      33061.96947035
+25-year gross avoided bills THB        470536.97231271    788289.57255753
+25-year reserves THB                  42075              43383.15
+25-year net benefit THB               263461.97231271    574776.42255753
+
+Net = gross avoided bills - CAPEX - 25 annual reserves. No other cash item is
+needed to reconcile the engines. The old public API rounds the lifetime net
+to THB1000. Thus exact model delta is 311314.45024482, whereas subtraction
+from the published 263000 produces 311776.42255753. Their 461.97231271
+difference is display rounding, not an energy or financial effect.
+
+Counterfactual convention
+Eight binary switches keep six requested categories distinct and retain two
+additional material implementation changes explicitly:
+  size: 4.5 -> 5.005 DC kWp, price held independently;
+  price: upfront CAPEX 165000 -> 170130, reserve held independently;
+  generation: legacy Bangkok 1380*.95 and inherited monthly shares -> JRC
+    1398.23/reference panel plane and source monthly shares;
+  selfConsumption: monthly min(demand, .70*PV) -> hourly min(demand, PV);
+  tariff: frozen legacy schedule -> dated v3 schedule for these same dates;
+  operatingCost: annual absolute reserve 1683 -> 1735.326;
+  demandCalendar: twelve identical kWh months -> days-normalized months;
+  degradationMethod: degrade year-one monetary savings -> degrade generation
+    then recompute coincidence and bills each year, at the same 0.5%/year.
+
+Price and reserve switches intentionally separate two effects of the real
+price change; both must switch to recover v3. Annual reserve rate itself did
+not change (1.02% CAPEX). Likewise annual demand did not change: both engines
+infer 15647.02907273 kWh/year. Calendar normalization changes monthly timing.
+Neither engine uses the installed AC count as quantified AC operating energy
+in this fixture: it supplies no input power/hours. No future load is supplied.
+
+The legacy engine has no hourly weather. Mixed states that apply hourly
+self-use to legacy production distribute legacy monthly totals over v3's
+synthetic solar-hour shape. This is an explicit diagnostic convention, not
+an evidenced historical hourly profile. Both endpoints match their actual
+engine; intermediate hybrids are diagnostic states, not purchasable packages
+or unique causal explanations. Inverter AC is held at 5 kW for the bridge;
+neither endpoint's synthetic output clips, so it adds no endpoint difference.
+Actual package selection changes from a heuristic target to finite package
+comparison maximizing undiscounted lifetime net. Size and price switches
+describe the resulting selected systems, not a rerun of either selection rule.
+
+Order dependence and interactions (THB, rounded below only)
+Factor                   Forward delta   Reverse delta   Shapley average
+size                        52804.70        72734.64        62546.61
+price                       -5130.00        -5130.00        -5130.00
+generation                  34821.58        43872.87        37639.12
+selfConsumption            221740.41       201145.09       215011.91
+tariff                          0.00            0.00            0.00
+operatingCost               -1308.15        -1308.15        -1308.15
+demandCalendar              -1097.52            0.00         -282.90
+degradationMethod            9483.43            0.00         2837.88
+TOTAL                     311314.45       311314.45       311314.45
+
+Forward switches in the listed order; reverse switches in the opposite order.
+All 256 combinations are evaluated. The Shapley column averages a factor's
+marginal contribution over every possible ordering using subset weights. It
+sums to the exact delta by mathematical construction, not because the chosen
+hybrid convention has been empirically established as causal. Do not attach
+these contributions to a particular real household or call them accuracy gains.
+
+Factor's marginal across every subset of the other switches:
+  size                  +52804.70 .. +73255.69
+  generation            +31308.12 .. +44115.81
+  selfConsumption      +200555.71 .. +230593.69
+  demandCalendar         -2040.51 .. +75.92
+  degradationMethod          0.00 .. +9483.43 (floating noise below 1e-9)
+Price, tariff and annual absolute reserve have constant marginal contributions
+in this bridge. Self-use's forward/reverse difference is THB20595.32; its full
+marginal range spans THB30037.98. A single waterfall would hide that dependence.
+
+Pair interactions with every other switch still at legacy (discrete second
+differences, not contributions to add to the Shapley column):
+  size x generation                  +3513.47
+  size x selfConsumption            +17902.99
+  generation x selfConsumption      +11072.19
+  selfConsumption x demandCalendar    -283.97
+  selfConsumption x degradationMethod +480.16
+Remaining pair terms at the legacy origin are below 1e-6; this does not assert
+that higher-order interactions or pair effects at other states are zero.
+
+What changed inside generation
+At final 5.005 kWp, legacy production would be 6561.555 kWh. Removing its .95
+unspecified-roof factor adds 345.345; changing yield from 1380 to 1398.23 adds
+91.24115, for 6998.14115. Size alone at the legacy effective yield adds
+662.055 kWh. A different order assigns the size/yield cross-effect differently.
+The generation switch also changes monthly shares, so the financial row is
+not merely annual extra kWh multiplied by one tariff. Important fixture detail:
+roofDirection/roofSlope are absent even though explicit panel tilt15/azimuth180
+are present. Legacy ignores those newer panel fields and uses unsure/unsure=.95;
+v3 uses the explicit reference plane. Thus not all uplift is a revised solar
+resource number, and it is inaccurate to call it an hourly-method correction.
+
+Tariff result and excluded scenarios
+For this October2026 ordinary1.2 fixture, old and new numeric schedules are
+identical: tiers 200@3, next200@4.1584, rest@4.3583; Ft .1623; service24.62;
+VAT7%. Tariff validation and provenance improved, but contribute THB0 here.
+Do not generalize that zero to historical dates, different categories or TOU.
+Personal tax/export/finance calculations live in separate optional scenarios.
+The base engines supply no tax cash flow, no export receipts, and no repayment;
+the exact net identity above independently checks their absence from this case.
+Discount rate is absent/default0, and the reported net is undiscounted.
+
+Evidence and limitations
+Read: VERIFICATION_RESULTS.txt, REPRESENTATIVE_COMPARISONS.txt, ENERGY_SOURCES.txt,
+TARIFF_SOURCES.txt and SCENARIO_SOURCES.txt; old/new estimator, energy engine,
+tariff configurations, solar assumptions and resource snapshot configuration.
+These are stored project evidence and implementation inspection, not a fresh
+verification of changing external offers, tariff law or tax eligibility.
+
+The dominant 97.67% self-use is plausible under the constructed smooth profiles,
+but no meter/weather measurements validate it. Repeating a monthly mean solar
+day and smooth generic demand suppresses variability; hourly averaging and
+unmodeled clouds/occupancy can overstate coincidence. The size and direction of
+that real-household bias cannot be quantified from this fixture alone.
+The authored daytime55% share, intra-day shapes, 70/30 solar beam/diffuse mix,
+fixed solar-time to civil-time alignment and representative2027 calendar lack
+household calibration. JRC supports a reference annual/monthly modeled output,
+not those household-hour coincidence assumptions. Geographic/mounting transfer
+and shade factors remain planning assumptions. Other province/address inputs
+do not personalize irradiance.
+
+The single supplier's starting reference plus7% contingency is not a verified
+complete VAT-inclusive site quotation; site extras and equipment compatibility
+remain unconfirmed. Maintenance1.02% and degradation0.5% are transferred fixed
+planning assumptions, not this installation's demonstrated costs/performance.
+Constant tariffs over25years, undiscounted selection, absence of curtailment/
+outages/availability losses and no measured calibration limit interpretation.
+
+Defect disposition
+No arithmetic defect is evidenced by this jump: both endpoints and all25 modern
+gross-savings years reconcile to the existing engines within floating precision.
+This investigation therefore changes no model math. The supported finding is
+assumption sensitivity, dominated by self-use coincidence; altering it requires
+an explicit calibrated/sensitivity design decision and evidence, not tuning the
+model until the new lifetime number resembles the old one.
+
+Validation performed
+The focused Vitest test passed (one file/one test, ~1.3s complete on this run).
+Targeted ESLint for both new TypeScript files and repository tsc --noEmit passed.
+Checks include actual engine endpoint reconciliation, all25 actual modern annual
+financial rows, equal numeric tariff charges, exact base cash identity, 256
+counterfactual states, two path sums, weighted average sum and material self-use
+order dependence. These establish diagnostic arithmetic and stated behavior;
+they do not establish measured predictive accuracy or external source currency.

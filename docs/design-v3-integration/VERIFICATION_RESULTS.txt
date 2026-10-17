@@ -1,0 +1,124 @@
+SolarMatch homeowner Design v3 integration — 17 October 2026
+
+Scope and preserved baseline
+Repository: gvrshabd/solarmatch-thailand
+Integration branch: feature/homeowner-design-v3-integration
+Calculator baseline: 0d7a13bf43d24b856714adda7cb657ebeabc68ee
+Main before integration: 3571f357e469bddc43db287b67ec22c4358f0061
+Application integration: cb60929ce19a40e6efde2772f021123a03c5984d
+Final exact-price/Thai presentation correction: 3869f90 (same tested model).
+Original archive reference commit: 6fae1dde7370ac326bb72f7bb78b5ca6b9eed81c
+The original supplied source is byte-for-byte preserved; manifest regression
+checks every supplied file. No installer visual redesign, LINE rewrite, migration,
+legal/consent replacement, seed or business-operation activation is included.
+
+Implemented
+- Final homeowner v3 cascade/assets, desktop frosted hero and mobile photo/card.
+- Bill-first qv8/schema11 with stable-ID draft migration and retained energy-v3
+  inputs. Native province/district selects; current conditional fields remain.
+- Existing full consent remains; drafts/editing cannot restore prior acceptance.
+- Results use the completed energy model, not prototype engine/arithmetic.
+  Corrected optional models, frozen shares, negative/unavailable cases retained.
+- Homeowner-only Manrope/Anuphan scope; exact supplied result SVG paths.
+- Narrow authenticated publication control explicitly publishes a disabled
+  release. Public configuration GET no longer initializes/publishes D1 releases.
+  Existing Access identity, allowlist, origin, CSRF and operation holds apply.
+- kWh contact is explicitly unavailable (actual-bill-v1 policy); API rejects it
+  even with forged positive bill metadata. kWh estimates remain available.
+  This is the owner's authorized fail-closed alternative, NOT complete kWh
+  qualification/persistence. Live contact collection remains disabled for all.
+- Staging-only actual v3 comparison viewer, isolated clickable original, synthetic
+  screenshots and direct interactive links. Nothing is added to public/ for it.
+
+Checks actually performed before publication
+- Full unit suite: 607 tests in 72 files passed.
+  Two additional review-link tests passed separately, verifying the synthetic
+  fixture, safe allowlisted share fields and negative/unavailable edge links.
+- Independent final release/security review: 34 tests in five boundary files
+  passed; no concrete release blocker found.
+- Typecheck passed including the final new live-smoke test.
+- Lint passed with 14 warnings: two application native-image warnings and twelve
+  warnings in the frozen supplied prototype. Reference source was not rewritten.
+  After assembling review assets, the first final lint incorrectly scanned their
+  generated bundles (12 errors). The new generated-only output directory is now
+  explicitly ignored, like the existing v2 directory; source remains linted.
+- Protected viewer browser test passed (9.8s), all listed EN/TH images and mobile
+  zoom/no-overflow, axe and prototype CSP isolation. Initial test used an exact
+  wrapped-label text lookup that included option text; corrected to accessible
+  combobox names. The next run found a genuine missing keyboard focus target on
+  scrollable image regions; added labelled focusable regions, then passed with
+  the original axe assertions intact. Earlier failed runs are not called passes.
+- Clean ordinary production build passed after the final font/glyph/source batch.
+- Compiled homeowner/home and installer-selected checks: 8/8 passed.
+- Compiled homeowner flow/home matrix: 26/27 passed initially. One Thai WebKit
+  no-contact result visibility assertion exceeded its unchanged five-second
+  window. Trace shows successful documents/assets and .rhero rendered ~716ms
+  after deadline; mocked 503 responses were intentional. Delayed hydration was
+  established; CPU contention is plausible, not proven. The same assertion then
+  passed three consecutive isolated repetitions. No timeout/assertion was weakened.
+  Final serial rerun on the rebuilt candidate: all 27/27 passed across the same
+  three browser projects in 2.2 minutes, with unchanged assertions and no retries.
+- Results desktop suite: 24/24 passed before the final native refinement fix;
+  new refinement regression passed, plus seven selected Android cases including
+  real-kWh EN/TH, 320/390px expanded axe and keyboard controls. Final matrix and
+  matched capture results are recorded in the companion comparison reports.
+- Final calculator behavior matrix: 75/75 passed, serially with no retries,
+  across desktop Chrome, Android Chrome and iPhone WebKit. Final exact-price
+  bounds regression covers 320/360/390/414/1440px without dropping typed cents.
+- Final default results and edge screenshot captures passed. The opt-in paired
+  loading capture experiment failed while holding navigation; no loading images
+  or comparison pass are claimed. This evidence gap remains explicitly visible
+  in the protected review viewer and RESULTS_VERIFICATION.txt.
+- Installer eight workspace before/after captures were pixel-identical. Landing
+  phone EN identical; TH differed by one channel in one pixel. Desktop image
+  loading/compression differences are recorded rather than called exact matches.
+  Installer source/CSS/assets are unchanged. Four compiled responsive/detail
+  cases passed after earlier local dev readiness/auth-fixture failures; no
+  production account or payment/provider action was used to obtain this evidence.
+
+Visual evidence
+docs/design-v3-comparison/ contains actual v3 matched EN/TH 360/390/768/1440
+screens, computed geometry and raw differences. See ASSESSMENT_REVIEW.txt and
+RESULTS_VERIFICATION.txt for final capture results and necessary departures.
+Original model values are not forced into implementation screenshots. Real
+expanded fields, full legal text, mobile language/navigation, current step count
+and factual financial disclosures may change height. No broad pixel masking.
+Browser emulation/axe is not physical-device or screen-reader acceptance.
+
+Data safety and release sequencing
+Both targets have the same complete 19-migration chain; none is pending or added.
+Verified encrypted fresh backups: all 60 tables restored in disposable memory,
+SHA-256 checked, foreign keys and ledger reconciled, remote pre/post state equal.
+Private backups live under ignored .wrangler/homeowner-v3-release/, protected by
+owner ACL and Windows CurrentUser DPAPI wrapping of AES-256-GCM keys.
+Production backup: production-2026-10-17T02-30-55-579Z-HZNN5q
+Source SHA-256: e956a63b9b49ae8fb7e097b3f85fabf5efb9d919833baad2dd7e1b80adb3c324
+Staging backup: staging-2026-10-17T02-33-37-571Z-dUjL1o
+Source SHA-256: 86a12ae0e5f5725e1255b5bf2498e38705867a4dffc13fc7e6e508a7af66cb4a
+Time Travel information is stored in each private manifest. No R2 write or R2
+restore claim. Production seven leads/enquiries; staging two synthetic leads/
+enquiries, one delivery and two ledger rows. Historical consent/legal preserved.
+Deploy new code first with old D1 release still current; then use authenticated
+explicit disabled-only qv8 publication and full preservation verification.
+RELEASE_OPERATIONS.txt documents exact guarded procedure and rollback boundary.
+
+Remaining limitations, not represented as completed
+- kWh contact storage/scoring policy deliberately unavailable; all live collection
+  and other real operations remain disabled.
+- Household interval calibration: example self-use ~97.7% is an uncalibrated
+  reference scenario, not measured performance. BENEFIT_ATTRIBUTION.txt explains
+  THB263461.97 -> THB574776.42; most uplift is the self-use model, not tariffs.
+- Obtain diverse itemized quotations and clarify VAT/inclusions; current price
+  evidence is not a market average and contingency is not VAT.
+- Independently retrievable MEA tariff source gap retained; current effective
+  dated evidence/PEA/approved tariff model is documented by calculator-v3.
+- TOU, batteries and expansion remain explicitly unsupported for precise advice.
+- Optional tax/export/financing are separate, never included in the base result.
+- Exact provenance of every supplied photo derivative/unidentified roof image,
+  native Thai review, qualified legal/company facts and provider approvals remain
+  unresolved. No substitute imagery or invented approval closes these items.
+- This document records preparation/evidence, not by itself successful deployment.
+  Actual staging/production version, checks and any failure are reported separately.
+
+No Milly's repository/resource was targeted. No real messages, charges, enquiries,
+registration, allocation, tracking or customer-data mutation were performed.

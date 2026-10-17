@@ -1,0 +1,361 @@
+{
+  "note": "Common controls compare identical question IDs and synthetic answers. Project/roof are modern-energy extensions; current counts, energy details and consent remain authoritative.",
+  "records": [
+    {
+      "surface": "prototype",
+      "locale": "en",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 107,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 107,
+            "width": 354,
+            "height": 63.59375,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".pair": {
+            "x": 18,
+            "y": 198.59375,
+            "width": 354,
+            "height": 188.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "en",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".estimate-actions": {
+            "x": 0,
+            "y": 759,
+            "width": 390,
+            "height": 85,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "12px 18px 20px",
+            "gap": "10px"
+          },
+          ".estimate-actions button": {
+            "x": 18,
+            "y": 772,
+            "width": 66,
+            "height": 52,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px 24px",
+            "gap": "10px"
+          },
+          ".assessment-flow-header": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 79.09375,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".segment-progress": {
+            "x": 18,
+            "y": 79.09375,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 112.09375,
+            "width": 354,
+            "height": 281.4375,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 112.09375,
+            "width": 354,
+            "height": 63.59375,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".location-pair": {
+            "x": 18,
+            "y": 203.6875,
+            "width": 354,
+            "height": 189.84375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "th",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 35.09375,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".pair": {
+            "x": 18,
+            "y": 160.09375,
+            "width": 354,
+            "height": 191.28125,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "th",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".estimate-actions": {
+            "x": 0,
+            "y": 759,
+            "width": 390,
+            "height": 85,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "12px 18px 20px",
+            "gap": "10px"
+          },
+          ".estimate-actions button": {
+            "x": 18,
+            "y": 772,
+            "width": 66,
+            "height": 52,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px 24px",
+            "gap": "10px"
+          },
+          ".assessment-flow-header": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 79.796875,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".segment-progress": {
+            "x": 18,
+            "y": 79.796875,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 112.796875,
+            "width": 354,
+            "height": 254.375,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 112.796875,
+            "width": 354,
+            "height": 35.09375,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".location-pair": {
+            "x": 18,
+            "y": 175.890625,
+            "width": 354,
+            "height": 191.28125,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    }
+  ]
+}

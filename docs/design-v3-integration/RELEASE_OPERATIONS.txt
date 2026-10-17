@@ -1,0 +1,112 @@
+HOMEOWNER DESIGN V3 — EXPLICIT DISABLED RELEASE OPERATIONS
+
+This is a procedure, not evidence of publication. The implementation/reviewer has
+performed read-only remote inspection only. No migration is needed or authorized
+by this helper. Root/release operator reviews and executes any authorized writes.
+
+Use the bundled Node >=22.13 runtime (the shell's default Node may be too old).
+All commands run from the SolarMatch repository. No command below touches another
+project, providers, Access policy, secrets, payments, sending or platform holds.
+
+Read-only preflight:
+  node scripts/homeowner-v3-production-release.mjs inspect production
+  node scripts/homeowner-v3-production-release.mjs inspect staging
+
+Fresh backup, separately for each target before deployment/publication:
+  node scripts/homeowner-v3-production-release.mjs backup production
+  node scripts/homeowner-v3-production-release.mjs backup staging
+
+The helper creates a unique .wrangler/homeowner-v3-release/<target>-<time>-<random>
+directory with Windows owner-only ACLs. It exports the exact target D1, encrypts
+AES-256-GCM, wraps its random key with Windows CurrentUser DPAPI, decrypts and fully
+restores into disposable in-memory SQLite. All 60 application/migration tables,
+original column/value hashes, foreign keys, ledger reconciliation and unchanged
+remote snapshot must match before it marks the backup verified. Only then is its
+own explicitly named temporary plaintext export removed. On failure, stop; inspect
+the private directory rather than reusing or silently deleting it. No automatic
+remote restore exists. Keep the DPAPI account/profile and both encrypted files;
+these are not portable recovery credentials for another Windows account.
+
+Backup manifests include deployed Worker versions, remote main, current release,
+target-ID collisions, migration names, counts, holds and Time Travel information
+when available. No original row values or secrets are printed. Private backups,
+keys and manifests are ignored and must never enter Git/review assets/public/.
+This D1 backup makes no R2-object recovery claim; the release modifies no R2 data.
+
+Ordering and explicit publication
+1. Verify feature branch against freshly read remote main; preserve all history.
+2. Complete protected staging visual/functional review and required tests. Staging
+   /api/assessment/config returns a read-only qv8 preview without publishing D1.
+3. Take fresh verified backups for the target(s) whose deployment/config changes
+   are about to occur. Store the exact run directory and export sourceSha256.
+4. Release application code by the authorized normal main/build workflow. Keep
+   existing D1 releasev8/qv6 current until the application has deployed/been checked.
+   Never auto-upgrade release state on public configuration reads.
+5. Open /admin/homeowner-v3-release on the exact target origin in the authenticated
+   owner admin browser. Click "Read current release and holds", enter the verified
+   fresh backup export SHA-256, check the explicit backup/scope confirmation and
+   click "Publish homeowner v3 with collection disabled" only when authorized.
+   This normal UI performs the authenticated GET/POST below; do not use browser
+   scripting to send a mutation. On uncertain outcome, inspect before any retry.
+   In an authenticated owner admin session on the exact target origin, GET
+   /admin/api/homeowner-v3-release. It returns the reviewed current release ID and
+   a CSRF token. Do not print/copy session credentials or the CSRF token to logs.
+6. After reviewing the successful backup, send same-origin JSON POST to that same
+   endpoint, with x-csrf-token from the authenticated preflight and body:
+   {"action":"publish-homeowner-v3-disabled",
+    "expectedCurrentReleaseId":"residential-release-v8",
+    "backupSha256":"<the exact verified export sourceSha256>"}
+   The reference is an operator attestation/audit link, NOT remote cryptographic
+   proof of a local backup. The operator must verify the backup actually exists.
+   The endpoint requires existing Access admin auth/allowlist, CSRF, exact HTTPS
+   origin and held runtime flags; the atomic batch rechecks DB holds/test clock
+   and the expected current release. It refuses occupied version IDs and retries.
+   If authentication fails, stop and obtain the proper owner admin session; do
+   not introduce a raw Cloudflare-token SQL bypass or weaken Access/CSRF.
+7. Verify using this exact fresh run directory, before and after publication:
+   node scripts/homeowner-v3-production-release.mjs verify production <run-directory>
+   (Use staging instead only for the explicitly targeted separate staging D1.)
+   All original business/legal/consent/financial records must match. Only the old
+   release current flag and exact new qv8/contact/release/audit rows are permitted.
+   Session/rate-limit metadata differences are explicitly reported, not claimed
+   unchanged. Any other change fails and requires review, not a baseline reset.
+8. Check actual protected/public assessment metadata: qv8/schema11, rulesv4,
+   energy-v3, null assessment token, disabled contact, no live submissions, kWh
+   contact unsupported. Production must not show the staging-only Test option.
+   Check bill and kWh calculator journeys, both languages, old shares/drafts and
+   installer visual baseline. Never create a fake production enquiry to test.
+
+Published release: residential-release-v9; questionnaire residential-questionnaire-v8
+(schema11); existing residential-rules-v4; new disabled contact configuration
+contact-configuration-homeowner-v3-disabled. Existing content/legal/facts/rules are
+referenced unchanged. The new question ordering does not invent kWh scoring or an
+actual bill. kWh calculation works, while kWh contact remains explicitly unavailable.
+Collection/payments/notifications/outbound remain off; platform/allocation paused;
+all live providers off, no cron, test clock NULL. No SQL migration or old-row rewrite.
+
+Rollback boundary
+Before qv8 publication, an authorized application rollback can use the fresh
+manifest's prior Worker version without changing legacy D1 releasev8. After qv8
+publication, do not assume the old pre-calculator application understands schema11
+or energy-v3. Prefer a forward application repair; a rollback then requires a
+separately reviewed coordinated restoration of the preserved legacy release pointer
+and previous app, with a fresh backup and audited atomic config action. This helper
+does not perform that write. Never reset Git, remove migration records or restore
+the whole D1 for a CSS/application regression. Actual data damage requires a
+separately authorized recovery plan and disposable restore verification first.
+
+READ-ONLY INSPECTION RECEIPT — 17 OCTOBER 2026
+Production checked 02:26:45 UTC; staging checked 02:29:45 UTC.
+Remote main: 3571f357e469bddc43db287b67ec22c4358f0061.
+Production Worker: 9c9fa004-8558-45a0-aa99-2ab9d39108ce (100%).
+Production deployment: 1dc137aa-5176-415e-a194-97c8005ddd36.
+Staging Worker: 74b553a0-9686-4a02-a612-3e32b94b62dd (100%).
+Staging deployment: f5f9492d-9726-4497-b06d-59b9894112f8.
+Both: releasev8/qv6/rulesv4, no proposed-ID collisions, all 19 migrations exactly
+matched, all five holds intact, NULL clock, runtime live flags disabled, zero cron,
+zero foreign-key violations and zero ledger mismatches. These checks are point-in-
+time evidence; fresh preflight/backup/verification is still required at release.
+Production: 7 leads, 7 enquiries, 3 legal versions, 9 audits, 0 installer users,
+deliveries, credit ledger entries, payment orders or outbox rows; 60 tables.
+Staging: 2 synthetic leads/enquiries, 1 installer user, 1 delivery, 2 credit ledger
+entries, 2 outbox rows, 13 audits; 60 tables. Existing fixtures/history are retained.

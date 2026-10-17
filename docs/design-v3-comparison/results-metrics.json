@@ -1,0 +1,3858 @@
+[
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "en",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 461.640625,
+      "top": 69,
+      "right": 360,
+      "bottom": 530.640625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 461.640625,
+      "top": 69,
+      "right": 360,
+      "bottom": 530.640625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 461.640625,
+      "top": 69,
+      "right": 360,
+      "bottom": 530.640625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "en",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 474.609375,
+      "top": 69,
+      "right": 360,
+      "bottom": 543.609375,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 474.609375,
+      "top": 69,
+      "right": 360,
+      "bottom": 543.609375,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 474.609375,
+      "top": 69,
+      "right": 360,
+      "bottom": 543.609375,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "en",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 418.875,
+      "top": 69,
+      "right": 390,
+      "bottom": 487.875,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 418.875,
+      "top": 69,
+      "right": 390,
+      "bottom": 487.875,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 418.875,
+      "top": 69,
+      "right": 390,
+      "bottom": 487.875,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "en",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 432.5625,
+      "top": 69,
+      "right": 390,
+      "bottom": 501.5625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 432.5625,
+      "top": 69,
+      "right": 390,
+      "bottom": 501.5625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 432.5625,
+      "top": 69,
+      "right": 390,
+      "bottom": 501.5625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "en",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 392.90625,
+      "top": 69,
+      "right": 768,
+      "bottom": 461.90625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 392.90625,
+      "top": 69,
+      "right": 768,
+      "bottom": 461.90625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 392.90625,
+      "top": 69,
+      "right": 768,
+      "bottom": 461.90625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "en",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 402.078125,
+      "top": 69,
+      "right": 768,
+      "bottom": 471.078125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 402.078125,
+      "top": 69,
+      "right": 768,
+      "bottom": 471.078125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 402.078125,
+      "top": 69,
+      "right": 768,
+      "bottom": 471.078125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "en",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 289.828125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 358.828125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 289.828125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 358.828125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 289.828125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 358.828125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "฿1,665 less each monthabout 28% of today’s bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, Anuphan, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "25.6px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "en",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 292.421875,
+      "top": 69,
+      "right": 1440,
+      "bottom": 361.421875,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "en",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 292.421875,
+      "top": 69,
+      "right": 1440,
+      "bottom": 361.421875,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "en",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 292.421875,
+      "top": 69,
+      "right": 1440,
+      "bottom": 361.421875,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "฿2,755 less each monthabout 46% of reference bill",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 599,
+    "columns": "563px",
+    "scrollWidth": 599
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 600,
+    "columns": "564px",
+    "scrollWidth": 600
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 899,
+    "columns": "863px",
+    "scrollWidth": 899
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 900,
+    "columns": "820px",
+    "scrollWidth": 900
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 959,
+    "columns": "879px",
+    "scrollWidth": 959
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 960,
+    "columns": "491.734px 364.266px",
+    "scrollWidth": 960
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 999,
+    "columns": "514.141px 380.859px",
+    "scrollWidth": 999
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 1000,
+    "columns": "514.719px 381.281px",
+    "scrollWidth": 1000
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 1099,
+    "columns": "571.594px 423.406px",
+    "scrollWidth": 1099
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "en",
+    "width": 1100,
+    "columns": "572.156px 423.844px",
+    "scrollWidth": 1100
+  },
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "th",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 438.09375,
+      "top": 69,
+      "right": 360,
+      "bottom": 507.09375,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 438.09375,
+      "top": 69,
+      "right": 360,
+      "bottom": 507.09375,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 438.09375,
+      "top": 69,
+      "right": 360,
+      "bottom": 507.09375,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "th",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 438.03125,
+      "top": 69,
+      "right": 360,
+      "bottom": 507.03125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 438.03125,
+      "top": 69,
+      "right": 360,
+      "bottom": 507.03125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 360,
+    "scrollWidth": 360,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 360,
+      "height": 438.03125,
+      "top": 69,
+      "right": 360,
+      "bottom": 507.03125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28px",
+        "lineHeight": "28px",
+        "padding": "0px 0px 2.24px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "37px",
+        "lineHeight": "37px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "324px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "108px 108px 108px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "th",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 439.3125,
+      "top": 69,
+      "right": 390,
+      "bottom": 508.3125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 439.3125,
+      "top": 69,
+      "right": 390,
+      "bottom": 508.3125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 439.3125,
+      "top": 69,
+      "right": 390,
+      "bottom": 508.3125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "th",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 439.25,
+      "top": 69,
+      "right": 390,
+      "bottom": 508.25,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 439.25,
+      "top": 69,
+      "right": 390,
+      "bottom": 508.25,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 390,
+    "scrollWidth": 390,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 390,
+      "height": 439.25,
+      "top": 69,
+      "right": 390,
+      "bottom": 508.25,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "28.86px",
+        "lineHeight": "28.86px",
+        "padding": "0px 0px 2.3088px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "38.22px",
+        "lineHeight": "38.22px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "354px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "118px 118px 118px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "th",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 407.40625,
+      "top": 69,
+      "right": 768,
+      "bottom": 476.40625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 407.40625,
+      "top": 69,
+      "right": 768,
+      "bottom": 476.40625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 407.40625,
+      "top": 69,
+      "right": 768,
+      "bottom": 476.40625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "th",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 405.65625,
+      "top": 69,
+      "right": 768,
+      "bottom": 474.65625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 405.65625,
+      "top": 69,
+      "right": 768,
+      "bottom": 474.65625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 768,
+    "scrollWidth": 768,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 768,
+      "height": 405.65625,
+      "top": 69,
+      "right": 768,
+      "bottom": 474.65625,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 0px 40px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "28px 18px 64px",
+        "columns": "732px",
+        "gap": "20px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "244px 244px 244px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results",
+    "locale": "th",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 301.125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 370.125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 301.125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 370.125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "prototype",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 301.125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 370.125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿4,335",
+    "headline": "ลดลง ฿1,665 ต่อเดือนประมาณ 28% ของค่าไฟตอนนี้",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, system-ui, sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, Manrope, system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results",
+    "locale": "th",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 294.28125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 363.28125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-extras",
+    "locale": "th",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 294.28125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 363.28125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "results-refined",
+    "locale": "th",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "hero": {
+      "x": 0,
+      "y": 69,
+      "width": 1440,
+      "height": 294.28125,
+      "top": 69,
+      "right": 1440,
+      "bottom": 363.28125,
+      "left": 0
+    },
+    "before": "฿6,000",
+    "after": "฿3,245",
+    "headline": "ลดลง ฿2,755 ต่อเดือนประมาณ 46% ของค่าไฟอ้างอิง",
+    "styles": [
+      {
+        "selector": ".rhero",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "48px 0px 64px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px 0px 32px 32px"
+      },
+      {
+        "selector": ".ba .was",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "40px",
+        "lineHeight": "40px",
+        "padding": "0px 0px 3.2px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".ba .now",
+        "fontFamily": "Manrope, \"Manrope Fallback\", sans-serif",
+        "fontWeight": "700",
+        "fontSize": "54px",
+        "lineHeight": "54px",
+        "padding": "0px",
+        "columns": "none",
+        "gap": "normal",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rbody",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "40px 40px 96px",
+        "columns": "652.594px 483.406px",
+        "gap": "24px",
+        "radius": "0px"
+      },
+      {
+        "selector": ".rstats",
+        "fontFamily": "Anuphan, \"Anuphan Fallback\", Manrope, \"Manrope Fallback\", system-ui, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px",
+        "lineHeight": "27.2px",
+        "padding": "0px",
+        "columns": "176.5px 176.516px 176.516px",
+        "gap": "0px",
+        "radius": "24px"
+      }
+    ]
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 599,
+    "columns": "563px",
+    "scrollWidth": 599
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 600,
+    "columns": "564px",
+    "scrollWidth": 600
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 899,
+    "columns": "863px",
+    "scrollWidth": 899
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 900,
+    "columns": "820px",
+    "scrollWidth": 900
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 959,
+    "columns": "879px",
+    "scrollWidth": 959
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 960,
+    "columns": "491.734px 364.266px",
+    "scrollWidth": 960
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 999,
+    "columns": "514.141px 380.859px",
+    "scrollWidth": 999
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 1000,
+    "columns": "514.719px 381.281px",
+    "scrollWidth": 1000
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 1099,
+    "columns": "571.594px 423.406px",
+    "scrollWidth": 1099
+  },
+  {
+    "surface": "implementation",
+    "state": "breakpoint-refined",
+    "locale": "th",
+    "width": 1100,
+    "columns": "572.156px 423.844px",
+    "scrollWidth": 1100
+  }
+]

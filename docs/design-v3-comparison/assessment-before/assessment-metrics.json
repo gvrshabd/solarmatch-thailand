@@ -1,0 +1,1781 @@
+{
+  "note": "Common controls compare identical question IDs and synthetic answers. Project/roof are modern-energy extensions; current counts, energy details and consent remain authoritative.",
+  "records": [
+    {
+      "surface": "prototype",
+      "locale": "en",
+      "width": 390,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 95.390625,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".money-input.big": {
+            "x": 18,
+            "y": 220.390625,
+            "width": 354,
+            "height": 72,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "6px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "en",
+      "width": 390,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 18,
+            "y": 120.09375,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 81,
+            "width": 354,
+            "height": 578.9375,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 153.09375,
+            "width": 354,
+            "height": 63.59375,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".bill-direct-input": {
+            "x": 18,
+            "y": 337.46875,
+            "width": 354,
+            "height": 72,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "9px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "en",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 63.59375,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".pair": {
+            "x": 18,
+            "y": 188.59375,
+            "width": 354,
+            "height": 188.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "en",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 18,
+            "y": 120.09375,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 81,
+            "width": 354,
+            "height": 471.40625,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 153.09375,
+            "width": 354,
+            "height": 63.59375,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".location-pair": {
+            "x": 18,
+            "y": 272.6875,
+            "width": 354,
+            "height": 189.84375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "en",
+      "width": 390,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 31.796875,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".opts": {
+            "x": 18,
+            "y": 156.796875,
+            "width": 354,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "en",
+      "width": 390,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 18,
+            "y": 120.09375,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 81,
+            "width": 354,
+            "height": 581.765625,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 153.09375,
+            "width": 354,
+            "height": 31.796875,
+            "display": "block",
+            "fontSize": "30px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".choice-grid": {
+            "x": 18,
+            "y": 212.890625,
+            "width": 354,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "en",
+      "width": 1440,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 210,
+            "y": 0,
+            "width": 1020,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 210,
+            "y": 64,
+            "width": 1020,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 647,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 97,
+            "width": 340,
+            "height": 647,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 146.25,
+            "display": "block",
+            "fontSize": "46px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".money-input.big": {
+            "x": 210,
+            "y": 271.25,
+            "width": 616,
+            "height": 72,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "6px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "en",
+      "width": 1440,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 210,
+            "y": 120.09375,
+            "width": 640,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 210,
+            "y": 81,
+            "width": 640,
+            "height": 653.015625,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 875.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          ".assessment-summary": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 875.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 153.09375,
+            "width": 640,
+            "height": 97.5,
+            "display": "block",
+            "fontSize": "46px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".bill-direct-input": {
+            "x": 210,
+            "y": 344.984375,
+            "width": 420,
+            "height": 72,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "9px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "en",
+      "width": 1440,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 210,
+            "y": 0,
+            "width": 1020,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 210,
+            "y": 64,
+            "width": 1020,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 647,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 97,
+            "width": 340,
+            "height": 647,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 97.5,
+            "display": "block",
+            "fontSize": "46px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".pair": {
+            "x": 210,
+            "y": 222.5,
+            "width": 616,
+            "height": 87.1875,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "en",
+      "width": 1440,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 210,
+            "y": 120.09375,
+            "width": 640,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 210,
+            "y": 81,
+            "width": 640,
+            "height": 417.203125,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 875.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          ".assessment-summary": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 875.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 153.09375,
+            "width": 640,
+            "height": 48.75,
+            "display": "block",
+            "fontSize": "46px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".location-pair": {
+            "x": 220,
+            "y": 257.84375,
+            "width": 298,
+            "height": 87.921875,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "en",
+      "width": 1440,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 210,
+            "y": 0,
+            "width": 1020,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 210,
+            "y": 64,
+            "width": 1020,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 647,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 97,
+            "width": 340,
+            "height": 647,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 48.75,
+            "display": "block",
+            "fontSize": "46px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".opts": {
+            "x": 210,
+            "y": 173.75,
+            "width": 616,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "en",
+      "width": 1440,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 210,
+            "y": 120.09375,
+            "width": 640,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 210,
+            "y": 81,
+            "width": 640,
+            "height": 661.28125,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 875.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          ".assessment-summary": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 875.375,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 153.09375,
+            "width": 640,
+            "height": 48.75,
+            "display": "block",
+            "fontSize": "46px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".choice-grid": {
+            "x": 210,
+            "y": 229.84375,
+            "width": 640,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "th",
+      "width": 390,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 70.1875,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".money-input.big": {
+            "x": 18,
+            "y": 195.1875,
+            "width": 354,
+            "height": 72,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "6px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "th",
+      "width": 390,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 18,
+            "y": 120.796875,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 81,
+            "width": 354,
+            "height": 552.453125,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 153.796875,
+            "width": 354,
+            "height": 35.09375,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".bill-direct-input": {
+            "x": 18,
+            "y": 309.671875,
+            "width": 354,
+            "height": 72,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "9px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "th",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 35.09375,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".pair": {
+            "x": 18,
+            "y": 160.09375,
+            "width": 354,
+            "height": 191.28125,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "th",
+      "width": 390,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 18,
+            "y": 120.796875,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 81,
+            "width": 354,
+            "height": 446.359375,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 153.796875,
+            "width": 354,
+            "height": 35.09375,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".location-pair": {
+            "x": 18,
+            "y": 244.890625,
+            "width": 354,
+            "height": 191.28125,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "th",
+      "width": 390,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 18,
+            "y": 0,
+            "width": 354,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 18,
+            "y": 64,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 591,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 97,
+            "width": 354,
+            "height": 70.1875,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".opts": {
+            "x": 18,
+            "y": 195.1875,
+            "width": 354,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "th",
+      "width": 390,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 18,
+            "y": 120.796875,
+            "width": 354,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 18,
+            "y": 81,
+            "width": 354,
+            "height": 622.171875,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".assessment-summary": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "display": "none",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          "h1": {
+            "x": 18,
+            "y": 153.796875,
+            "width": 354,
+            "height": 70.1875,
+            "display": "block",
+            "fontSize": "26px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".choice-grid": {
+            "x": 18,
+            "y": 251.984375,
+            "width": 354,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "th",
+      "width": 1440,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 210,
+            "y": 0,
+            "width": 1020,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 210,
+            "y": 64,
+            "width": 1020,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 647,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 97,
+            "width": 340,
+            "height": 647,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 102.59375,
+            "display": "block",
+            "fontSize": "38px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".money-input.big": {
+            "x": 210,
+            "y": 227.59375,
+            "width": 616,
+            "height": 72,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "6px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "th",
+      "width": 1440,
+      "name": "bill",
+      "questionId": "monthlyBillThb",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 210,
+            "y": 120.796875,
+            "width": 640,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 210,
+            "y": 81,
+            "width": 640,
+            "height": 608.171875,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 847.890625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          ".assessment-summary": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 847.890625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 153.796875,
+            "width": 640,
+            "height": 51.296875,
+            "display": "block",
+            "fontSize": "38px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".bill-direct-input": {
+            "x": 210,
+            "y": 299.484375,
+            "width": 420,
+            "height": 72,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px 18px",
+            "gap": "9px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "th",
+      "width": 1440,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 210,
+            "y": 0,
+            "width": 1020,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 210,
+            "y": 64,
+            "width": 1020,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 647,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 97,
+            "width": 340,
+            "height": 647,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 51.296875,
+            "display": "block",
+            "fontSize": "38px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".pair": {
+            "x": 210,
+            "y": 176.296875,
+            "width": 616,
+            "height": 88.640625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "th",
+      "width": 1440,
+      "name": "location",
+      "questionId": "province",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 210,
+            "y": 120.796875,
+            "width": 640,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 210,
+            "y": 81,
+            "width": 640,
+            "height": 421.828125,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 847.890625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          ".assessment-summary": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 847.890625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 153.796875,
+            "width": 640,
+            "height": 51.296875,
+            "display": "block",
+            "fontSize": "38px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".location-pair": {
+            "x": 220,
+            "y": 261.09375,
+            "width": 298,
+            "height": 88.640625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "prototype",
+      "locale": "th",
+      "width": 1440,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".flow-hdr": {
+            "x": 210,
+            "y": 0,
+            "width": 1020,
+            "height": 64,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "14px"
+          },
+          ".bar": {
+            "x": 210,
+            "y": 64,
+            "width": 1020,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".q": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 647,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 97,
+            "width": 340,
+            "height": 647,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 97,
+            "width": 616,
+            "height": 51.296875,
+            "display": "block",
+            "fontSize": "38px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".opts": {
+            "x": 210,
+            "y": 176.296875,
+            "width": 616,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "surface": "implementation",
+      "locale": "th",
+      "width": 1440,
+      "name": "choice",
+      "questionId": "propertyType",
+      "extension": false,
+      "metrics": {
+        "values": {
+          ".segment-progress": {
+            "x": 210,
+            "y": 120.796875,
+            "width": 640,
+            "height": 5,
+            "display": "flex",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "4px"
+          },
+          ".focus-card": {
+            "x": 210,
+            "y": 81,
+            "width": 640,
+            "height": 665.1875,
+            "display": "block",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".aside": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 847.890625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          ".assessment-summary": {
+            "x": 890,
+            "y": 81,
+            "width": 340,
+            "height": 847.890625,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "16px"
+          },
+          "h1": {
+            "x": 210,
+            "y": 153.796875,
+            "width": 640,
+            "height": 51.296875,
+            "display": "block",
+            "fontSize": "38px",
+            "padding": "0px",
+            "gap": "normal"
+          },
+          ".choice-grid": {
+            "x": 210,
+            "y": 233.09375,
+            "width": 640,
+            "height": 360,
+            "display": "grid",
+            "fontSize": "16px",
+            "padding": "0px",
+            "gap": "10px"
+          }
+        },
+        "viewportWidth": 1440,
+        "scrollWidth": 1440
+      }
+    }
+  ]
+}

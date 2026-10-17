@@ -1,0 +1,200 @@
+{
+  "method": "Decoded RGBA, exact per-pixel comparison, no tolerance or masking",
+  "rows": [
+    {
+      "file": "credits-en-1440.png",
+      "before": {
+        "width": 1440,
+        "height": 988
+      },
+      "after": {
+        "width": 1440,
+        "height": 988
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "credits-en-390.png",
+      "before": {
+        "width": 390,
+        "height": 1661
+      },
+      "after": {
+        "width": 390,
+        "height": 1661
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "credits-th-1440.png",
+      "before": {
+        "width": 1440,
+        "height": 993
+      },
+      "after": {
+        "width": 1440,
+        "height": 993
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "credits-th-390.png",
+      "before": {
+        "width": 390,
+        "height": 1652
+      },
+      "after": {
+        "width": 390,
+        "height": 1652
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "landing-en-1440.png",
+      "before": {
+        "width": 1440,
+        "height": 3104
+      },
+      "after": {
+        "width": 1440,
+        "height": 3104
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 120290,
+      "maxChannelDifference": 20,
+      "bounds": {
+        "minX": 779,
+        "minY": 209,
+        "maxX": 1299,
+        "maxY": 780
+      }
+    },
+    {
+      "file": "landing-en-390.png",
+      "before": {
+        "width": 390,
+        "height": 3876
+      },
+      "after": {
+        "width": 390,
+        "height": 3876
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "landing-th-1440.png",
+      "before": {
+        "width": 1440,
+        "height": 2996
+      },
+      "after": {
+        "width": 1440,
+        "height": 2996
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 279681,
+      "maxChannelDifference": 245,
+      "bounds": {
+        "minX": 779,
+        "minY": 172,
+        "maxX": 1299,
+        "maxY": 743
+      }
+    },
+    {
+      "file": "landing-th-390.png",
+      "before": {
+        "width": 390,
+        "height": 3673
+      },
+      "after": {
+        "width": 390,
+        "height": 3673
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 1,
+      "maxChannelDifference": 1,
+      "bounds": {
+        "minX": 348,
+        "minY": 812,
+        "maxX": 348,
+        "maxY": 812
+      }
+    },
+    {
+      "file": "overview-en-1440.png",
+      "before": {
+        "width": 1440,
+        "height": 900
+      },
+      "after": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "overview-en-390.png",
+      "before": {
+        "width": 390,
+        "height": 1343
+      },
+      "after": {
+        "width": 390,
+        "height": 1343
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "overview-th-1440.png",
+      "before": {
+        "width": 1440,
+        "height": 900
+      },
+      "after": {
+        "width": 1440,
+        "height": 900
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    },
+    {
+      "file": "overview-th-390.png",
+      "before": {
+        "width": 390,
+        "height": 1343
+      },
+      "after": {
+        "width": 390,
+        "height": 1343
+      },
+      "dimensionsMatch": true,
+      "differingPixels": 0,
+      "maxChannelDifference": 0,
+      "bounds": null
+    }
+  ]
+}

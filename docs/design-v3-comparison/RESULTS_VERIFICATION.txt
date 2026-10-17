@@ -1,0 +1,188 @@
+HOMEOWNER RESULTS v3 — implementation and comparison evidence
+17 October 2026. Synthetic fixtures only. No calculator math or installer edits.
+
+Implementation
+components/results/results-shell.tsx
+components/results/results-presentation.ts
+components/results/optional-scenarios.tsx
+components/results/result-icon-v3.tsx
+app/homeowner-results-v3.css (all selectors scoped to .homeowner-v3)
+
+The final source prototype and v3.1/v3.2 cascade were inspected. Results retain
+the before/after hero, percentage, verdict, three statistics and lifetime plot.
+Mobile order follows the executor: hero, lifetime, extras, precise, next steps,
+breakdown, actions. Desktop keeps the two-column composition. Duplicate bill
+bars, extras chips and the quotes-differ card were removed. One closed optional
+refinement disclosure opens for supplied optional fields. Full model/candidate/
+energy/cash-flow/source diagnostics and all existing legal copy remain within
+the full breakdown, which opens automatically for unsupported/no-selection cases.
+
+Share/LINE links, manual-copy fallback, frozen model/reference behavior, legacy
+recalculation, restart and contact boundaries retain their existing handlers.
+The one-line share description has a full disclosure retaining the prior text.
+No optional tax/finance/export input is added to persistence or shared data.
+
+Necessary departures from obsolete prototype data and copy
+- Actual energy-v3 model drives every displayed figure and the lifetime plot.
+  Matched synthetic THB6000/Sathon/high-use/single-phase fixture has 5.005kWp,
+  THB170130, approximately THB2755 monthly reduction, 5.4-year simple payback,
+  THB574776.42 lifetime benefit; untouched prototype shows its legacy figures.
+  No fixture output, old engine, fake extras math or obsolete numeric expectation
+  is inserted into the application to make screenshots match.
+- “Reference bill” labels the modern before/after, and percentage uses a reference
+  bill. This is necessary because additional demand/current tariffs can make the
+  model baseline differ from the entered historical bill.
+- A visible reference-scenario note next to the lifetime plot reports actual
+  immediate self-use percentage (~97.7% for this fixture) and explicitly says
+  smooth assumed load/solar curves are uncalibrated, not measured performance.
+  Attribution is documented separately in docs/calculator-v3/BENEFIT_ATTRIBUTION.txt.
+- Real output precision needs 18px statistics below400px (and narrower horizontal
+  stat padding below375px); labels remain readable at13px. The prototype's shorter
+  4.5kWp/165000 values do not expose the same width constraint.
+  Exact quoted cash prices retain cents. A long-price-only adaptation reduces
+  its numeral size/padding so the full amount stays inside its own statistic,
+  including320/360/390/414px mobile and1440px desktop; no value rounding is used
+  to hide this layout constraint. Final browser verification is recorded below.
+- Extras retain substantive progressive-tax eligibility and bracket calculations,
+  actual-quote finance and interval/contract export controls. Three native closed
+  disclosures use the approved row/switch appearance. Expanded real controls are
+  necessarily larger than the obsolete single-tax-rate prototype. No ownership
+  gate, automatic tax credit, automatic export price/term or invented payback.
+- Link-content privacy disclosure, conditional states and full diagnostics/legal
+  content add height absent from the mock. Negative net, increased/unchanged
+  bills, unavailable payback, unsupported/no-feasible/no-economic results keep
+  honest guards and diagnostic access. Header/footer are shared-shell ownership.
+  Existing44px minimum touch targets are retained versus40px prototype buttons.
+
+Reproduction
+Behavior:
+  $env:PLAYWRIGHT_BASE_URL='http://127.0.0.1:3000'
+  pnpm exec playwright test --config=playwright.calculator.config.ts --output=test-results/calculator-v3-final-all-browsers tests/e2e/calculator-v3.spec.ts
+  (All3 configured projects; serial workers1, retries0;25 cases each.)
+Capture (PowerShell):
+  $env:CAPTURE_HOMEOWNER_V3='1'
+  $env:PLAYWRIGHT_BASE_URL='http://127.0.0.1:3000'
+  pnpm exec playwright test --config=playwright.calculator.config.ts --project=calculator-desktop-chromium --output=test-results/calculator-v3-results-comparison tests/e2e/calculator-v3-results-comparison.spec.ts
+  Remove-Item Env:CAPTURE_HOMEOWNER_V3
+Then use bundled Python to run scripts/results-v3-visual-diffs.py.
+Edge captures use the same opt-in environment and project with
+tests/e2e/calculator-v3-result-edge-captures.spec.ts and unique output directory
+test-results/calculator-v3-edge-comparison-final.
+The known-unsuccessful loading diagnostic is
+tests/e2e/calculator-v3-loading-comparison.spec.ts; do not describe it as passed.
+
+Capture states and limits
+Both locales, widths360/390/768/1440, same synthetic household inputs. The
+reference is served separately on4175. Only its prototype navigation/debug strip
+is excluded at capture time; original source is untouched. The reference's own
+old engine remains active. Neither side is forced to the other's numbers.
+Closed means user-collapsed disclosures even if supplied exact roof area has
+auto-opened the refinement; results-extras opens tax; results-refined opens
+refinements with extras closed. Actual expanded controls preserve real fields.
+Screenshots include the real header/footer and necessary copy differences.
+
+Raw side-by-side,50%overlay and pixel-difference images are produced without
+registration, masks or a similarity threshold. Differences include necessary
+content, model and layout-height changes; raw difference does not prove a defect
+or visual equivalence. Computed metrics accompany final paired captures.
+
+Verification record
+- Focused presentation/SSR tests plus existing scenario arithmetic:48/48 passed.
+- Repository tsc --noEmit passed after final source changes.
+- Targeted ESLint for result source, focused tests and capture harness passed
+  before the last copy/CSS refinement; final lint is part of integration checks.
+- Initial dev desktop behavior run:21/24 passed. Failures were (1) synthetic
+  Test fixture lacked newly required protected-session flags, (2) a post-reload
+  test clicked diagnostics without opening the approved closed breakdown, and
+  (3) last Thai journey used an old expected label loaded before an HMR copy
+  update. Current fixtures/locators corrected, assertions retained.
+- Initial dev capture overlapped another Playwright run's output directory and
+  failed at context.close with a missing trace resource (ENOENT). Partial images
+  were replaced by the complete recapture; the failure is recorded here and in
+  the tool transcript. Some initial trace resources were lost in that collision.
+  Complete recapture uses its own output directory. This is an artifact
+  collision, not an application correctness pass or failure.
+- First compiled preview:24/24 desktop behavior cases passed in2.5minutes.
+  This precedes the final native-disclosure refinement-state fix. That fix has
+  a new browser regression and its focused8-test unit repeat passed; final
+  targeted ESLint passed.
+- Rebuilt preview (coordinator session17895): the new refinement regression
+  passed1/1 in9.8s. Android Chromium selected7/7 passed in1minute: refinement
+  clear/re-entry; EN/TH expanded320/390 with WCAG2/2.1/2.2 axe tags; native
+  keyboard tax controls; complete qv8 real-kWh/no-contact journeys. This is
+  selected mobile coverage, not a new complete three-browser matrix.
+- Matched capture passed1/1 in1.2minutes:48 paired state PNGs,16 closed viewport
+  PNGs, computed results-metrics.json, then24 generated raw comparisons (eight
+  each side-by-side,50%overlay,difference). No overflow at target widths or
+  spot checks599/600/899/900/959/960/999/1000/1099/1100 in both locales.
+
+Final default-result geometry (compiled preview37330)
+Result-body columns match the source exactly at360/390/768/1440. The specified
+before/after numeral sizes and line heights match:28/37 at360 and40/54 at1440.
+Hero heights, implementation minus prototype, after font/SVG/Thai headline fixes:
+  width           360       390       768       1440
+  EN (px)        +12.97    +13.68     +9.17      +2.59
+  TH (px)         -0.06     -0.06     -1.75      -6.84
+Different model values, factual copy, retained touch targets, real diagnostics
+and disclosures affect wrapping/heights. These are not masked in comparisons.
+
+Final capture passed1/1 in34.0s:48 state PNGs plus16 closed viewport PNGs,
+results-metrics.json and24 regenerated raw comparisons. Homeowner Anuphan now
+matches the prototype's Thai typeface; Manrope numerals match. Exact supplied
+SVG paths replace prior share/copy/verdict glyph approximations. Desktop Thai
+headline no longer wraps due to the unnecessary repeated "ค่าไฟ" prefix.
+Visible screenshot review of Thai390/1440 confirms the composition; factual
+reference caveat, substantive extras, disclosure and full legal/footer content
+remain larger than the obsolete prototype. This is faithful layout with
+documented necessary departures, not pixel equality or numerical equivalence.
+
+Edge-capture bounds regression on preview37330 identified a real remaining
+1440px exact-price collision:฿150,123.45 extended into the payback cell. Mobile
+320/360/390/414 bounds passed. The capture failed rather than accepting this
+collision. Coordinator applied an all-width long-price-only style correction;
+final edge recapture on rebuilt preview78148 passed1/1 in24.9s. Both locales
+have negative/no-payback/unsupported/no-feasible390/1440 captures; exact quoted
+price additionally has320/360/414 captures (26 states,52 full/viewport PNGs).
+All exact-price text remains inside its own cell: right margin10.50/14.47/
+15.11/23.11/22.67px at320/360/390/414/1440 in both locales. Negative net and
+unavailable payback/unsupported/no-feasible guards are asserted from real model
+outputs; no financial output is fabricated. No lead/enquiry/submit operation
+was requested. These are implementation-only extensions, not prototype pairs.
+The normal fixture does not receive the long-price class, so its37330 captures
+remain valid for the78148 build's sole additional long-price CSS change.
+
+Loading capture methodology and initial failures
+The prototype's own clock is paused after its third completed750ms row and
+before its350ms fake redirect. The application completes real preparation work;
+its /estimate/results document navigation alone is held in a route handler.
+No app/prototype source, calculation flags, fake stages or minimum delays are
+inserted. Intended coverage is both locales at360/390/768/1440, full-page/
+viewport. Actual loading source hides the shell header/footer through its
+existing body class; this was not verified by successful paired captures.
+Initial harness failed while Playwright waited on the deliberately held
+navigation. A subsequent retry overlapped a coordinator preview stop and is
+not application evidence. The final bounded attempt used direct Chromium
+Runtime.evaluate/Page.captureScreenshot, but still timed out checking all3
+completed actual rows before capture. No loading pairs or loading-metrics.json
+were produced, and no comparison pass is claimed. This remains a visual-
+evidence gap; it does not prove an application loading defect. Source was not
+altered to manufacture a stable loading state. Failure artifacts remain at
+test-results/calculator-v3-loading-comparison-final. The opt-in capture harness
+is retained as an explicitly failing experiment, not part of the behavior75.
+Targeted ESLint for all4 browser files passed after the harness changes.
+
+Final complete behavior matrix (compiled preview78148)
+75/75 passed in5.1minutes:25 desktop Chromium,25 Android Chromium,25 iPhone13
+WebKit. The exact current tests/e2e/calculator-v3.spec.ts ran serially with
+workers1/retries0 and the unchanged60s case/10s expectation defaults. No final
+case failed and no timeout was relaxed. Coverage includes questionnaire
+restoration/races, focus, last-refinement clear/re-entry, frozen legacy/model
+date, real energy balances, no feasible/unsupported/invalid quotes, typed exact
+cents and own-cell bounds at320/360/390/414/1440, demand cap, memory-only tax,
+separate finance/export, EN/TH expanded narrow layouts/axe/native keyboard, and
+the real qv8 kWh/no-contact path. Browser emulation is not physical-device,
+screen-reader or native-language acceptance, and this is not a loading visual
+comparison pass. Raw final run artifacts: test-results/calculator-v3-final-all-browsers.
+Final repository tsc --noEmit passed after capture-harness and bounds changes.
+All browser work stopped after this matrix; no application code was changed
+by this agent during the final capture/verification batch.

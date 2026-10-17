@@ -1,0 +1,886 @@
+[
+  {
+    "locale": "en",
+    "name": "negative",
+    "width": 390,
+    "status": "supported",
+    "net": -341210.42744247534,
+    "payback": 37.68533416465026,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 119.828125,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "฿900,000",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 232.734375,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "37.7 yrs",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 335.15625,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "negative",
+    "width": 1440,
+    "status": "supported",
+    "net": -341210.42744247534,
+    "payback": 37.68533416465026,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 929.515625,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "฿900,000",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1096.859375,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "37.7 yrs",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1247.390625,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "no-payback",
+    "width": 390,
+    "status": "supported",
+    "net": -4231710.427442475,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 119.828125,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "฿4,000,000",
+        "width": 101,
+        "contentWidth": 101,
+        "textRight": 229.53125,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 284.421875,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "no-payback",
+    "width": 1440,
+    "status": "supported",
+    "net": -4231710.427442475,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 929.515625,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "฿4,000,000",
+        "width": 152,
+        "contentWidth": 152,
+        "textRight": 1086.765625,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1162.84375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "unsupported",
+    "width": 390,
+    "status": "unsupported",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 47.421875,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 166.421875,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 284.421875,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "unsupported",
+    "width": 1440,
+    "status": "unsupported",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 808.828125,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 986.328125,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1162.84375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "no-feasible",
+    "width": 390,
+    "status": "no-feasible-option",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 47.421875,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 166.421875,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 284.421875,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "no-feasible",
+    "width": 1440,
+    "status": "no-feasible-option",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 808.828125,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 986.328125,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1162.84375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "exact-quote",
+    "width": 320,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 75,
+        "contentWidth": 86,
+        "textRight": 113.828125,
+        "cellRight": 112.65625,
+        "crossesCell": true
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 78,
+        "contentWidth": 78,
+        "textRight": 196.828125,
+        "cellRight": 207.328125,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 yrs",
+        "width": 74,
+        "contentWidth": 74,
+        "textRight": 271.953125,
+        "cellRight": 301.984375,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "exact-quote",
+    "width": 360,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 88,
+        "contentWidth": 88,
+        "textRight": 113.828125,
+        "cellRight": 126,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 91,
+        "contentWidth": 91,
+        "textRight": 219.53125,
+        "cellRight": 234,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 yrs",
+        "width": 87,
+        "contentWidth": 87,
+        "textRight": 298.625,
+        "cellRight": 342,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "exact-quote",
+    "width": 390,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 119.828125,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 101,
+        "contentWidth": 101,
+        "textRight": 238.890625,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 yrs",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 324.625,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "exact-quote",
+    "width": 414,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 94,
+        "contentWidth": 95,
+        "textRight": 129.375,
+        "cellRight": 144,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 109,
+        "contentWidth": 109,
+        "textRight": 246.890625,
+        "cellRight": 270,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 yrs",
+        "width": 93,
+        "contentWidth": 93,
+        "textRight": 346.578125,
+        "cellRight": 396,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "name": "exact-quote",
+    "width": 1440,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 929.515625,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 152,
+        "contentWidth": 152,
+        "textRight": 1100.8125,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 yrs",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1229.84375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "negative",
+    "width": 390,
+    "status": "supported",
+    "net": -341210.42744247534,
+    "payback": 37.68533416465026,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 119.828125,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "฿900,000",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 232.734375,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "37.7 ปี",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 322.03125,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "negative",
+    "width": 1440,
+    "status": "supported",
+    "net": -341210.42744247534,
+    "payback": 37.68533416465026,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 929.515625,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "฿900,000",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1096.859375,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "37.7 ปี",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1225.53125,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "no-payback",
+    "width": 390,
+    "status": "supported",
+    "net": -4231710.427442475,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 119.828125,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "฿4,000,000",
+        "width": 101,
+        "contentWidth": 101,
+        "textRight": 229.53125,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 284.421875,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "no-payback",
+    "width": 1440,
+    "status": "supported",
+    "net": -4231710.427442475,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 929.515625,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "฿4,000,000",
+        "width": 152,
+        "contentWidth": 152,
+        "textRight": 1086.765625,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1162.84375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "unsupported",
+    "width": 390,
+    "status": "unsupported",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 47.421875,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 166.421875,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 284.421875,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "unsupported",
+    "width": 1440,
+    "status": "unsupported",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 808.828125,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 986.328125,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1162.84375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "no-feasible",
+    "width": 390,
+    "status": "no-feasible-option",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 47.421875,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 166.421875,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 284.421875,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "no-feasible",
+    "width": 1440,
+    "status": "no-feasible-option",
+    "net": 0,
+    "payback": null,
+    "statistics": [
+      {
+        "text": "—",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 808.828125,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 986.328125,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "—",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1162.84375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "exact-quote",
+    "width": 320,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 75,
+        "contentWidth": 86,
+        "textRight": 113.828125,
+        "cellRight": 112.65625,
+        "crossesCell": true
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 78,
+        "contentWidth": 78,
+        "textRight": 196.828125,
+        "cellRight": 207.328125,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 ปี",
+        "width": 74,
+        "contentWidth": 74,
+        "textRight": 258.828125,
+        "cellRight": 301.984375,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "exact-quote",
+    "width": 360,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 88,
+        "contentWidth": 88,
+        "textRight": 113.828125,
+        "cellRight": 126,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 91,
+        "contentWidth": 91,
+        "textRight": 219.53125,
+        "cellRight": 234,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 ปี",
+        "width": 87,
+        "contentWidth": 87,
+        "textRight": 285.5,
+        "cellRight": 342,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "exact-quote",
+    "width": 390,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 86,
+        "contentWidth": 86,
+        "textRight": 119.828125,
+        "cellRight": 136,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 101,
+        "contentWidth": 101,
+        "textRight": 238.890625,
+        "cellRight": 254,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 ปี",
+        "width": 85,
+        "contentWidth": 85,
+        "textRight": 311.5,
+        "cellRight": 372,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "exact-quote",
+    "width": 414,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 94,
+        "contentWidth": 95,
+        "textRight": 129.375,
+        "cellRight": 144,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 109,
+        "contentWidth": 109,
+        "textRight": 246.890625,
+        "cellRight": 270,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 ปี",
+        "width": 93,
+        "contentWidth": 93,
+        "textRight": 332,
+        "cellRight": 396,
+        "crossesCell": false
+      }
+    ]
+  },
+  {
+    "locale": "th",
+    "name": "exact-quote",
+    "width": 1440,
+    "status": "supported",
+    "net": 599884.6428075247,
+    "payback": 4.7611819925785746,
+    "statistics": [
+      {
+        "text": "5.005 kWp",
+        "width": 145,
+        "contentWidth": 145,
+        "textRight": 929.515625,
+        "cellRight": 946.96875,
+        "crossesCell": false
+      },
+      {
+        "text": "฿150,123.45",
+        "width": 152,
+        "contentWidth": 152,
+        "textRight": 1100.8125,
+        "cellRight": 1123.484375,
+        "crossesCell": false
+      },
+      {
+        "text": "4.8 ปี",
+        "width": 144,
+        "contentWidth": 144,
+        "textRight": 1207.984375,
+        "cellRight": 1300,
+        "crossesCell": false
+      }
+    ]
+  }
+]

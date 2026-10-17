@@ -1,0 +1,76 @@
+HOMEOWNER V3 — HOME / ASSESSMENT VISUAL EVIDENCE
+
+Final captures use the compiled application at http://127.0.0.1:3000 and the
+untouched supplied prototype at http://127.0.0.1:4175. Source files under
+docs/design-v3/ were not rewritten. Only the prototype navigation/debug strip
+was hidden at capture time. Locale, synthetic answers and question position
+were initialized before loading; application captures use the real components.
+No prototype calculator engine or fictional installer flow enters production.
+
+Coverage
+- Home: EN/TH at 360, 390, 768 and 1440 px; 16 full-page and 16 viewport PNGs.
+- Assessment: all 11 common question IDs paired at those widths/locales,
+  plus the modern required roof-area screen as an unpaired extension.
+  184 states: 88 prototype, 96 application; full-page + viewport per state.
+- assessment-metrics.json records actual question IDs and computed geometry.
+  All 184 states have scrollWidth <= viewportWidth + 1.
+- Correct question headings, enabled controls, completed entrance opacity and
+  fonts are awaited. Captures respect reduced motion; no answers or calculated
+  values are changed to match a reference image.
+
+Measured assessment composition
+- EN and TH at 1440: both source and application have question x=210, y=97,
+  width=616, and full progress width=1020. Province/district selects share
+  the same equal-width desktop row. Phone answer panels are absent.
+- A separate viewport-first diagnostic for EN/TH location at 390 records
+  the live fixed actions at y=759, height=85, width=390; button height=52,
+  back-button width=66. These match the supplied composition.
+
+Intentional differences
+- Language switching is preserved. Desktop retains it beside the count/exit;
+  phone puts the count above the progress bar, adding approximately 15–16 px
+  versus the prototype header. Existing real navigation/brand SVG are retained.
+- Actual qv8/schema11 has twelve screens including the contact decision.
+  Counts, order, answer summaries and draft restoration follow that release,
+  rather than the prototype's fixed ten-question claim. Roof area is required.
+- Bill/usage wording, kWh and billing-detail disclosure, weekday/weekend timing,
+  appliance schedules, roof/electrical inputs and conditional owner permission
+  remain real calculator controls. Extra controls are documented extensions.
+- The answer summary includes the extra roof-area answer and real release order.
+  Full legal/consent copy and disabled contact status remain authoritative.
+  The browser/privacy notice appears only on the final contact question.
+- Home example figures and chart come from the current calculateEstimate result,
+  not the prototype's old figures. Factual question-count copy is shortened.
+- The real loader follows calculation/submission readiness, with no fabricated
+  minimum-duration stages or delays to imitate the reference animation.
+
+Capture limitation
+Some secondary viewport PNGs taken immediately after a full-page capture omit
+or clip the fixed action layer. The corresponding full-page images are intact.
+Viewport-first diagnostic images and live element bounds show the correct bar.
+The comparison viewer uses full-page pairs; these problematic secondary viewport
+frames are excluded from fidelity claims. No application CSS was changed to
+compensate for this capture/compositor behavior.
+
+Assets and installer isolation
+The three public/design-v3 home/FAQ photographs have SHA256 hashes identical to
+their supplied originals; credits are retained. Prior original-photo source and
+license evidence remains under docs/design-v2-review/photo-evidence. Exact
+provenance/rights for every supplied derivative and unidentified roof image remain
+unverified; no licence rights are invented.
+Installer components, styles and photograph are unchanged. The separate exact
+decoded RGBA installer-pixel-comparison.json records eight identical portal
+captures and one identical phone landing. Remaining landing differences are
+confined to photo pixels, including an unloaded photograph in the original Thai
+desktop baseline; they are not presented as twelve pixel-identical comparisons.
+
+Reference step mapping
+bill=0; location=1; planning=2; project=3; choice/home=4; ownership=5;
+daytime=6; multiple/appliances=7; shade=8; roof-material=9; contact=10.
+The roof-extension screen has no matching original prototype question.
+
+Verification ownership
+Scoped TypeScript and ESLint checks passed for assessment/header/harness source.
+Earlier compiled home + installer responsive/detail checks passed 8/8 without
+assertion changes. Final cross-browser and calculator/flow suite outcomes are
+recorded by the coordinator; screenshots alone do not establish those outcomes.
