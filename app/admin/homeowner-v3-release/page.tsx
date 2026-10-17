@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site/internal-link';
 import { headers } from 'next/headers';
 import { authenticateAdmin } from '@/lib/server/admin-auth';
 import { HomeownerV3ReleasePanel } from '@/components/admin/homeowner-v3-release-panel';

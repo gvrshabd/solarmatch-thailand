@@ -123,3 +123,60 @@ Remaining limitations, not represented as completed
 
 No Milly's repository/resource was targeted. No real messages, charges, enquiries,
 registration, allocation, tracking or customer-data mutation were performed.
+
+Live release verification and follow-up
+Staging Worker 2dc7e976-3ee3-4ddd-be49-00d8aa20dfa7 passed authenticated owner
+viewer, matching EN/TH result, language preservation and existing installer enquiry
+checks. Anonymous staging home/review/admin requests redirected to Access. Its
+full post-deployment preservation check passed against the encrypted backup.
+Main was fast-forwarded to a66a71ce11d9710cf9cd711f19827a7cd64fe589. The normal
+Cloudflare build a1ed340e-5024-4e8b-91f6-83afba9440ba succeeded, serving Worker
+f78addaa-820c-4387-9abb-d13080e3a06a. The authenticated disabled-only control
+published releasev9/qv8/schema11/rulesv4. Full preservation verification passed:
+all seven leads, legal/consent/financial/history rows retained; only expected new
+version/question/option/audit rows and the former current flag changed. No migration.
+Authenticated administration still displays seven lead rows.
+
+Live tests initially failed because innerText was compared with textContent
+(including CSS uppercase/newline differences), and because canonical 308 redirects
+were mistaken for exposed review routes. Both test issues were corrected without
+relaxing persistence or isolation: compare innerText with innerText; follow only
+the exact same-origin trailing-slash canonicalization then require denial/404.
+The next run completed both actual journeys, frozen reload and negative results,
+but flagged the intentional disabled installer API 503 as an unexpected failure.
+The test now verifies that specific held-service response and rejects other errors.
+
+A real new admin return-link defect was also found: native browser logs showed
+vinext Next Link interception errors. The release page now uses the project's
+existing internal-link anchor component, as the homeowner pages already do.
+Targeted publication API/panel tests: 6/6 passed, including a new link regression.
+This fix does not change the calculator, installer interface, data or holds.
+
+Additional live failures retained
+Browser response.json() retrieval of the routed installer 503 remained pending
+until the test deadline, despite the separate API request returning its expected
+portal_unavailable JSON and the actual disabled landing rendering. Underlying
+browser/protocol cause was not established. The test retains the real browser
+response status, verifies the body through an independent actual API GET, and
+requires disabled application controls; no request is mocked or timeout extended.
+A subsequent run then exposed a genuine Cloudflare 1102 resource-limit failure on
+both homepages (rays a4bc398d6ddc2ca3 and a4bc39b9baf8a62b, 03:30 UTC).
+Both server-rendered fixed example cards were running the full hourly/25-year
+calculator on each request. This release is not considered fully verified until
+that expensive fixed-example path is removed and the live checks pass.
+
+Forward repair (17 October 2026)
+Both fixed server examples now read a frozen full-precision synthetic snapshot,
+generated from the unchanged fixture/current calculator. A regression compares
+every consumed value and provenance field with a fresh calculation and renders
+both locales while the calculator module throws if called by the examples.
+Only the fixed examples changed; real input calculations remain unchanged.
+Local Node measurements were 352-411 ms wall time per full calculation; these
+are not measurements of Cloudflare CPU. No CPU limits or paid resources changed.
+The final bounded Astra review found no concrete blocker. Focused snapshot/panel
+tests: 5/5; typecheck and lint pass (0 errors, 14 existing/reference warnings).
+Both staging and ordinary production builds pass. The repaired staging Worker
+084fd214-448a-40e7-be53-d35b260d63b7 renders the same EN/TH example figures,
+hydrates the bill control, and follows the language link through owner Access.
+Final production verification is still required; earlier failures remain above.
+Full final unit rerun: 613/613 across 74 files, 28.33 seconds, no failures.

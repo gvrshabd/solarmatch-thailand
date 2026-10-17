@@ -18,7 +18,8 @@ for(const locale of ['en','th'] as const){
     expect(config.questionnaire.schemaVersion).toBe(11);
     expect(config.assessmentToken).toBeNull();
     expect(config.contactInputSupport.kwh).toBe(false);
-    await page.goto(prefix||'/');
+    const home=await page.goto(prefix||'/');
+    expect(home?.status()).toBe(200);
     await expect(page.locator('#hero-monthly-bill')).toBeEnabled();
     for(const width of [390,1440]){
       await page.setViewportSize({width,height:844});
@@ -40,7 +41,7 @@ for(const locale of ['en','th'] as const){
     await expect(page.locator('.rhero')).toBeVisible();
     const before=await page.locator('.rhero').innerText();
     await page.reload();
-    await expect(page.locator('.rhero')).toHaveText(before);
+    await expect.poll(()=>page.locator('.rhero').innerText()).toBe(before);
     await page.screenshot({path:`docs/design-v3-comparison/live-production-results-${locale}-1440.png`});
     const negative={...answers,quoteSystemKw:5.005,quoteModuleCount:7,quoteModuleWp:715,quoteInverterAcKw:5,quoteBatteryIncluded:false,quoteCashPriceThb:900000};
     expect(calculateEstimate(negative).planningTwentyFiveYearNetBenefitThb).toBeLessThan(0);
@@ -53,15 +54,31 @@ for(const locale of ['en','th'] as const){
     for(const path of ['/methodology','/resources','/contact','/privacy','/terms','/cookies']){
       const response=await page.goto(prefix+path);expect(response?.status()).toBe(200);await expect(page.locator('main')).toBeVisible();
     }
+    expect(failures).toEqual([]);
+    const portalResponse=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/installer/portal');
     await page.goto('/installers?lang='+locale);
+    const heldPortal=await portalResponse;
+    expect(heldPortal.status()).toBe(503);
+    // Browser response-body retrieval timed out in the live harness. Keep the
+    // real browser status check, and verify the endpoint body independently.
+    const heldBody=await request.get('/api/installer/portal');
+    expect(heldBody.status()).toBe(503);
+    expect(await heldBody.json()).toEqual({error:'portal_unavailable'});
     await expect(page.locator('main')).toBeVisible();
-    expect(writes).toEqual([]);expect(failures).toEqual([]);
+    await expect(page.getByRole('button',{name:locale==='en'?'Applications unavailable':'ยังไม่เปิดรับสมัคร',exact:true}).first()).toBeDisabled();
+    expect(writes).toEqual([]);expect(failures).toEqual(['503 /api/installer/portal']);
   });
 }
 
-test('production authentication and review isolation',async({request})=>{
+test('production authentication and review isolation',async({request,baseURL})=>{
   for(const path of ['/design-review/','/design-review/catalog.json','/design-review/prototype/','/admin/local-access']){
-    const response=await request.get(path,{maxRedirects:0});
+    let response=await request.get(path,{maxRedirects:0});
+    if(response.status()===308){
+      const target=new URL(response.headers().location,baseURL);
+      expect(target.origin).toBe(baseURL);
+      expect(target.pathname).toBe(path.replace(/\/$/,''));
+      response=await request.get(target.href,{maxRedirects:0});
+    }
     expect([302,303,401,403,404]).toContain(response.status());
   }
   const admin=await request.get('/admin',{maxRedirects:0});

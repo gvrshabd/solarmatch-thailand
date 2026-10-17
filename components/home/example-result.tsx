@@ -1,5 +1,4 @@
-import {calculateEstimate} from '@/lib/calculator';
-import {designV2Example} from '@/config/design-v2-example';
+import {designExampleResult} from '@/config/design-example-result';
 import {designText} from '@/config/design-v2-copy';
 import {homeownerText} from '@/config/homeowner-v3-copy';
 import type {Locale} from '@/config/i18n';
@@ -8,7 +7,7 @@ import {LifetimePlot} from '@/components/design-v2/lifetime-plot';
 
 /** Final V3 composition backed by the current energy model. */
 export function ExampleResult({locale}:{locale:Locale}) {
-  const text=designText(locale),v3=homeownerText(locale),r=calculateEstimate(designV2Example);
+  const text=designText(locale),v3=homeownerText(locale),r=designExampleResult;
   return <div className="excard" data-testid="home-example">
     <div className="exnums">
       <div className="top"><span className="lbl">{v3.exampleBill}</span><span className="chip chip-dark">{text.exWhere}</span></div>

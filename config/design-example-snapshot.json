@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "syntheticOnly": true,
+    "fixtureSource": "config/design-v2-example.ts#designV2Example",
+    "calculatorSource": "lib/calculator/index.ts#calculateEstimate",
+    "modelVersion": "residential-hourly-2026-10-17-v3",
+    "assumptionVersion": "residential-hourly-2026-10-17-v3 / installer-reference-2026-10-17-v3 / jrc-pvgis-5.3-era5-bangkok-2026-10-17",
+    "tariffVersion": "mea-residential-september-2026-ft-sep-dec-2026",
+    "calculationReferenceDate": "2026-10-17",
+    "fixture": {
+      "estimateModelVersion": "energy-v3",
+      "calculationReferenceDate": "2026-10-17",
+      "billDate": "2026-10-17",
+      "tariffCategory": "ordinary-1.2",
+      "utility": "MEA",
+      "roofArea": "60-100",
+      "exactRoofAreaSqm": 60,
+      "electricityPhase": "single",
+      "province": "bangkok",
+      "district": "sathon",
+      "monthlyBillThb": 6000,
+      "activelyPlanningSolar": true,
+      "planningTimeframe": "within-3-months",
+      "projectType": "new-rooftop",
+      "propertyType": "detached-home",
+      "ownershipStatus": "owner",
+      "daytimePattern": "high",
+      "daytimeLoads": [
+        "air-conditioning",
+        "pump",
+        "home-office-equipment"
+      ],
+      "airConditionerCount": 5,
+      "roofMaterial": "concrete-tile",
+      "shade": "almost-none",
+      "quoteContactRequested": false
+    }
+  },
+  "result": {
+    "currentMonthlyBillThb": 6000,
+    "planningAfterSolarMonthlyBillThb": 3244.8358774710614,
+    "planningMonthlySavingsThb": 2755.164122528912,
+    "planningSystemKw": 5.005,
+    "planningInstalledCostThb": 170130,
+    "planningPaybackYears": 5.4308403695097764,
+    "planningTwentyFiveYearNetBenefitThb": 574776.4225575246,
+    "lifetimeCostSeries": [
+      {
+        "year": 0,
+        "withoutSolarThb": 0,
+        "withSolarThb": 170130
+      },
+      {
+        "year": 1,
+        "withoutSolarThb": 71999.99999999968,
+        "withSolarThb": 210803.35652965272
+      },
+      {
+        "year": 2,
+        "withoutSolarThb": 143999.99999999936,
+        "withSolarThb": 251596.82140017534
+      },
+      {
+        "year": 3,
+        "withoutSolarThb": 215999.99999999904,
+        "withSolarThb": 292511.9460587927
+      },
+      {
+        "year": 4,
+        "withoutSolarThb": 287999.9999999987,
+        "withSolarThb": 333548.8465150096
+      },
+      {
+        "year": 5,
+        "withoutSolarThb": 359999.99999999837,
+        "withSolarThb": 374708.11115269194
+      },
+      {
+        "year": 6,
+        "withoutSolarThb": 431999.999999998,
+        "withSolarThb": 415991.07989213243
+      },
+      {
+        "year": 7,
+        "withoutSolarThb": 503999.9999999977,
+        "withSolarThb": 457399.28046684153
+      },
+      {
+        "year": 8,
+        "withoutSolarThb": 575999.9999999973,
+        "withSolarThb": 498932.0867176427
+      },
+      {
+        "year": 9,
+        "withoutSolarThb": 647999.999999997,
+        "withSolarThb": 540588.8756161556
+      },
+      {
+        "year": 10,
+        "withoutSolarThb": 719999.9999999966,
+        "withSolarThb": 582371.1490710797
+      },
+      {
+        "year": 11,
+        "withoutSolarThb": 791999.9999999963,
+        "withSolarThb": 624282.4786953612
+      },
+      {
+        "year": 12,
+        "withoutSolarThb": 863999.9999999959,
+        "withSolarThb": 666326.7709617062
+      },
+      {
+        "year": 13,
+        "withoutSolarThb": 935999.9999999956,
+        "withSolarThb": 708504.7114935532
+      },
+      {
+        "year": 14,
+        "withoutSolarThb": 1007999.9999999952,
+        "withSolarThb": 750815.632049575
+      },
+      {
+        "year": 15,
+        "withoutSolarThb": 1079999.9999999949,
+        "withSolarThb": 793258.8677296502
+      },
+      {
+        "year": 16,
+        "withoutSolarThb": 1151999.9999999946,
+        "withSolarThb": 835836.3238817052
+      },
+      {
+        "year": 17,
+        "withoutSolarThb": 1223999.9999999944,
+        "withSolarThb": 878551.5386478949
+      },
+      {
+        "year": 18,
+        "withoutSolarThb": 1295999.9999999942,
+        "withSolarThb": 921405.0676926794
+      },
+      {
+        "year": 19,
+        "withoutSolarThb": 1367999.999999994,
+        "withSolarThb": 964396.2194446657
+      },
+      {
+        "year": 20,
+        "withoutSolarThb": 1439999.9999999937,
+        "withSolarThb": 1007524.3057903178
+      },
+      {
+        "year": 21,
+        "withoutSolarThb": 1511999.9999999935,
+        "withSolarThb": 1050788.6420566675
+      },
+      {
+        "year": 22,
+        "withoutSolarThb": 1583999.9999999932,
+        "withSolarThb": 1094190.2722736227
+      },
+      {
+        "year": 23,
+        "withoutSolarThb": 1655999.999999993,
+        "withSolarThb": 1137728.6644398568
+      },
+      {
+        "year": 24,
+        "withoutSolarThb": 1727999.9999999928,
+        "withSolarThb": 1181405.5017263712
+      },
+      {
+        "year": 25,
+        "withoutSolarThb": 1799999.9999999925,
+        "withSolarThb": 1225223.5774424677
+      }
+    ]
+  }
+}
