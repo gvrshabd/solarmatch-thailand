@@ -357,7 +357,13 @@ for(const locale of ['en','th'] as const){
     const action=hero.locator('.solar-only-action');
     await expect(action).toHaveText(locale==='en'?'See my solar-only estimate':'ดูผลประเมินเฉพาะโซลาร์ของฉัน');
     expect((await new AxeBuilder({page}).include('.rhero').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
-    for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth})),`Overflow at ${width}px`).toEqual({width,scroll:width});}
+    for(const width of [320,390,1440]){
+      await page.setViewportSize({width,height:900});
+      // Chromium can report the new innerWidth before applying its media-query
+      // styles. Wait for the actual responsive rule, not an arbitrary delay.
+      await expect(page.locator('.hdr .header-inner')).toHaveCSS('gap',width<=430?'8px':'20px');
+      expect(await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth})),`Overflow at ${width}px`).toEqual({width,scroll:width});
+    }
     await page.setViewportSize({width:mobile?390:1440,height:900});
     if(process.env.BATTERY_REVIEW_SCREENSHOTS){await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:`${process.env.BATTERY_REVIEW_SCREENSHOTS}/battery-before-${locale}-${mobile?'mobile':'desktop'}.png`});}
     await action.focus();await action.press('Enter');

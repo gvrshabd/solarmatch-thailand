@@ -53,6 +53,18 @@ Verification history (do not treat failures as passes)
   14 existing warnings. Final full unit rerun: 626/626 in 75 files.
 - Final browser runs: 32/32 desktop/mobile Chromium and 12/12 mobile WebKit.
   Deployed receipts are reported in the task handoff/private release receipt.
+- Initial deployed run: 18/20 passed. Two desktop viewport-resize assertions
+  measured 320px innerWidth with the previous desktop media styles (20px gap,
+  40px gutter). Fresh 320px sessions and settled responsive styles fit correctly.
+  Diagnostic evidence is retained locally. The test now waits for the expected
+  header media rule before the unchanged exact overflow assertion; no timeout
+  extension or tolerance was added. This follow-up changes test synchronization,
+  not application code. Final deployed Chromium rerun: 20/20 passed.
+- Two additional EN/TH no-contact journeys used the actual published qv8 API
+  (not intercepted configuration), completed 11 steps from project choice,
+  calculated only after opt-in and survived reload. Zero API write requests.
+- The user's existing production result tab also restored its saved battery
+  scenario after reload and displayed the exact explanation, action and edit link.
 - Tests include every selectable project type, no-contact completion, explicit
   opt-in/undo, restored expansion flags/snapshots, project editing, Back, reload,
   keyboard focus, axe checks, and overflow at 320/390/1440px.
