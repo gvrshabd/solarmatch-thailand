@@ -46,7 +46,7 @@ describe('explicit homeowner v3 admin publication', () => {
     const req = request(); const response = await POST(req);
     expect(requireAdminRequest).toHaveBeenCalledWith(req, { csrf: true });
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ releaseId: 'residential-release-v9', liveLeadSubmissions: false, kwhContactSupported: false });
+    expect(await response.json()).toMatchObject({ releaseId: 'residential-release-v9', liveLeadSubmissions: false, kwhContactSupported: true });
     const event = fixture.sqlite.prepare("SELECT next_json FROM audit_events WHERE action='homeowner-design-v3.published-disabled'").get();
     expect(JSON.parse(String(event?.next_json)).backupSha256).toBe(payload.backupSha256);
     expect((await POST(request())).status).toBe(409); // No retry duplicates.

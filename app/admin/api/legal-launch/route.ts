@@ -4,6 +4,7 @@ import { interpolateLegalDocuments, legalLaunchDraft, operatorProfileComplete } 
 import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { getRuntimeEnv, requireDatabase } from '@/lib/server/runtime';
+import {consumptionSummary,storedContactConsumption} from '@/lib/qualification/consumption-snapshot';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,7 +96,7 @@ type DistributionLead = {
   id: string; created_at: string; legal_first_name: string; legal_last_name: string; phone_e164: string | null;
   preferred_contact_method: string; line_id: string | null; province: string; custom_location: string | null;
   property_type: string; custom_property_type: string | null; ownership_status: string; air_conditioner_count: number;
-  monthly_bill_thb: number; daytime_pattern: string; roof_area: string; roof_material: string; custom_roof_material: string | null;
+  monthly_bill_thb: number; scoring_explanation_json: string; daytime_pattern: string; roof_area: string; roof_material: string; custom_roof_material: string | null;
   roof_shade: string; quality_score: number; hard_eligible: number; consent_version: string; consented_at: string;
   privacy_notice_version_id: string | null; distribution_expires_at: string | null; recipient_category_snapshot: string | null;
   disclosed_fields_snapshot_json: string | null; contact_collection_mode: string; third_party_disclosure_authorized: number;
@@ -113,7 +114,7 @@ type DistributionPartner = {
 async function validatedDistribution(database: D1Database, leadId: string, partnerIds: string[]) {
   const lead = await database.prepare(`SELECT id, created_at, legal_first_name, legal_last_name, phone_e164, preferred_contact_method,
       line_id, province, custom_location, property_type, custom_property_type, ownership_status, air_conditioner_count,
-      monthly_bill_thb, daytime_pattern, roof_area, roof_material, custom_roof_material, roof_shade, quality_score,
+      monthly_bill_thb, scoring_explanation_json, daytime_pattern, roof_area, roof_material, custom_roof_material, roof_shade, quality_score,
       hard_eligible, consent_version, consented_at, privacy_notice_version_id, distribution_expires_at,
       recipient_category_snapshot, disclosed_fields_snapshot_json,
       COALESCE(contact_collection_mode_v2, contact_collection_mode) AS contact_collection_mode,
@@ -168,7 +169,7 @@ function deliveryCopy(lead: DistributionLead, partner: DistributionPartner) {
   if (allowed.has('lineId')) lines.push(`LINE ID: ${lead.line_id || 'NOT PROVIDED'}`);
   if (allowed.has('assessmentAnswers')) lines.push(
     `Area: ${lead.custom_location || lead.province}`, '', `Property: ${lead.custom_property_type || lead.property_type}`,
-    `Owner status: ${lead.ownership_status}`, `AC units: ${lead.air_conditioner_count}`, `Typical monthly bill: ฿${lead.monthly_bill_thb.toLocaleString('en-US')}`,
+    `Owner status: ${lead.ownership_status}`, `AC units: ${lead.air_conditioner_count}`, consumptionSummary(storedContactConsumption(lead.scoring_explanation_json),lead.monthly_bill_thb),
     `Daytime use: ${lead.daytime_pattern}`, `Roof area: ${lead.roof_area}`, `Roof material: ${lead.custom_roof_material || lead.roof_material}`,
     `Shade: ${lead.roof_shade}`, '', `Lead quality: ${lead.quality_score}/5`, `Hard eligible: ${lead.hard_eligible ? 'YES' : 'NO'}`,
   );

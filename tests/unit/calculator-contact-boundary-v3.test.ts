@@ -54,15 +54,15 @@ describe('calculator v3 contact input readiness boundary', () => {
     expect(parsed.quoteContactRequested).toBe(false);
   });
 
-  it.each([undefined, 0, 6000])('rejects kWh contact with accompanying bill %s before token, proof or database work', async monthlyBillThb => {
+  it.each([undefined, 0, 6000])('requires authentication for kWh contact with accompanying bill %s without reaching storage', async monthlyBillThb => {
     const value = body({ consumptionInput: 'kwh', monthlyConsumptionKwh: 1200, monthlyBillThb });
     // A valid calculator-shaped input is not permission to use a new contact mode.
     expect(leadSchema.safeParse(value).success).toBe(true);
     const response = await POST(request(value));
-    expect(response.status).toBe(422);
-    expect(await response.json()).toEqual({ ok: false, code: 'contact_consumption_input_not_supported' });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ ok: false, code: 'invalid_assessment_session' });
     expect(response.headers.get('Cache-Control')).toBe('no-store');
-    expect(sideEffects.token).not.toHaveBeenCalled();
+    expect(sideEffects.token).toHaveBeenCalledOnce();
     expect(sideEffects.proof).not.toHaveBeenCalled();
     expect(sideEffects.database).not.toHaveBeenCalled();
   });

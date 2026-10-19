@@ -12,7 +12,7 @@ import { InstallerPlatformPanel } from './installer-platform-panel';
 type Lead = {
   id: string; created_at: string; legal_first_name: string; legal_last_name: string; phone_display: string | null;
   preferred_contact_method: 'phone' | 'line'; line_id: string | null; province: string; custom_location: string | null;
-  ownership_status: string; air_conditioner_count: number; monthly_bill_thb: number; daytime_pattern: string;
+  ownership_status: string; air_conditioner_count: number; monthly_bill_thb: number; consumption_summary?: string; daytime_pattern: string;
   quality_score: number; raw_score: number; hard_eligible: number; status: string; exported_at: string | null;
   selected: boolean; selectionReason: string; exportReason: string; explanation: { factors: Array<{ key: string; points: number; maximum: number; explanationEn: string }> };
   selectionCompatible: boolean; exportCompatible: boolean; contact_collection_mode: 'validation_interest'|'named_installer_handoff'|'shared_solar_company_handoff'; contact_configuration_version_id: string;
@@ -100,7 +100,7 @@ function leadClipboard(leads: Lead[]) {
     lines.push(lead.preferred_contact_method === 'phone' ? `Phone: ${lead.phone_display ?? 'Not provided'}` : `LINE ID: ${lead.line_id ?? 'Not provided'}`);
     lines.push(`Preferred contact: ${lead.preferred_contact_method === 'line' ? `LINE${lead.line_id ? ` (${lead.line_id})` : ''}` : 'Phone'}`);
     lines.push(`Location: ${lead.custom_location || lead.province}`);
-    lines.push(`Qualification: ${lead.quality_score}/5 · ${lead.ownership_status} · ${lead.air_conditioner_count} AC units · typical bill ฿${lead.monthly_bill_thb.toLocaleString('en-US')}`);
+    lines.push(`Qualification: ${lead.quality_score}/5 · ${lead.ownership_status} · ${lead.air_conditioner_count} AC units · ${lead.consumption_summary??`Homeowner-provided bill ฿${lead.monthly_bill_thb.toLocaleString('en-US')}`}`);
     lines.push(`Sellable under current rules: ${lead.hard_eligible ? 'Yes' : 'No'}`, '');
   });
   return lines.join('\n').trim();

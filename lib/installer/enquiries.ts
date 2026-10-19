@@ -51,6 +51,8 @@ export async function canonicalEnquiryStatements(database:D1Database, leadId:str
     database.prepare(`INSERT INTO installer_operational_events(id,event_type,enquiry_id,attribution_json,created_at)
       SELECT ?,'qualification-evaluated',el.enquiry_id,json_object('sourceLeadId',l.id,'ruleVersion',?,'ownerRequired',?,'minimumAcUnits',?,'minimumQuality',?,
         'ownership',l.ownership_status,'installedAcUnits',l.air_conditioner_count,'qualityScore',l.quality_score,
+        'consumptionPolicy',json_extract(l.scoring_explanation_json,'$.consumption.version'),
+        'consumptionInput',json_extract(l.scoring_explanation_json,'$.consumption.input'),
         'ownerCriterionMet',CASE WHEN ?=0 OR l.ownership_status='owner' THEN 1 ELSE 0 END,
         'acCriterionMet',CASE WHEN l.air_conditioner_count>=? THEN 1 ELSE 0 END,
         'qualityCriterionMet',CASE WHEN l.quality_score>=? THEN 1 ELSE 0 END),?

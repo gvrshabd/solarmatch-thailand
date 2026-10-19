@@ -1,0 +1,16 @@
+SolarMatch trust content — unpublished working draft
+Reviewed internally: 2026-10-19. Do not display on public pages until owner and partner evidence below is supplied and checked in both languages.
+
+1. How participating installers are selected
+Safe current framing: SolarMatch is preparing a referral service. A homeowner may view the free planning estimate without requesting contact. If contact sharing is activated, eligibility and delivery limits are separate from the calculator result; a request may reach fewer than three companies or none. Participation does not mean government accreditation or a guarantee of workmanship, price, or suitability.
+Before publication, owner must document the actual company onboarding checks, who performs each check, evidence inspected, expiry/recheck process, service-area and capacity rules, and complaint/removal policy. State only checks that have been operating and evidenced. Do not use "vetted", "certified", "top-ranked" or a verification badge until its exact test and records exist.
+
+2. How SolarMatch earns money
+Safe current framing: The calculator is free to homeowners. The planned referral/installer-credit model may charge participating installers for delivered enquiries; trial deliveries may also occur. A referral fee does not make SolarMatch the installer or bind a homeowner to buy. The live public contact and credit purchases remain disabled at this review date.
+Before publication, owner must confirm the effective commercial terms, whether trial/paid treatment affects allocation, any other revenue sources, whether a payment is made only after documented delivery, and the approved plain-language disclosure. Confirm the legal operator details and privacy contact; the current legal copy contains placeholders.
+
+3. Factual installer profile template (no sample profile)
+Fields to evidence before publication: legal company name and registration number; trading name; verified business address and service areas; named contact role (with consent); installation licences/qualifications relevant to the actual work; insurer and coverage dates if claimed; supported system types and phase; actual quote and aftercare responsibilities; equipment/warranty providers and claim route; profile reviewed date. Keep unknown fields unpublished or mark them "Not provided" only in an agreed public profile format.
+Before publication, collect partner consent to publish, documentary evidence for each claim, expiry/recheck dates, and an owner-approved correction process. No partner names, reviews, rankings, performance statistics, warranties or technical-inspection claims are supported by this draft.
+
+Editorial checks outstanding: Thai-language review by a qualified native reviewer; technical review of installer-selection criteria, warranty terminology and the scope of each profile; legal review of operator/revenue disclosures and data rights. Credit reviewers only after they perform and approve the review.

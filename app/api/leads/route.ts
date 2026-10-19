@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { calculateLeadAssessment } from '@/lib/qualification/scoring';
+import { calculateContactAssessment } from '@/lib/qualification/contact-consumption';
+import {validateScoringConfiguration} from '@/lib/qualification/scoring';
 import { consentSnapshot, publicContactConfiguration, restrictedOperationalContactConfiguration } from '@/lib/server/contact-mode';
 import { verifyAssessmentToken } from '@/lib/server/assessment-token';
 import { sha256 } from '@/lib/server/crypto';
@@ -60,15 +61,7 @@ export async function POST(request: NextRequest) {
   const parsed = leadSchema.safeParse(raw);
   if (!parsed.success) return jsonError('invalid_submission', 400);
   if (parsed.data.website) return NextResponse.json({ ok: true }, { status: 202 });
-
-  // Meter-only estimates are available without contact. The published contact
-  // storage/scoring contract still requires an actual bill; a v6 token must not
-  // authorize a new kWh submission mode, even with an accompanying bill amount.
-  // Reject before token/proof/database work, rather than inventing a user bill
-  // or letting the positive-bill database constraint fail during insertion.
-  if (parsed.data.answers.consumptionInput === 'kwh' || Math.round(parsed.data.answers.monthlyBillThb) <= 0) {
-    return jsonError('contact_consumption_input_not_supported', 422);
-  }
+  if(parsed.data.answers.consumptionInput!=='kwh'&&Math.round(parsed.data.answers.monthlyBillThb)<=0)return jsonError('contact_consumption_input_not_supported',422);
 
   const token = await verifyAssessmentToken(parsed.data.assessmentToken);
   if (!token || Date.now() - token.issuedAt < 1_500) return jsonError('invalid_assessment_session', 403);
@@ -95,10 +88,15 @@ export async function POST(request: NextRequest) {
     const questionnaire = JSON.parse(release.questionnaire_json) as QuestionnaireDocument;
     const contract = assessmentReleaseContract(questionnaire, release.questionnaire_version_id, release.rule_version_id);
     if (contract.calculatorModelVersion === 'energy-v3' && parseScoringConfiguration(release).id !== release.rule_version_id) return jsonError('submissions_unavailable', 503);
+    if(validateScoringConfiguration(parseScoringConfiguration(release)).length)return jsonError('submissions_unavailable',503);
+    if(parsed.data.answers.consumptionInput==='kwh'&&(!contract.contactInputSupport.kwh||token.contactInputPolicy!==contract.contactInputSupport.policyVersion))return jsonError('contact_consumption_input_not_supported',422);
     if (!submissionMatchesAssessmentContract(parsed.data.answers, questionnaire)) return jsonError('assessment_answers_version_mismatch', 422);
   } catch { return jsonError('submissions_unavailable', 503); }
 
-  const assessment = calculateLeadAssessment(parsed.data.answers, parseScoringConfiguration(release));
+  let normalized:ReturnType<typeof calculateContactAssessment>;
+  try{normalized=calculateContactAssessment(parsed.data.answers,parseScoringConfiguration(release));}
+  catch{return jsonError('contact_consumption_input_not_supported',422);}
+  const {assessment,consumption}=normalized;
   const phoneDisplay = parsed.data.phone;
   const phoneE164 = normalizeThaiPhone(phoneDisplay);
   const lineId = null;
@@ -116,7 +114,7 @@ export async function POST(request: NextRequest) {
   const consent = consentSnapshot(contact);
   const answers = parsed.data.answers;
   const adultConfirmationText = contactLaunchReviewCopy.adultConfirmation;
-  const explanation = JSON.stringify({ factors: assessment.factors, eligibilityReasons: assessment.eligibilityReasons });
+  const explanation = JSON.stringify({ factors: assessment.factors, eligibilityReasons: assessment.eligibilityReasons, consumption });
   const recipientSnapshot = consent.recipient ? JSON.stringify({
     ...consent.recipient,
     sharedFields: contact.sharedFields,
@@ -152,7 +150,10 @@ export async function POST(request: NextRequest) {
     phoneE164, phoneDisplay, verified.verifiedAt, parsed.data.contactMethod, lineId, answers.province,
     answers.customProvince ?? answers.customLocation ?? null, answers.ownershipStatus, answers.propertyType, answers.customPropertyType ?? null,
     JSON.stringify(answers.daytimeLoads), answers.customDaytimeLoad ?? null, answers.airConditionerCount ?? 0,
-    Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
+    // Historic positive-bill column is a qualification compatibility value for
+    // kWh rows. The immutable server snapshot explicitly marks it calculated;
+    // raw answers retain the original input and no supplied bill is invented.
+    consumption.input==='kwh'?Math.floor(consumption.qualificationBillThb):Math.round(answers.monthlyBillThb), answers.roofMaterial, answers.customRoofMaterial ?? null, answers.shade,
     answers.roofArea ?? 'unsure', answers.daytimePattern, answers.planningTimeframe ?? (answers.activelyPlanningSolar ? 'within-3-months' : 'researching'),
     answers.activelyPlanningSolar ? 1 : 0, answers.quoteContactRequested ? 1 : 0, JSON.stringify(answers),
     release.questionnaire_version_id, release.rule_version_id, release.release_id, assessment.rawPoints,

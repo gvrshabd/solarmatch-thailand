@@ -1,0 +1,131 @@
+HOMEOWNER CONTACT AND QUOTATION TOOLS — 19 OCTOBER 2026
+
+Baseline main: 52e56664a9a9394b6926258c8725bed04acdd826.
+Branch: feature/homeowner-contact-and-quote-guide.
+Scope: homeowner Design v3 retained; installer design, calculator arithmetic,
+tax/export/finance engines, legal/consent texts and historical versions preserved.
+
+Consumption contact contract
+Modern qv7/qv8 releases with the existing compatible v4 commercial rules advertise
+residential-consumption-v1. Legacy releases retain actual-bill-v1 and reject kWh.
+The new signed assessment token includes contactInputPolicy. An earlier token
+cannot authorize kWh submission merely by adding a positive bill to its answers.
+No change to ownerRequired, four installed ACs, weights, bands or partner criteria.
+The composite scoring reference is the stored v4 rule plus the explicit consumption
+snapshot version, not a rewritten historical scoring configuration.
+
+Server preprocessing preserves original consumptionInput, monthlyConsumptionKwh,
+billingPeriodDays and answers_json. A leftover bill slider value in a kWh answer
+is not evidence of a supplied bill. reportedBillThb is explicitly null for kWh.
+Calendar-day normalization (and supplied monthly records) follows consumptionMonths;
+the ordinary reference tariff converts mean monthly kWh into a qualification bill
+equivalent. No future load, PV output, tax, export or financing benefit enters it.
+The immutable scoring_explanation_json and original lead_score_history store:
+version, input provenance, raw reported units/period, any assumed period, normalized
+monthly kWh, qualification equivalent, tariff identity/tiers/Ft/VAT/service/source
+and reference date/warnings. The operational qualification event references the
+normalization version/input. Existing original records are not recalculated.
+
+The historic leads.monthly_bill_thb > 0 column remains a compatibility qualification
+value; for kWh it holds floor(calculated equivalent), never a fabricated reported
+bill. The separate server snapshot identifies its meaning. Admin summaries/manual
+copy label the equivalent explicitly. Installer projection shows raw kWh, billing
+period and 'bill not supplied' instead of this compatibility value. All projections
+respect assessment-field consent and withdrawal redaction. No migration or table
+rebuild is needed. Future consumers of monthly_bill_thb must use the provenance
+snapshot; do not assume that every modern row is a homeowner-supplied bill.
+
+Validation/holds
+TOU, unsupported tariff dates, out-of-range consumption, existing-system expansion
+and battery economics remain unsupported. Battery interest retains the explicit
+solar-only estimate action. Old tokens and incompatible releases fail closed.
+OTP proof, legal snapshots, transaction guards, canonical duplicates, idempotency,
+recipient lifetime limits and trusted environment classification remain intact.
+Public config token issuance also checks platform/collection holds. Input support
+never enables collection. All real operation switches remain off or paused.
+
+Receipts and help
+A real estimate is calculated and saved before opening the contact form. Pending
+submission is 'submitting', never 'submitted'. Only an API success becomes a local
+'Request received' receipt; it is not proof of matching or recipient delivery.
+Network/5xx uncertainty offers a retry using the same idempotency key. No lead IDs,
+contact details or receipt state are added to shared estimate links. Shared links
+suppress any local receipt. Policy hours/limit come from the server configuration.
+Persistent status and withdrawal need separate homeowner authorization; /enquiry
+remains installer staff access. No verified help email/phone is configured. See
+docs/homeowner-request-access-gap.md; no fake contact channel is published.
+
+Website tools/content
+/quotation-comparison and /en/quotation-comparison: unsaved in-memory A/B/optional C,
+explicit missing values, separately described battery/backup/finance, full scope,
+warranties and claim costs, fictional example and print text mirrors. No upload,
+storage, URL payload, analytics or automatic ranking. Guide/results link to it.
+Buying guide covers suitability, scope, price, quote comparison, warranties and
+survey-to-handover. Homepage composition and installer visual components unchanged.
+Copy distinguishes reserves from servicing, model feasibility from installability,
+package selection from a market-wide optimum, and sources from endorsement.
+Trust material remains internal/unpublished: docs/trust-content-unpublished.txt.
+
+Sources rechecked 19 October 2026
+PEA Ft: https://www.pea.co.th/our-services/tariff/ft
+PEA September tariff announcement: https://www.pea.co.th/news/corporate-news/2392
+PEA programme: https://ppim.pea.co.th/app/v1/project/solar/detail/6a3df059ee9f0e286c0a1766
+RD decree: https://www.rd.go.th/fileadmin/user_upload/kormor/newlaw/dc805.pdf
+The RD PDF's extracted text is garbled; rendered page 2 was inspected for the
+existing 200,000-baht limit, expenditure period through 31 December 2571 and the
+specified invoice/connection conditions. This is a source check, not tax advice.
+The old PEA /our-services/tariff URL now shows service fees; active numerical
+tariff evidence uses the existing period-specific PDF and the announcement above.
+The independent MEA residential page still cannot be read in this environment.
+Existing MEA, measured-load calibration and quotation/VAT/scope gaps remain.
+An announcement never replaces the homeowner's own approved export contract.
+
+Verification record
+Full unit suite after integration: 638 tests / 76 files passed. A further 26-test
+token/adapter/release-helper/classification run passed after using real local
+configuration issuance in the kWh fixture. Tests use disposable SQLite and mock
+providers; no synthetic production record or real message is created.
+Initial new browser checks exposed fixture label mismatches (questionnaire Yes
+versus contact-copy label; Thai guide link), and an invalid assumption that an
+error leaves a receipt object. Corrected fixtures retain the real assertions.
+First broader 39-case run: 36 pass, 3 Thai label failures. These are not hidden
+as passes. Visual review additionally repaired worksheet hover contrast, captured
+screenshots after actual scrolling/font readiness, and localized example content.
+Final browser/build/release receipts are recorded in the completion handoff and
+private .wrangler/ evidence. Emulation is not physical-device/native review.
+Actual A4 landscape PDFs were rendered and visually inspected in both languages.
+This exposed a repeated skip-navigation link in printed output; worksheet-only
+print CSS now hides that link and sets a white paper background. Browser print
+assertions cover the link as well as wrapping values and missing-item markers.
+The final worksheet run initially passed Chromium but failed mobile WebKit twice:
+the trace showed an early filled DOM value absent from React's print mirror and
+then erased by selecting Quote C. Controls now stay disabled until hydration
+completes; a delayed-module test verifies the initial disabled state and retained
+entry afterward. This is an application readiness fix, not a sleep in the test.
+The separate 66-case calculator/guide/installer regression run passed in 7.7m.
+Final worksheet/guide run: 18/18 passed across desktop Chromium, mobile Chromium
+and mobile WebKit, including deliberate delayed hydration. Final typecheck and
+production build passed; lint has 0 errors and 14 pre-existing warnings in home,
+installer image usage and archived prototype scripts. All six PDF pages were
+re-rendered and inspected after the print fix. The existing production admin
+browser session redirects to Access login; authenticated production dashboard
+inspection remains unverified, not bypassed. Adapter/authorization coverage uses
+the real local SQLite migration chain and synthetic browser fixtures.
+
+Remaining owner/provider decisions
+Publish verified homeowner help/correction/withdrawal contact and staffed process;
+approve separate homeowner authorization before persistent status access; resolve
+company/legal facts, qualified Thai legal/native review, actual quotation/VAT and
+calibration/independent MEA checks. Authorized non-owners may request contact but
+remain non-sellable under current owner-only commercial policy: no policy changed.
+Provider/account/live operations testing remains separately gated.
+
+Release/recovery
+No migration, release-pointer or operation-setting write. Take the existing
+encrypted DPAPI/AES D1 backup and verify original rows/foreign keys/ledger using
+the project recovery helper. Preserve private recovery files outside Git.
+Normal feature push/fast-forward or merge to main and automatic Cloudflare build.
+Rollback the task commits through normal Git revert/redeploy to baseline main;
+no D1 restore is needed for an application-only rollback. New kWh provenance
+requires these adapters; keep collection off during any rollback/rollout.
+No Milly's or unrelated resource operations.

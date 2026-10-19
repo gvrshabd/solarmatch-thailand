@@ -69,7 +69,7 @@ export const designV2Copy = {
       ]
     ],
     "trP2": "So if an installer quotes a faster payback, you’ll know exactly what to ask.",
-    "trSrc": "Built on official sources",
+    "trSrc": "Sources behind the estimate",
     "src": [
       "MEA residential tariff · Sep 2026",
       "PEA residential tariff",
@@ -90,11 +90,11 @@ export const designV2Copy = {
       ],
       [
         "How long do panels and inverters last?",
-        "Panels usually carry long performance warranties, often 25 years. Inverters usually need replacing once in that time. The yearly maintenance reserve in your estimate sets money aside for it."
+        "Check the written product, panel-performance and workmanship warranties separately. The model includes a yearly maintenance/component allowance, including inverter replacement risk. It does not set money aside, buy servicing or guarantee equipment life."
       ],
       [
         "Do I need approval from MEA or PEA?",
-        "Yes, for systems connected to the grid. Homes in Bangkok, Nonthaburi and Samut Prakan apply to MEA; elsewhere to PEA. Installers usually handle the paperwork for you."
+        "Grid-connected systems require the applicable utility process. Homes in Bangkok, Nonthaburi and Samut Prakan use MEA; other supported areas use PEA. Agree in writing who handles applications, approvals and fees."
       ],
       [
         "Is SolarMatch an installer?",
@@ -578,7 +578,7 @@ export const designV2Copy = {
       ]
     ],
     "trP2": "ถ้าผู้ติดตั้งเสนอระยะคืนทุนที่เร็วกว่านี้ คุณจะรู้ว่าควรถามอะไร",
-    "trSrc": "อ้างอิงแหล่งข้อมูลทางการ",
+    "trSrc": "แหล่งข้อมูลของผลประเมิน",
     "src": [
       "อัตราค่าไฟบ้าน กฟน. · ก.ย. 2569",
       "อัตราค่าไฟบ้าน กฟภ.",
@@ -599,11 +599,11 @@ export const designV2Copy = {
       ],
       [
         "แผงและอินเวอร์เตอร์ใช้ได้นานแค่ไหน?",
-        "แผงมักมีการรับประกันประสิทธิภาพระยะยาว ส่วนใหญ่ 25 ปี ส่วนอินเวอร์เตอร์มักต้องเปลี่ยนหนึ่งครั้งในช่วงนั้น เงินสำรองค่าบำรุงรักษารายปีในผลประเมินเผื่อไว้สำหรับเรื่องนี้แล้ว"
+        "ตรวจเอกสารรับประกันตัวสินค้า ประสิทธิภาพแผง และงานติดตั้งแยกกัน แบบจำลองเผื่อค่าบำรุงรักษาและอุปกรณ์รายปี รวมความเสี่ยงการเปลี่ยนอินเวอร์เตอร์ แต่ไม่ได้เก็บเงินสำรองให้ ซื้อบริการดูแล หรือรับประกันอายุอุปกรณ์"
       ],
       [
         "ต้องขออนุญาตการไฟฟ้าไหม?",
-        "ต้องขอ หากระบบเชื่อมต่อกับสายส่งไฟฟ้า บ้านในกรุงเทพฯ นนทบุรี และสมุทรปราการยื่นกับ กฟน. พื้นที่อื่นยื่นกับ กฟภ. โดยปกติผู้ติดตั้งจะดำเนินการเอกสารให้"
+        "ระบบเชื่อมต่อโครงข่ายต้องดำเนินการตามขั้นตอนของการไฟฟ้าที่เกี่ยวข้อง บ้านในกรุงเทพฯ นนทบุรี และสมุทรปราการใช้ กฟน. พื้นที่อื่นที่รองรับใช้ กฟภ. ควรตกลงเป็นลายลักษณ์อักษรว่าใครรับผิดชอบการยื่นเรื่อง การอนุมัติ และค่าธรรมเนียม"
       ],
       [
         "SolarMatch เป็นผู้ติดตั้งหรือเปล่า?",

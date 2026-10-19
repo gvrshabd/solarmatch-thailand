@@ -1,4 +1,5 @@
 export const pageDescriptions: Record<string,{en:string;th:string}> = {
+ 'quotation-comparison':{en:'Compare the scope, cash price, equipment, warranties and exclusions in solar quotations using an unsaved worksheet.',th:'เปรียบเทียบขอบเขตงาน ราคาซื้อเงินสด อุปกรณ์ การรับประกัน และข้อยกเว้นในใบเสนอราคาโซลาร์ด้วยแบบฟอร์มที่ไม่บันทึกข้อมูล'},
  '':{en:'Explore rooftop solar for your home with a preliminary estimate based on your bill, location and daytime electricity use.',th:'เข้าใจทางเลือกโซลาร์สำหรับบ้านด้วยค่าประเมินเบื้องต้นจากค่าไฟ พื้นที่ และการใช้ไฟช่วงกลางวัน'},
  'how-it-works':{en:'See how your assessment becomes a planning estimate, and how optional installer contact works.',th:'ดูขั้นตอนจากแบบประเมินสู่ตัวเลขสำหรับวางแผน และการเลือกขอให้ผู้ติดตั้งติดต่อ'},
  methodology:{en:'Review the tariff, generation, price, maintenance and degradation assumptions behind your SolarMatch estimate.',th:'ตรวจสอบอัตราค่าไฟ ผลผลิต ราคา เงินสำรองบำรุงรักษา และการเสื่อมของแผงที่ใช้ในผลประเมิน'},

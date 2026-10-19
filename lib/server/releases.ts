@@ -15,7 +15,8 @@ import { getRuntimeEnv } from './runtime';
 import type { SolarMatchRuntimeEnv } from './runtime';
 import { stagingIdentity, stagingRoute } from './staging-access';
 import { currentCalculationDate } from '@/config/electricity-tariffs';
-import { assessmentReleaseContract, actualBillContactInputSupport } from '@/lib/questionnaire/release-contract';
+import { assessmentReleaseContract, normalizedContactInputSupport } from '@/lib/questionnaire/release-contract';
+import {getPlatformSettings} from '@/lib/installer/settings';
 
 const seedActor = 'system:initial-migration';
 const questionnaireId = legacyQuestionnaireV1.id;
@@ -819,7 +820,7 @@ export async function publishHomeownerDesignV3Release(
        restricted_site_collection_enabled, public_collection_enabled, permitted_contact_methods_json, shared_fields_json,
        readiness_state, readiness_issues_json, restored_from_id, created_by, published_by, published_at)
       VALUES (?, ?, 'published', 'disabled', 'disabled', 0, 0, 0, '[]', '[]', 'incomplete',
-        '["Collection remains disabled; kWh submission storage and scoring are unavailable"]', ?, ?, ?, CURRENT_TIMESTAMP)`)
+        '["Collection remains disabled pending verified legal and operational activation"]', ?, ?, ?, CURRENT_TIMESTAMP)`)
       .bind(homeownerDesignV3ContactId, contactVersion?.value ?? 1, source.contact_configuration_version_id, actor, actor),
   ];
   for (const [index, question] of questionnaire.questions.entries()) {
@@ -848,7 +849,7 @@ export async function publishHomeownerDesignV3Release(
       VALUES (?, ?, 'homeowner-design-v3.published-disabled', 'public-release', ?, ?, ?)`)
       .bind(crypto.randomUUID(), actor, homeownerDesignV3ReleaseId, JSON.stringify({ releaseId: source.release_id }),
         JSON.stringify({ questionnaireVersionId: questionnaire.id, ruleVersionId: source.rule_version_id,
-          liveLeadSubmissions: false, contactInputPolicy: actualBillContactInputSupport.policyVersion, kwhContactSupported: false,
+          liveLeadSubmissions: false, contactInputPolicy: normalizedContactInputSupport.policyVersion, kwhContactSupported: true,
           ...(options.backupSha256 ? { backupSha256: options.backupSha256 } : {}) })),
   );
   await database.batch(statements);
@@ -906,7 +907,7 @@ export async function calculatorV3StagingPreviewConfiguration(
   });
   return {
     calculatorModelVersion: 'energy-v3', calculationReferenceDate: currentCalculationDate(),
-    contactInputSupport: { ...actualBillContactInputSupport },
+    contactInputSupport: { ...normalizedContactInputSupport },
     contactReviewAvailable: true,
     privatePreview: true, accessRestrictedSession: true, restrictedSiteCollectionEnabled: false, publicCollectionEnabled: false,
     releaseId: 'residential-homeowner-v3-staging-preview', questionnaireVersionId: homeownerDesignV3Questionnaire.id,
@@ -929,11 +930,12 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
     throw new Error('assessment_rules_version_mismatch');
   }
   const accessRestrictedSession = Boolean(options.restrictedAccess);
+  const servicePolicy=await getPlatformSettings(requireDatabase());
   const localContact=await localTestContact(options.request,release,requireDatabase());
   const configuredContact = localContact ?? (accessRestrictedSession
     ? restrictedOperationalContactConfiguration(release)
     : publicContactConfiguration(release));
-  const shouldIssueToken = configuredContact.enabled && (Boolean(localContact) ||
+  const shouldIssueToken = servicePolicy.collectionEnabled&&!servicePolicy.platformPaused&&configuredContact.enabled && (Boolean(localContact) ||
     (accessRestrictedSession && configuredContact.restrictedSiteCollectionEnabled)
     || (!accessRestrictedSession && configuredContact.publicCollectionEnabled && Boolean(release.live_lead_submissions))
   );
@@ -942,6 +944,7 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
       releaseId: release.release_id,
       questionnaireVersionId: release.questionnaire_version_id,
       ruleVersionId: release.rule_version_id,
+      contactInputPolicy: contract.contactInputSupport.policyVersion,
     })
     : null;
   const liveLeadSubmissions = Boolean(shouldIssueToken && token);
@@ -950,6 +953,7 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
   const loadingFacts = await getPublishedLoadingFacts(loadingFactSetVersionId);
   return {
     ...contract,
+    requestPolicy:{recipientLimit:servicePolicy.recipientLimit,startHour:servicePolicy.startHour,endHour:servicePolicy.endHour,timezone:servicePolicy.timezone},
     contactReviewAvailable: false,
     ...(contract.calculatorModelVersion === 'energy-v3' ? { calculationReferenceDate: currentCalculationDate() } : {}),
     privatePreview: Boolean(localContact),

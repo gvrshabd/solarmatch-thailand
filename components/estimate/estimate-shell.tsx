@@ -119,7 +119,7 @@ const optionIcons: Record<string, LucideIcon> = {
   other: CircleHelp,
 };
 
-type ContactOutcome = 'declined' | 'submitted' | 'skipped';
+type ContactOutcome = 'declined' | 'submitting' | 'submitted' | 'skipped';
 type CompletionJourney = { answers: EstimateAnswers; outcome: ContactOutcome; waitsForSubmission: boolean };
 type ResultViewState = {
   signature: string;
@@ -524,7 +524,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       setError(english ? 'Tick the consent box before continuing to the contact form.' : 'กรุณาทำเครื่องหมายในช่องความยินยอมก่อนกรอกข้อมูลติดต่อ');
       return;
     }
-    const collectionUnavailable = question.id === 'quoteContactRequested' && (draft.consumptionInput === 'kwh' || !assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
+    const collectionUnavailable = question.id === 'quoteContactRequested' && ((draft.consumptionInput === 'kwh' && !assessmentConfig?.contactInputSupport?.kwh) || !assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
     const validationDraft = collectionUnavailable || reviewingContact ? { ...calculationDraft, quoteContactRequested: false, quoteConsentAccepted: undefined } : calculationDraft;
     const questionError = firstQuestionError(question, validationDraft, english);
     if (questionError) { setError(questionError); return; }
@@ -543,6 +543,13 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       if (firstQuestion >= 0) moveStep(firstQuestion, firstQuestion < step ? 'backward' : 'forward');
       setError(english ? 'One answer still needs attention.' : 'ยังมีคำตอบที่ต้องตรวจสอบอีกหนึ่งข้อ');
       return;
+    }
+    if((reviewingContact&&assessmentConfig)||parsed.data.quoteContactRequested) {
+      // Preserve a real result before collecting contact details or starting an
+      // API request. This browser snapshot is never a submission receipt.
+      writeSessionValue(resultStorageKey,parsed.data);
+      if(assessmentConfig)writeSessionValue(assessmentContextStorageKey,assessmentConfig);
+      persistCompletionView({answers:parsed.data,outcome:'skipped',waitsForSubmission:false},{resultSnapshot:calculateEstimate(parsed.data),viewed:false});
     }
     if (reviewingContact && assessmentConfig) {
       setShowContactForm(true);
@@ -576,7 +583,8 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     setSubmissionComplete(false);
     setMinimumLoadingElapsed(false);
     completionRoutedRef.current = false;
-    removeSessionValue(resultViewStorageKey);
+    const savedView=parseJson(readSessionValue(resultViewStorageKey));
+    if(savedView&&typeof savedView==='object')writeSessionValue(resultViewStorageKey,{...savedView,contactOutcome:'skipped'});
   }
 
   function previous() {
@@ -609,7 +617,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
 
   const completedAnswers = estimateAnswersSchema.safeParse(calculationDraft);
   const contactPermissionUnavailable = question.id === 'quoteContactRequested' && draft.ownershipStatus !== 'owner' && draft.ownerPermission === 'not-yet';
-  const contactCollectionUnavailable = question.id === 'quoteContactRequested' && (draft.consumptionInput === 'kwh' || !assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
+  const contactCollectionUnavailable = question.id === 'quoteContactRequested' && ((draft.consumptionInput === 'kwh' && !assessmentConfig?.contactInputSupport?.kwh) || !assessmentConfig?.contact.enabled || !assessmentConfig.liveLeadSubmissions);
   const visibleOptions = question.id === 'quoteContactRequested' ? [
     ...(question.options ?? []).filter((option) => option.value !== 'yes' || (!contactPermissionUnavailable && !contactCollectionUnavailable)),
     ...(assessmentConfig?.contactReviewAvailable === true && assessmentConfig.accessRestrictedSession ? [{ value: 'test', label: contactReviewCopy.label, description: contactReviewCopy.help }] : []),
@@ -656,7 +664,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {energyQuestionnaire && question.id === 'daytimeLoads' && <EnergyInputFields section="loads" answers={draft} locale={locale} onChange={setValue} />}
       {energyQuestionnaire && question.id === 'roofArea' && <EnergyInputFields section="roof" answers={draft} locale={locale} onChange={setValue} />}
       {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
-      {question.id === 'quoteContactRequested' && draft.consumptionInput === 'kwh' && <p role="status">{english ? 'Contact requests for kWh-based assessments are not available. Your full estimate is still available without contact details.' : 'ยังไม่เปิดรับคำขอติดต่อจากแบบประเมินที่ใช้หน่วยไฟ kWh คุณยังดูผลประเมินทั้งหมดได้โดยไม่ต้องให้ข้อมูลติดต่อ'}</p>}
+      {question.id === 'quoteContactRequested' && draft.consumptionInput === 'kwh' && !assessmentConfig?.contactInputSupport?.kwh && <p role="status">{english ? 'You can view your full estimate without contact details. Contact requests are unavailable for this saved assessment version.' : 'คุณดูผลประเมินทั้งหมดได้โดยไม่ต้องให้ข้อมูลติดต่อ แบบประเมินรุ่นที่บันทึกไว้นี้ยังไม่รองรับคำขอติดต่อ'}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
     </ScreenTransition>
       <div className="estimate-actions">{step>0&&<button className="button button-secondary" type="button" disabled={!ready||transitioning} aria-label={english?'Back':'ย้อนกลับ'} onClick={previous}><ArrowLeft aria-hidden="true"/><span className="sr-only">{english?'Back':'ย้อนกลับ'}</span></button>}<button className="button" type="button" disabled={!ready || transitioning} onClick={next}>{contactReview ? (english ? 'Continue' : 'ถัดไป') : (contactPermissionUnavailable || contactCollectionUnavailable) ? (english ? 'View my estimate' : 'ดูผลประเมิน') : step === questions.length - 1 && draft.quoteContactRequested ? (english ? 'Continue' : 'ถัดไป') : step === questions.length - 1 ? (english ? 'See my estimate' : 'ดูผลประเมิน') : (english ? 'Next' : 'ถัดไป')} <ArrowRight aria-hidden="true" /></button></div>
@@ -672,11 +680,11 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     reviewOnly={contactReview}
     onBack={() => { setShowContactForm(false); setDirection('backward'); setError(''); if (contactReview) { setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); } }}
     onConfigurationChanged={(configuration) => { setAssessmentConfig(configuration); writeSessionValue(assessmentContextStorageKey, configuration); }}
-    onProcessingStart={() => beginCompletion(completedAnswers.data, 'submitted', true)}
+    onProcessingStart={() => beginCompletion(completedAnswers.data, 'submitting', true)}
     onProcessingFailed={cancelCompletion}
     onContinue={(outcome) => {
       if (outcome === 'reviewed') setReviewConsentAccepted(false);
-      if (outcome === 'submitted') setSubmissionComplete(true);
+      if (outcome === 'submitted') {setCompletionJourney(current=>current?{...current,outcome:'submitted'}:current);setSubmissionComplete(true);}
       else beginCompletion(completedAnswers.data, 'skipped', false);
     }}
   />}

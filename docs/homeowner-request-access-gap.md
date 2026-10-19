@@ -1,0 +1,9 @@
+# Homeowner request confirmation: remaining access gap
+
+The successful `POST /api/leads` response proves that the request was saved and queued. It does not prove matching, installer delivery, or the absence of a suitable installer. Allocation and delivery happen after that response. The results page therefore shows only **Request received** for a successful submission. A shared estimate URL contains no request status and must never become a status link.
+
+The installer `/enquiry` route is for staff and cannot authorize a homeowner. The public site contact configuration currently has no verified email, phone, or LINE destination; the `/contact` page still contains unresolved contact placeholders. No usable correction or withdrawal route can be claimed from those values. Public collection remains paused until legal and operational readiness is complete.
+
+To offer persistent homeowner status and withdrawal later, implement a separate homeowner authorization flow tied to the verified submitting phone (or another approved identity proof). The server must check that authorization before reading the lead, enquiry, recipient delivery, or withdrawal records. Return only a scoped status and confirmed recipient names from actual delivery records, and apply withdrawal through an audited, idempotent server action that also suppresses further allocation and notifies prior recipients as required. Do not expose raw lead IDs, staff links, or personal information in a public URL or a shared estimate.
+
+Before promising help in the UI, publish and verify an owner-controlled contact destination and a staffed process for corrections and withdrawal. The receipt component will render a direct contact link only when `siteConfig.contact.email` or `siteConfig.contact.phone` is populated with such a verified destination.

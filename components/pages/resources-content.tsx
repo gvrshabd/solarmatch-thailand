@@ -52,8 +52,8 @@ export async function ResourcesContent({ locale }: { locale: Locale }) {
   const facts = await publishedFacts();
   return (
     <main>
-      <PageHero eyebrow={english ? 'Resources · checked 2026-09-08' : 'แหล่งข้อมูล · ตรวจสอบล่าสุด 8 กันยายน 2569'} title={english ? 'Sources behind the estimate' : 'แหล่งข้อมูลของผลประเมิน'}>
-        <p>{english ? 'Policy, tariffs, prices, and conditions can change. These are the sources used by the current model and should be rechecked before a real decision.' : 'นโยบาย อัตราค่าไฟ ราคา และเงื่อนไขเปลี่ยนได้ ลิงก์เหล่านี้คือแหล่งที่ใช้กับแบบจำลองปัจจุบัน และควรตรวจสอบอีกครั้งก่อนตัดสินใจจริง'}</p>
+      <PageHero eyebrow={english ? 'Resources' : 'แหล่งข้อมูล'} title={english ? 'Sources behind the estimate' : 'แหล่งข้อมูลของผลประเมิน'}>
+        <p>{english ? 'Policy, tariffs, prices, and conditions can change. These are model references, not approval or endorsement of SolarMatch by their publishers. Check current rules, your approved utility contract, and the date shown on each research item before a real decision.' : 'นโยบาย อัตราค่าไฟ ราคา และเงื่อนไขเปลี่ยนได้ ลิงก์เหล่านี้เป็นหลักฐานอ้างอิงของแบบจำลอง ไม่ได้หมายความว่าหน่วยงานผู้เผยแพร่รับรอง SolarMatch ตรวจเงื่อนไขปัจจุบัน สัญญาที่การไฟฟ้าอนุมัติให้คุณ และวันที่ของงานวิจัยแต่ละรายการก่อนตัดสินใจจริง'}</p>
       </PageHero>
       <section className="site-shell resource-list">
         {resources[locale].map((resource) => <a key={resource.name} href={resource.href} target="_blank" rel="noopener noreferrer" aria-label={`${resource.name} (${english ? 'opens in a new tab' : 'เปิดในแท็บใหม่'})`}><div><h2>{resource.name}</h2><p>{resource.note}</p></div><ExternalLink size={20} aria-hidden="true" /></a>)}

@@ -9,12 +9,14 @@ import {
 import { HomePage } from '@/components/home/home-page';
 import { MethodologyContent } from '@/components/pages/methodology-content';
 import { ResourcesContent } from '@/components/pages/resources-content';
+import { SolarGuideContent } from '@/components/pages/solar-guide-content';
+import { QuotationComparison } from '@/components/pages/quotation-comparison';
 import { ContactContent } from '@/components/pages/contact-content';
 import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
 import { PageHero } from '@/components/content/page-hero';
 import { PublishedLegalDocument } from '@/components/content/published-legal-document';
-import { legalReviewDisclosures, prelaunchNotice } from '@/config/legal-review';
+import { prelaunchNotice } from '@/config/legal-review';
 
 const en = (path = '') => `/en${path}`;
 
@@ -30,11 +32,7 @@ function EnglishHowItWorks() {
 }
 
 function EnglishSolarGuide() {
-  return <main><PageHero eyebrow="Solar guide" title="A guide to home solar"><p>The right system depends on several factors. This guide introduces the key ideas without promoting a brand or installer.</p></PageHero>
-    <section className="site-shell guide-layout"><nav className="guide-index" aria-label="Contents"><strong>On this page</strong><a href="#daytime">Daytime electricity</a><a href="#roof">Roof and shade</a><a href="#size">System size</a><a href="#quotes">Comparing quotes</a></nav>
-      <article className="prose guide-prose"><section id="daytime"><p className="eyebrow">01 · Behaviour</p><h2>Daytime electricity use matters</h2><p>Panels generate while the sun is shining. Homes using air conditioning, pumps, or work-from-home equipment during the day may consume more solar energy directly than homes whose main demand occurs at night.</p></section><section id="roof"><p className="eyebrow">02 · Site conditions</p><h2>Area does not tell the whole story</h2><p>Orientation, pitch, material, shade from trees or buildings, and structural strength all matter. A professional survey is still required before a real design.</p></section><section id="size"><p className="eyebrow">03 · Sizing</p><h2>Bigger is not always more suitable</h2><p>A system much larger than the home’s usage pattern may produce energy that creates less value than expected, particularly where export rules and rates are limited.</p></section><section id="quotes"><p className="eyebrow">04 · Comparing</p><h2>Ask quotations to explain the same things</h2><p>Compare DC and AC size, equipment models, warranties, production assumptions, structural work, installation standards, monitoring, and exclusions—not only the total on the first page.</p><div className="callout"><strong>Important</strong><p>{legalReviewDisclosures.installerChecks.en}</p><p>{prelaunchNotice.en}</p></div></section></article>
-    </section><section className="content-cta"><div className="site-shell"><h2>Turn your bill into a practical starting system size</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
-  </main>;
+  return <SolarGuideContent locale="en" />;
 }
 
 function EnglishMethodology() {
@@ -90,6 +88,7 @@ export function EnglishPage({ slug }: { slug: string }) {
     case 'estimate/results': return <ResultsShell locale="en" />;
     case 'how-it-works': return <EnglishHowItWorks />;
     case 'solar-guide': return <EnglishSolarGuide />;
+    case 'quotation-comparison': return <QuotationComparison locale="en" />;
     case 'methodology': return <EnglishMethodology />;
     case 'contact': return <EnglishContact />;
     case 'resources': return <EnglishResources />;

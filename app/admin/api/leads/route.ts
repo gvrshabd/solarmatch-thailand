@@ -8,6 +8,7 @@ import { ensureInitialRelease, getCurrentRelease, parseScoringConfiguration } fr
 import { requireDatabase } from '@/lib/server/runtime';
 import { redactInstallerLeads } from '@/lib/installer/privacy';
 import type { SubmissionMode } from '@/lib/installer/enquiries';
+import {consumptionSummary,storedContactConsumption} from '@/lib/qualification/consumption-snapshot';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +123,7 @@ export async function GET(request: Request) {
       const reviewSelection = resolveAdministratorReviewSelection(lead, threshold);
       return ({
       ...lead,
+      consumption_summary: consumptionSummary(storedContactConsumption(lead.scoring_explanation_json),lead.monthly_bill_thb),
       explanation: JSON.parse(lead.scoring_explanation_json),
       selected: reviewSelection.selected,
       selectionCompatible: true,

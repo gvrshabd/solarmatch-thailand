@@ -3,6 +3,7 @@ import { initialQuestionnaire, legacyQuestionnaireV1 } from '@/config/assessment
 const fields: Record<string, [string, string]> = {
   propertyType: ['ประเภทที่พักอาศัย', 'Property type'], ownershipStatus: ['สถานะต่อทรัพย์สิน', 'Ownership status'],
   monthlyBillThb: ['ค่าไฟต่อเดือน', 'Monthly electricity bill'], daytimePattern: ['การใช้ไฟช่วงกลางวัน', 'Daytime electricity use'],
+  monthlyConsumptionKwh: ['หน่วยไฟที่ผู้ใช้กรอก', 'Homeowner-provided electricity use'], billingPeriodDays:['จำนวนวันในรอบบิล','Billing period'],billInputStatus:['ค่าไฟที่ผู้ใช้กรอก','Homeowner-provided bill'],
   daytimeLoads: ['อุปกรณ์ที่มีในบ้าน', 'Installed appliances'], airConditionerCount: ['จำนวนเครื่องปรับอากาศ', 'Installed air conditioners'],
   roofArea: ['พื้นที่หลังคา', 'Roof area'], roofMaterial: ['วัสดุหลังคา', 'Roof material'], shade: ['เงาบนหลังคา', 'Roof shading'],
   planningTimeframe: ['ช่วงเวลาที่วางแผนติดตั้ง', 'Installation timeframe'], projectType: ['ประเภทโครงการ', 'Project type'],
@@ -20,9 +21,10 @@ export function assessmentRows(assessment: Record<string, unknown>, en: boolean)
       if (typeof value === 'number' && Number.isFinite(value)) {
         const number = new Intl.NumberFormat(en ? 'en-GB' : 'th-TH').format(value);
         return key === 'monthlyBillThb' ? `${number} ${en ? 'THB/month' : 'บาท/เดือน'}`
-          : key === 'airConditionerCount' ? `${number} ${en ? 'units' : 'เครื่อง'}` : number;
+          : key === 'monthlyConsumptionKwh' ? `${number} kWh` : key === 'billingPeriodDays' ? `${number} ${en?'days':'วัน'}` : key === 'airConditionerCount' ? `${number} ${en ? 'units' : 'เครื่อง'}` : number;
       }
       if (typeof value !== 'string' || !value.trim()) return missing;
+      if(key==='billInputStatus'&&value==='not-supplied')return en?'Not supplied':'ไม่ได้กรอก';
       return question?.options?.find((option) => option.value === value)?.label[locale]
         ?? (key === 'planningTimeframe' ? legacyQuestionnaireV1.questions.find((item) => item.id === 'installationTimeframe')?.options?.find((option) => option.value === value)?.label[locale] : undefined)
         ?? (en ? 'Other / unrecognised answer' : 'คำตอบอื่น / ไม่พบตัวเลือก');

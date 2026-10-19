@@ -101,12 +101,13 @@ export type PublicAssessmentConfig = {
   calculationReferenceDate?: string;
   /** Legal Test preview is exposed only by the exact protected staging override. */
   contactReviewAvailable?: boolean;
+  requestPolicy?: {recipientLimit:number;startHour:number;endHour:number;timezone:'Asia/Bangkok'};
   /** Input support is distinct from collection availability and never enables it. */
   contactInputSupport?: {
-    policyVersion: 'actual-bill-v1';
+    policyVersion: 'actual-bill-v1' | 'residential-consumption-v1';
     bill: boolean;
-    kwh: false;
-    kwhUnavailableReason: 'versioned-storage-and-scoring-unavailable';
+    kwh: boolean;
+    kwhUnavailableReason?: 'versioned-storage-and-scoring-unavailable';
   };
   attribution?: import('@/lib/analytics/attribution').PublicAttributionConfig;
   privatePreview: boolean;

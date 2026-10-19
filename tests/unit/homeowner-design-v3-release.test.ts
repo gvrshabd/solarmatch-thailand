@@ -51,7 +51,7 @@ describe('bill-first questionnaire contract', () => {
     expect(questionnaireDocumentSchema.safeParse({ ...homeownerDesignV3Questionnaire,
       questions: homeownerDesignV3Questionnaire.questions.map(q => q.id === 'roofArea' ? { ...q, required: false } : q) }).success).toBe(false);
     expect(assessmentReleaseContract(homeownerDesignV3Questionnaire, homeownerDesignV3Questionnaire.id, 'residential-rules-v4'))
-      .toMatchObject({ calculatorModelVersion: 'energy-v3', contactInputSupport: { bill: true, kwh: false, policyVersion: 'actual-bill-v1' } });
+      .toMatchObject({ calculatorModelVersion: 'energy-v3', contactInputSupport: { bill: true, kwh: true, policyVersion: 'residential-consumption-v1' } });
     expect(() => assessmentReleaseContract(homeownerDesignV3Questionnaire, homeownerDesignV3Questionnaire.id, 'residential-rules-v3')).toThrow('incompatible');
     expect(() => assessmentReleaseContract({ ...homeownerDesignV3Questionnaire, schemaVersion: 10 }, homeownerDesignV3Questionnaire.id, 'residential-rules-v4')).toThrow('incompatible');
     expect(() => assessmentReleaseContract(homeownerDesignV3Questionnaire, calculatorV3Questionnaire.id, 'residential-rules-v4')).toThrow('mismatch');
@@ -103,7 +103,7 @@ describe('explicit disabled release publication', () => {
     const config = await getPublicAssessmentConfig({ restrictedAccess: true });
     expect(config).toMatchObject({ questionnaireVersionId: homeownerDesignV3Questionnaire.id, calculatorModelVersion: 'energy-v3',
       contactReviewAvailable: false,
-      contactInputSupport: { policyVersion: 'actual-bill-v1', bill: true, kwh: false },
+      contactInputSupport: { policyVersion: 'residential-consumption-v1', bill: true, kwh: true },
       assessmentToken: null, liveLeadSubmissions: false, restrictedSiteCollectionEnabled: false, publicCollectionEnabled: false,
       contact: { enabled: false, mode: 'disabled', operationalDistributionEnabled: false } });
     expect(config.calculationReferenceDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);

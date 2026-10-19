@@ -1,0 +1,40 @@
+.quote-worksheet{background:var(--sm-stone);color:var(--sm-pine)}
+.quote-worksheet *{box-sizing:border-box}
+.quote-worksheet-body{padding-block:36px 80px}
+.quote-worksheet-notice{background:var(--sm-sage);border-radius:var(--sm-r-md);padding:18px 22px;line-height:1.6}
+.quote-worksheet-notice p{margin:0}.quote-worksheet-notice p+p{margin-top:8px;font-weight:600}
+.quote-worksheet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+.quote-worksheet-actions .button{min-height:44px;white-space:normal;text-align:center}
+.quote-worksheet .quote-worksheet-actions .button-secondary,
+.quote-worksheet .quote-worksheet-actions .button-secondary:hover{background:var(--sm-sage);color:var(--sm-pine);border-color:var(--sm-line-2)}
+.quote-worksheet-toggle{display:inline-flex;align-items:center;gap:10px;min-height:44px;font-weight:600;cursor:pointer;margin-bottom:22px}
+.quote-worksheet-toggle input{width:21px;height:21px;accent-color:var(--sm-green)}
+.quote-worksheet-example{border:1px solid var(--sm-gold);background:var(--sm-gold-soft);border-radius:var(--sm-r-md);padding:22px;margin-bottom:28px;line-height:1.6}
+.quote-worksheet-example h2{font-size:19px;margin:14px 0 6px}.quote-worksheet-example ol{margin:0;padding-inline-start:24px}.quote-worksheet-example li+li{margin-top:5px}
+.quote-worksheet-column-heads,.quote-worksheet-row{display:grid;grid-template-columns:minmax(170px,1.1fr) repeat(var(--quote-count),minmax(0,1fr));gap:12px}
+.quote-worksheet-column-heads{padding:0 18px 10px;text-align:left}.quote-worksheet-column-heads strong{font-size:17px}
+.quote-worksheet-group{background:#fff;border:1px solid var(--sm-line);border-radius:var(--sm-r-lg);padding:20px;margin-bottom:18px;box-shadow:var(--sm-shadow);break-inside:avoid-page}
+.quote-worksheet-group h2{font-size:22px;line-height:1.4;margin:0 0 12px}
+.quote-worksheet-row{padding:12px 0;border-top:1px solid var(--sm-line);align-items:start}
+.quote-worksheet-field-name{font-weight:600;line-height:1.45;padding-top:10px;overflow-wrap:anywhere}
+.quote-worksheet-cell{display:block;min-width:0}.quote-worksheet-cell :is(input,textarea){display:block;width:100%;min-height:44px;background:var(--sm-stone);border:1px solid var(--sm-line-2);border-radius:10px;padding:10px 12px;color:var(--sm-pine);font:inherit;font-size:14px;line-height:1.5;resize:vertical;overflow-wrap:anywhere}
+.quote-worksheet-cell :is(input,textarea)::placeholder{color:var(--sm-muted);opacity:1}
+.quote-worksheet :focus-visible{outline:3px solid var(--sm-green);outline-offset:2px}
+.quote-worksheet-mobile-name,.quote-worksheet-print-missing,.quote-worksheet-print-value{display:none}
+.quote-worksheet-links{display:flex;gap:20px;flex-wrap:wrap;padding-top:18px}.quote-worksheet-links a{color:var(--sm-green);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:700px){
+  .quote-worksheet-body{padding-block:22px 52px}.quote-worksheet-actions .button{flex:1 1 100%}
+  .quote-worksheet-column-heads{display:none}.quote-worksheet-group{padding:17px;border-radius:18px}
+  .quote-worksheet-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quote-worksheet-field-name{grid-column:1/-1;padding-top:0}
+  .quote-worksheet-mobile-name{display:block;font-size:13px;font-weight:700;margin:0 0 5px}.quote-worksheet-cell:last-child:nth-child(4){grid-column:1/-1}
+}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  body:has(.quote-worksheet),body:has(.quote-worksheet) .terrace-public{background:#fff!important}
+  body:has(.quote-worksheet) :is(.site-header,.site-footer,.skip-link){display:none!important}
+  .quote-worksheet{background:#fff;color:#000}.quote-worksheet .page-hero{padding:0 0 8px;background:none;border:0}.quote-worksheet .page-hero h1{font-size:20px}.quote-worksheet .page-hero-lede{font-size:11px;margin-top:4px}
+  .quote-worksheet-body{width:100%;padding:0}.quote-worksheet-notice{font-size:10px;padding:6px 0;background:none}.quote-worksheet-actions,.quote-worksheet-toggle,.quote-worksheet-links{display:none!important}
+  .quote-worksheet-example{padding:8px;border:1px solid #777;font-size:10px;break-inside:avoid}.quote-worksheet-example h2{font-size:12px;margin:4px 0}.quote-worksheet-example li+li{margin-top:0}
+  .quote-worksheet-column-heads,.quote-worksheet-row{grid-template-columns:minmax(120px,1.1fr) repeat(var(--quote-count),minmax(0,1fr));gap:7px}.quote-worksheet-column-heads{display:grid;padding:0 6px 3px}.quote-worksheet-column-heads strong{font-size:11px}
+  .quote-worksheet-group{padding:7px;margin-bottom:7px;border:1px solid #aaa;box-shadow:none;border-radius:0;break-inside:auto}.quote-worksheet-group h2{font-size:13px;margin:0 0 3px;break-after:avoid}.quote-worksheet-row{padding:4px 0;break-inside:avoid}.quote-worksheet-field-name{font-size:10px;padding:2px 0}.quote-worksheet-cell :is(input,textarea){display:none}.quote-worksheet-print-missing,.quote-worksheet-print-value{display:block;font-size:10px;white-space:pre-wrap;overflow-wrap:anywhere}.quote-worksheet-print-missing{color:#555}.quote-worksheet-mobile-name{display:none}
+}

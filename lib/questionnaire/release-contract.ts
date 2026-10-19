@@ -2,13 +2,17 @@ import { calculatorV3Questionnaire, homeownerDesignV3Questionnaire } from '@/con
 import type { EstimateAnswers } from '@/lib/calculator/types';
 import type { PublicAssessmentConfig, QuestionnaireDocument } from './types';
 import { questionnaireDocumentSchema } from './validation';
+import {CONTACT_CONSUMPTION_VERSION} from '@/lib/qualification/consumption-snapshot';
 
 export const actualBillContactInputSupport: NonNullable<PublicAssessmentConfig['contactInputSupport']> = {
   policyVersion: 'actual-bill-v1', bill: true, kwh: false,
   kwhUnavailableReason: 'versioned-storage-and-scoring-unavailable',
 };
+export const normalizedContactInputSupport: NonNullable<PublicAssessmentConfig['contactInputSupport']> = {
+  policyVersion: CONTACT_CONSUMPTION_VERSION, bill: true, kwh: true,
+};
 
-/** Modern contact retains the established v4 actual-bill qualification policy. */
+/** Modern contact retains v4 weights/gates and versions its input preprocessing separately. */
 export function assessmentReleaseContract(questionnaire: QuestionnaireDocument, questionnaireId: string, ruleId: string) {
   if (questionnaire.id !== questionnaireId) throw new Error('assessment_questionnaire_version_mismatch');
   const modern = questionnaire.schemaVersion === 10 || questionnaire.schemaVersion === 11;
@@ -21,7 +25,7 @@ export function assessmentReleaseContract(questionnaire: QuestionnaireDocument, 
   }
   return {
     calculatorModelVersion: modern ? 'energy-v3' as const : 'legacy-v5' as const,
-    contactInputSupport: { ...actualBillContactInputSupport },
+    contactInputSupport: { ...(modern ? normalizedContactInputSupport : actualBillContactInputSupport) },
   };
 }
 

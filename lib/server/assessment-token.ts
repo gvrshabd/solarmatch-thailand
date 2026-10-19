@@ -5,6 +5,7 @@ export type AssessmentTokenPayload = {
   releaseId: string;
   questionnaireVersionId: string;
   ruleVersionId: string;
+  contactInputPolicy?: string;
   issuedAt: number;
   expiresAt: number;
   nonce: string;

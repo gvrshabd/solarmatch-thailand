@@ -73,6 +73,8 @@ html[lang=th] .homeowner-v3 .v2-results .rsub{letter-spacing:0;line-height:1.35}
 @media(prefers-reduced-motion:reduce){.homeowner-v3 .v2-results .scenario-switch,.homeowner-v3 .v2-results .scenario-switch::after{transition:none}}
 .homeowner-v3 .v2-results .result-model-recovery{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:24px;display:grid;gap:18px;line-height:1.6;color:#fff}
 .homeowner-v3 .v2-results .result-model-recovery p{margin:0}
+.homeowner-v3 .v2-results .request-confirmation{padding:24px;line-height:1.65}
+.homeowner-v3 .v2-results .request-confirmation p{margin-top:12px}
 .homeowner-v3 .v2-results .result-model-recovery .solar-only-action{background:var(--lime,#d9ed92);color:#142f27;border-color:transparent;font-weight:600}
 .homeowner-v3 .v2-results .result-model-recovery :focus-visible{outline:3px solid #d9ed92;outline-offset:4px}
 .homeowner-v3 .v2-results .result-model-recovery .btn{white-space:normal;min-height:44px;text-align:center}

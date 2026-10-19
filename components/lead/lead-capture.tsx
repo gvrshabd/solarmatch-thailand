@@ -189,7 +189,9 @@ export function LeadCapture({
         }
         setSubmissionError(body?.code === 'rate_limited'
           ? (english ? 'Please wait a minute before trying again.' : 'กรุณารอสักครู่แล้วลองอีกครั้ง')
-          : contact.failureBody[locale]);
+          : response.status >= 500
+            ? (english ? 'We could not confirm the request status. Wait a moment, then retry; the same submission will not create a second request.' : 'ยังยืนยันสถานะคำขอไม่ได้ กรุณารอสักครู่แล้วลองอีกครั้ง โดยการส่งซ้ำรายการเดิมจะไม่สร้างคำขอใหม่')
+            : contact.failureBody[locale]);
         setSending(false);
         return;
       }
@@ -198,7 +200,9 @@ export function LeadCapture({
       onContinue('submitted');
     } catch {
       onProcessingFailed();
-      setSubmissionError(contact.failureBody[locale]);
+      setSubmissionError(english
+        ? 'We could not confirm the request status. Wait a moment, then retry; the same submission will not create a second request.'
+        : 'ยังยืนยันสถานะคำขอไม่ได้ กรุณารอสักครู่แล้วลองอีกครั้ง โดยการส่งซ้ำรายการเดิมจะไม่สร้างคำขอใหม่');
       setSending(false);
     }
   }
@@ -245,7 +249,7 @@ export function LeadCapture({
         {errors.adultConfirmed && <p className="field-error" role="alert">{errors.adultConfirmed}</p>}
         <div className="privacy-inline"><LockKeyhole size={17} aria-hidden="true" /><span><LegalText text={contactLaunchReviewCopy.termsNotice[locale]} locale={locale} openInNewTab /></span></div>
         <input className="website-honeypot" tabIndex={-1} autoComplete="off" aria-hidden="true" value={fields.website} onChange={(event) => setValue('website', event.target.value)} />
-        {submissionError && <div className="form-error form-error-summary" role="alert"><strong>{contact.failureTitle[locale]}</strong><p>{submissionError}</p></div>}
+        {submissionError && <div className="form-error form-error-summary" role="alert"><strong>{english ? 'Request not confirmed' : 'ยังไม่ยืนยันคำขอ'}</strong><p>{submissionError}</p></div>}
         <div className="contact-form-actions">
           <button type="button" className="button button-secondary" disabled={sending} onClick={onBack}><ArrowLeft size={18} />{english ? 'Back' : 'ย้อนกลับ'}</button>
           <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{reviewOnly ? contactReviewCopy.finish[locale] : sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : submissionError ? (english ? 'Try again' : 'ลองอีกครั้ง') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button>

@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       actor: identity.email, expectedCurrentReleaseId: body.expectedCurrentReleaseId,
       backupSha256: body.backupSha256, requireOperationalHolds: true,
     });
-    return NextResponse.json({ ok: true, ...result, liveLeadSubmissions: false, kwhContactSupported: false }, { headers });
+    return NextResponse.json({ ok: true, ...result, liveLeadSubmissions: false, kwhContactSupported: true }, { headers });
   } catch {
     // Do not leak database errors, actor data or source documents. A stale source,
     // occupied version or changed hold requires a fresh read and human review.

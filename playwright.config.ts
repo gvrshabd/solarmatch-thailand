@@ -9,7 +9,7 @@ export default defineConfig({
   projects: [
     { name: 'desktop-webkit', testMatch: /terrace\.spec\.ts/, use: { ...devices['Desktop Safari'], browserName: 'webkit' } },
     { name: 'installer-mobile-webkit', testMatch: /installer-(studio|repair-portal|payment-return)\.spec\.ts/, use: { ...devices['iPhone 13'], browserName: 'webkit' } },
-    { name: 'homeowner-v3-mobile-webkit', testMatch: /(?:calculator-v3|homeowner-v3-(?:home|flow))\.spec\.ts/, use: { ...devices['iPhone 13'], browserName: 'webkit' } },
+    { name: 'homeowner-v3-mobile-webkit', testMatch: /(?:calculator-v3|homeowner-contact-consumption|quotation-comparison|homeowner-v3-(?:home|flow))\.spec\.ts/, use: { ...devices['iPhone 13'], browserName: 'webkit' } },
     { name: 'desktop-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
     { name: 'mobile-chromium', testIgnore: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], channel: 'chrome' } },
     { name: 'mobile-chromium-audit', testMatch: /mobile-audit\.spec\.ts/, use: { ...devices['Pixel 7'], browserName: 'chromium', channel: 'chrome' } },

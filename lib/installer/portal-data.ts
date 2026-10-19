@@ -14,6 +14,12 @@ export function deliveryProjection(row:Row):InstallerDelivery {
   const assessment:Record<string,unknown>={};
   const safeKeys=['propertyType','ownershipStatus','monthlyBillThb','daytimePattern','daytimeLoads','airConditionerCount','roofArea','roofMaterial','shade','planningTimeframe','projectType'];
   if(allowed('assessmentAnswers')) for(const key of safeKeys) if(answers[key]!==undefined) assessment[key]=answers[key];
+  if(allowed('assessmentAnswers')&&answers.consumptionInput==='kwh') {
+    delete assessment.monthlyBillThb;
+    assessment.monthlyConsumptionKwh=answers.monthlyConsumptionKwh;
+    assessment.billingPeriodDays=answers.billingPeriodDays??365/12;
+    assessment.billInputStatus='not-supplied';
+  }
   return {id:String(row.id),enquiryId:String(row.enquiry_id),reference:`SM-${String(row.id).slice(0,8).toUpperCase()}`,product:String(row.product),fundingSource:String(row.funding_source),creditCost:Number(row.credit_cost),deliveredAt:String(row.available_at),notificationStatus:String(row.notification_status),claimDeadline:String(row.claim_deadline),withdrawn,homeownerName:[allowed('legalFirstName')?row.legal_first_name:'',allowed('legalLastName')?row.legal_last_name:''].filter(Boolean).join(' '),phone:allowed('phone')?String(row.phone_e164??''):'',location:allowed('assessmentAnswers')?deliveryLocation({province:String(row.province??''),district:String(answers.district??''),customArea:String(row.custom_location??''),location:''},true):'',requestedAt:withdrawn?'':String(row.requested_at),assessment,qualification:'',province:allowed('assessmentAnswers')?String(row.province??''):'',district:allowed('assessmentAnswers')?String(answers.district??''):'',customArea:allowed('assessmentAnswers')?String(row.custom_location??''):'',teamNotes:!withdrawn?String(row.portal_team_notes??''):'',notesRevision:Number(row.portal_notes_revision??0),notesUpdatedAt:!withdrawn&&row.portal_notes_updated_at?String(row.portal_notes_updated_at):null,outcome:!withdrawn&&(row.portal_progress_stage||row.outcome_status)?String(row.portal_progress_stage||row.outcome_status):null};
 }
 export const deliverySelect=`SELECT d.*,l.legal_first_name,l.legal_last_name,l.phone_e164,l.province,l.custom_location,l.answers_json,l.created_at AS requested_at,l.hard_eligible,

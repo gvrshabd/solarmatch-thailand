@@ -81,7 +81,7 @@ async function main(){
   const[action,targetName,directoryArg]=process.argv.slice(2),target=targets[targetName];
   if(!['inspect','backup','verify'].includes(action)||!target||((action==='verify')!==Boolean(directoryArg)))throw Error('Usage: inspect|backup production|staging, or verify production|staging <fresh-run-directory>');
   const git=(...args)=>execFileSync('git',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
-  if(git('remote','get-url','origin')!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/homeowner-design-v3-integration','main'].includes(git('branch','--show-current')))throw Error('Wrong repository/branch');
+  if(git('remote','get-url','origin')!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/homeowner-design-v3-integration','feature/homeowner-contact-and-quote-guide','main'].includes(git('branch','--show-current')))throw Error('Wrong repository/branch');
   const remoteMain=git('ls-remote','origin','refs/heads/main').split(/\s+/)[0];
   if(!/^[a-f0-9]{40}$/.test(remoteMain))throw Error('Remote main unavailable');
   const config=JSON.parse(await readFile(target.config,'utf8'));
@@ -126,7 +126,8 @@ async function main(){
   const beforeState=await state();
   if(action==='inspect'){console.log(JSON.stringify(beforeState));return;}
   if(action==='backup'){
-    if(beforeState.collisions.length)throw Error('Target release IDs already allocated; inspect before proceeding');
+    // Existing published IDs prevent a duplicate publication, not a read-only
+    // recovery backup. The publisher retains its independent atomic ID guard.
     if(process.platform!=='win32')throw Error('Backup requires reviewed Windows CurrentUser DPAPI protection');
     await mkdir(backupRoot,{recursive:true});
     const directory=await mkdtemp(path.join(backupRoot,`${targetName}-${new Date().toISOString().replaceAll(/[:.]/g,'-')}-`));

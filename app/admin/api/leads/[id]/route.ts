@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { requireDatabase } from '@/lib/server/runtime';
+import {consumptionSummary,storedContactConsumption} from '@/lib/qualification/consumption-snapshot';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   return NextResponse.json({
     lead: {
       ...lead,
+      consumption_summary:consumptionSummary(storedContactConsumption(lead.scoring_explanation_json),Number(lead.monthly_bill_thb)),
       answers: JSON.parse(String(lead.answers_json)),
       scoringExplanation: JSON.parse(String(lead.scoring_explanation_json)),
       daytimeLoads: JSON.parse(String(lead.daytime_loads_json)),
