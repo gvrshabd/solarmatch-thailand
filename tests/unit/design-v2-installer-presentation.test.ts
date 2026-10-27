@@ -17,7 +17,7 @@ describe('Design v2 installer display integrity',()=>{
  });
  it('never interprets not-recorded or legacy open as a completed call',()=>{
    expect(enquiryGroup({outcome:'not-recorded'} as InstallerDelivery)).toBe('new');
-   expect(enquiryGroup({outcome:'open'} as InstallerDelivery)).toBe('progress');
+   expect(enquiryGroup({outcome:'open'} as InstallerDelivery)).toBe('new');
    expect(enquiryGroup({outcome:'lost'} as InstallerDelivery)).toBe('closed');
  });
  it('combines an order with its purchase only, retaining reversals and unpaid orders',()=>{

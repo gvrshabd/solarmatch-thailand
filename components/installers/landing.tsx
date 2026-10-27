@@ -1,35 +1,93 @@
 'use client';
+
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Copy, Phone } from 'lucide-react';
 import { designText } from '@/config/design-v2-copy';
 import type { InstallerPublicConfig } from '@/lib/installer/public-config';
-import { PortalBrand } from './workspace';
 import { portalMoney } from '@/lib/installer/presentation';
+import { signalLandingFaq, signalLandingText } from './signal-landing-copy';
 
-export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage }: { en: boolean; config: InstallerPublicConfig; apply: () => void; signIn: () => void; auth?:ReactNode; setLanguage:(english:boolean)=>void }) {
-  const t = designText(en ? 'en' : 'th');
+export function SignalBrand({ en }: { en: boolean }) {
+  const t = signalLandingText(en);
+  return <a className="brand" href={'/installers?lang=' + (en ? 'en' : 'th')} aria-label={'SolarMatch ' + t.brandSub}>
+    <SignalLogo/>
+    <span><b>SolarMatch</b><small>{t.brandSub}</small></span>
+  </a>;
+}
+
+export function SignalLogo() {
+  return <svg className="logo" viewBox="0 0 64 56" aria-hidden="true">
+      <g fill="#E2A62B"><path d="M32 0 27.5 8h9L32 0Z"/><path d="m15.5 6.5 1.2 9 7.7-4.5-8.9-4.5Z"/><path d="m48.5 6.5-8.9 4.5 7.7 4.5 1.2-9Z"/><path d="M3 24.5 11.5 29v-9L3 24.5Z"/><path d="m61 24.5-8.5-4.5v9l8.5-4.5Z"/><path d="m9 41 9-1.1-4.5-7.8L9 41Z"/><path d="m55 41-4.5-8.9-4.5 7.8L55 41Z"/></g>
+      <path d="M15 37a20.5 20.5 0 1 1 34 0" fill="none" stroke="#E2A62B" strokeWidth="6"/>
+      <path d="M10 53 39 30M54 53 25 30" fill="none" stroke="#137A50" strokeLinecap="square" strokeWidth="6"/>
+    </svg>;
+}
+
+export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage }: {
+  en: boolean;
+  config: InstallerPublicConfig;
+  apply: () => void;
+  signIn: () => void;
+  auth?: ReactNode;
+  setLanguage: (english: boolean) => void;
+}) {
+  const t = signalLandingText(en);
   const c = config.commercial;
   const available = config.accountsAvailable;
-  const action = <><button className="btn btn-primary" disabled={!available} onClick={apply}>{available ? t.iApply : en ? 'Applications unavailable' : 'ยังไม่เปิดรับสมัคร'}<ArrowRight size={18}/></button><button className="btn btn-ghost" disabled={!available} onClick={signIn}>{en ? 'Sign in' : 'เข้าสู่ระบบ'}</button></>;
-  const faq = [
-    [en ? 'Is a sale guaranteed?' : 'รับประกันว่าจะขายได้หรือไม่?', en ? 'No. A shared enquiry is a request for contact, not a guaranteed sale. You provide your own advice, quotation and installation agreement.' : 'ไม่รับประกัน คำขอแบบแชร์เป็นคำขอรับการติดต่อ ไม่ใช่ยอดขายที่รับประกัน บริษัทของคุณเป็นผู้ให้คำแนะนำ ใบเสนอราคา และสัญญาติดตั้งเอง'],
-    [en ? 'Can other companies receive the same request?' : 'บริษัทอื่นได้รับคำขอเดียวกันได้หรือไม่?', c ? en ? `Yes. A request may reach up to ${c.recipientLimit} companies, including trial deliveries.` : `ได้ คำขอหนึ่งอาจส่งให้บริษัทได้สูงสุด ${c.recipientLimit} แห่ง รวมรายการทดลอง` : en ? 'Requests are shared, not exclusive. Current limits are shown in the installer terms.' : 'คำขอเป็นแบบแชร์ ไม่ใช่เฉพาะราย ขอบเขตปัจจุบันระบุในข้อตกลงผู้ติดตั้ง'],
-    [en ? 'What if an enquiry has a problem?' : 'หากคำขอมีปัญหาต้องทำอย่างไร?', c ? en ? `Submit a claim within ${c.claimDays} days of its original portal availability. Claims are reviewed; a credit restoration is not a cash refund.` : `ยื่นคำร้องภายใน ${c.claimDays} วันนับจากพร้อมใช้ในพอร์ทัลครั้งแรก คำร้องต้องผ่านการตรวจสอบ การคืนเครดิตไม่ใช่การคืนเงินสด` : en ? 'Use the protected claim flow in your portal. The current terms explain eligibility.' : 'ยื่นคำร้องผ่านพอร์ทัลที่มีการปกป้องสิทธิ์ โดยดูเงื่อนไขในข้อตกลงฉบับปัจจุบัน'],
+  const price = c ? portalMoney(c.creditValueMinor * c.sharedCredits, 'THB', en, (c.creditValueMinor * c.sharedCredits) % 100 === 0) : '—';
+  const faq = signalLandingFaq(en, c);
+  const name = en ? 'Arun' : 'อรุณ';
+  const exampleFacts = [
+    [portalMoney(720000, 'THB', en, true), t.fBill],
+    ['6', t.fAc],
+    [en ? 'Owner' : 'เจ้าของ', t.fOwn],
+    [en ? 'Within 3 months' : 'ภายใน 3 เดือน', t.fWhen],
   ];
-  return <div className="v2-installer-landing">
-    <header className="hdr"><div className="wrap v2-landing-header"><a className="brand" href={'/installers?lang='+(en?'en':'th')}><PortalBrand/></a><nav className="nav" aria-label={en?'Installer information':'ข้อมูลผู้ติดตั้ง'}><a aria-current="page" href={'/installers?lang='+(en?'en':'th')}>{en?'For installers':'สำหรับผู้ติดตั้ง'}</a><a href={en?'/en':'/'}>{en?'Homeowner site':'เว็บไซต์เจ้าของบ้าน'}</a></nav><div className="hdr-right"><div className="lang-toggle"><button aria-label="Switch to Thai" aria-pressed={!en} onClick={()=>setLanguage(false)}>ไทย</button><button aria-label="Switch to English" aria-pressed={en} onClick={()=>setLanguage(true)}>EN</button></div><button className="btn btn-ghost v2-landing-signin" disabled={!available} onClick={signIn}>{en?'Sign in':'เข้าสู่ระบบ'}</button><button className="btn btn-primary" disabled={!available} onClick={apply}>{en?'Apply':'สมัคร'}</button></div></div></header>
-    <section className="wrap ihero"><div><p className="eyebrow">{t.iEyebrow}</p><h1>{t.iH1}</h1><p className="lede">{t.iLede}</p><div className="btns">{action}</div><div className="terms">
-      <div><span>{t.tPrice}</span><b>{c ? portalMoney(c.creditValueMinor*c.sharedCredits,'THB',en,(c.creditValueMinor*c.sharedCredits)%100===0) : '—'}</b></div>
-      <div><span>{t.tCos}</span><b>{c ? `${en?'Up to':'สูงสุด'} ${c.recipientLimit}` : '—'}</b></div>
-      <div><span>{t.tStart}</span><b>{c ? `${c.trialDeliveries} ${en?'trial enquiries':'คำขอทดลอง'}` : '—'}</b></div>
-      <div><span>{t.tClaim}</span><b>{c ? `${c.claimDays} ${en?'days':'วัน'}` : '—'}</b></div>
-    </div><p className="note">{en?'Subject to approval, current terms and delivery availability. No automatic billing.':'ขึ้นอยู่กับการอนุมัติ ข้อตกลงปัจจุบัน และความพร้อมในการส่งคำขอ ไม่มีการเรียกเก็บเงินอัตโนมัติ'}</p></div>
-    {auth||<div className="iphoto"><Image src="/images/design-v2/installer-tall.jpg" alt={en?'Solar technician working on rooftop panels':'ช่างกำลังติดตั้งแผงโซลาร์บนหลังคา'} width={900} height={1347}/><span className="credit">Los Muertos Crew</span><div className="sample"><div className="example-top"><b>{t.sample}</b><span className="tag-ex">{t.exampleTag}</span></div><div className="v2-sample-chips">{[en?'Sathon, Bangkok':'สาทร กรุงเทพมหานคร','฿6,000'+t.perMo,en?'5 air conditioners':'เครื่องปรับอากาศ 5 เครื่อง',en?'Owner':'เจ้าของ',en?'Within 3 months':'ภายใน 3 เดือน'].map(x=><span className="chip" key={x}>{x}</span>)}</div></div></div>}</section>
-    <section className="section band-sage"><div className="wrap"><div className="section-head"><h2>{t.iHowH}</h2></div><div className="steps">{[[t.ih1t,t.ih1p],[t.ih2t,t.ih2p],[t.ih3t,c?(en?`Approved companies may receive ${c.trialDeliveries} trial enquiries. A request may reach up to ${c.recipientLimit} companies.`:`บริษัทที่อนุมัติอาจได้รับคำขอทดลอง ${c.trialDeliveries} รายการ คำขอหนึ่งอาจส่งให้บริษัทได้สูงสุด ${c.recipientLimit} แห่ง`):(en?'Follow up on available enquiries in your portal.':'ติดตามคำขอที่พร้อมใช้ในพอร์ทัลของคุณ')]].map(([h,p],i)=><div className="step" key={h}><span className="n">{i+1}</span><h3>{h}</h3><p>{p}</p></div>)}</div></div></section>
-    <section className="section"><div className="wrap trustgrid"><div><h2>{t.fairH}</h2><p className="lede">{t.fairP}</p></div><div className="fairtable"><div><span>{en?'The terms':'เงื่อนไข'}</span><span>SolarMatch</span></div>{[[en?'Shared request':'คำขอแบบแชร์',c?en?`Up to ${c.recipientLimit} companies`:`สูงสุด ${c.recipientLimit} บริษัท`:'—'],[en?'Automatic billing':'การเรียกเก็บอัตโนมัติ',en?'None':'ไม่มี'],[en?'Sales guarantee':'การรับประกันยอดขาย',en?'No':'ไม่รับประกัน'],[en?'Claim window':'ระยะเวลายื่นคำร้อง',c?`${c.claimDays} ${en?'days':'วัน'}`:'—']].map(([l,v])=><div key={l}><span className="muted">{l}</span><span className="us">{v}</span></div>)}</div></div></section>
-    <section className="section v2-installer-faq"><div className="wrap"><h2>{t.iFaqH}</h2><div className="faq">{faq.map(([h,p])=><details key={h}><summary>{h}</summary><p>{p}</p></details>)}</div></div></section>
-    <section className="section band-dark"><div className="wrap cta-final"><h2>{t.iH1}</h2><div className="btns">{action}</div></div></section>
-    <footer className="wrap footer"><a href={en?'/en/privacy':'/privacy'}>{en?'Privacy Notice':'ประกาศความเป็นส่วนตัว'}</a><a href={en?'/en/terms':'/terms'}>{en?'Terms of use':'ข้อกำหนดการใช้งาน'}</a></footer>
+  return <div className="signal landing" lang={en ? 'en' : 'th'}>
+    <a className="sr skip" href="#installer-landing-main">{en ? 'Skip to content' : 'ข้ามไปเนื้อหา'}</a>
+    <header className="a-hdr"><div className="wrap">
+      <SignalBrand en={en}/>
+      <nav className="a-nav" aria-label={t.navMain}><a href="#how">{t.navHow}</a><a href="#price">{t.navPrice}</a><a href="#faq">{t.navFaq}</a></nav>
+      <div className="r">
+        <div className="lang"><button type="button" aria-label="Switch to Thai" aria-pressed={!en} onClick={() => setLanguage(false)}>ไทย</button><button type="button" aria-label="Switch to English" aria-pressed={en} onClick={() => setLanguage(true)}>EN</button></div>
+        <button type="button" className="btn ghost sm" disabled={!available} onClick={signIn}>{t.signIn}</button>
+        <button type="button" className="btn primary sm" disabled={!available} onClick={apply}>{available ? t.apply : t.unavailable}</button>
+      </div>
+    </div></header>
+    <main id="installer-landing-main" tabIndex={-1}>
+      <section className={'a-hero' + (auth ? ' authing' : '')}><div className="wrap">
+        <div className="copy"><p className="eyebrow">{t.eyebrow}</p><h1>{designText(en ? 'en' : 'th').iH1}</h1><p className="lede">{t.lede}</p><div className="btns">
+          <button type="button" className="btn primary lg" disabled={!available} onClick={apply}>{available ? t.applyLong : t.unavailable}<ArrowRight className="i" aria-hidden="true"/></button>
+          <button type="button" className="btn ghost lg" disabled={!available} onClick={signIn}>{t.signIn}</button>
+        </div></div>
+        {auth || <div className="stack" role="group" aria-label={t.exLabel}>
+          <div className="notif"><div className="nt"><span className="live" aria-hidden="true"/><b>{t.exNew}</b><span>{t.exNow}</span></div>
+            <div className="nb"><span className="av" aria-hidden="true">{name[0]}</span><div><b>{name}</b><small>{en ? 'Prawet, Bangkok' : 'ประเวศ, กรุงเทพมหานคร'}</small></div></div>
+            <div className="facts4 mini">{exampleFacts.map(([value, label]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}</div>
+            <div className="na"><span className="btn primary"><Phone className="i" aria-hidden="true"/>{en ? `Call ${name}` : `โทรหา${name}`}</span><span className="btn soft"><Copy className="i" aria-hidden="true"/>{t.copy}</span></div>
+          </div><span className="ex-tag">{t.exTag}</span>
+        </div>}
+      </div></section>
+      <section className="a-facts" id="price" aria-label={t.navPrice}><div className="wrap"><div className="fgrid">
+        <div><b>{price}</b><span>{t.fPrice}</span></div>
+        <div><b>{c ? c.recipientLimit : '—'}</b><span>{t.fCos}</span></div>
+        <div><b>{c ? c.trialDeliveries : '—'}</b><span>{t.fFree}</span></div>
+        <div><b>{c ? `${c.claimDays} ${en ? 'days' : 'วัน'}` : '—'}</b><span>{t.fClaim}</span></div>
+      </div><p className="note">{t.fNote}</p></div></section>
+      <section className="a-how" id="how"><div className="wrap"><p className="eyebrow">{t.howEyebrow}</p><h2>{t.howH}</h2><ol className="tl">
+        {[[t.s1t, t.s1p], [t.s2t, t.s2p], [t.s3t, t.s3p]].map(([heading, text], i) => <li key={heading}><span className="n" aria-hidden="true">{i + 1}</span><h3>{heading}</h3><p>{text}</p></li>)}
+      </ol></div></section>
+      <section className="a-faq" id="faq"><div className="wrap"><div className="band">
+        <Image src="/images/design-v2/palms-roof.jpg" alt={t.photoAlt} width={1600} height={1200} loading="eager"/>
+        <span className="credit">Photo: Kindel Media / Pexels</span><h2>{t.faqH}</h2>
+      </div><div className="qas">{faq.map(([question, answer]) => <details className="qa" key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
+    </main>
+    <footer className="foot"><div className="wrap">
+      <div className="fb"><SignalBrand en={en}/><p>{t.footTag}</p></div>
+      <div><h2 className="h4">{t.footInst}</h2><a href="#how">{t.navHow}</a><a href="#price">{t.navPrice}</a><button type="button" className="tlink" disabled={!available} onClick={signIn}>{t.signIn}</button></div>
+      <div><h2 className="h4">SolarMatch</h2><a href={en ? '/en' : '/'}>{t.homeSite}</a><a href={en ? '/en/privacy' : '/privacy'}>{t.privacy}</a><a href={en ? '/en/terms' : '/terms'}>{t.terms}</a></div>
+      <p className="fine">{t.footFine}</p>
+    </div></footer>
   </div>;
 }
