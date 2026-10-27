@@ -16,7 +16,7 @@ const stateFile=`${privateDirectory}/resources.json`;
 const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 let token;
 export function assertStagingCheckout(remote,branch){
-  if(remote!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3','feature/homeowner-design-v3-integration'].includes(branch))throw Error('Wrong repository/branch.');
+  if(remote!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3','feature/homeowner-design-v3-integration','feature/installer-signal-integration'].includes(branch))throw Error('Wrong repository/branch.');
 }
 function verifyCheckout(){assertStagingCheckout(execFileSync('git',['remote','get-url','origin'],{encoding:'utf8'}).trim(),execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim());}
 export async function cloudflare(suffix,method='GET',body){
@@ -149,8 +149,8 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1]
     const config=await verifiedConfiguration();
     await assertProtectedStagingBuild(process.cwd(),config);
     let configPath='staging/wrangler.jsonc';
-    if(process.argv.includes('--design-review')||process.argv.includes('--homeowner-v3-review')){
-      const {prepareReviewAssets}=await import(process.argv.includes('--homeowner-v3-review')?'./homeowner-v3-review-assets.mjs':'./design-v2-review-assets.mjs');
+    if(process.argv.includes('--signal-review')||process.argv.includes('--design-review')||process.argv.includes('--homeowner-v3-review')){
+      const {prepareReviewAssets}=await import(process.argv.includes('--signal-review')?'./signal-review-assets.mjs':process.argv.includes('--homeowner-v3-review')?'./homeowner-v3-review-assets.mjs':'./design-v2-review-assets.mjs');
       const rows=(await stagingQuery("SELECT d.id FROM lead_recipient_deliveries d JOIN leads l ON l.id=d.lead_id WHERE l.is_test_submission=1 AND l.submission_mode='sandbox' AND d.allocation_environment='sandbox' ORDER BY d.delivered_at LIMIT 1"))[0].results;
       const assets=await prepareReviewAssets(process.cwd(),{enquiryId:rows[0]?.id});
       config.main=path.resolve('dist/server/index.js');config.assets.directory=assets;

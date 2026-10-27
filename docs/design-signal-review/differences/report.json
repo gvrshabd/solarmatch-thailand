@@ -1,0 +1,648 @@
+{
+  "unmasked": true,
+  "thresholdMeaning": "Exact pixel differences are reported without treating legitimate legal, data, font rendering or accessibility differences as equality.",
+  "pairs": [
+    {
+      "name": "claims-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 116707,
+      "changedFraction": 0.0900516975308642,
+      "channelDifferenceAbove16Pixels": 38249,
+      "exactlyEqual": false
+    },
+    {
+      "name": "claims-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 348661,
+      "changedFraction": 0.26481118604933773,
+      "channelDifferenceAbove16Pixels": 137457,
+      "exactlyEqual": false
+    },
+    {
+      "name": "company-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 79316,
+      "changedFraction": 0.06120061728395062,
+      "channelDifferenceAbove16Pixels": 1445,
+      "exactlyEqual": false
+    },
+    {
+      "name": "company-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 2564,
+      "changedPixels": 221729,
+      "changedFraction": 0.11086893475739029,
+      "channelDifferenceAbove16Pixels": 4782,
+      "exactlyEqual": false
+    },
+    {
+      "name": "company-nocompany-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 982,
+      "changedPixels": 74397,
+      "changedFraction": 0.05261159198913781,
+      "channelDifferenceAbove16Pixels": 2192,
+      "exactlyEqual": false
+    },
+    {
+      "name": "company-nocompany-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 2432,
+      "changedPixels": 207745,
+      "changedFraction": 0.10951469719973009,
+      "channelDifferenceAbove16Pixels": 7358,
+      "exactlyEqual": false
+    },
+    {
+      "name": "credits-debt-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1514,
+      "changedPixels": 131518,
+      "changedFraction": 0.0603249302803464,
+      "channelDifferenceAbove16Pixels": 27940,
+      "exactlyEqual": false
+    },
+    {
+      "name": "credits-debt-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 3762,
+      "changedPixels": 1016963,
+      "changedFraction": 0.3465706320969479,
+      "channelDifferenceAbove16Pixels": 528724,
+      "exactlyEqual": false
+    },
+    {
+      "name": "credits-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1419,
+      "changedPixels": 125925,
+      "changedFraction": 0.06162643880667137,
+      "channelDifferenceAbove16Pixels": 25225,
+      "exactlyEqual": false
+    },
+    {
+      "name": "credits-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 3400,
+      "changedPixels": 330572,
+      "changedFraction": 0.12465007541478129,
+      "channelDifferenceAbove16Pixels": 66651,
+      "exactlyEqual": false
+    },
+    {
+      "name": "credits-payment-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1679,
+      "changedPixels": 146234,
+      "changedFraction": 0.060483257229832575,
+      "channelDifferenceAbove16Pixels": 31741,
+      "exactlyEqual": false
+    },
+    {
+      "name": "credits-payment-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 3928,
+      "changedPixels": 395929,
+      "changedFraction": 0.12922639563423677,
+      "channelDifferenceAbove16Pixels": 88351,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e22-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1063,
+      "changedPixels": 77992,
+      "changedFraction": 0.0509511863698129,
+      "channelDifferenceAbove16Pixels": 12665,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e22-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 2514,
+      "changedPixels": 414560,
+      "changedFraction": 0.21141097036085102,
+      "channelDifferenceAbove16Pixels": 283210,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e25-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 948,
+      "changedPixels": 123073,
+      "changedFraction": 0.09015544421003281,
+      "channelDifferenceAbove16Pixels": 82406,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e25-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 220439,
+      "changedFraction": 0.16742541621096124,
+      "channelDifferenceAbove16Pixels": 113930,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e39-close-menu-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 59717,
+      "changedFraction": 0.046077932098765435,
+      "channelDifferenceAbove16Pixels": 13396,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e39-close-menu-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 375067,
+      "changedFraction": 0.28486678211204275,
+      "channelDifferenceAbove16Pixels": 247361,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e39-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1088,
+      "changedPixels": 81995,
+      "changedFraction": 0.05233545241013072,
+      "channelDifferenceAbove16Pixels": 15391,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e39-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 2566,
+      "changedPixels": 456218,
+      "changedFraction": 0.2279403241601215,
+      "channelDifferenceAbove16Pixels": 321712,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e41-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1096,
+      "changedPixels": 80747,
+      "changedFraction": 0.051162687550689374,
+      "channelDifferenceAbove16Pixels": 14645,
+      "exactlyEqual": false
+    },
+    {
+      "name": "e41-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 2582,
+      "changedPixels": 445113,
+      "changedFraction": 0.22101382351188703,
+      "channelDifferenceAbove16Pixels": 311897,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-account-menu-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 132726,
+      "changedFraction": 0.10241203703703704,
+      "channelDifferenceAbove16Pixels": 84613,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-account-menu-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 3167,
+      "changedFraction": 0.0024053651719528495,
+      "channelDifferenceAbove16Pixels": 3074,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-debt-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1096,
+      "changedPixels": 159426,
+      "changedFraction": 0.10101505474452555,
+      "channelDifferenceAbove16Pixels": 90621,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-debt-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 316416,
+      "changedFraction": 0.24032081662413415,
+      "channelDifferenceAbove16Pixels": 192403,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-empty-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 948,
+      "changedPixels": 15465,
+      "changedFraction": 0.011328674402250351,
+      "channelDifferenceAbove16Pixels": 13904,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-empty-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 25060,
+      "changedFraction": 0.019033296876898774,
+      "channelDifferenceAbove16Pixels": 23609,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1088,
+      "changedPixels": 155514,
+      "changedFraction": 0.0992608762254902,
+      "channelDifferenceAbove16Pixels": 86981,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 10061,
+      "changedFraction": 0.007641420585733382,
+      "channelDifferenceAbove16Pixels": 9656,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-nocompany-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 48189,
+      "changedFraction": 0.03718287037037037,
+      "channelDifferenceAbove16Pixels": 8649,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-nocompany-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 255042,
+      "changedFraction": 0.19370670798395917,
+      "channelDifferenceAbove16Pixels": 124210,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-nocredits-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1088,
+      "changedPixels": 159883,
+      "changedFraction": 0.10204950469771241,
+      "channelDifferenceAbove16Pixels": 90765,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-nocredits-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 322740,
+      "changedFraction": 0.24512395187750638,
+      "channelDifferenceAbove16Pixels": 198982,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-paused-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1088,
+      "changedPixels": 155514,
+      "changedFraction": 0.0992608762254902,
+      "channelDifferenceAbove16Pixels": 86981,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-paused-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 10061,
+      "changedFraction": 0.007641420585733382,
+      "channelDifferenceAbove16Pixels": 9656,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-pending-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 62053,
+      "changedFraction": 0.0478804012345679,
+      "channelDifferenceAbove16Pixels": 28334,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-pending-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 262723,
+      "changedFraction": 0.1995404970227245,
+      "channelDifferenceAbove16Pixels": 142711,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-platform-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1088,
+      "changedPixels": 156798,
+      "changedFraction": 0.10008042279411765,
+      "channelDifferenceAbove16Pixels": 87872,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-platform-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 10640,
+      "changedFraction": 0.008081176327621824,
+      "channelDifferenceAbove16Pixels": 10215,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1096,
+      "changedPixels": 154487,
+      "changedFraction": 0.0978856194241687,
+      "channelDifferenceAbove16Pixels": 86306,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 11169,
+      "changedFraction": 0.008482956616842873,
+      "channelDifferenceAbove16Pixels": 10582,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-unverified-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1088,
+      "changedPixels": 200694,
+      "changedFraction": 0.1280981924019608,
+      "channelDifferenceAbove16Pixels": 125980,
+      "exactlyEqual": false
+    },
+    {
+      "name": "inbox-unverified-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1688,
+      "changedPixels": 319115,
+      "changedFraction": 0.24237073155912017,
+      "channelDifferenceAbove16Pixels": 197687,
+      "exactlyEqual": false
+    },
+    {
+      "name": "landing-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 2404,
+      "changedPixels": 79754,
+      "changedFraction": 0.023038569975965983,
+      "channelDifferenceAbove16Pixels": 29559,
+      "exactlyEqual": false
+    },
+    {
+      "name": "landing-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 5686,
+      "changedPixels": 456477,
+      "changedFraction": 0.10292418626045077,
+      "channelDifferenceAbove16Pixels": 87029,
+      "exactlyEqual": false
+    },
+    {
+      "name": "landing-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 2342,
+      "changedPixels": 224151,
+      "changedFraction": 0.06646473811557074,
+      "channelDifferenceAbove16Pixels": 14154,
+      "exactlyEqual": false
+    },
+    {
+      "name": "landing-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 5372,
+      "changedPixels": 228578,
+      "changedFraction": 0.05455113885865934,
+      "channelDifferenceAbove16Pixels": 84510,
+      "exactlyEqual": false
+    },
+    {
+      "name": "signin-en-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 2452,
+      "changedPixels": 63009,
+      "changedFraction": 0.0178451264274062,
+      "channelDifferenceAbove16Pixels": 22388,
+      "exactlyEqual": false
+    },
+    {
+      "name": "signin-en-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 5380,
+      "changedPixels": 188431,
+      "changedFraction": 0.044903012105614336,
+      "channelDifferenceAbove16Pixels": 67129,
+      "exactlyEqual": false
+    },
+    {
+      "name": "terms-terms-th-desktop.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 290481,
+      "changedFraction": 0.22413657407407409,
+      "channelDifferenceAbove16Pixels": 147592,
+      "exactlyEqual": false
+    },
+    {
+      "name": "terms-terms-th-phone.png",
+      "dimensionsMatch": true,
+      "width": 780,
+      "height": 1830,
+      "changedPixels": 534344,
+      "changedFraction": 0.3743477651674373,
+      "channelDifferenceAbove16Pixels": 383925,
+      "exactlyEqual": false
+    }
+  ],
+  "homeowner": [
+    {
+      "name": "homeowner-home-en-1440.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 4436,
+      "changedPixels": 535305,
+      "changedFraction": 0.08380062744214006,
+      "channelDifferenceAbove16Pixels": 74,
+      "exactlyEqual": false
+    },
+    {
+      "name": "homeowner-home-en-390.png",
+      "dimensionsMatch": true,
+      "width": 390,
+      "height": 4882,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    },
+    {
+      "name": "homeowner-home-th-1440.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 4408,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    },
+    {
+      "name": "homeowner-home-th-390.png",
+      "dimensionsMatch": true,
+      "width": 390,
+      "height": 4762,
+      "changedPixels": 86395,
+      "changedFraction": 0.04651945422630009,
+      "channelDifferenceAbove16Pixels": 18,
+      "exactlyEqual": false
+    },
+    {
+      "name": "homeowner-result-en-1440.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1898,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    },
+    {
+      "name": "homeowner-result-en-390.png",
+      "dimensionsMatch": true,
+      "width": 390,
+      "height": 3006,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    },
+    {
+      "name": "homeowner-result-th-1440.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 1927,
+      "changedPixels": 11500,
+      "changedFraction": 0.004144323358127198,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": false
+    },
+    {
+      "name": "homeowner-result-th-390.png",
+      "dimensionsMatch": true,
+      "width": 390,
+      "height": 2885,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    },
+    {
+      "name": "homeowner-worksheet-en-1440.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    },
+    {
+      "name": "homeowner-worksheet-en-390.png",
+      "dimensionsMatch": true,
+      "width": 390,
+      "height": 844,
+      "changedPixels": 33844,
+      "changedFraction": 0.10281929760602747,
+      "channelDifferenceAbove16Pixels": 26851,
+      "exactlyEqual": false
+    },
+    {
+      "name": "homeowner-worksheet-th-1440.png",
+      "dimensionsMatch": true,
+      "width": 1440,
+      "height": 900,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    },
+    {
+      "name": "homeowner-worksheet-th-390.png",
+      "dimensionsMatch": true,
+      "width": 390,
+      "height": 844,
+      "changedPixels": 0,
+      "changedFraction": 0,
+      "channelDifferenceAbove16Pixels": 0,
+      "exactlyEqual": true
+    }
+  ]
+}

@@ -2,12 +2,14 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import type { InstallerPortalData } from '../../lib/installer/portal-contract';
 
-for (const lang of ['en', 'th']) test(`disabled installer service hides registration and recovery (${lang})`, async ({ page }) => {
+for (const lang of ['en', 'th']) test(`unavailable installer service hides registration and recovery (${lang})`, async ({ page }) => {
   await page.route('**/api/installer/portal*', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'portal_unavailable' }) }));
   await page.goto(`/installers?lang=${lang}`);
-  await expect(page.getByRole('heading', { level:1, name: lang === 'en' ? 'Homeowners who already know their numbers.' : 'ลูกค้าที่รู้ตัวเลขของตัวเองมาแล้ว' })).toBeVisible();
+  await expect(page.getByRole('heading', { level:1, name: lang === 'en' ? 'The portal is temporarily unavailable' : 'พอร์ทัลไม่พร้อมใช้งาน' })).toBeVisible();
   await expect(page.locator('form')).toHaveCount(0);
-  await expect(page.getByRole('button',{name:lang==='en'?'Applications unavailable':'ยังไม่เปิดรับสมัคร',exact:true}).first()).toBeDisabled();
+  await expect(page.getByRole('button',{name:lang==='en'?'Retry':'ลองอีกครั้ง',exact:true})).toBeEnabled();
+  await expect(page.getByRole('button',{name:lang==='en'?'Create a company account':'สร้างบัญชีบริษัท',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:lang==='en'?'Forgot password':'ลืมรหัสผ่าน',exact:true})).toHaveCount(0);
 });
 
 // Deliberately synthetic API fixtures: no account, messages or payment side effects.
@@ -39,61 +41,102 @@ for (const lang of ['en', 'th'] as const) {
     });
     test('responsive workspace, credits, account, enquiries and accessibility', async ({ page }, info) => {
       test.setTimeout(120000);
+      await page.setViewportSize({width:390,height:844});
       await page.goto('/installers?lang=' + lang);
-      await expect(page.locator('.callnext')).toContainText('Synthetic Arun');
-      const nav = page.getByRole('navigation', { name: en ? 'Installer navigation' : 'เมนูผู้ติดตั้ง' });
+      await expect(page.locator('.rows .row').first()).toContainText('Synthetic Arun');
+      await expect(page.getByRole('button',{name:en?'Waiting 2':'รอติดต่อ 2',exact:true})).toHaveAttribute('aria-pressed','true');
+      const nav = page.locator('nav:visible').filter({has:page.getByRole('link',{name:en?'Credits':'เครดิต',exact:true})});
       for (const width of [320, 360, 390, 430, 768, 900, 1440]) {
         await page.setViewportSize({ width, height: 900 });
-        for (const view of [en ? 'Today' : 'วันนี้', en ? 'Enquiries' : 'คำขอ', en ? 'Credits' : 'เครดิต', en ? 'Company' : 'บริษัท']) {
-          await nav.getByRole('button', { name: view, exact: true }).click();
+        for (const view of [en ? 'Enquiries' : 'คำขอ', en ? 'Credits' : 'เครดิต', en ? 'Company' : 'บริษัท']) {
+          await nav.getByRole('link', { name: new RegExp('^'+view+'(?:$| )') }).click();
           await expect(page.locator('#installer-page-title')).toBeFocused();
+          await expect(page.getByRole('heading',{level:1})).toHaveCount(1);
+          await expect.poll(()=>new URL(page.url()).searchParams.get('lang')).toBe(lang);
           await page.evaluate(() => document.fonts.ready);
           expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), width + ' ' + view).toBe(true);
         }
       }
       for (const view of ['overview', 'inbox', 'credits', 'profile', 'terms', 'claims']) {
         await page.goto('/installers?view=' + view + '&lang=' + lang);
-        await expect(page.locator('.installer-workspace')).toBeVisible();
+        await expect(page.locator('.a-app')).toBeVisible();
         await page.setViewportSize({ width: 390, height: 844 });
-        expect((await new AxeBuilder({ page }).include('.installer-shell').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
+        expect((await new AxeBuilder({ page }).include('.signal').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice']).analyze()).violations).toEqual([]);
         if (view === 'overview' || view === 'credits') await page.screenshot({ path: info.outputPath(view + '-' + lang + '-mobile.png'), fullPage: true });
         await page.setViewportSize({ width: 1440, height: 1000 });
-        if (view === 'overview' || view === 'credits') expect((await new AxeBuilder({ page }).include('.installer-shell').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
+        if (view === 'overview' || view === 'credits') expect((await new AxeBuilder({ page }).include('.signal').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice']).analyze()).violations).toEqual([]);
         if (view === 'overview' || view === 'credits') await page.screenshot({ path: info.outputPath(view + '-' + lang + '-desktop.png'), fullPage: true });
       }
     });
     test('search, status groups, withdrawal privacy and back navigation', async ({ page }) => {
+      await page.setViewportSize({width:390,height:844});
       await page.goto('/installers?view=inbox&lang=' + lang);
-      await page.getByRole('button',{name:en?'All 3':'ทั้งหมด 3',exact:true}).click();
-      await expect(page.locator('.installer-enquiry-card')).toHaveCount(3);
-      await expect(page.locator('.installer-shell')).not.toContainText('HIDDEN_PRIVATE');
-      await expect(page.locator('.installer-shell')).not.toContainText('999,999');
+      await expect(page.locator('.rows .row')).toHaveCount(2);
+      await page.getByRole('button',{name:en?'Closed 1':'ปิดแล้ว 1',exact:true}).click();
+      await expect(page.locator('.rows .row')).toHaveCount(1);
+      await expect(page.locator('.rows .row')).toContainText('SM-TEST-042');
+      await expect(page.locator('.signal')).not.toContainText('HIDDEN_PRIVATE');
+      await expect(page.locator('.signal')).not.toContainText('999,999');
       await page.getByRole('searchbox').fill('HIDDEN_PRIVATE');
-      await expect(page.locator('.installer-enquiry-card')).toHaveCount(0);
-      await page.getByRole('searchbox').fill('Sathon');
-      await expect(page.locator('.installer-enquiry-card')).toHaveCount(1);
+      await expect(page.locator('.rows .row')).toHaveCount(0);
       await page.getByRole('searchbox').fill('');
-      await page.getByRole('button', { name: en ? 'New 1' : 'ใหม่ 1', exact: true }).click();
-      await expect(page.locator('.installer-enquiry-card')).toContainText('SM-TEST-039');
-      await page.getByRole('navigation').getByRole('button', { name: en ? 'Credits' : 'เครดิต', exact: true }).click();
-      await expect(page.locator('.balance .big')).toHaveText('18');
+      await page.getByRole('button',{name:en?'Waiting 2':'รอติดต่อ 2',exact:true}).click();
+      await page.getByRole('searchbox').fill('Sathon');
+      await expect(page.locator('.rows .row')).toHaveCount(1);
+      await page.getByRole('searchbox').fill('');
+      await expect(page.locator('.rows .row').first()).toContainText('Synthetic Arun');
+      await expect(page.locator('.rows .row').first()).toHaveAttribute('href',new RegExp('/'+fixture().deliveries[0].id+'\\?lang='+lang+'&tab=waiting$'));
+      await page.locator('nav:visible').getByRole('link', { name: en ? 'Credits' : 'เครดิต', exact: true }).click();
+      await expect(page.locator('.bal > b')).toContainText('18');
       await expect(page.getByRole('button', { name: (en ? 'Pay with ' : 'ชำระผ่าน ') + 'PromptPay' })).toBeDisabled();
       await page.goBack();
-      await expect(page.locator('.installer-enquiry-grid')).toBeVisible();
+      await expect(page.locator('.rows')).toBeVisible();await expect(page.getByRole('button',{name:en?'Waiting 2':'รอติดต่อ 2',exact:true})).toHaveAttribute('aria-pressed','true');
     });
     test('details retain actions and reduced-motion support without fake competition', async ({ page }) => {
+      await page.setViewportSize({width:1440,height:1000});
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/installers/enquiry/' + fixture().deliveries[0].id + '?lang=' + lang);
       await expect(page.getByRole('link', { name: '080 000 0000', exact: true })).toHaveAttribute('href', 'tel:0800000000');
-      await expect(page.getByRole('group', { name: en ? 'Report outcome' : 'รายงานผล' })).toBeVisible();
-      await page.getByText(en?'Share with staff':'แชร์กับทีมงาน',{exact:true}).click();
-      await expect(page.getByRole('button', { name: en ? 'Create replacement link' : 'สร้างลิงก์ใหม่' })).toBeVisible();
-      await expect(page.locator('.installer-shell')).not.toContainText('companies have contacted');
+      await expect(page.getByRole('group', { name: en ? 'Set the stage' : 'เลือกขั้นตอน' })).toBeVisible();
+      await page.getByText(en?'Share with a team member':'แชร์กับทีมงาน',{exact:true}).click();
+      await expect(page.getByRole('button', { name: en ? 'Create link' : 'สร้างลิงก์',exact:true })).toBeVisible();
+      await expect(page.getByRole('button', { name: en ? 'Create replacement link' : 'สร้างลิงก์ใหม่',exact:true })).toHaveCount(0);
+      await expect(page.locator('.signal')).not.toContainText('companies have contacted');
       await page.setViewportSize({ width: 320, height: 800 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-      expect((await new AxeBuilder({ page }).include('.installer-shell').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
+      await expect(page.locator('.mcall').getByRole('link',{name:en?'Call Synthetic Arun':'โทรหา Synthetic Arun'})).toBeVisible();
+      expect((await new AxeBuilder({ page }).include('.signal').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice']).analyze()).violations).toEqual([]);
     });
-    test('signed-out form remains usable on mobile', async ({ page }) => {
+    test('calling and manual copying keep the stage unchanged; stage and share controls use real actions',async({page})=>{
+      await page.setViewportSize({width:1440,height:1000});
+      const data=fixture(),item=data.deliveries[0],posts:unknown[]=[];
+      await page.unroute('**/api/installer/portal**');
+      await page.route('**/api/installer/portal**',async route=>{
+        if(route.request().method()==='GET'){await route.fulfill({json:data});return;}
+        const body=route.request().postDataJSON();posts.push(body);expect(new URL(route.request().url()).searchParams.get('lang')).toBe(lang);
+        if(body.action==='report-outcome'){
+          expect(body).toEqual({action:'report-outcome',deliveryId:item.id,outcome:'contacted'});item.outcome='contacted';await route.fulfill({json:{ok:true}});return;
+        }
+        expect(body).toEqual({action:'rotate-share-link',deliveryId:item.id});await route.fulfill({json:{url:'http://127.0.0.1:3000/installers/shared/synthetic-staff-token'}});
+      });
+      await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Synthetic denied clipboard');}}}));
+      await page.goto('/installers/enquiry/'+item.id+'?lang='+lang);
+      await expect(page.locator('#installer-page-title')).toBeFocused();
+      const stages=page.getByRole('group',{name:en?'Set the stage':'เลือกขั้นตอน',exact:true});
+      await expect(stages.getByRole('button',{name:en?'New':'ใหม่',exact:true})).toHaveAttribute('aria-pressed','true');
+      const call=page.locator('.dact a[href^="tel:"]');await expect(call).toHaveAttribute('href','tel:0800000000');
+      await call.evaluate(node=>node.addEventListener('click',event=>event.preventDefault()));await call.click();expect(posts).toHaveLength(0);
+      await page.locator('.dact').getByRole('button',{name:en?'Copy':'คัดลอก',exact:true}).click();
+      await expect(page.getByLabel(en?'Number to copy':'หมายเลขสำหรับคัดลอก',{exact:true})).toHaveValue('0800000000');expect(posts).toHaveLength(0);
+      await expect(stages.getByRole('button',{name:en?'New':'ใหม่',exact:true})).toHaveAttribute('aria-pressed','true');
+      await stages.getByRole('button',{name:en?'Contacted':'ติดต่อแล้ว',exact:true}).click();
+      await expect(stages.getByRole('button',{name:en?'Contacted':'ติดต่อแล้ว',exact:true})).toHaveAttribute('aria-pressed','true');expect(posts).toHaveLength(1);
+      await page.getByText(en?'Share with a team member':'แชร์กับทีมงาน',{exact:true}).click();
+      await page.getByRole('button',{name:en?'Create link':'สร้างลิงก์',exact:true}).click();
+      await expect(page.getByLabel(en?'Staff access link':'ลิงก์สำหรับทีมงาน',{exact:true})).toHaveValue('http://127.0.0.1:3000/installers/shared/synthetic-staff-token');
+      await expect(page.getByRole('button',{name:en?'Create replacement link':'สร้างลิงก์ใหม่',exact:true})).toBeVisible();expect(posts).toHaveLength(2);
+    });
+    test('signed-out form remains usable on mobile', async ({ page, browserName }) => {
       await page.unroute('**/api/installer/portal**');
       await page.route('**/api/installer/portal**', route => route.fulfill({ status: 401, json: { error: 'unauthorized' } }));
       await page.setViewportSize({ width: 320, height: 800 });
@@ -101,14 +144,22 @@ for (const lang of ['en', 'th'] as const) {
       await expect(page.locator('.skip-link')).toHaveCount(0);
       const skip = page.getByRole('link', {name:en?'Skip to content':'ข้ามไปเนื้อหา',exact:true});
       await expect(skip).toHaveCount(1);
-      await page.keyboard.press('Tab');
+      await expect.poll(()=>skip.evaluate(element=>(element as HTMLElement).tabIndex)).toBe(0);
+      expect(await skip.evaluate(node=>Array.from(document.querySelectorAll<HTMLElement>('a[href],button,input,select,textarea,[tabindex]')).find(element=>element.tabIndex>=0&&!(element as HTMLButtonElement).disabled&&element.getClientRects().length>0&&getComputedStyle(element).visibility!=='hidden')===node)).toBe(true);
+      // Bundled Windows WebKit skips native links with both Tab and Alt+Tab,
+      // even in minimal HTML. Check natural order plus actual focus/activation;
+      // Chromium still exercises the first hardware-Tab step. This is not a
+      // claim about physical Safari keyboard or assistive-technology behavior.
+      if(browserName==='webkit')await skip.focus();else await page.keyboard.press('Tab');
       await expect(skip).toBeFocused();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#installer-landing-main')).toBeFocused();
       await page.getByRole('button', {name:en?'Sign in':'เข้าสู่ระบบ',exact:true}).first().click();
       await expect(page.getByRole('heading', { name: en ? 'Sign in' : 'เข้าสู่ระบบ', exact: true })).toBeVisible();
       await page.getByLabel(en ? 'Email' : 'อีเมล', { exact: true }).fill('design@example.test');
       await expect(page.getByLabel(en ? 'Email' : 'อีเมล', { exact: true })).toHaveValue('design@example.test');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-      expect((await new AxeBuilder({ page }).include('.installer-shell').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
+      expect((await new AxeBuilder({ page }).include('.signal').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice']).analyze()).violations).toEqual([]);
     });
   });
 }

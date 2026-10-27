@@ -5,7 +5,7 @@ import {readdirSync,readFileSync} from 'node:fs';
 import {unstable_splitSqlQuery} from 'wrangler';
 import {triggerSafeStatement} from '../../scripts/installer-staging-migration-transport.mjs';
 import stagingWorker from '../../staging/worker';
-import {stagingDesignAsset,reviewContentSecurityPolicy} from '@/lib/server/staging-design-review';
+import {stagingDesignAsset,reviewContentSecurityPolicy,stagingReviewPolicy} from '@/lib/server/staging-design-review';
 import {assertStagingCheckout} from '../../scripts/installer-staging-cloudflare.mjs';
 const verify=vi.hoisted(()=>vi.fn());
 vi.mock('jose',()=>({jwtVerify:verify,createRemoteJWKSet:vi.fn(()=>({}))}));
@@ -38,6 +38,12 @@ it('publishes only allowlisted review assets behind verified owner Access',async
  for(const width of [360,390,768,1440])expect(stagingDesignAsset(`/design-review/images/implementation-results-en-${width}.png`)).toBe(true);
  for(const path of ['/design-review/backup.sql','/design-review/secret.json','/design-review/../admin','/design-review/prototype/../../api/leads'])expect(stagingDesignAsset(path)).toBe(false);
  expect(reviewContentSecurityPolicy).toContain("connect-src 'none'");expect(reviewContentSecurityPolicy).toContain("form-action 'none'");
+ for(const path of ['/design-review/signal/','/design-review/signal/viewer.js','/design-review/signal/prototype/']){
+  expect(stagingReviewPolicy(path)).toContain("connect-src 'none'");
+  const protectedAsset=await stagingWorker.fetch(new Request(origin+path,{headers}),assetEnv,context);
+  expect(protectedAsset.status).toBe(200);
+  expect(protectedAsset.headers.get('Content-Security-Policy')).toContain("connect-src 'none'");
+ }
 });
 it('exempts only the exact LINE path, not its children or other APIs',()=>{
   expect(stagingRoute(new Request(origin+'/api/installer/webhooks/line'),env)).toBe('signed-webhook');

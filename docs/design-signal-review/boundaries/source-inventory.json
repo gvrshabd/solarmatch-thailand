@@ -1,0 +1,269 @@
+{
+  "count": 52,
+  "phoneCssWidth": 390,
+  "phoneDeviceScaleFactor": 2,
+  "desktopCssWidth": 1440,
+  "desktopDeviceScaleFactor": 1,
+  "files": [
+    {
+      "name": "claims-en-desktop.png",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "claims-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "company-en-desktop.png",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "company-en-phone.png",
+      "width": 780,
+      "height": 2564
+    },
+    {
+      "name": "company-nocompany-th-desktop.png",
+      "width": 1440,
+      "height": 982
+    },
+    {
+      "name": "company-nocompany-th-phone.png",
+      "width": 780,
+      "height": 2432
+    },
+    {
+      "name": "credits-debt-th-desktop.png",
+      "width": 1440,
+      "height": 1514
+    },
+    {
+      "name": "credits-debt-th-phone.png",
+      "width": 780,
+      "height": 3762
+    },
+    {
+      "name": "credits-en-desktop.png",
+      "width": 1440,
+      "height": 1419
+    },
+    {
+      "name": "credits-en-phone.png",
+      "width": 780,
+      "height": 3400
+    },
+    {
+      "name": "credits-payment-en-desktop.png",
+      "width": 1440,
+      "height": 1679
+    },
+    {
+      "name": "credits-payment-en-phone.png",
+      "width": 780,
+      "height": 3928
+    },
+    {
+      "name": "e22-en-desktop.png",
+      "width": 1440,
+      "height": 1063
+    },
+    {
+      "name": "e22-en-phone.png",
+      "width": 780,
+      "height": 2514
+    },
+    {
+      "name": "e25-en-desktop.png",
+      "width": 1440,
+      "height": 948
+    },
+    {
+      "name": "e25-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "e39-close-menu-en-desktop.png",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "e39-close-menu-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "e39-en-desktop.png",
+      "width": 1440,
+      "height": 1088
+    },
+    {
+      "name": "e39-en-phone.png",
+      "width": 780,
+      "height": 2566
+    },
+    {
+      "name": "e41-th-desktop.png",
+      "width": 1440,
+      "height": 1096
+    },
+    {
+      "name": "e41-th-phone.png",
+      "width": 780,
+      "height": 2582
+    },
+    {
+      "name": "inbox-account-menu-en-desktop.png",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "inbox-account-menu-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-debt-th-desktop.png",
+      "width": 1440,
+      "height": 1096
+    },
+    {
+      "name": "inbox-debt-th-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-empty-en-desktop.png",
+      "width": 1440,
+      "height": 948
+    },
+    {
+      "name": "inbox-empty-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-en-desktop.png",
+      "width": 1440,
+      "height": 1088
+    },
+    {
+      "name": "inbox-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-nocompany-th-desktop.png",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "inbox-nocompany-th-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-nocredits-en-desktop.png",
+      "width": 1440,
+      "height": 1088
+    },
+    {
+      "name": "inbox-nocredits-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-paused-en-desktop.png",
+      "width": 1440,
+      "height": 1088
+    },
+    {
+      "name": "inbox-paused-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-pending-en-desktop.png",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "inbox-pending-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-platform-en-desktop.png",
+      "width": 1440,
+      "height": 1088
+    },
+    {
+      "name": "inbox-platform-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-th-desktop.png",
+      "width": 1440,
+      "height": 1096
+    },
+    {
+      "name": "inbox-th-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "inbox-unverified-en-desktop.png",
+      "width": 1440,
+      "height": 1088
+    },
+    {
+      "name": "inbox-unverified-en-phone.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "name": "landing-en-desktop.png",
+      "width": 1440,
+      "height": 2404
+    },
+    {
+      "name": "landing-en-phone.png",
+      "width": 780,
+      "height": 5686
+    },
+    {
+      "name": "landing-th-desktop.png",
+      "width": 1440,
+      "height": 2342
+    },
+    {
+      "name": "landing-th-phone.png",
+      "width": 780,
+      "height": 5372
+    },
+    {
+      "name": "signin-en-desktop.png",
+      "width": 1440,
+      "height": 2452
+    },
+    {
+      "name": "signin-en-phone.png",
+      "width": 780,
+      "height": 5380
+    },
+    {
+      "name": "terms-terms-th-desktop.png",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "terms-terms-th-phone.png",
+      "width": 780,
+      "height": 1830
+    }
+  ]
+}

@@ -81,7 +81,7 @@ async function main(){
   const[action,targetName,directoryArg]=process.argv.slice(2),target=targets[targetName];
   if(!['inspect','backup','verify'].includes(action)||!target||((action==='verify')!==Boolean(directoryArg)))throw Error('Usage: inspect|backup production|staging, or verify production|staging <fresh-run-directory>');
   const git=(...args)=>execFileSync('git',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
-  if(git('remote','get-url','origin')!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/homeowner-design-v3-integration','feature/homeowner-contact-and-quote-guide','main'].includes(git('branch','--show-current')))throw Error('Wrong repository/branch');
+  if(git('remote','get-url','origin')!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/homeowner-design-v3-integration','feature/homeowner-contact-and-quote-guide','feature/installer-signal-integration','main'].includes(git('branch','--show-current')))throw Error('Wrong repository/branch');
   const remoteMain=git('ls-remote','origin','refs/heads/main').split(/\s+/)[0];
   if(!/^[a-f0-9]{40}$/.test(remoteMain))throw Error('Remote main unavailable');
   const config=JSON.parse(await readFile(target.config,'utf8'));
@@ -162,7 +162,7 @@ async function main(){
   try{
     const current=await snapshot();
     if(JSON.stringify(Object.keys(current))!==JSON.stringify(Object.keys(manifest.before)))throw Error('Unexpected schema/table changes');
-    const published=beforeState.current.id===releaseId;
+    const published=manifest.current.id!==releaseId&&beforeState.current.id===releaseId;
     if(!published&&beforeState.current.id!==manifest.current.id)throw Error('Unexpected current release');
     if(published){
       const next=(await query('SELECT * FROM public_releases WHERE id=?',[releaseId]))[0];

@@ -36,8 +36,10 @@ for (const lang of ['en', 'th'] as const) {
         for (const width of [360, 390, 600, 768, 1000, 1440]) {
           await page.setViewportSize({ width, height: 900 });
           expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-          const first = await page.locator('#estimate-province').boundingBox(), second = await page.locator('#estimate-district').boundingBox();
-          if (width >= 600) expect(Math.abs(first!.y - second!.y)).toBeLessThan(2);
+          // Read both boxes in one layout frame: sequential remote reads can
+          // straddle the existing viewport transition in Windows WebKit.
+          const topDifference=await page.evaluate(()=>Math.abs(document.getElementById('estimate-province')!.getBoundingClientRect().top-document.getElementById('estimate-district')!.getBoundingClientRect().top));
+          if (width >= 600) expect(topDifference).toBeLessThan(2);
         }
         expect((await new AxeBuilder({ page }).include('main').withTags(['wcag2a', 'wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
       }

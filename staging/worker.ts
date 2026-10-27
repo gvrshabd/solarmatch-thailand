@@ -1,6 +1,6 @@
 import application from '../worker';
 import {stagingIdentity,stagingRoute,type StagingAccessEnv} from '../lib/server/staging-access';
-import {stagingDesignAsset,reviewContentSecurityPolicy} from '../lib/server/staging-design-review';
+import {stagingDesignAsset,stagingReviewPolicy} from '../lib/server/staging-design-review';
 
 const headers={'Cache-Control':'private, no-store','X-Robots-Tag':'noindex, nofollow, noarchive','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
 const stagingWorker = {
@@ -27,7 +27,7 @@ const stagingWorker = {
       if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405,headers:{...headers,Allow:'GET, HEAD'}});
       const asset=await env.ASSETS.fetch(request),safe=new Headers(asset.headers);
       for(const [key,value]of Object.entries(headers))safe.set(key,value);
-      safe.set('Content-Security-Policy',pathname.includes('/prototype/')?reviewContentSecurityPolicy:reviewContentSecurityPolicy.replace("connect-src 'none'","connect-src 'self'"));
+      safe.set('Content-Security-Policy',stagingReviewPolicy(pathname));
       return new Response(asset.body,{status:asset.status,headers:safe});
     }
     const assetPath=pathname.startsWith('/_next/static/')||pathname.startsWith('/images/')||['/favicon.svg','/og.png','/llms.txt'].includes(pathname);

@@ -1,7 +1,7 @@
 import http from 'node:http';
 import path from 'node:path';
 import {readFile} from 'node:fs/promises';
-import {stagingDesignAsset,reviewContentSecurityPolicy} from '../lib/server/staging-design-review.ts';
+import {stagingDesignAsset,stagingReviewPolicy} from '../lib/server/staging-design-review.ts';
 const root=path.resolve('docs/design-v2/prototype');
 const comparisonRoot=path.resolve('docs/design-v2-comparison');
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.jpg':'image/jpeg','.png':'image/png','.json':'application/json; charset=utf-8','.txt':'text/plain; charset=utf-8'};
@@ -12,7 +12,7 @@ http.createServer(async(req,res)=>{
       if(!stagingDesignAsset(pathname)){res.writeHead(404).end();return;}
       const file=path.resolve('.wrangler/design-v2-staging-assets','.'+(pathname.endsWith('/')?pathname+'index.html':/\/estimate-(en|th)$/.test(pathname)?pathname+'.html':pathname));
       const content=await readFile(file);
-      res.writeHead(200,{'Content-Type':types[path.extname(file)]??'application/octet-stream','Cache-Control':'no-store','Content-Security-Policy':pathname.includes('/prototype/')?reviewContentSecurityPolicy:reviewContentSecurityPolicy.replace("connect-src 'none'","connect-src 'self'")}).end(content);return;
+      res.writeHead(200,{'Content-Type':types[path.extname(file)]??'application/octet-stream','Cache-Control':'no-store','Content-Security-Policy':stagingReviewPolicy(pathname)}).end(content);return;
     }
     const comparison=pathname.startsWith('/comparison/');
     const base=comparison?comparisonRoot:root;
