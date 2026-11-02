@@ -15,6 +15,7 @@ export interface OptionalScenariosProps {
   systemDcKwp: number;
   inverterAcKw: number;
   exportIntervals?: ExportSurplusInterval[];
+  getExportIntervals?: () => ExportSurplusInterval[] | undefined;
 }
 
 const taxFlags = [
@@ -80,11 +81,12 @@ export function OptionalScenarios(props: OptionalScenariosProps) {
     actualMonthlyPaymentBaht: optionalNumber(actualPayment),
     monthlyBenefitBaht: Math.max(0, props.annualBillSavingsThb) / 12,
   }), [props.installationPriceThb, props.annualBillSavingsThb, deposit, term, rate, basis, upfrontFees, financedFees, actualPayment]);
+  const exportIntervals=useMemo(()=>exportVerified?(props.getExportIntervals?.()??props.exportIntervals??[]):[],[exportVerified,props.getExportIntervals,props.exportIntervals]);
   const exportScenario = useMemo(() => calculateExportScenario({
     contract: exportVerified ? { verified: true, rateBahtPerKwh: optionalNumber(exportRate) ?? NaN,
       startDate: exportStart, endDate: exportEnd, acExportCapKw: optionalNumber(exportCap) ?? NaN } : undefined,
-    intervals: props.exportIntervals ?? [],
-  }), [exportVerified, exportRate, exportStart, exportEnd, exportCap, props.exportIntervals]);
+    intervals: exportIntervals,
+  }), [exportVerified, exportRate, exportStart, exportEnd, exportCap, exportIntervals]);
   const taxStatus = tax.status === 'compatible'
     ? t('Compatible with the supplied conditions — conditional', 'ข้อมูลสอดคล้องกับเงื่อนไขเบื้องต้น — ยังมีเงื่อนไข')
     : tax.status === 'ineligible' ? t('Ineligible on the supplied facts', 'ไม่เข้าเงื่อนไขตามข้อมูลที่ระบุ')

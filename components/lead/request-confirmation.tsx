@@ -1,5 +1,5 @@
 import type { Locale } from '@/config/i18n';
-import { siteConfig } from '@/config/site';
+import { supportChannels } from '@/config/support';
 
 /** A saved request is not evidence that an installer has received it. */
 export type RequestConfirmationState =
@@ -17,8 +17,9 @@ export function RequestConfirmation({ locale, state, policy }: { locale: Locale;
     : kind === 'checking' ? (en ? 'Checking your request' : 'กำลังตรวจสอบคำขอ')
     : kind === 'shared' ? (en ? 'Shared with an installer' : 'ส่งคำขอให้บริษัทติดตั้งแล้ว')
     : (en ? 'No suitable installer currently available' : 'ขณะนี้ยังไม่มีบริษัทติดตั้งที่เหมาะสม');
-  const helpEmail = siteConfig.contact.email.trim();
-  const helpPhone = siteConfig.contact.phone.trim();
+  const support = supportChannels();
+  const helpEmail = support.email;
+  const helpPhone = support.phone;
 
   return <section className="card request-confirmation" role="status" aria-live="polite" aria-label={title}>
     <h2>{title}</h2>
@@ -37,7 +38,7 @@ export function RequestConfirmation({ locale, state, policy }: { locale: Locale;
       : 'คำขอหนึ่งรายการอาจส่งให้บริษัทที่แตกต่างกันได้ไม่เกินสามราย และค่าที่ตั้งไว้จริงอาจต่ำกว่านั้น การส่งมอบให้บริษัทติดตั้งจำกัดตามเวลาทำการที่ SolarMatch กำหนดในเวลาไทย ไม่รับประกันว่าจะจับคู่ ได้รับการติดต่อ หรือได้รับใบเสนอราคา'}</p>
     {policy&&<p>{en?`For this request: at most ${policy.recipientLimit} companies; delivery hours ${String(policy.startHour).padStart(2,'0')}:00–${String(policy.endHour).padStart(2,'0')}:00, Bangkok time.`:`สำหรับคำขอนี้ ส่งให้บริษัทได้ไม่เกิน ${policy.recipientLimit} ราย ช่วงเวลาส่งมอบ ${String(policy.startHour).padStart(2,'0')}:00–${String(policy.endHour).padStart(2,'0')}:00 น. ตามเวลาไทย`}</p>}
     {(helpEmail || helpPhone) ? <p>{en ? 'For help, a correction, or withdrawal, contact SolarMatch: ' : 'หากต้องการความช่วยเหลือ แก้ไขข้อมูล หรือถอนคำขอ โปรดติดต่อ SolarMatch: '}
-      {helpEmail && <a href={`mailto:${helpEmail}`}>{helpEmail}</a>}{helpEmail && helpPhone && ' · '}{helpPhone && <a href={`tel:${helpPhone}`}>{helpPhone}</a>}
+      {helpEmail && <a href={support.emailHref}>{helpEmail}</a>}{helpEmail && helpPhone && ' · '}{helpPhone && <a href={support.phoneHref}>{helpPhone}</a>}
     </p> : <p className="note">{en
       ? 'A verified homeowner help channel has not been published yet. Correction and withdrawal cannot be completed from this page; do not use installer staff links for your request.'
       : 'ยังไม่ได้เผยแพร่ช่องทางช่วยเหลือเจ้าของบ้านที่ยืนยันแล้ว หน้านี้ยังไม่สามารถแก้ไขข้อมูลหรือถอนคำขอได้ และลิงก์สำหรับพนักงานบริษัทติดตั้งไม่ใช่ช่องทางสำหรับเจ้าของบ้าน'}</p>}

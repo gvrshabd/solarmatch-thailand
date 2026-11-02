@@ -17,6 +17,7 @@ import { stagingIdentity, stagingRoute } from './staging-access';
 import { currentCalculationDate } from '@/config/electricity-tariffs';
 import { assessmentReleaseContract, normalizedContactInputSupport } from '@/lib/questionnaire/release-contract';
 import {getPlatformSettings} from '@/lib/installer/settings';
+import {phoneCollectionReady} from '@/lib/installer/collection-readiness';
 
 const seedActor = 'system:initial-migration';
 const questionnaireId = legacyQuestionnaireV1.id;
@@ -935,7 +936,7 @@ export async function getPublicAssessmentConfig(options: { restrictedAccess?: bo
   const configuredContact = localContact ?? (accessRestrictedSession
     ? restrictedOperationalContactConfiguration(release)
     : publicContactConfiguration(release));
-  const shouldIssueToken = servicePolicy.collectionEnabled&&!servicePolicy.platformPaused&&configuredContact.enabled && (Boolean(localContact) ||
+  const shouldIssueToken = phoneCollectionReady(getRuntimeEnv()) && servicePolicy.collectionEnabled&&!servicePolicy.platformPaused&&configuredContact.enabled && (Boolean(localContact) ||
     (accessRestrictedSession && configuredContact.restrictedSiteCollectionEnabled)
     || (!accessRestrictedSession && configuredContact.publicCollectionEnabled && Boolean(release.live_lead_submissions))
   );

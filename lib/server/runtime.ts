@@ -13,6 +13,7 @@ export type SolarMatchRuntimeEnv = {
   CSRF_SECRET?: string;
   ASSESSMENT_SIGNING_SECRET?: string;
   INSTALLER_PLATFORM_MODE?: string;
+  INSTALLER_REGISTRATION_ENABLED?: string;
   INSTALLER_TEST_CLOCK_ENABLED?: string;
   INSTALLER_AUTH_SECRET?: string;
   INSTALLER_BASE_URL?: string;

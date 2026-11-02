@@ -76,9 +76,9 @@ export const activeResidentialTariff: ResidentialTariff = {
 
 export const september2026ResidentialTariff: ResidentialTariff = {
   id: 'pea-residential-september-2026-ft-sep-dec-2026',
-  label: 'อัตราบ้านอยู่อาศัย 1.2 · รอบบิล ก.ย.–ธ.ค. 2569',
-  labelTh: 'อัตราบ้านอยู่อาศัย 1.2 · รอบบิล ก.ย.–ธ.ค. 2569',
-  labelEn: 'Ordinary residential 1.2 · September–December 2026 bills',
+  label: 'อัตราบ้านอยู่อาศัย 1.1.2 · รอบบิล ก.ย.–ธ.ค. 2569',
+  labelTh: 'อัตราบ้านอยู่อาศัย 1.1.2 · รอบบิล ก.ย.–ธ.ค. 2569',
+  labelEn: 'Ordinary residential 1.1.2 · September–December 2026 bills',
   effectiveFrom: '2026-09-01',
   effectiveTo: '2026-12-31',
   serviceChargeThb: 24.62,
@@ -112,6 +112,9 @@ export const meaActiveResidentialTariff: ResidentialTariff = {
 
 export const meaSeptember2026ResidentialTariff: ResidentialTariff = {
   ...september2026ResidentialTariff,
+  label: 'อัตราบ้านอยู่อาศัย 1.2 · รอบบิล ก.ย.–ธ.ค. 2569',
+  labelTh: 'อัตราบ้านอยู่อาศัย 1.2 · รอบบิล ก.ย.–ธ.ค. 2569',
+  labelEn: 'Ordinary residential 1.2 · September–December 2026 bills',
   id: 'mea-residential-september-2026-ft-sep-dec-2026',
   authority: 'MEA',
   authorityLabelEn: 'Metropolitan Electricity Authority (MEA)',
@@ -138,13 +141,14 @@ const currentSmallMeterTiers: TariffTier[] = [
 ];
 
 function smallMeterTariff(tariff: ResidentialTariff): ResidentialTariff {
+  const categoryLabel=tariff.authority==='PEA'?'1.1.1':'1.1';
   return {
     ...tariff,
     id: `${tariff.id}-ordinary-1.1`,
     category: 'ordinary-1.1',
-    label: `อัตราบ้านอยู่อาศัย 1.1 · ${tariff.effectiveFrom}–${tariff.effectiveTo}`,
-    labelTh: `อัตราบ้านอยู่อาศัย 1.1 · ${tariff.effectiveFrom}–${tariff.effectiveTo}`,
-    labelEn: `Ordinary residential 1.1 · ${tariff.effectiveFrom}–${tariff.effectiveTo}`,
+    label: `อัตราบ้านอยู่อาศัย ${categoryLabel} · ${tariff.effectiveFrom}–${tariff.effectiveTo}`,
+    labelTh: `อัตราบ้านอยู่อาศัย ${categoryLabel} · ${tariff.effectiveFrom}–${tariff.effectiveTo}`,
+    labelEn: `Ordinary residential ${categoryLabel} · ${tariff.effectiveFrom}–${tariff.effectiveTo}`,
     serviceChargeThb: 8.19,
     tiers: tariff.effectiveFrom < '2026-09-01' ? historicalSmallMeterTiers : currentSmallMeterTiers,
   };

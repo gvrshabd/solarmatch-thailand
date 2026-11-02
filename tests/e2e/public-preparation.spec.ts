@@ -43,18 +43,21 @@ for (const locale of ['en', 'th'] as const) {
       const config = await response.json();
       config.liveLeadSubmissions = false;
       config.contact.enabled = false;
+      config.contactReviewAvailable = false;
+      config.accessRestrictedSession = false;
       await route.fulfill({ response, json: config });
     });
-    await page.addInitScript(() => sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ version: 9, step: 10, answers: {
+    await page.addInitScript(() => sessionStorage.setItem('solarmatch:estimate-draft', JSON.stringify({ version: 11, step: 11, answers: {
+      estimateModelVersion:'energy-v3',calculationReferenceDate:'2026-11-03',roofArea:'100-200',
       province: 'bangkok', district: 'sathon', monthlyBillThb: 6000, activelyPlanningSolar: true,
       planningTimeframe: 'within-3-months', projectType: 'new-rooftop', propertyType: 'detached-home',
       ownershipStatus: 'owner', daytimePattern: 'high', daytimeLoads: ['air-conditioning'],
       airConditionerCount: 5, roofMaterial: 'concrete-tile', shade: 'almost-none', quoteContactRequested: true,
     } })));
     await page.goto(`${prefix}/estimate`);
-    await expect(page.getByRole('status').filter({ hasText: locale === 'en' ? "SolarMatch is preparing its installer referral service. The free calculator is available, but we are not currently accepting homeowner contact requests or installer credit purchases through this website. The referral and credit provisions in our legal documents describe the planned service and apply only when that service becomes available and the relevant request or agreement is made." : "SolarMatch อยู่ระหว่างเตรียมเปิดบริการส่งต่อคำขอให้บริษัทติดตั้งโซลาร์ คุณสามารถใช้เครื่องคำนวณได้ฟรี แต่ขณะนี้เว็บไซต์ยังไม่เปิดรับคำขอให้บริษัทติดตั้งติดต่อกลับหรือการซื้อเครดิตจากบริษัทติดตั้ง ข้อกำหนดเกี่ยวกับการส่งต่อคำขอและเครดิตในเอกสารทางกฎหมายอธิบายบริการที่วางแผนไว้ และจะใช้เมื่อบริการนั้นเปิดให้ใช้งานและมีการส่งคำขอหรือทำข้อตกลงที่เกี่ยวข้องแล้วเท่านั้น" })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: locale === 'en' ? 'Installer contact requests are currently unavailable' : 'ขณะนี้ยังไม่เปิดรับคำขอให้ผู้ติดตั้งติดต่อกลับ' })).toBeVisible();
     await expect(page.locator('.quote-consent-check,input[type="tel"]')).toHaveCount(0);
-    await expect(page.getByRole('radio', { name: locale === 'en' ? /^Test/ : /^ทดสอบ/ })).toBeVisible();
+    await expect(page.getByRole('radio', { name: locale === 'en' ? /^Test/ : /^ทดสอบ/ })).toHaveCount(0);
     await expect(page.getByRole('radio', { name: locale === 'en' ? /^Yes,/ : /^ใช่ / })).toHaveCount(0);
     await page.getByRole('button', { name: locale === 'en' ? 'View my estimate' : 'ดูผลประเมิน', exact: true }).click();
     await expect(page.locator('.rstats > div')).toHaveCount(3, { timeout: 15_000 });

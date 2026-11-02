@@ -1,10 +1,11 @@
+import {ServiceAvailabilityNotice} from '@/components/site/service-availability';
 import { PageHero } from '@/components/content/page-hero';
 import { CALCULATOR_MODEL_VERSION } from '@/lib/calculator/residential-estimator';
 import { REFERENCE_ANNUAL_YIELD_KWH_PER_KWP } from '@/lib/calculator/energy-model';
 import { solarPackages, SOLAR_PACKAGE_CATALOG_VERSION } from '@/config/solar-packages';
 import { solarResourceV3 } from '@/config/solar-resource-v3';
 import type { Locale } from '@/config/i18n';
-import { legalReviewDisclosures, prelaunchNotice } from '@/config/legal-review';
+import { legalReviewDisclosures } from '@/config/legal-review';
 
 export function MethodologyContent({ locale = 'th' }: { locale?: Locale }) {
   const english = locale === 'en';
@@ -34,7 +35,7 @@ export function MethodologyContent({ locale = 'th' }: { locale?: Locale }) {
           <p>{english?'For battery interest, you may explicitly choose a panel-only estimate using your saved answers. It excludes battery costs, savings and backup performance. Existing-system upgrades are not given new-installation economics: existing equipment, generation and pre-solar demand need a separate assessment.':'หากสนใจแบตเตอรี่ คุณเลือกดูผลประเมินเฉพาะแผงจากคำตอบที่บันทึกไว้ได้ โดยไม่รวมต้นทุน ผลประหยัด และประสิทธิภาพไฟสำรองของแบตเตอรี่ ส่วนการปรับปรุงระบบเดิมจะไม่ใช้ตัวเลขของระบบติดตั้งใหม่แทน ต้องประเมินอุปกรณ์เดิม การผลิตไฟ และการใช้ไฟก่อนติดโซลาร์แยกต่างหาก'}</p>
           <h2>{english ? 'What the result means' : 'ความหมายของผลลัพธ์'}</h2>
           <p>{legalReviewDisclosures.estimate[locale]}</p>
-          <p>{prelaunchNotice[locale]}</p>
+          <p><ServiceAvailabilityNotice locale={locale}/></p>
           <p>{english ? 'The result is a preliminary planning estimate: useful for understanding whether solar may be worth exploring for your property and what to discuss with a solar provider. It is not an engineering design, quotation, financial guarantee, or approval from a utility or tax authority.' : 'ผลลัพธ์เป็นค่าประเมินเบื้องต้นเพื่อใช้ประกอบการวางแผน ช่วยให้เข้าใจว่าโซลาร์อาจเหมาะกับอสังหาริมทรัพย์ของคุณเพียงใด และควรพูดคุยเรื่องใดกับผู้ให้บริการด้านโซลาร์ ไม่ใช่แบบวิศวกรรม ใบเสนอราคา การรับประกันทางการเงิน หรือการอนุมัติจากการไฟฟ้าหรือหน่วยงานภาษี'}</p>
           <p>{english ? 'Official tariff and policy links are evidence for the model, not an endorsement of SolarMatch. Check the current rules and your own approved utility contract before including export or tax benefits in a purchase decision.' : 'ลิงก์อัตราค่าไฟและนโยบายทางการเป็นหลักฐานอ้างอิงของแบบจำลอง ไม่ใช่การรับรอง SolarMatch ตรวจเงื่อนไขปัจจุบันและสัญญาที่การไฟฟ้าอนุมัติให้คุณก่อนนำรายได้ขายไฟหรือสิทธิภาษีไปประกอบการตัดสินใจซื้อ'}</p>
 

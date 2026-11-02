@@ -14,7 +14,7 @@ describe('homeowner v3 draft migration', () => {
     });
   }
   it('accepts v11 and strips consent, contact and unknown financial facts', () => {
-    const result = estimateDraftSchema.parse({version:11,step:1,answers:{monthlyBillThb:6000,phone:'0800000000',quoteConsentAccepted:true,taxIncome:800000}});
+    const result = estimateDraftSchema.parse({version:11,step:1,answers:{monthlyBillThb:6000,phone:'0800000000',quoteContactRequested:true,quoteConsentAccepted:true,taxIncome:800000}});
     expect(result.answers).toEqual({monthlyBillThb:6000});
   });
 });

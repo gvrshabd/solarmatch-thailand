@@ -4,7 +4,8 @@ import Link from '@/components/site/internal-link';
 import { usePathname } from 'next/navigation';
 import { BrandMark } from './brand-mark';
 import { isEnglishPath, localizedPath, type Locale } from '@/config/i18n';
-import { legalReviewDisclosures, prelaunchNotice } from '@/config/legal-review';
+import { legalReviewDisclosures } from '@/config/legal-review';
+import {ServiceAvailabilityNotice} from './service-availability';
 
 export function SiteFooter() {
   const pathname = usePathname();
@@ -38,9 +39,9 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="site-shell footer-bottom">
-        <div><span>{english ? 'All figures are preliminary estimates, not quotations. Contact requests are not currently available.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา ขณะนี้ยังไม่เปิดรับคำขอติดต่อ'}</span>
+        <div><span>{english ? 'All figures are preliminary estimates, not quotations.' : 'ตัวเลขทั้งหมดเป็นค่าประเมินเบื้องต้น ไม่ใช่ใบเสนอราคา'}</span>
           <p>{legalReviewDisclosures.operator[locale]}</p>
-          <details className="footer-service-details"><summary>{english ? 'About this service' : 'เกี่ยวกับบริการนี้'}</summary><p>{prelaunchNotice[locale]}</p></details>
+          <details className="footer-service-details"><summary>{english ? 'About this service' : 'เกี่ยวกับบริการนี้'}</summary><p><ServiceAvailabilityNotice locale={locale}/></p></details>
           <div className="footer-service-links"><Link href={link('/cookies')}>{english ? 'Cookie and Browser Storage Policy' : 'นโยบายคุกกี้และพื้นที่จัดเก็บของเบราว์เซอร์'}</Link><Link href={link('/resources')}>{english ? 'Sources and resources' : 'แหล่งข้อมูลอ้างอิง'}</Link></div>
         </div>
       </div>

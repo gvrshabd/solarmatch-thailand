@@ -14,7 +14,7 @@ const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 const env:StagingAccessEnv={INSTALLER_PLATFORM_MODE:'sandbox',INSTALLER_BASE_URL:origin,STAGING_ACCESS_AUD:'staging-site',ACCESS_AUD:'staging-admin',ACCESS_TEAM_DOMAIN:'https://team.example.test',ADMIN_EMAILS:'owner@example.test'};
 beforeEach(()=>{verify.mockReset();});
 it('limits staging management to the exact repository and explicit integration branches',()=>{
- for(const branch of ['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3','feature/homeowner-design-v3-integration'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).not.toThrow();
+ for(const branch of ['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3','feature/homeowner-design-v3-integration','feature/nonlegal-launch-readiness'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).not.toThrow();
  for(const branch of ['main','unrelated'])expect(()=>assertStagingCheckout('https://github.com/gvrshabd/solarmatch-thailand.git',branch)).toThrow();
  expect(()=>assertStagingCheckout('https://github.com/example/other.git','feature/design-v2-integration')).toThrow();
 });
@@ -30,6 +30,10 @@ it('publishes only allowlisted review assets behind verified owner Access',async
  expect((await stagingWorker.fetch(new Request(url,{headers,method:'POST'}),assetEnv,context)).status).toBe(405);
  expect((await stagingWorker.fetch(new Request(url+'VERIFICATION.txt',{headers}),assetEnv,context)).status).toBe(404);
  expect(stagingDesignAsset('/design-review/prototype/app.js')).toBe(true);
+ expect(stagingDesignAsset('/design-review/readiness/')).toBe(true);
+ expect(stagingDesignAsset('/design-review/readiness/images/availability-en-true-mobile-chromium.png')).toBe(true);
+ expect(stagingDesignAsset('/design-review/readiness/traces.zip')).toBe(false);
+ expect(stagingDesignAsset('/design-review/readiness/images/private.png')).toBe(false);
  expect(stagingDesignAsset('/design-review/images/implementation-live-results-en-390.jpg')).toBe(true);
  expect(stagingDesignAsset('/design-review/evidence/hero-source.jpg')).toBe(true);
  expect(stagingDesignAsset('/design-review/evidence/private.jpg')).toBe(false);

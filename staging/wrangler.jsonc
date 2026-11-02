@@ -14,6 +14,7 @@
   "triggers": { "crons": [] },
   "vars": {
     "INSTALLER_PLATFORM_MODE": "sandbox",
+    "INSTALLER_REGISTRATION_ENABLED": "false",
     "INSTALLER_BASE_URL": "https://solarmatch-installer-staging.deluxejahseh.workers.dev",
     "STAGING_ACCESS_AUD": "5534610d52401d48b3ef59bf43e5d34d8bde9d2d8ed23260358dc97ccd8b1da3",
     "ACCESS_TEAM_DOMAIN": "https://millys.cloudflareaccess.com",

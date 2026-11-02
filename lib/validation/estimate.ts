@@ -160,7 +160,7 @@ export const estimateAnswersSchema = estimateAnswerFieldsSchema.superRefine((ans
 });
 
 /** Partial drafts use the same bounded fields, without completed-answer requirements. */
-export const estimateDraftAnswersSchema = estimateAnswerFieldsSchema.omit({ quoteConsentAccepted: true }).partial();
+export const estimateDraftAnswersSchema = estimateAnswerFieldsSchema.omit({ quoteContactRequested:true, quoteConsentAccepted: true }).partial();
 
 /** Restore only recognized, individually valid values; never retain arbitrary draft keys. */
 export function sanitizeEstimateDraftAnswers(raw: unknown): Partial<EstimateAnswers> {

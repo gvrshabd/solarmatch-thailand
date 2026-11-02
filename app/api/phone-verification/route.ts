@@ -5,6 +5,9 @@ import { assertPlatformRequest } from '@/lib/installer/platform';
 import { getPlatformSettings } from '@/lib/installer/settings';
 import {trustedShareAddress} from '@/lib/installer/rate-limit';
 import { sendMessage } from '@/lib/installer/providers/sms';
+import {getPublicAssessmentConfig} from '@/lib/server/releases';
+import {authenticateRestrictedSiteOwner} from '@/lib/server/private-preview-auth';
+import {canRequestContact} from '@/lib/contact/availability';
 import { allowPhoneAttempt, phoneChallengeSchema, phoneVerifySchema, PHONE_CODE_TTL_MS, PHONE_RESEND_MS, randomPhoneCode, phoneCodeHash, verificationBindings, verifyPhoneCode, limitedJsonBody, RequestTooLarge } from '@/lib/installer/phone-verification';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +30,10 @@ export async function POST(request: NextRequest) {
     const database = requireDatabase();
     const settings=await getPlatformSettings(database);
     if (!settings.collectionEnabled || settings.platformPaused) return reply({ok:false,code:'verification_unavailable'},503);
+    const restricted=await authenticateRestrictedSiteOwner(request.headers);
+    const current=await getPublicAssessmentConfig({request,restrictedAccess:Boolean(restricted)});
+    if (token.releaseId!==current.releaseId || token.questionnaireVersionId!==current.questionnaireVersionId || token.ruleVersionId!==current.ruleVersionId) return reply({ok:false,code:'assessment_version_expired'},409);
+    if (!canRequestContact(current)) return reply({ok:false,code:'verification_unavailable'},503);
     const address = trustedShareAddress(request);
     if (!await allowPhoneAttempt(database,address,parsed.data.phone,verifying?'verify':'send')) return reply({ok:false,code:'rate_limited'},429);
     if (verifying) {

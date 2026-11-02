@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { base64, hmac } from '../../lib/installer/providers/common';
-import { confirmPayment, createCharge, createHostedOrder, normalizePayment, verifyPaymentEvent, type PaymentConfig } from '../../lib/installer/providers/payment';
+import { confirmPayment, createCharge, createHostedOrder, normalizePayment, verifyPaymentEvent, type PaymentConfig, paymentCheckoutReady } from '../../lib/installer/providers/payment';
 import { enquiryNotificationText, sendEnquiryNotification, verifyLineWebhook } from '../../lib/installer/providers/line';
 import { sendMessage } from '../../lib/installer/providers/sms';
 import { sendAuthEmail } from '../../lib/installer/providers/email';
@@ -11,6 +11,13 @@ const expected = { ...order, providerOrderId: charge.id };
 const config = { mode: 'sandbox' as const, sandboxEnabled: true, secretKey: 'skey_test_fixture', publicKey: 'pkey_test_fixture', activatedMethods: ['promptpay'] as const };
 function json(value: unknown) { return new Response(JSON.stringify(value), { status: 200 }); }
 describe('installer provider boundaries', () => {
+  it('does not offer checkout with disabled, incompatible or incomplete provider configuration',()=>{
+    const ready={...config,activatedMethods:['promptpay'] as const};
+    expect(paymentCheckoutReady({...ready,activatedMethods:[...ready.activatedMethods]})).toBe(true);
+    for(const change of [{mode:'off' as const},{publicKey:''},{secretKey:'skey_live_wrong'},{sandboxEnabled:false},{activatedMethods:[]}]){
+      expect(paymentCheckoutReady({...ready,activatedMethods:[...ready.activatedMethods],...change})).toBe(false);
+    }
+  });
   it('does not fall back to network or live keys when disabled/misconfigured', async () => {
     const transport = vi.fn();
     await expect(createHostedOrder(order, { mode: 'off', fetch: transport })).rejects.toThrow('provider_disabled');

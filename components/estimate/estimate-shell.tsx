@@ -18,7 +18,8 @@ import { restoredQuestionPosition } from '@/lib/questionnaire/draft-position';
 import { currentCalculationDate } from '@/config/electricity-tariffs';
 import { lockedSharedConsentCopy } from '@/config/contact-content';
 import { contactReviewCopy } from '@/config/contact-review';
-import { prelaunchNotice } from '@/config/legal-review';
+import {ServiceAvailabilityNotice} from '@/components/site/service-availability';
+import {sameAssessmentVersion} from '@/lib/contact/availability';
 import { localizedDistrictOptions } from '@/config/districts';
 import { localizedPath, type Locale } from '@/config/i18n';
 import { provinceOptions } from '@/config/provinces';
@@ -43,21 +44,17 @@ function freshDraft(questionnaire: QuestionnaireDocument, referenceDate = curren
   return questionnaire.schemaVersion >= 10 ? { estimateModelVersion: 'energy-v3', calculationReferenceDate: referenceDate, consumptionInput: 'bill' } : {};
 }
 
-function isMatchingReadOnlyModernConfiguration(configuration: PublicAssessmentConfig): boolean {
+function isMatchingModernConfiguration(configuration: PublicAssessmentConfig): boolean {
+  const readOnly=configuration.assessmentToken===null&&configuration.assessmentTokenExpiresAt===null
+    &&!configuration.liveLeadSubmissions&&!configuration.publicCollectionEnabled&&!configuration.restrictedSiteCollectionEnabled
+    &&configuration.contact.mode==='disabled'&&!configuration.contact.enabled&&!configuration.contact.publicCollectionEnabled
+    &&!configuration.contact.restrictedSiteCollectionEnabled&&!configuration.contact.operationalDistributionEnabled;
   return configuration.questionnaire.id === homeownerDesignV3Questionnaire.id
     && configuration.questionnaire.schemaVersion === homeownerDesignV3Questionnaire.schemaVersion
     && configuration.questionnaireVersionId === homeownerDesignV3Questionnaire.id
     && configuration.calculatorModelVersion === 'energy-v3'
-    && configuration.assessmentToken === null
-    && configuration.assessmentTokenExpiresAt === null
-    && configuration.liveLeadSubmissions === false
-    && configuration.publicCollectionEnabled === false
-    && configuration.restrictedSiteCollectionEnabled === false
-    && configuration.contact.mode === 'disabled'
-    && configuration.contact.enabled === false
-    && configuration.contact.publicCollectionEnabled === false
-    && configuration.contact.restrictedSiteCollectionEnabled === false
-    && configuration.contact.operationalDistributionEnabled === false;
+    && (readOnly || (configuration.ruleVersionId === 'residential-rules-v4'
+      && JSON.stringify(configuration.questionnaire) === JSON.stringify(homeownerDesignV3Questionnaire)));
 }
 
 function ConsentCopy({ copy, locale }: { copy: string; locale: Locale }) {
@@ -290,9 +287,9 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       .then((configuration) => {
         if (!active) return;
         if (interactionRef.current || restoredModernRef.current) {
-          if (!isMatchingReadOnlyModernConfiguration(configuration)) return;
-          // Restore facts and test-copy availability without changing the active
-          // questionnaire, answers, reference date or collection permissions.
+          if (!isMatchingModernConfiguration(configuration)) return;
+          // Only the exact active questionnaire/rules may refresh capabilities.
+          // Saved answers/date stay fixed; consent is never restored from storage.
           const readOnlyContext = { ...configuration, calculationReferenceDate: undefined };
           setAssessmentConfig(readOnlyContext);
           writeSessionValue(assessmentContextStorageKey, readOnlyContext);
@@ -663,7 +660,7 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
       {energyQuestionnaire && question.id === 'daytimePattern' && <EnergyInputFields section="timing" answers={draft} locale={locale} onChange={setValue} />}
       {energyQuestionnaire && question.id === 'daytimeLoads' && <EnergyInputFields section="loads" answers={draft} locale={locale} onChange={setValue} />}
       {energyQuestionnaire && question.id === 'roofArea' && <EnergyInputFields section="roof" answers={draft} locale={locale} onChange={setValue} />}
-      {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status">{prelaunchNotice[locale]}</p>}
+      {contactCollectionUnavailable && !contactPermissionUnavailable && <p role="status"><ServiceAvailabilityNotice locale={locale} available={false}/></p>}
       {question.id === 'quoteContactRequested' && draft.consumptionInput === 'kwh' && !assessmentConfig?.contactInputSupport?.kwh && <p role="status">{english ? 'You can view your full estimate without contact details. Contact requests are unavailable for this saved assessment version.' : 'คุณดูผลประเมินทั้งหมดได้โดยไม่ต้องให้ข้อมูลติดต่อ แบบประเมินรุ่นที่บันทึกไว้นี้ยังไม่รองรับคำขอติดต่อ'}</p>}
       {error && <p className="form-error" id="estimate-error" role="alert">{error}</p>}
     </ScreenTransition>
@@ -678,8 +675,17 @@ export function EstimateShell({ locale = 'th', questionnaireOverride }: { locale
     active={showContactForm}
     resetKey={contactResetKey}
     reviewOnly={contactReview}
-    onBack={() => { setShowContactForm(false); setDirection('backward'); setError(''); if (contactReview) { setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); } }}
-    onConfigurationChanged={(configuration) => { setAssessmentConfig(configuration); writeSessionValue(assessmentContextStorageKey, configuration); }}
+    onBack={() => { setShowContactForm(false); setDirection('backward'); setError(''); setDraft(current=>({...current,quoteConsentAccepted:undefined})); if (contactReview) { setReviewConsentAccepted(false); setContactResetKey((current) => current + 1); } }}
+    onConfigurationChanged={(configuration) => {
+      const compatible = sameAssessmentVersion(assessmentConfig, configuration);
+      const next = compatible ? configuration : {...assessmentConfig, assessmentToken:null, liveLeadSubmissions:false, contact:{...assessmentConfig.contact,enabled:false}};
+      setAssessmentConfig(next); writeSessionValue(assessmentContextStorageKey,next);
+      setDraft(current=>({...current,quoteContactRequested:undefined,quoteConsentAccepted:undefined}));
+      setShowContactForm(false);
+      setError(compatible
+        ? english ? 'Contact availability or terms changed. Review your choice and consent again, or continue to your estimate.' : 'มีการเปลี่ยนแปลงการรับคำขอหรือเงื่อนไข กรุณาเลือกและให้ความยินยอมอีกครั้ง หรือดูผลประเมินต่อ'
+        : english ? 'The assessment has been updated. Your answers and estimate are safe. Continue to your estimate; a new contact request requires the current assessment.' : 'มีการอัปเดตแบบประเมิน คำตอบและผลประเมินของคุณยังอยู่ คุณดูผลประเมินต่อได้ แต่การขอติดต่อใหม่ต้องใช้แบบประเมินปัจจุบัน');
+    }}
     onProcessingStart={() => beginCompletion(completedAnswers.data, 'submitting', true)}
     onProcessingFailed={cancelCompletion}
     onContinue={(outcome) => {

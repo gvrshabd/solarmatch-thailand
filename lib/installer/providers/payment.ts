@@ -19,6 +19,15 @@ function omise(path: string, config: PaymentConfig, init: RequestInit = {}, writ
 export function enabledPaymentMethods(config: Pick<PaymentConfig,'activatedMethods'|'activatedCardBrands'>): PaymentMethod[] {
   return [...new Set(config.activatedMethods ?? [])].filter(method => method !== 'credit_card' || !!config.activatedCardBrands?.length);
 }
+/** Display capability only: no provider request or payment is created. */
+export function paymentCheckoutReady(config:PaymentConfig) {
+  if(config.mode==='local-test')return true;
+  try {
+    configured(config,true);
+    const prefix=config.mode==='sandbox'?'pkey_test_':'pkey_live_';
+    return new RegExp(`^${prefix}[A-Za-z0-9]+$`).test(config.publicKey??'')&&enabledPaymentMethods(config).length>0;
+  } catch {return false;}
+}
 export async function createHostedOrder(order: PaymentOrder, config: PaymentConfig) {
   requireMode(config.mode);
   if (!/^[A-Za-z0-9_-]{1,100}$/.test(order.orderId) || !Number.isSafeInteger(order.amountMinor) || order.amountMinor < 100 || order.currency !== 'thb') throw new ProviderError('invalid_order');

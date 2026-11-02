@@ -16,7 +16,7 @@ const stateFile=`${privateDirectory}/resources.json`;
 const origin='https://solarmatch-installer-staging.deluxejahseh.workers.dev';
 let token;
 export function assertStagingCheckout(remote,branch){
-  if(remote!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3','feature/homeowner-design-v3-integration','feature/installer-signal-integration'].includes(branch))throw Error('Wrong repository/branch.');
+  if(remote!=='https://github.com/gvrshabd/solarmatch-thailand.git'||!['feature/installer-shared-workflow','feature/design-v2-integration','feature/calculator-energy-accuracy-v3','feature/homeowner-design-v3-integration','feature/installer-signal-integration','feature/nonlegal-launch-readiness'].includes(branch))throw Error('Wrong repository/branch.');
 }
 function verifyCheckout(){assertStagingCheckout(execFileSync('git',['remote','get-url','origin'],{encoding:'utf8'}).trim(),execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim());}
 export async function cloudflare(suffix,method='GET',body){
@@ -54,7 +54,7 @@ async function verifiedConfiguration(){
   const state=await verifiedDatabase(),config=JSON.parse(await readFile('staging/wrangler.jsonc','utf8'));
   if(config.name!==workerName||config.account_id!==account||config.d1_databases[0].database_id!==state.database.id||config.d1_databases[0].database_name!==databaseName||config.r2_buckets[0].bucket_name!==bucketName||config.vars.INSTALLER_PLATFORM_MODE!=='sandbox'||config.vars.INSTALLER_BASE_URL!==origin||config.vars.OUTBOUND_MESSAGES_ENABLED!=='false'||config.vars.INSTALLER_TEST_CLOCK_ENABLED!=='false'||config.preview_urls!==false||config.assets.run_worker_first!==true||config.triggers.crons.length)throw Error('Unsafe staging deployment configuration.');
   if(config.d1_databases.length!==1||config.r2_buckets.length!==1||config.d1_databases[0].binding!=='DB'||config.r2_buckets[0].binding!=='MEDIA'||config.vars.STAGING_ACCESS_AUD!==state.access.site.aud||config.vars.ACCESS_AUD!==state.access.admin.aud||config.vars.ACCESS_TEAM_DOMAIN!=='https://millys.cloudflareaccess.com')throw Error('Staging bindings or Access audiences differ from verified provenance.');
-  for(const key of ['AUTH_EMAIL_LIVE_ENABLED','SMS_LIVE_ENABLED','OMISE_LIVE_ENABLED','LINE_LIVE_ENABLED','CAMPAIGN_ATTRIBUTION_ENABLED','CAMPAIGN_ATTRIBUTION_PRIVACY_REVIEWED'])if(config.vars[key]!=='false')throw Error('Live operation must remain disabled: '+key);
+  for(const key of ['INSTALLER_REGISTRATION_ENABLED','AUTH_EMAIL_LIVE_ENABLED','SMS_LIVE_ENABLED','OMISE_LIVE_ENABLED','LINE_LIVE_ENABLED','CAMPAIGN_ATTRIBUTION_ENABLED','CAMPAIGN_ATTRIBUTION_PRIVACY_REVIEWED'])if(config.vars[key]!=='false')throw Error('Live operation must remain disabled: '+key);
   for(const key of ['AUTH_EMAIL_PROVIDER_MODE','SMS_PROVIDER_MODE','OMISE_PROVIDER_MODE'])if(config.vars[key]!=='off')throw Error('Provider must remain off: '+key);
   const held=(await stagingQuery("SELECT json_extract(config_json,'$.collectionEnabled') collection,json_extract(config_json,'$.paymentsEnabled') payments,json_extract(config_json,'$.notificationsEnabled') notifications,json_extract(config_json,'$.platformPaused') platform,json_extract(config_json,'$.deliveryPaused') delivery FROM installer_platform_settings WHERE id=1"))[0].results[0];
   if(!held||held.collection!==0||held.payments!==0||held.notifications!==0||held.platform!==1||held.delivery!==1)throw Error('Staging operation holds are not intact.');

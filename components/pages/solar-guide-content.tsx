@@ -1,7 +1,8 @@
+import {ServiceAvailabilityNotice} from '@/components/site/service-availability';
 import Link from '@/components/site/internal-link';
 import { ArrowRight } from 'lucide-react';
 import { PageHero } from '@/components/content/page-hero';
-import { legalReviewDisclosures, prelaunchNotice } from '@/config/legal-review';
+import { legalReviewDisclosures } from '@/config/legal-review';
 import { localizedPath, type Locale } from '@/config/i18n';
 
 const checkedOn = '2026-10-19';
@@ -51,7 +52,7 @@ export function SolarGuideContent({ locale }: { locale: Locale }) {
           <p className="eyebrow">05 · {en ? 'Next steps' : 'ขั้นตอนต่อไป'}</p>
           <h2>{en ? 'From survey to handover' : 'จากสำรวจหน้างานถึงส่งมอบ'}</h2>
           <p>{en ? 'A site survey checks roof structure, shade, electrical supply and phase, cable routes and access. The installer then prepares a design and itemised quotation, identifies who handles applications and fees, agrees milestones, installs and tests the system, and hands over operating instructions, as-built details, monitoring access and warranty documents. Ask when the system may be operated and who resolves any inspection or connection issue.' : 'การสำรวจหน้างานตรวจโครงสร้างหลังคา เงา ระบบไฟและเฟส ทางเดินสาย และการเข้าทำงาน จากนั้นผู้ติดตั้งจัดทำแบบและใบเสนอราคาแจกแจง ระบุผู้รับผิดชอบการยื่นเรื่องและค่าธรรมเนียม ตกลงงวดงาน ติดตั้งและทดสอบระบบ แล้วส่งมอบวิธีใช้งาน แบบงานจริง สิทธิ์เข้าระบบติดตาม และเอกสารรับประกัน ถามให้ชัดว่าเริ่มใช้งานได้เมื่อใดและใครแก้ปัญหาหากการตรวจหรือเชื่อมต่อยังไม่ผ่าน'}</p>
-          <div className="callout"><strong>{en ? 'Before choosing' : 'ก่อนตัดสินใจ'}</strong><p>{legalReviewDisclosures.installerChecks[locale]}</p><p>{prelaunchNotice[locale]}</p></div>
+          <div className="callout"><strong>{en ? 'Before choosing' : 'ก่อนตัดสินใจ'}</strong><p>{legalReviewDisclosures.installerChecks[locale]}</p><p><ServiceAvailabilityNotice locale={locale}/></p></div>
           <p>{en ? 'Further reading:' : 'อ่านเพิ่มเติม:'} <Link href={path('/resources')}>{en ? 'sources and resources' : 'แหล่งข้อมูลอ้างอิง'}</Link> · <a href="https://greener.bangkok.go.th/en/solarcity/solar-installation-guide-for-homes/" target="_blank" rel="noopener noreferrer">{en ? 'Bangkok Environmental Office home solar guide' : 'คู่มือโซลาร์สำหรับบ้านของสำนักสิ่งแวดล้อม กรุงเทพมหานคร'}</a> ({en ? 'checked 19 October 2026; source use is not endorsement' : 'ตรวจ 19 ตุลาคม 2569 การอ้างอิงไม่ได้หมายถึงการรับรอง SolarMatch'})</p>
         </section>
       </article>

@@ -3,6 +3,8 @@ const signalAssets=new Set(signalPaths);
 /** Review assets are never part of public/ or a normal production build. */
 export function stagingDesignAsset(pathname:string){
  if(!pathname.startsWith('/design-review/'))return false;
+ if(/^\/design-review\/readiness(?:\/|\/index\.html)?$/.test(pathname))return true;
+ if(/^\/design-review\/readiness\/images\/(?:form-(?:en|th)|availability-(?:en|th)-(?:true|false)|refresh-(?:en|th)-(?:terms|disabled|questionnaire))-(?:desktop|mobile)-chromium\.png$/.test(pathname))return true;
  if(pathname==='/design-review/signal'||pathname.startsWith('/design-review/signal/'))return signalAssets.has(pathname);
  // Cloudflare Assets canonicalizes .html to extensionless URLs before serving.
  if(/^\/design-review\/(?:estimate-(?:en|th)(?:\.html)?|open-example\.js)$/.test(pathname))return true;

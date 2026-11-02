@@ -35,6 +35,7 @@ export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage 
   const t = signalLandingText(en);
   const c = config.commercial;
   const available = config.accountsAvailable;
+  const canApply = available && config.registrationAvailable === true;
   const price = c ? portalMoney(c.creditValueMinor * c.sharedCredits, 'THB', en, (c.creditValueMinor * c.sharedCredits) % 100 === 0) : '—';
   const faq = signalLandingFaq(en, c);
   const name = en ? 'Arun' : 'อรุณ';
@@ -52,13 +53,13 @@ export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage 
       <div className="r">
         <div className="lang"><button type="button" aria-label="Switch to Thai" aria-pressed={!en} onClick={() => setLanguage(false)}>ไทย</button><button type="button" aria-label="Switch to English" aria-pressed={en} onClick={() => setLanguage(true)}>EN</button></div>
         <button type="button" className="btn ghost sm" disabled={!available} onClick={signIn}>{t.signIn}</button>
-        <button type="button" className="btn primary sm" disabled={!available} onClick={apply}>{available ? t.apply : t.unavailable}</button>
+        <button type="button" className="btn primary sm" disabled={!canApply} onClick={apply}>{canApply ? t.apply : t.unavailable}</button>
       </div>
     </div></header>
     <main id="installer-landing-main" tabIndex={-1}>
       <section className={'a-hero' + (auth ? ' authing' : '')}><div className="wrap">
         <div className="copy"><p className="eyebrow">{t.eyebrow}</p><h1>{designText(en ? 'en' : 'th').iH1}</h1><p className="lede">{t.lede}</p><div className="btns">
-          <button type="button" className="btn primary lg" disabled={!available} onClick={apply}>{available ? t.applyLong : t.unavailable}<ArrowRight className="i" aria-hidden="true"/></button>
+          <button type="button" className="btn primary lg" disabled={!canApply} onClick={apply}>{canApply ? t.applyLong : t.unavailable}<ArrowRight className="i" aria-hidden="true"/></button>
           <button type="button" className="btn ghost lg" disabled={!available} onClick={signIn}>{t.signIn}</button>
         </div></div>
         {auth || <div className="stack" role="group" aria-label={t.exLabel}>

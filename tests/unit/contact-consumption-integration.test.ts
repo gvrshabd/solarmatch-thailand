@@ -13,12 +13,14 @@ import {createAssessmentToken} from '@/lib/server/assessment-token';
 import {sha256} from '@/lib/server/crypto';
 import {verificationBindings} from '@/lib/installer/phone-verification';
 import {POST} from '@/app/api/leads/route';
+import {POST as verifyPhone} from '@/app/api/phone-verification/route';
 import {calculateContactAssessment,contactConsumption} from '@/lib/qualification/contact-consumption';
 import {CONTACT_CONSUMPTION_VERSION,consumptionSummary,storedContactConsumption} from '@/lib/qualification/consumption-snapshot';
 import {calculateLeadAssessment,initialScoringConfiguration} from '@/lib/qualification/scoring';
 import {deliveryProjection} from '@/lib/installer/portal-data';
 import {assessmentRows} from '@/lib/installer/assessment-display';
 import {contactLaunchReviewCopy,legalReviewContentVersion} from '@/config/legal-review';
+import {allocateEnquiry,suppressEnquiry} from '@/lib/installer/deliveries';
 import type {EstimateAnswers} from '@/lib/calculator/types';
 
 const kwh:EstimateAnswers={...syntheticAnswers,estimateModelVersion:'energy-v3',calculationReferenceDate:'2026-10-19',roofArea:'100-200',consumptionInput:'kwh',monthlyBillThb:0,monthlyConsumptionKwh:1200,billingPeriodDays:30,tariffCategory:'ordinary-1.2'};
@@ -39,6 +41,43 @@ async function payload(answers=kwh,policy:string|undefined=CONTACT_CONSUMPTION_V
 const request=(body:unknown)=>new NextRequest('http://localhost:3000/api/leads',{method:'POST',headers:{Origin:'http://localhost:3000','Content-Type':'application/json'},body:JSON.stringify(body)});
 
 describe('versioned consumption and controlled final submission',()=>{
+ it('rolls back contact, score, enquiry and OTP consumption together on persistence failure, then permits the same retry',async()=>{
+   const p=await payload();
+   fixture.sqlite.exec("CREATE TRIGGER synthetic_persistence_failure BEFORE INSERT ON installer_enquiries BEGIN SELECT RAISE(ABORT,'synthetic persistence failure'); END");
+   const failed=await POST(request(p));expect(failed.status).toBe(500);
+   expect(await failed.json()).toMatchObject({code:'submission_failed'});
+   for(const table of ['leads','lead_score_history','installer_enquiries'])expect(fixture.sqlite.prepare('SELECT count(*) n FROM '+table).get()?.n).toBe(0);
+   expect(fixture.sqlite.prepare('SELECT consumed_at FROM installer_phone_challenges WHERE id=?').get(p.phoneVerificationId)?.consumed_at).toBeNull();
+   fixture.sqlite.exec('DROP TRIGGER synthetic_persistence_failure');
+   expect((await POST(request(p))).status).toBe(201);
+   expect(fixture.sqlite.prepare('SELECT count(*) n FROM leads').get()?.n).toBe(1);
+ });
+ it('rejects a stale assessment before creating a phone challenge or invoking the capture provider',async()=>{
+   const r=(await getCurrentRelease(fixture.d1()))!;
+   const token=(await createAssessmentToken({releaseId:'obsolete-release',questionnaireVersionId:r.questionnaire_version_id,ruleVersionId:r.rule_version_id}))!.token;
+   const response=await verifyPhone(new NextRequest('http://localhost:3000/api/phone-verification',{method:'POST',headers:{Origin:'http://localhost:3000','Content-Type':'application/json'},body:JSON.stringify({phone:'0812345678',assessmentToken:token})}));
+   expect(response.status).toBe(409);
+   expect(await response.json()).toMatchObject({code:'assessment_version_expired'});
+   expect(fixture.sqlite.prepare('SELECT count(*) n FROM installer_phone_challenges').get()?.n).toBe(0);
+   expect(fixture.sqlite.prepare('SELECT count(*) n FROM installer_test_messages').get()?.n).toBe(0);
+ });
+ it.each(['bill','kwh'] as const)('completes %s submission, allocation, retry, ledger and withdrawal together',async input=>{
+   const p=await payload({...kwh,consumptionInput:input,monthlyBillThb:input==='bill'?6000:0});
+   expect((await POST(request(p))).status).toBe(201);
+   const enquiry=fixture.sqlite.prepare('SELECT id FROM installer_enquiries').get()!;
+   const db=fixture.d1();
+   await allocateEnquiry(db,String(enquiry.id),'synthetic-readiness');
+   expect((await POST(request(p))).status).toBe(200);
+   await allocateEnquiry(db,String(enquiry.id),'synthetic-retry');
+   expect(fixture.sqlite.prepare('SELECT count(*) n FROM lead_recipient_deliveries').get()?.n).toBe(3);
+   expect(fixture.sqlite.prepare("SELECT count(*) n FROM installer_credit_ledger WHERE kind='delivery'").get()?.n).toBe(3);
+   const mismatches=fixture.sqlite.prepare("SELECT a.company_id FROM installer_credit_accounts a WHERE a.available<>(SELECT coalesce(sum(available_delta),0) FROM installer_credit_ledger WHERE company_id=a.company_id) OR a.reserved<>(SELECT coalesce(sum(reserved_delta),0) FROM installer_credit_ledger WHERE company_id=a.company_id)").all();
+   expect(mismatches).toEqual([]);
+   await suppressEnquiry(db,String(enquiry.id),'withdrawal','synthetic-readiness');
+   expect((await allocateEnquiry(db,String(enquiry.id),'synthetic-after-withdrawal')).allocated).toHaveLength(0);
+   expect(fixture.sqlite.prepare('SELECT count(*) n FROM lead_recipient_deliveries').get()?.n).toBe(3);
+   expect(fixture.sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+ });
  it('preserves raw kWh/period and zero absent bill, stores server-derived provenance and one consented enquiry on retries',async()=>{
    const p=await payload();const response=await POST(request(p));expect(response.status).toBe(201);
    const row=fixture.sqlite.prepare('SELECT * FROM leads').get()!;

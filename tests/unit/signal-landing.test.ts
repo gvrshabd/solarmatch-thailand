@@ -8,6 +8,12 @@ const commercial = { creditValueMinor: 17550, sharedCredits: 4, trialDeliveries:
 const noop = () => {};
 
 describe('Signal installer landing safeguards', () => {
+  it('keeps existing sign-in enabled when new applications are independently unavailable',()=>{
+    const html=renderToStaticMarkup(createElement(InstallerLanding,{en:true,config:{accountsAvailable:true,registrationAvailable:false,recoveryAvailable:false,commercial},apply:noop,signIn:noop,setLanguage:noop}));
+    const buttons=html.match(/<button\b[^>]*>.*?<\/button>/g)||[];
+    expect(buttons.filter(button=>button.includes('Sign in')).every(button=>!button.includes('disabled=""'))).toBe(true);
+    expect(buttons.filter(button=>button.includes('Applications unavailable')).every(button=>button.includes('disabled=""'))).toBe(true);
+  });
   for (const en of [true, false]) {
     it(`uses configured commercial values in ${en ? 'English' : 'Thai'}`, () => {
       const faq = signalLandingFaq(en, commercial);

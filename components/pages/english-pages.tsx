@@ -1,3 +1,4 @@
+import {ServiceAvailabilityNotice} from '@/components/site/service-availability';
 import Link from '@/components/site/internal-link';
 import { notFound } from 'next/navigation';
 import {
@@ -16,7 +17,7 @@ import { EstimateShell } from '@/components/estimate/estimate-shell';
 import { ResultsShell } from '@/components/results/results-shell';
 import { PageHero } from '@/components/content/page-hero';
 import { PublishedLegalDocument } from '@/components/content/published-legal-document';
-import { prelaunchNotice } from '@/config/legal-review';
+
 
 const en = (path = '') => `/en${path}`;
 
@@ -25,7 +26,7 @@ function EnglishHowItWorks() {
     <section className="site-shell numbered-sections">
       <article><span>01</span><ClipboardList /><div><h2>Start with available information</h2><p>Answer what you know about province, bills, usage, and the roof. There is no need to guess or upload documents.</p></div></article>
       <article><span>02</span><Calculator /><div><h2>Prepare a practical planning figure</h2><p>Your assessment answers produce a starting system size, production, price, savings, and payback with a method and source trail you can inspect.</p></div></article>
-      <article><span>03</span><MessagesSquare /><div><h2>Prepare your next step</h2><p>View the full estimate without contact details and prepare questions for a professional assessment.</p><p>{prelaunchNotice.en}</p></div></article>
+      <article><span>03</span><MessagesSquare /><div><h2>Prepare your next step</h2><p>View the full estimate without contact details and prepare questions for a professional assessment.</p><p><ServiceAvailabilityNotice locale="en"/></p></div></article>
     </section>
     <section className="content-cta"><div className="site-shell"><h2>Ready to try it with your electricity bill?</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
   </main>;

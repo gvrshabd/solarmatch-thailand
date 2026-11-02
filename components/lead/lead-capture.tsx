@@ -61,6 +61,16 @@ export function LeadCapture({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousResetKey = useRef(resetKey);
   const reviewCompletedRef = useRef(false);
+  const submissionInFlight = useRef(false);
+  const [needsReview, setNeedsReview] = useState(false);
+
+  const [verificationToken, setVerificationToken] = useState(configuration.assessmentToken);
+  if (verificationToken !== configuration.assessmentToken) {
+    setVerificationToken(configuration.assessmentToken);
+    setChallengeId(''); setVerificationProof(''); setCode('');
+    setFields(current => ({...current, adultConfirmed:false}));
+    setNeedsReview(false);
+  }
 
   useEffect(() => {
     if (previousResetKey.current === resetKey) return;
@@ -116,6 +126,14 @@ export function LeadCapture({
     try {
       const response = await fetch('/api/phone-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,assessmentToken:configuration.assessmentToken,...(verify?{challengeId,code}:{})})});
       const body = await response.json() as {challengeId?:string;proof?:string;code?:string};
+      if (body.code === 'assessment_version_expired') {
+        setNeedsReview(true);
+        setVerificationProof('');setChallengeId('');setCode('');
+        setOtpNotice(english?'Contact terms changed. Go back to review consent or continue to your estimate.':'เงื่อนไขการติดต่อเปลี่ยนไป กรุณาย้อนกลับไปตรวจสอบความยินยอม หรือดูผลประเมินต่อ');
+        const latest=await fetch('/api/assessment/config',{headers:{Accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(5000)});
+        if(latest.ok){setNeedsReview(false);onConfigurationChanged(await latest.json() as PublicAssessmentConfig);}
+        return;
+      }
       if (!response.ok) { setOtpNotice(english?'The code could not be sent or verified. Check the code, or wait before trying again.':'ไม่สามารถส่งหรือยืนยันรหัสได้ กรุณาตรวจสอบรหัส หรือรอสักครู่แล้วลองอีกครั้ง'); return; }
       if (verify && body.proof) { setVerificationProof(body.proof); setOtpNotice(english?'Phone number verified.':'ยืนยันหมายเลขโทรศัพท์แล้ว'); }
       else if (body.challengeId) { setChallengeId(body.challengeId); setResendAt(Date.now()+60_000); setOtpNotice(english?'Enter the SMS code within 5 minutes.':'กรอกรหัสจาก SMS ภายใน 5 นาที'); }
@@ -133,7 +151,7 @@ export function LeadCapture({
   }
 
   async function submit() {
-    if (sending || reviewCompletedRef.current || !validate()) return;
+    if (submissionInFlight.current || sending || needsReview || reviewCompletedRef.current || !validate()) return;
     // A review must never reach token checks, API calls, analytics, or lead storage,
     // even if the real configuration is enabled while the reviewer uses the form.
     if (reviewOnly) { finishReview(); return; }
@@ -164,6 +182,7 @@ export function LeadCapture({
       return;
     }
     onProcessingStart();
+    submissionInFlight.current = true;
     setSending(true);
     setSubmissionError('');
     try {
@@ -178,9 +197,12 @@ export function LeadCapture({
           setOtpNotice(english?'Your verification expired. Request a new SMS code.':'การยืนยันหมดอายุแล้ว กรุณาขอรหัส SMS ใหม่');
         }
         if (body?.code === 'assessment_version_expired') {
-          const latest = await fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+          setNeedsReview(true);
+          setVerificationProof(''); setChallengeId(''); setCode('');
+          const latest = await fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store', signal:AbortSignal.timeout(5000) });
           if (latest.ok) {
             const latestConfiguration = await latest.json() as PublicAssessmentConfig;
+            setNeedsReview(false);
             onConfigurationChanged(latestConfiguration);
             setSubmissionError(english ? 'The contact terms were updated. Return to the quote question and review the current wording.' : 'มีการอัปเดตเงื่อนไขการติดต่อ กรุณาย้อนกลับไปตรวจสอบข้อความล่าสุด');
             setSending(false);
@@ -204,6 +226,8 @@ export function LeadCapture({
         ? 'We could not confirm the request status. Wait a moment, then retry; the same submission will not create a second request.'
         : 'ยังยืนยันสถานะคำขอไม่ได้ กรุณารอสักครู่แล้วลองอีกครั้ง โดยการส่งซ้ำรายการเดิมจะไม่สร้างคำขอใหม่');
       setSending(false);
+    } finally {
+      submissionInFlight.current = false;
     }
   }
 
@@ -251,8 +275,8 @@ export function LeadCapture({
         <input className="website-honeypot" tabIndex={-1} autoComplete="off" aria-hidden="true" value={fields.website} onChange={(event) => setValue('website', event.target.value)} />
         {submissionError && <div className="form-error form-error-summary" role="alert"><strong>{english ? 'Request not confirmed' : 'ยังไม่ยืนยันคำขอ'}</strong><p>{submissionError}</p></div>}
         <div className="contact-form-actions">
-          <button type="button" className="button button-secondary" disabled={sending} onClick={onBack}><ArrowLeft size={18} />{english ? 'Back' : 'ย้อนกลับ'}</button>
-          <button type="button" className="button" disabled={sending} onClick={() => void submit()}>{reviewOnly ? contactReviewCopy.finish[locale] : sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : submissionError ? (english ? 'Try again' : 'ลองอีกครั้ง') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button>
+          <button type="button" className="button button-secondary" disabled={sending} onClick={() => {setNeedsReview(false); onBack();}}><ArrowLeft size={18} />{english ? 'Back' : 'ย้อนกลับ'}</button>
+          <button type="button" className="button" disabled={sending || needsReview} onClick={() => void submit()}>{reviewOnly ? contactReviewCopy.finish[locale] : sending ? (english ? 'Sending securely…' : 'กำลังส่งอย่างปลอดภัย…') : needsReview ? (english ? 'Return to review consent' : 'ย้อนกลับไปตรวจสอบความยินยอม') : submissionError ? (english ? 'Try again' : 'ลองอีกครั้ง') : (english ? 'Submit my request' : 'ส่งคำขอติดต่อ')}<ArrowRight size={18} /></button>
         </div>
         {reviewOnly && <button type="button" className="text-link contact-skip" disabled={sending} onClick={finishReview}>{contactReviewCopy.skip[locale]}</button>}
         {!reviewOnly && <button type="button" className="text-link contact-skip" disabled={sending} onClick={() => onContinue('skipped')}>{english ? 'Continue to my estimate without submitting' : 'ดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ'}</button>}

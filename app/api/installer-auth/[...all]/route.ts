@@ -1,12 +1,18 @@
 import { createInstallerAuth,trustedInstallerAuthRequest } from '@/lib/installer/auth';
 import { assertPlatformRequest } from '@/lib/installer/platform';
 import {allowInstallerRequest,trustedShareAddress} from '@/lib/installer/rate-limit';
-import {requireDatabase} from '@/lib/server/runtime';
+import {requireDatabase,getRuntimeEnv} from '@/lib/server/runtime';
+import {authEmailReady,installerRegistrationReady} from '@/lib/installer/collection-readiness';
 
 async function handler(request: Request) {
   try {
     assertPlatformRequest(request);
-    const address=trustedShareAddress(request);const path=new URL(request.url).pathname;
+    const address=trustedShareAddress(request);const path=new URL(request.url).pathname.replace(/\/+$/u,'');
+    const env=getRuntimeEnv();
+    if((path.endsWith('/sign-up/email')&&!installerRegistrationReady(env))
+      || (['/request-password-reset','/send-verification-email'].some(suffix=>path.endsWith(suffix))&&!authEmailReady(env))){
+      return Response.json({error:'Installer registration or email recovery is currently unavailable. / ขณะนี้ยังไม่เปิดรับสมัครหรือกู้คืนบัญชีทางอีเมล'},{status:503,headers:{'Cache-Control':'no-store'}});
+    }
     const specific:Record<string,{max:number;window:number}>={'sign-in/email':{max:5,window:60},'sign-up/email':{max:3,window:60},'request-password-reset':{max:3,window:300},'send-verification-email':{max:3,window:300}};
     const rule=Object.entries(specific).find(([suffix])=>path.endsWith('/'+suffix))?.[1];
     const db=requireDatabase();

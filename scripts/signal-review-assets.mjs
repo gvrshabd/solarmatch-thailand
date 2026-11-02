@@ -2,6 +2,7 @@ import { prepareReviewAssets as prepareHomeownerV3ReviewAssets } from './homeown
 import { readFile, writeFile, mkdir, copyFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
+import {appendReadinessReview} from './readiness-review-assets.mjs';
 
 const screenshotName=/^([a-z0-9]+(?:-[a-z0-9]+)*)-(en|th)-(phone|desktop)\.png$/;
 const routes=new Set(['landing','signin','inbox','credits','company','claims','terms','e22','e25','e39','e41']);
@@ -124,5 +125,7 @@ export async function appendSignalReviewAssets(root,target,options={}) {
 /** Preserve the existing homeowner and archived viewers in the same private asset tree. */
 export async function prepareReviewAssets(root=process.cwd(),options={}) {
   const target=await prepareHomeownerV3ReviewAssets(root,options);
-  return appendSignalReviewAssets(root,target,options);
+  await appendSignalReviewAssets(root,target,options);
+  await appendReadinessReview(root,target);
+  return target;
 }

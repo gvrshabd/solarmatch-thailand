@@ -23,7 +23,7 @@ export async function sendAuthEmail(message: AuthEmailMessage, config: AuthEmail
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${message.kind}:${message.url}`));
   const key = `auth-${Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2,'0')).join('')}`;
   try {
-    const response = await (config.fetch ?? fetch)('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${config.token}`, 'Content-Type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify(payload), redirect: 'error', signal: AbortSignal.timeout(15000) });
+    const response = await (config.fetch ?? fetch)('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${config.token}`, 'Content-Type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify(payload), redirect: 'manual', signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new ProviderError(`auth_email_http_${response.status}`);
     const result = parseObject(await response.text());
     if (typeof result.id !== 'string' || !result.id) throw new ProviderError('invalid_auth_email_response');

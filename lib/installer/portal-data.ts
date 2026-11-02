@@ -3,7 +3,7 @@ import { parseJson, type Row } from './deliveries';
 import { getPlatformSettings, installerTermsFor } from './settings';
 import type { InstallerPortalData, InstallerDelivery } from './portal-contract';
 import { getRuntimeEnv } from '@/lib/server/runtime';
-import { enabledPaymentMethods } from './providers/payment';
+import { enabledPaymentMethods,paymentCheckoutReady } from './providers/payment';
 export async function membership(db:D1Database,userId:string) {
   return db.prepare(`SELECT p.*,m.role FROM installer_memberships m JOIN solar_company_partners p ON p.id=m.company_id WHERE m.user_id=? AND p.archived_at IS NULL`).bind(userId).first<Row>();
 }
@@ -29,6 +29,14 @@ export const activeDelivery=`d.delivery_channel='portal' AND d.withdrawal_suppre
 export async function getPortalData(db:D1Database,session:InstallerPortalData['session'],deliveryId?:string):Promise<InstallerPortalData> {
   const settings=await getPlatformSettings(db);const company=await membership(db,session.user.id);const id=String(company?.id??'');
   const installerTerms=installerTermsFor(settings);
+  const env=getRuntimeEnv();
+  const mode=env.INSTALLER_PLATFORM_MODE==='local-test'?'local-test'
+    :env.INSTALLER_PLATFORM_MODE==='production'&&env.OMISE_PROVIDER_MODE==='live'?'live'
+    :env.INSTALLER_PLATFORM_MODE==='sandbox'&&env.OMISE_PROVIDER_MODE==='sandbox'?'sandbox':'off';
+  const paymentsAvailable=settings.paymentsEnabled&&!settings.platformPaused&&paymentCheckoutReady({
+    mode,sandboxEnabled:settings.paymentsEnabled,liveEnabled:settings.paymentsEnabled&&env.OMISE_LIVE_ENABLED==='true',
+    publicKey:env.OMISE_PUBLIC_KEY,secretKey:env.OMISE_SECRET_KEY,activatedMethods:settings.paymentMethods,activatedCardBrands:settings.paymentCardBrands,
+  });
   const [balance,deliveries,orders,ledger,claims]=await Promise.all([
     db.prepare('SELECT * FROM installer_credit_accounts WHERE company_id=?').bind(id).first<Row>(),
     db.prepare(`${deliverySelect} WHERE d.partner_id=? AND d.delivery_channel='portal'${deliveryId?' AND d.id=?':''} ORDER BY d.available_at DESC LIMIT 100`).bind(...(deliveryId?[id,deliveryId]:[id])).all<Row>(),
@@ -48,7 +56,7 @@ export async function getPortalData(db:D1Database,session:InstallerPortalData['s
     // Keep them for protected adjudication, but never return them after withdrawal.
     claims:claims.results.map(r=>({id:String(r.id),deliveryId:String(r.delivery_id),reason:r.financial_only?'withdrawn-claim':String(r.reason),status:String(r.status),submittedAt:String(r.submitted_at),decision:!r.financial_only&&r.decision_notes?String(r.decision_notes):null})),
     terms:{version:settings.termsVersion,textEn:installerTerms.en,textTh:installerTerms.th,acceptedAt:company?.terms_version===settings.termsVersion&&company?.terms_accepted_at?String(company.terms_accepted_at):null},
-    integrations:{paymentsEnabled:settings.paymentsEnabled,paymentMethods:enabledPaymentMethods({activatedMethods:settings.paymentMethods,activatedCardBrands:settings.paymentCardBrands}),lineConfigured:!!getRuntimeEnv().LINE_CHANNEL_ACCESS_TOKEN,mode:getRuntimeEnv().INSTALLER_PLATFORM_MODE??'off'},
+    integrations:{paymentsEnabled:paymentsAvailable,paymentMethods:enabledPaymentMethods({activatedMethods:settings.paymentMethods,activatedCardBrands:settings.paymentCardBrands}),lineConfigured:!!getRuntimeEnv().LINE_CHANNEL_ACCESS_TOKEN,mode:getRuntimeEnv().INSTALLER_PLATFORM_MODE??'off'},
     availability:{platformPaused:settings.platformPaused,allocationPaused:settings.deliveryPaused,notificationsEnabled:settings.notificationsEnabled,canManage:company?.role==='owner'},
     commercial:{creditValueMinor:settings.creditValueMinor,sharedCredits:settings.sharedCredits,claimDays:settings.claimDays,trialDeliveries:settings.trialDeliveries,recipientLimit:settings.recipientLimit},
   };
