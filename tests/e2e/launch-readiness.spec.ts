@@ -84,6 +84,13 @@ for(const locale of ['en','th'] as const){
   expect((await new AxeBuilder({page}).include('#how').withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
   await page.setViewportSize({width:info.project.name==='desktop-chromium'?1440:390,height:900});
   if(process.env.READINESS_SCREENSHOTS)await page.locator('#how').screenshot({path:`${process.env.READINESS_SCREENSHOTS}/availability-${locale}-${available}-${info.project.name}.png`});
+  await page.addInitScript(value=>{sessionStorage.setItem('solarmatch:estimate',JSON.stringify(value));sessionStorage.removeItem('solarmatch:result-view-state');},{...answers,estimateModelVersion:'energy-v3',quoteContactRequested:false});
+  await page.goto((locale==='en'?'/en':'')+'/estimate/results');
+  await expect(page.locator('.rstats')).toBeVisible();
+  const resultBadge=page.locator('.nextsteps .chip-gold');
+  if(available)await expect(resultBadge).toHaveCount(0);else await expect(resultBadge).toHaveText(locale==='en'?'Currently unavailable':'ยังไม่เปิดให้บริการ');
+  await expect(page.locator('.nextsteps')).not.toContainText(locale==='en'?'Opening soon':'เร็ว ๆ นี้');
+  if(process.env.READINESS_SCREENSHOTS)await page.locator('.nextsteps').screenshot({path:`${process.env.READINESS_SCREENSHOTS}/results-${locale}-${available}-${info.project.name}.png`});
  });
  for(const change of ['terms','disabled','questionnaire','refresh-failure'] as const)test(`contact refresh ${change} preserves results ${locale}`,async({page},info)=>{
   const en=locale==='en';let reads=0,posts=0;

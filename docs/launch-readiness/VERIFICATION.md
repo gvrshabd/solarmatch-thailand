@@ -15,6 +15,7 @@ Baseline main: 3238368edde145845232ff11e9f10395d997f218. Branch: feature/nonlega
 | Isolated local compiled build | Passed |
 | Repaired combined contact/configuration/optional-scenario browsers | 78 passed across desktop Chromium, mobile Chromium and mobile WebKit; both languages |
 | Final updated-terms refresh failure flow | 6 passed across the same three projects, original assertions/timeouts |
+| Final homepage/results availability regression | 12 passed across desktop Chromium, mobile Chromium and mobile WebKit; both languages and both capability states |
 | Real local signup, email capture/verification, session/recovery, OTP/contact submission, payment idempotency and rejected-request lifecycle | 8 passed across Chromium desktop/mobile; real local database/services, capture providers only |
 | Admin, notes, payment return and legal/public preparation run | 50 passed, 2 fixture-period failures initially |
 | Complete admin sequence after selecting the correct fixture period | 8 passed across Chromium desktop/mobile |
@@ -34,6 +35,7 @@ Automated axe/keyboard and responsive checks cover relevant public and installer
 - Result traces showed successful script/configuration responses but the initial loading view remained beyond the five-second assertion. Optional interval modelling ran synchronously even when export was not requested. It now runs only for the explicitly selected optional export scenario; arithmetic is unchanged. The complete repaired 78-case sequence passed, followed by six final failure-flow cases. The original broader failures are not relabelled as passes and assertions/timeouts were not increased.
 - The combined admin report test selected October, while this fresh supported-flow store contained November submissions. Reporting therefore correctly had no matching rows. Explicit reporting-window parameters preserve the archived October default; this run selected November 1–30. The full eight-case admin sequence then passed without removing missing-cost, CSV privacy, authentication, CSRF, Thai or read-only assertions.
 - Workerd email transport used unsupported redirect:error. Actual Workerd tests now verify manual redirect handling, successful synthetic provider acceptance and rejection of a 302 without forwarding authorization. This is not real inbox delivery.
+- The authenticated staging walkthrough caught a remaining hard-coded results badge after the initial publication. It now uses the shared capability component, matching the homepage without changing the design. The new results assertion initially used an incomplete saved-answer fixture (missing quoteContactRequested); the application correctly rejected that fixture. The fixture now includes the explicit No answer. All twelve complete homepage-to-results availability cases then passed without weakening assertions or increasing timeouts.
 
 Private failure/run logs remain under .wrangler/readiness-*. Browser traces were inspected privately during diagnosis; none is exported into source or the viewer. Published captures contain synthetic public screens only.
 

@@ -5,7 +5,7 @@ import path from 'node:path';
 export async function appendReadinessReview(root,target) {
  const source=path.resolve(root,'.wrangler/readiness-images');
  let names;try{names=await readdir(source);}catch(error){if(error.code==='ENOENT')return;throw error;}
- const images=names.filter(name=>/^(?:form-(?:en|th)|availability-(?:en|th)-(?:true|false)|refresh-(?:en|th)-(?:terms|disabled|questionnaire))-(?:desktop|mobile)-chromium\.png$/.test(name)).sort();
+ const images=names.filter(name=>/^(?:form-(?:en|th)|(?:availability|results)-(?:en|th)-(?:true|false)|refresh-(?:en|th)-(?:terms|disabled|questionnaire))-(?:desktop|mobile)-chromium\.png$/.test(name)).sort();
  if(!images.length)return;
  if(!path.resolve(target).startsWith(path.resolve(root,'.wrangler')+path.sep))throw Error('Private staging asset tree required');
  const review=path.join(target,'design-review/readiness');await mkdir(path.join(review,'images'),{recursive:true});

@@ -32,6 +32,8 @@ it('publishes only allowlisted review assets behind verified owner Access',async
  expect(stagingDesignAsset('/design-review/prototype/app.js')).toBe(true);
  expect(stagingDesignAsset('/design-review/readiness/')).toBe(true);
  expect(stagingDesignAsset('/design-review/readiness/images/availability-en-true-mobile-chromium.png')).toBe(true);
+ expect(stagingDesignAsset('/design-review/readiness/images/results-th-false-desktop-chromium.png')).toBe(true);
+ expect(stagingDesignAsset('/design-review/readiness/images/results-th-false-desktop-chromium.png/extra')).toBe(false);
  expect(stagingDesignAsset('/design-review/readiness/traces.zip')).toBe(false);
  expect(stagingDesignAsset('/design-review/readiness/images/private.png')).toBe(false);
  expect(stagingDesignAsset('/design-review/images/implementation-live-results-en-390.jpg')).toBe(true);
