@@ -105,6 +105,7 @@ for(const locale of ['en','th'] as const){
   expect(posts).toBe(1);
   expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('solarmatch:result-view-state')!).resultSnapshot.assumptionVersion)).toBeTruthy();
   if(change==='refresh-failure'){
+   await expect(page.getByRole('alert')).toContainText(en?'The contact terms changed':'เงื่อนไขการติดต่อเปลี่ยนไป');
    await expect(page.getByRole('button',{name:en?'Return to review consent':'ย้อนกลับไปตรวจสอบความยินยอม',exact:true})).toBeDisabled();
    await page.getByRole('button',{name:en?'Continue to my estimate without submitting':'ดูผลประเมินต่อโดยไม่ส่งข้อมูลติดต่อ',exact:true}).click();
   }else{

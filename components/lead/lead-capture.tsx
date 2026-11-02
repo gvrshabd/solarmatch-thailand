@@ -185,6 +185,7 @@ export function LeadCapture({
     submissionInFlight.current = true;
     setSending(true);
     setSubmissionError('');
+    let versionRejected=false;
     try {
       const response = await fetch('/api/leads', {
         method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(parsed.data),
@@ -197,6 +198,7 @@ export function LeadCapture({
           setOtpNotice(english?'Your verification expired. Request a new SMS code.':'การยืนยันหมดอายุแล้ว กรุณาขอรหัส SMS ใหม่');
         }
         if (body?.code === 'assessment_version_expired') {
+          versionRejected=true;
           setNeedsReview(true);
           setVerificationProof(''); setChallengeId(''); setCode('');
           const latest = await fetch('/api/assessment/config', { headers: { Accept: 'application/json' }, cache: 'no-store', signal:AbortSignal.timeout(5000) });
@@ -222,7 +224,9 @@ export function LeadCapture({
       onContinue('submitted');
     } catch {
       onProcessingFailed();
-      setSubmissionError(english
+      setSubmissionError(versionRejected
+        ? english ? 'The contact terms changed, but we could not reload them. Go back to review or continue to your estimate without submitting.' : 'เงื่อนไขการติดต่อเปลี่ยนไป แต่ยังโหลดข้อมูลล่าสุดไม่ได้ กรุณาย้อนกลับไปตรวจสอบ หรือดูผลประเมินต่อโดยไม่ส่งคำขอ'
+        : english
         ? 'We could not confirm the request status. Wait a moment, then retry; the same submission will not create a second request.'
         : 'ยังยืนยันสถานะคำขอไม่ได้ กรุณารอสักครู่แล้วลองอีกครั้ง โดยการส่งซ้ำรายการเดิมจะไม่สร้างคำขอใหม่');
       setSending(false);

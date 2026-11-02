@@ -81,7 +81,8 @@ export function OptionalScenarios(props: OptionalScenariosProps) {
     actualMonthlyPaymentBaht: optionalNumber(actualPayment),
     monthlyBenefitBaht: Math.max(0, props.annualBillSavingsThb) / 12,
   }), [props.installationPriceThb, props.annualBillSavingsThb, deposit, term, rate, basis, upfrontFees, financedFees, actualPayment]);
-  const exportIntervals=useMemo(()=>exportVerified?(props.getExportIntervals?.()??props.exportIntervals??[]):[],[exportVerified,props.getExportIntervals,props.exportIntervals]);
+  const {getExportIntervals,exportIntervals:suppliedExportIntervals}=props;
+  const exportIntervals=useMemo(()=>exportVerified?(getExportIntervals?.()??suppliedExportIntervals??[]):[],[exportVerified,getExportIntervals,suppliedExportIntervals]);
   const exportScenario = useMemo(() => calculateExportScenario({
     contract: exportVerified ? { verified: true, rateBahtPerKwh: optionalNumber(exportRate) ?? NaN,
       startDate: exportStart, endDate: exportEnd, acExportCapKw: optionalNumber(exportCap) ?? NaN } : undefined,

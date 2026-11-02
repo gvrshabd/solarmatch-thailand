@@ -1,5 +1,7 @@
 # Installer providers: prelaunch setup and verification
 
+Current acceptance status and operational owners: [launch-readiness/README.md](launch-readiness/README.md), 3 November 2026. This document describes adapter setup; presence of credentials or mock success is not provider acceptance.
+
 All adapters are server modules under `lib/installer/providers`. Their default mode must be `off`. The caller controls environment configuration, database persistence, tenant authorization, loopback-only access to local fixtures, idempotent ledger issuance and the durable notification outbox. No production calls or messages were made during implementation. Never print configuration objects, raw webhook bodies, phone numbers, codes or bearer links in logs.
 
 ## Payment: Omise provider-hosted components
