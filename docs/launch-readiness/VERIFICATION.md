@@ -1,12 +1,13 @@
 # Readiness verification — 3 November 2026
 
-Baseline main: 3238368edde145845232ff11e9f10395d997f218. Branch: feature/nonlegal-launch-readiness. Implementation commit: 4b4aeb6bfbb6b66dc2e3794ee1d37a30aaea6bf4; final small copy/memo/test corrections are included in the following local commit. No push/main merge/production deployment is authorized by this task.
+Baseline main: 3238368edde145845232ff11e9f10395d997f218. Branch: feature/nonlegal-launch-readiness. Initial implementation commit: 4b4aeb6bfbb6b66dc2e3794ee1d37a30aaea6bf4. Final staging application source: 57813a2fdf725333c6f59dff4f72300353a5bf1c. Subsequent handoff-only documentation does not change that deployed application. No push/main merge/production deployment is authorized by this task.
 
 ## Completed checks
 
 | Check | Actual result |
 |---|---|
 | Final full unit/service suite | 691 passed, 84 files |
+| Final full suite after the last results-badge repair | 691 passed, 84 files |
 | Final affected consumption/draft/provider/scenario/security suite | 91 passed |
 | Additional persistence/registration/landing regressions | 25 passed |
 | Typecheck | Passed |
@@ -48,7 +49,25 @@ Encrypted round trip and local restore verified across 60 tables; zero foreign-k
 No migration is required. No remote record, legal version, release pointer or business setting is changed by this release. R2 objects/bindings are untouched; database restoration does not claim R2 recovery.
 
 Previous staging version/rollback point: 361d723f-5230-499e-b278-479f3a283eb9.
-Protected staging build/publication and post-deployment verification are recorded below when completed.
+
+Final staging Worker version: 36baeefd-599c-41c0-a073-2bf7f71e10cb (100%). Deployment: 5e6d4edd-0662-4d72-93c1-64a09040e8ac. Direct protected staging deployment completed successfully. Final source lint/typecheck, normal production-profile build and staging build passed. The normal build was never deployed.
+
+Post-deployment backup comparison verified all 60 tables: existing records preserved, zero foreign-key violations and zero ledger mismatches. Counts remain two leads/enquiries, one delivery, two ledger postings, three legal versions and nineteen migrations. No migration ran. Collection/payments/notifications are false, platform/allocation pauses true, clock null and cron count zero. Registration is explicitly false, and all outbound/live/attribution gates remain off. LINE invitation/link/outbox history remains intact; no new message was sent.
+
+Fresh anonymous checks of staging home, English, installer, admin and all three review locations redirect to owner Access. Authenticated browser checks opened both home languages, completed a non-submitting calculator journey, restored the same numerical results in Thai/English, opened the existing synthetic installer enquiry/credits/company views and separately protected admin with the expected held controls. The final deployed English desktop result and Thai mobile synthetic result show the corrected unavailable badge. A browser-debugger interruption during one language-switch check was recovered by opening a fresh tab; it was not recorded as application success. Final source mobile WebKit/Chromium regressions passed independently.
+
+The protected current screenshot gallery has 32 allowlisted synthetic captures at /design-review/readiness/. It includes enabled/disabled availability, contact forms, terms/disable/questionnaire recovery and results in both locales and sizes. Enabled screenshots are local intercepted fixtures, never evidence that staging collection is enabled. Full-size images and the existing homeowner/Signal comparison viewers loaded through authenticated Access. The older homeowner comparison captures remain explicitly historical; current readiness screenshots supplement them rather than silently replacing the design reference.
+
+Staging links:
+- Home: https://solarmatch-installer-staging.deluxejahseh.workers.dev/ and /en
+- Calculator: /estimate and /en/estimate
+- Synthetic browser-only result: /design-review/estimate-th and /design-review/estimate-en
+- Installer: /installers?view=inbox&lang=en (or lang=th); existing synthetic credentials retained
+- Admin: /admin; durable separate Access identity retained
+- Current captures: /design-review/readiness/
+- Original comparisons: /design-review/ and /design-review/signal/
+
+No local server is needed to open these HTTPS previews. Use ordinary owner Cloudflare verification, followed by the existing synthetic login only for the installer workspace. No credentials are published. Roll back only the staging Worker to the recorded prior version for an application regression; no database restore is warranted without an actual data problem. Production/main and Milly's remain untouched.
 
 ## Intentional boundaries
 

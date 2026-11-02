@@ -41,6 +41,7 @@ scripts/installer-staging-cloudflare.mjs
 scripts/readiness-review-assets.mjs
 scripts/signal-review-assets.mjs
 staging/wrangler.jsonc
+tests/e2e/installer-admin-local.spec.ts
 tests/e2e/launch-readiness.spec.ts
 tests/e2e/public-preparation.spec.ts
 tests/unit/contact-consumption-integration.test.ts
