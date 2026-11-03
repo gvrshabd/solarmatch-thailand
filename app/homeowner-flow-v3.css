@@ -78,7 +78,7 @@ html[lang=th] .homeowner-v3 .estimate-focus-layout .visual-choice strong{font-we
 .homeowner-v3 .accuracy-fields>*{min-width:0}
 .homeowner-v3 .footer-grid-v3{display:grid;grid-template-columns:1fr 1fr;gap:24px 16px}
 .homeowner-v3 .footer-grid-v3 .footer-brand{grid-column:1/-1}
-.homeowner-v3 .footer-grid-v3 .footer-brand p{max-width:24em;margin-top:12px}
+.homeowner-v3 .footer-grid-v3 .footer-brand p{max-width:30em;margin-top:12px}
 .homeowner-v3 .footer-service-details{margin-top:12px;max-width:85ch}
 .homeowner-v3 .footer-service-details summary{min-height:44px;cursor:pointer}
 .homeowner-v3 .footer-service-details p{margin-block:12px}

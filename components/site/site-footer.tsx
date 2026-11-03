@@ -21,7 +21,7 @@ export function SiteFooter() {
       <div className="wrap footer-grid-v3">
         <div className="footer-brand">
           <BrandMark />
-          <p>{english ? 'A free residential solar planning estimate for Thai homeowners.' : 'ผลประเมินโซลาร์เบื้องต้นฟรีเพื่อวางแผนสำหรับเจ้าของบ้านในไทย'}</p>
+          <p>{english ? 'Free residential solar planning estimate and contact from real installers for Thai homeowners.' : 'ผลประเมินโซลาร์เบื้องต้นฟรีและการติดต่อจากผู้ติดตั้งจริงสำหรับเจ้าของบ้านในไทย'}</p>
         </div>
         <div>
           <h2>SolarMatch</h2>

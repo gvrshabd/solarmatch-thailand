@@ -18,7 +18,6 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(30px,8.
 .homeowner-v3 .homeowner-home-v3 .trust span{white-space:nowrap}
 .homeowner-v3 .homeowner-home-v3 .exstack{display:grid;gap:22px}
 .homeowner-v3 .homeowner-home-v3 .exstack>*{grid-area:auto}
-.homeowner-v3 .homeowner-home-v3 .ex-head h2{font-size:clamp(30px,4.4vw,54px);color:var(--green);margin-top:10px}
 .homeowner-v3 .homeowner-home-v3 .excard{background:var(--pine);color:#fff;border-radius:var(--r-xl);padding:24px;box-shadow:var(--shadow-lift);display:grid;gap:14px;min-width:0}
 .homeowner-v3 .homeowner-home-v3 .excard .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .homeowner-v3 .homeowner-home-v3 .excard .lbl{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lime)}
@@ -33,12 +32,10 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .excard .lbl{letter-spacing:0;tex
 .homeowner-v3 .homeowner-home-v3 .sec-h{font-size:clamp(30px,4vw,48px);margin-bottom:26px}
 html[lang=th] .homeowner-v3 .homeowner-home-v3 .sec-h{font-size:clamp(26px,3.4vw,40px)}
 .homeowner-v3 .homeowner-home-v3 .steps3{list-style:none;margin:0;padding:0;display:grid}
-.homeowner-v3 .homeowner-home-v3 .steps3 li{display:flex;gap:16px;padding:18px 0;border-top:1px solid var(--line-2)}
+.homeowner-v3 .homeowner-home-v3 .steps3 li{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--line-2)}
 .homeowner-v3 .homeowner-home-v3 .steps3 li:last-child{border-bottom:1px solid var(--line-2)}
 .homeowner-v3 .homeowner-home-v3 .steps3 .n{width:36px;height:36px;border-radius:50%;background:var(--white);display:grid;place-items:center;font-weight:800;flex:none;font-family:var(--font-manrope),sans-serif}
-.homeowner-v3 .homeowner-home-v3 .steps3 h3{font-size:19px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.homeowner-v3 .homeowner-home-v3 .steps3 h3 .chip{height:26px;font-size:12px}
-.homeowner-v3 .homeowner-home-v3 .steps3 p{color:var(--muted);margin-top:4px}
+.homeowner-v3 .homeowner-home-v3 .steps3 h3{font-size:19px}
 .homeowner-v3 .homeowner-home-v3 .trustgrid .sec-h{margin-top:12px;margin-bottom:16px}
 .homeowner-v3 .homeowner-home-v3 .trp{font-size:18px;color:var(--ondark);max-width:30em}
 .homeowner-v3 .homeowner-home-v3 .source-heading{margin-top:30px}
@@ -47,6 +44,9 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .sec-h{font-size:clamp(26px,3.4vw
 .homeowner-v3 .homeowner-home-v3 .compare{align-self:center}
 .homeowner-v3 .homeowner-home-v3 .compare b{color:#fff;white-space:nowrap}
 .homeowner-v3 .homeowner-home-v3 .compare .inc b{color:var(--lime)}
+.homeowner-v3 .homeowner-home-v3 .compare b svg{width:24px;height:24px;stroke-width:3;display:block}
+.homeowner-v3 .homeowner-home-v3 .compare .mark-yes{color:#3ddc84}
+.homeowner-v3 .homeowner-home-v3 .compare .mark-no{color:#ff6b6b}
 .homeowner-v3 .homeowner-home-v3 .faqband+.faq{margin-top:24px}
 @media(max-width:699px){
   .homeowner-v3 .homeowner-home-v3 .faqband{min-height:200px}
@@ -55,7 +55,7 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .sec-h{font-size:clamp(26px,3.4vw
 }
 @media(min-width:860px){
   .homeowner-v3 .homeowner-home-v3 .steps3{grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
-  .homeowner-v3 .homeowner-home-v3 .steps3 li{flex-direction:column;gap:14px;border:0;padding:0}
+  .homeowner-v3 .homeowner-home-v3 .steps3 li{flex-direction:column;align-items:flex-start;gap:14px;border:0;padding:0}
   .homeowner-v3 .homeowner-home-v3 .steps3 li:last-child{border:0}
   .homeowner-v3 .homeowner-home-v3 .steps3 h3{font-size:22px}
 }
