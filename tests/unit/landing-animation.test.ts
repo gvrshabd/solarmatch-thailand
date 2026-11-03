@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { wrapFeedPosition } from '@/components/installers/landing-examples';
+import { feedAdvance, wrapFeedPosition } from '@/components/installers/landing-examples';
 import { sunPathLitSteps, sunPathProgress } from '@/components/installers/landing-sun-path';
 
 describe('Pulse animation boundaries', () => {
+  it('keeps the specified speed when Safari delivers frames more than 50ms apart', () => {
+    expect(feedAdvance(1000, false)).toBe(26);
+    expect(feedAdvance(1000, true)).toBe(32);
+    expect(feedAdvance(500, false) * 2).toBe(feedAdvance(1000, false));
+    expect(feedAdvance(0, true)).toBe(0);
+    expect(feedAdvance(-100, true)).toBe(0);
+  });
   it('loops at the exact repeated-list boundary without discarding overshoot', () => {
     expect(wrapFeedPosition(499.5, 1000)).toBe(499.5);
     expect(wrapFeedPosition(500, 1000)).toBe(0);

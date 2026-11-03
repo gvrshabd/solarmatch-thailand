@@ -10,6 +10,10 @@ export function wrapFeedPosition(position: number, scrollSize: number): number {
   return half > 0 ? ((position % half) + half) % half : 0;
 }
 
+export function feedAdvance(elapsedMs: number, sideways: boolean): number {
+  return Math.max(0, elapsedMs) * (sideways ? .032 : .026);
+}
+
 function subscribeMotion(change: () => void) {
   const media = window.matchMedia('(prefers-reduced-motion: reduce)');
   media.addEventListener('change', change);
@@ -34,14 +38,16 @@ export function LandingExamples({ en }: { en: boolean }) {
     let last = 0, holdUntil = 0, frameId = 0;
     let hover = false;
     const frame = (time: number) => {
-      const dt = last ? Math.min(50, time - last) : 16;
+      // Use elapsed visible time. A 50ms cap makes a delayed Safari frame slow
+      // the feed itself, on top of the rendering delay (e.g. 26px/s becomes 2px/s).
+      const dt = last ? Math.max(0, time - Math.max(last, holdUntil)) : 0;
       last = time;
       if (sideways !== mq.matches) {
         sideways = mq.matches;
         position = sideways ? v.scrollLeft : v.scrollTop;
       }
       if (!paused && !hover && time > holdUntil && !document.hidden) {
-        position = wrapFeedPosition(position + dt * (sideways ? .032 : .026), sideways ? v.scrollWidth : v.scrollHeight);
+        position = wrapFeedPosition(position + feedAdvance(dt, sideways), sideways ? v.scrollWidth : v.scrollHeight);
         if (sideways) v.scrollLeft = position;
         else v.scrollTop = position;
       }
@@ -65,11 +71,14 @@ export function LandingExamples({ en }: { en: boolean }) {
     // Their temporary hold is handled by user(), not a permanent hover pause.
     const enter = () => { hover = window.matchMedia('(hover: hover)').matches; };
     const leave = () => { hover = false; };
+    // rAF may be suspended in a background tab. Never catch up that hidden time.
+    const visibility = () => { last = 0; };
     const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
     v.addEventListener('scroll', scroll, { passive: true });
     events.forEach(event => v.addEventListener(event, user, { passive: true }));
     v.addEventListener('mouseenter', enter);
     v.addEventListener('mouseleave', leave);
+    document.addEventListener('visibilitychange', visibility);
     frameId = requestAnimationFrame(frame);
     return () => {
       cancelAnimationFrame(frameId);
@@ -77,6 +86,7 @@ export function LandingExamples({ en }: { en: boolean }) {
       events.forEach(event => v.removeEventListener(event, user));
       v.removeEventListener('mouseenter', enter);
       v.removeEventListener('mouseleave', leave);
+      document.removeEventListener('visibilitychange', visibility);
     };
   }, [paused]);
 

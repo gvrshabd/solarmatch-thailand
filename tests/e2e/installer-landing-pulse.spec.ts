@@ -95,7 +95,7 @@ for (const lang of ['en', 'th'] as const) {
   });
 }
 
-test('Pulse feed: moves on both axes, pauses, resumes and survives resizing', async ({ page }) => {
+test('Pulse feed: moves on both axes, pauses, resumes and survives resizing', async ({ page, browserName }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.setViewportSize({ width: 1180, height: 820 });
   await page.goto('/installers?lang=en');
@@ -112,6 +112,15 @@ test('Pulse feed: moves on both axes, pauses, resumes and survives resizing', as
   await page.mouse.move(0, 0);
   await expect.poll(position).toBeGreaterThan(paused + 3);
   await page.setViewportSize({ width: 390, height: 844 });
+  if (browserName === 'webkit' && test.info().project.use.isMobile) {
+    // WebKit's mobile emulation changes only the visual viewport on this resize:
+    // innerWidth becomes 390 but device-width/layout remains 1180 (also on a
+    // blank document). Explicitly simulate the new layout viewport, not a zoom.
+    // Keep the same document and all pause/interaction state for this regression.
+    await page.locator('meta[name="viewport"]').evaluate(el => el.setAttribute('content', 'width=390, initial-scale=1, viewport-fit=cover'));
+  }
+  await expect.poll(() => page.evaluate(() => matchMedia('(max-width:959px)').matches)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.clientWidth)).toBe(390);
   const mobileStart = await position();
   await expect.poll(position).toBeGreaterThan(mobileStart + 3);
   await viewport.dispatchEvent('pointerdown');
@@ -130,6 +139,34 @@ test('Pulse feed: moves on both axes, pauses, resumes and survives resizing', as
     expect(await position()).toBe(tapped);
     await expect.poll(position, { timeout: 6000 }).toBeGreaterThan(tapped + 3);
   }
+});
+
+test('Pulse feed: preserves speed and pauses while the document is hidden', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/installers?lang=en');
+  await signalReady(page);
+  const viewport = page.locator('.feed-v');
+  const position = () => viewport.evaluate(el => el.scrollLeft);
+  const before = await viewport.evaluate(el => ({ position: el.scrollLeft, time: performance.now() }));
+  await page.waitForTimeout(1500);
+  const after = await viewport.evaluate(el => ({ position: el.scrollLeft, time: performance.now() }));
+  const pixelsPerSecond = (after.position - before.position) / (after.time - before.time) * 1000;
+  // Allow rendering/measurement scheduling, but reject the old 2–5px/s stall.
+  expect(pixelsPerSecond).toBeGreaterThan(20);
+  expect(pixelsPerSecond).toBeLessThan(40);
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  const hidden = await position();
+  await page.waitForTimeout(600);
+  expect(await position()).toBe(hidden);
+  await page.evaluate(() => {
+    Reflect.deleteProperty(document, 'hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect.poll(position).toBeGreaterThan(hidden + 3);
 });
 
 test('Pulse sun follows scroll progress and reaches the final circle', async ({ page }) => {

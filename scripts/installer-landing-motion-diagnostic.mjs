@@ -23,12 +23,15 @@ try {
         const sample = await page.evaluate(() => new Promise(resolve => {
           const feed = document.querySelector('.feed-v');
           const before = feed.scrollTop + feed.scrollLeft;
+          const started = performance.now();
           let frames = 0, id;
           const tick = () => { frames++; id = requestAnimationFrame(tick); };
           id = requestAnimationFrame(tick);
           setTimeout(() => {
             cancelAnimationFrame(id);
-            resolve({ frames, movement: feed.scrollTop + feed.scrollLeft - before });
+            const elapsedMs = performance.now() - started;
+            const movement = feed.scrollTop + feed.scrollLeft - before;
+            resolve({ frames, elapsedMs, movement, pixelsPerSecond: movement / elapsedMs * 1000, layoutWidth: document.documentElement.clientWidth });
           }, 1500);
         }));
         results.push({ surface, scale, width, sampleMilliseconds: 1500, ...sample });
