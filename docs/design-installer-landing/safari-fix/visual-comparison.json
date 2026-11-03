@@ -1,0 +1,82 @@
+[
+  {
+    "lang": "en",
+    "width": 360,
+    "height": 844,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.08453383137276765
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "height": 844,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.10298968342446603
+  },
+  {
+    "lang": "en",
+    "width": 768,
+    "height": 900,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.053984284262485485
+  },
+  {
+    "lang": "en",
+    "width": 1180,
+    "height": 820,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.0652963921272204
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "height": 900,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.09760690549646206
+  },
+  {
+    "lang": "th",
+    "width": 360,
+    "height": 844,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.0743869395711501
+  },
+  {
+    "lang": "th",
+    "width": 390,
+    "height": 844,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.10267310656851746
+  },
+  {
+    "lang": "th",
+    "width": 768,
+    "height": 900,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.04885756782001299
+  },
+  {
+    "lang": "th",
+    "width": 1180,
+    "height": 820,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.06716219046312277
+  },
+  {
+    "lang": "th",
+    "width": 1440,
+    "height": 900,
+    "geometryDelta": 0,
+    "pixelsAbove16Percent": 0,
+    "meanChannelDifference": 0.09801429312343646
+  }
+]

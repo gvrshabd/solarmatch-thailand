@@ -1,0 +1,57 @@
+SolarMatch Pulse landing: Safari motion repair, 2026-11-03
+
+Application commit: 14508d1 (parent 4d9ce6d).
+Scope: installer landing animation, its generated assets, and regression checks.
+No migration, API, portal, calculator, operational flag or consent change.
+
+Established causes
+1. Four large animated CSS blur layers plus SVG turbulence were expensive in
+   high-density Windows headless WebKit. The original prototype also exhibits
+   this behavior. Original circle colours, blur extents and grain were rendered
+   into trusted local PNGs; animation geometry and timing remain unchanged.
+2. The feed discarded elapsed time beyond 50ms per frame. Delayed rendering
+   therefore also slowed the intended scrolling rate. It now uses actual visible
+   elapsed time, with background-tab and user-interaction time excluded.
+3. In mobile WebKit emulation, resizing the page changed innerWidth but left the
+   layout viewport/media query at its previous width. Reproduced independently
+   on blank HTML. The test explicitly updates the emulated viewport meta width
+   after resizing; it still checks both axes, manual scrolling and touch resume.
+   No application viewport workaround was added.
+
+Verification actually performed
+- Typecheck: passed.
+- Lint: passed, zero errors; 14 pre-existing warnings.
+- Full unit suite: 696 passed across 85 files.
+- Production build: passed.
+- Landing browser suite: 76 passed, no skips/failures, 6.0 minutes.
+  Desktop/mobile Chromium and desktop/mobile WebKit, including native 3x iPhone
+  emulation. Original motion assertions and 30-second test limit retained.
+- New regression: intended elapsed-time speed; background visibility pause and
+  resume. Targeted original plus new high-density WebKit tests: 2 passed.
+- Ten English/Thai visual pairs at 360, 390, 768, 1180 and 1440px: all measured
+  geometry deltas zero. No pixels exceeded the comparison's 16-channel threshold;
+  mean channel difference 0.049–0.103 out of 255. References were not overwritten.
+  Mobile English and desktop Thai full-page images were also visually inspected.
+- Read-only prototype/implementation motion diagnostic: all six implementation
+  samples maintain approximately 26px/s vertical or 32px/s horizontal. Original
+  prototype at 3x measured approximately 2px/s mobile and 0.66px/s wide.
+
+Limits
+Windows headless WebKit still has lower frame throughput at high density: the
+3x/1180px stress sample recorded four callbacks in 1.5 seconds versus one in the
+prototype. Correct scrolling speed is not proof of 60fps. No physical iPhone,
+iPad or macOS Safari acceptance is claimed. Actual-device visual smoothness
+remains a device verification item, not an omitted automated failure.
+
+Evidence
+safari-fix/visual-comparison.json and ten current full-page images.
+safari-fix/index.html compares retained pre-fix implementation images with repair.
+The original prototype and earlier failure report remain unchanged.
+Local raw logs and encrypted production backups stay under ignored .wrangler/.
+
+Release safety
+Production main before this repair: 4d9ce6dcbaebaddc5d8d61de020bed3072b5fa22.
+Previous Worker version: 7e41004c-5f7a-4720-bae4-2d89d6d82d9c.
+Use a normal Git revert/redeployment for application rollback. No database restore
+is appropriate for this asset/animation-only repair absent an actual data issue.
+Production deployment and post-release checks are reported separately in chat.
