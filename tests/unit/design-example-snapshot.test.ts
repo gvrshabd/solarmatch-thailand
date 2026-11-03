@@ -67,9 +67,11 @@ describe('immutable synthetic design example snapshot', () => {
       const home = await import('@/components/home/example-result');
       const prior = await import('@/components/design-v2/example-result');
       for (const locale of ['en', 'th'] as const) {
-        for (const element of [createElement(home.ExampleResult, { locale }), createElement(prior.ExampleResult, { locale }), createElement(prior.ExampleResult, { locale, mini: true })]) {
+        const elements = [createElement(home.ExampleResult, { locale }), createElement(prior.ExampleResult, { locale }), createElement(prior.ExampleResult, { locale, mini: true })];
+        for (const [index, element] of elements.entries()) {
           const html = renderToStaticMarkup(element);
-          expect(html).toContain('5.005');
+          // The home card shows system size to one decimal (5.0 kWp); the earlier card keeps the full model figure.
+          expect(html).toContain(index === 0 ? '5.0 kWp' : '5.005');
           expect(html).toContain('5.4');
           expect(html).toContain('2,755');
         }

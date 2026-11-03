@@ -1,86 +1,228 @@
-/* Final supplied V3 + v3.1/v3.2 cascade, isolated from installer surfaces. */
-.homeowner-v3 .homeowner-home-v3 .hero3{position:relative;overflow:hidden;isolation:isolate}
-.homeowner-v3 .homeowner-home-v3 .hero-bg{position:absolute;z-index:-1;left:0;right:0;top:0;height:min(330px,40vh);background:var(--sage)}
-.homeowner-v3 .homeowner-home-v3 .hero-bg picture,.homeowner-v3 .homeowner-home-v3 .hero-bg img{display:block;width:100%;height:100%}
-.homeowner-v3 .homeowner-home-v3 .hero-bg img{object-fit:cover;object-position:55% 30%}
-.homeowner-v3 .homeowner-home-v3 .hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(245,244,239,0) 48%,rgba(245,244,239,.88) 84%,var(--stone) 100%)}
+/* Homeowner home page (final design): Daylight hero from 960px, Glow hero below it, then example, sun path, trust panel, questions, final call.
+   Scoped to the home page; uses the --sm-* tokens. Pure presentation: behaviour lives in the components. */
+.homeowner-v3 .homeowner-home-v3{--sm-night:#0F211B;--sm-night-2:#17322A;--sm-coral:#E8836B;--hp-lift:0 2px 6px rgba(20,45,38,.08),0 34px 60px -26px rgba(20,45,38,.45);--hp-spring:cubic-bezier(.34,1.56,.64,1);--hp-hdr:68px;--gl:max(16px,env(safe-area-inset-left,0px));--gr:max(16px,env(safe-area-inset-right,0px));overflow-x:clip;color:var(--sm-pine)}
+.homeowner-v3 .homeowner-home-v3 :is(h1,h2,h3){margin:0;font-weight:700;letter-spacing:-.035em;line-height:1.04;text-wrap:balance}
+html[lang=th] .homeowner-v3 .homeowner-home-v3 :is(h1,h2,h3){letter-spacing:0;font-weight:600;line-height:1.28}
+.homeowner-v3 .homeowner-home-v3 p{margin:0}
+.homeowner-v3 .homeowner-home-v3 .wrap{max-width:1240px;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr)}
+@media(min-width:900px){.homeowner-v3 .homeowner-home-v3 .wrap{padding-left:max(40px,env(safe-area-inset-left,0px));padding-right:max(40px,env(safe-area-inset-right,0px))}}
+.homeowner-v3 .homeowner-home-v3 .num{font-variant-numeric:tabular-nums}
+.homeowner-v3 .homeowner-home-v3 .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sm-muted)}
+html[lang=th] .homeowner-v3 .homeowner-home-v3 .eyebrow{letter-spacing:.02em;text-transform:none;font-size:14px}
+.homeowner-v3 .homeowner-home-v3 .credit{position:absolute;z-index:2;right:max(16px,env(safe-area-inset-right,0px));top:14px;font-size:10.5px;color:rgba(255,255,255,.94);background:rgba(20,45,38,.45);padding:3px 8px;border-radius:var(--sm-pill)}
+.homeowner-v3 .homeowner-home-v3 .link{display:inline-flex;align-items:center;gap:8px;font-weight:700;text-decoration:none;color:inherit}
+.homeowner-v3 .homeowner-home-v3 .link svg{width:18px;height:18px;flex:none;transition:transform .2s var(--sm-ease)}
+.homeowner-v3 .homeowner-home-v3 .link:hover svg{transform:translateX(3px)}
+.homeowner-v3 .homeowner-home-v3 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:56px;padding:0 26px;border-radius:var(--sm-pill);border:0;font-weight:700;font-size:16px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .15s var(--sm-ease),background .15s;background:var(--sm-pine);color:#fff;box-shadow:none}
+.homeowner-v3 .homeowner-home-v3 .btn:hover{background:var(--sm-pine-2)}
+.homeowner-v3 .homeowner-home-v3 .btn:active{transform:scale(.97)}
+.homeowner-v3 .homeowner-home-v3 .btn svg{width:18px;height:18px;flex:none;transition:transform .2s var(--sm-ease)}
+.homeowner-v3 .homeowner-home-v3 .btn:hover svg{transform:translateX(3px)}
+.homeowner-v3 .homeowner-home-v3 .btn:disabled{opacity:.6;cursor:not-allowed}
+.homeowner-v3 .homeowner-home-v3 :focus-visible{outline:2.5px solid var(--sm-green);outline-offset:3px;border-radius:8px}
+
+/* ---------- sections ---------- */
+.homeowner-v3 .homeowner-home-v3 .hp-sec{padding-block:56px;background:var(--sm-stone)}
+@media(min-width:900px){.homeowner-v3 .homeowner-home-v3 .hp-sec{padding-block:88px}}
+.homeowner-v3 .homeowner-home-v3 .hp-sec h2{font-size:clamp(32px,4.4vw,52px)}
+.homeowner-v3 .homeowner-home-v3 .hp-example .eyebrow{margin-bottom:18px}
+.homeowner-v3 .homeowner-home-v3 .ex-link{margin-top:0}
+@media(max-width:899px){.homeowner-v3 .homeowner-home-v3 .hp-example{padding-top:28px}}
+.homeowner-v3 .homeowner-home-v3 .hp-how{padding-top:24px}
+.homeowner-v3 .homeowner-home-v3 .hp-sec[id],.homeowner-v3 .homeowner-home-v3 .hero3[id]{scroll-margin-top:84px}
+
+/* ---------- hero: Glow on phone and tablet, Daylight on desktop ---------- */
+.homeowner-v3 .homeowner-home-v3 .top{position:relative;isolation:isolate;overflow:hidden;background:var(--sm-stone)}
+.homeowner-v3 .homeowner-home-v3 .hero3{position:relative;isolation:isolate;overflow:hidden;background:none;padding-block:24px 40px}
 .homeowner-v3 .homeowner-home-v3 .hero3>.wrap{width:100%}
-.homeowner-v3 .homeowner-home-v3 .hero3 .credit{top:10px;bottom:auto}
-.homeowner-v3 .homeowner-home-v3 .hero-copy{padding-top:calc(min(330px,40vh) - 64px);padding-bottom:44px;max-width:500px;position:relative}
-.homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(34px,9.4vw,46px)}
-html[lang=th] .homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(30px,8.4vw,42px)}
-.homeowner-v3 .homeowner-home-v3 .hero3 .lede{margin-top:10px;font-size:17px;color:var(--muted);max-width:30em}
-.homeowner-v3 .homeowner-home-v3 .billcard{margin-top:22px;padding:20px;display:grid;gap:12px;max-width:480px}
-.homeowner-v3 .homeowner-home-v3 .billcard label{margin-bottom:0}
-.homeowner-v3 .homeowner-home-v3 .billcard .range{margin:0}
-.homeowner-v3 .homeowner-home-v3 .billcard .btn{min-height:56px;width:100%}
-.homeowner-v3 .homeowner-home-v3 .trust{flex-wrap:nowrap;gap:18px;margin-top:16px}
-.homeowner-v3 .homeowner-home-v3 .trust span{white-space:nowrap}
-.homeowner-v3 .homeowner-home-v3 .exstack{display:grid;gap:22px}
-.homeowner-v3 .homeowner-home-v3 .exstack>*{grid-area:auto}
-.homeowner-v3 .homeowner-home-v3 .excard{background:var(--pine);color:#fff;border-radius:var(--r-xl);padding:24px;box-shadow:var(--shadow-lift);display:grid;gap:14px;min-width:0}
-.homeowner-v3 .homeowner-home-v3 .excard .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.homeowner-v3 .homeowner-home-v3 .excard .lbl{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lime)}
-html[lang=th] .homeowner-v3 .homeowner-home-v3 .excard .lbl{letter-spacing:0;text-transform:none;font-size:14px}
-.homeowner-v3 .homeowner-home-v3 .ba{display:flex;align-items:flex-end;gap:12px;flex-wrap:nowrap;min-width:0}
-.homeowner-v3 .homeowner-home-v3 .ba .was{font-size:clamp(24px,6.2vw,30px);font-weight:700;color:#FF9C87;text-decoration:line-through;text-decoration-thickness:3px;line-height:1;padding-bottom:.08em}
-.homeowner-v3 .homeowner-home-v3 .ba .now{font-size:clamp(31px,8.2vw,40px);font-weight:700;color:var(--lime);line-height:1}
-.homeowner-v3 .homeowner-home-v3 .exnums{display:grid;gap:14px;align-content:center;min-width:0}
-.homeowner-v3 .homeowner-home-v3 .excard .save{font-weight:600;font-size:16px;margin-top:-4px}
-.homeowner-v3 .homeowner-home-v3 .chartbox{background:#fff;border-radius:var(--r-md);padding:12px 12px 4px}
-.homeowner-v3 .homeowner-home-v3 .chartbox .chart{display:block;width:100%;height:auto}
-.homeowner-v3 .homeowner-home-v3 .sec-h{font-size:clamp(30px,4vw,48px);margin-bottom:26px}
-html[lang=th] .homeowner-v3 .homeowner-home-v3 .sec-h{font-size:clamp(26px,3.4vw,40px)}
-.homeowner-v3 .homeowner-home-v3 .steps3{list-style:none;margin:0;padding:0;display:grid}
-.homeowner-v3 .homeowner-home-v3 .steps3 li{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--line-2)}
-.homeowner-v3 .homeowner-home-v3 .steps3 li:last-child{border-bottom:1px solid var(--line-2)}
-.homeowner-v3 .homeowner-home-v3 .steps3 .n{width:36px;height:36px;border-radius:50%;background:var(--white);display:grid;place-items:center;font-weight:800;flex:none;font-family:var(--font-manrope),sans-serif}
-.homeowner-v3 .homeowner-home-v3 .steps3 h3{font-size:19px}
-.homeowner-v3 .homeowner-home-v3 .trustgrid .sec-h{margin-top:12px;margin-bottom:16px}
-.homeowner-v3 .homeowner-home-v3 .trp{font-size:18px;color:var(--ondark);max-width:30em}
-.homeowner-v3 .homeowner-home-v3 .source-heading{margin-top:30px}
-.homeowner-v3 .homeowner-home-v3 .method-link{margin-top:22px}
-.homeowner-v3 .homeowner-home-v3 .method-link .link{color:#fff}
-.homeowner-v3 .homeowner-home-v3 .compare{align-self:center}
-.homeowner-v3 .homeowner-home-v3 .compare b{color:#fff;white-space:nowrap}
-.homeowner-v3 .homeowner-home-v3 .compare .inc b{color:var(--lime)}
-.homeowner-v3 .homeowner-home-v3 .compare b svg{width:24px;height:24px;stroke-width:3;display:block}
-.homeowner-v3 .homeowner-home-v3 .compare .mark-yes{color:#3ddc84}
-.homeowner-v3 .homeowner-home-v3 .compare .mark-no{color:#ff6b6b}
-.homeowner-v3 .homeowner-home-v3 .faqband+.faq{margin-top:24px}
-@media(max-width:699px){
-  .homeowner-v3 .homeowner-home-v3 .faqband{min-height:200px}
-  .homeowner-v3 .homeowner-home-v3 .faqband::after{background:linear-gradient(0deg,rgba(20,45,38,.82),rgba(20,45,38,.1) 75%)}
-  .homeowner-v3 .homeowner-home-v3 .faqband .inner{padding:22px}
+.homeowner-v3 .homeowner-home-v3 .hero-bg{position:absolute;inset:0;z-index:-1;pointer-events:none;height:auto;background:none}
+.homeowner-v3 .homeowner-home-v3 .hero-bg picture{display:block;position:absolute;inset:0;width:100%;height:100%}
+.homeowner-v3 .homeowner-home-v3 .hero-bg img{display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:66% 50%}
+.homeowner-v3 .homeowner-home-v3 .hero-bg::after{content:"";position:absolute;inset:0}
+.homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(40px,5.8vw,78px)}
+html[lang=th] .homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(34px,5vw,64px)}
+.homeowner-v3 .homeowner-home-v3 .hero3 h1 em{font-style:normal}
+.homeowner-v3 .homeowner-home-v3 .trust{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-size:15px;font-weight:600}
+.homeowner-v3 .homeowner-home-v3 .trust span{display:inline-flex;align-items:center;gap:7px;white-space:normal}
+.homeowner-v3 .homeowner-home-v3 .trust svg{width:17px;height:17px;flex:none;color:var(--sm-green)}
+/* glow: pre-rendered soft circles (no CSS blur, so Safari stays smooth) drifting slowly, plus fine grain */
+.homeowner-v3 .homeowner-home-v3 .hero-glow{position:absolute;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.homeowner-v3 .homeowner-home-v3 .blob{position:absolute;will-change:transform}
+.homeowner-v3 .homeowner-home-v3 .blob::before{content:"";position:absolute;inset:-168px;background:center/100% 100% no-repeat}
+.homeowner-v3 .homeowner-home-v3 .b1::before{background-image:url('/images/installer-glow/glow-narrow-1.png')}
+.homeowner-v3 .homeowner-home-v3 .b2::before{background-image:url('/images/installer-glow/glow-narrow-2.png')}
+.homeowner-v3 .homeowner-home-v3 .b3::before{background-image:url('/images/installer-glow/glow-narrow-3.png')}
+.homeowner-v3 .homeowner-home-v3 .b4::before{background-image:url('/images/installer-glow/glow-narrow-4.png')}
+.homeowner-v3 .homeowner-home-v3 .b1{width:340px;height:340px;right:-120px;top:-110px;animation:hp-drift1 22s ease-in-out infinite alternate}
+.homeowner-v3 .homeowner-home-v3 .b2{width:260px;height:260px;right:10%;top:52%;animation:hp-drift2 26s ease-in-out infinite alternate}
+.homeowner-v3 .homeowner-home-v3 .b3{width:300px;height:300px;left:-140px;bottom:-60px;animation:hp-drift3 24s ease-in-out infinite alternate}
+.homeowner-v3 .homeowner-home-v3 .b4{width:220px;height:220px;left:10%;top:-120px;animation:hp-drift2 19s ease-in-out infinite alternate-reverse}
+@keyframes hp-drift1{to{transform:translate(-120px,90px) scale(1.15)}}
+@keyframes hp-drift2{to{transform:translate(100px,-70px) scale(.88)}}
+@keyframes hp-drift3{to{transform:translate(160px,-50px) scale(1.12)}}
+@keyframes hp-kb{from{transform:scale(1)}to{transform:scale(1.08) translate(-1.5%,-1%)}}
+.homeowner-v3 .homeowner-home-v3 .grain{position:absolute;inset:0;opacity:.22;mix-blend-mode:multiply;background:url('/images/installer-glow/grain.png') 0 0/180px 180px}
+
+/* bill calculator */
+.homeowner-v3 .homeowner-home-v3 .billcard{color:var(--sm-pine);display:grid;gap:12px;padding:20px;border-radius:var(--sm-r-lg);background:var(--sm-white);box-shadow:var(--hp-lift);margin-top:26px;max-width:460px;border:0}
+.homeowner-v3 .homeowner-home-v3 .billcard>*{min-width:0}
+.homeowner-v3 .homeowner-home-v3 .billcard label{font-weight:700;font-size:15px;margin:0}
+.homeowner-v3 .homeowner-home-v3 .money-input{display:flex;align-items:center;gap:8px;min-height:64px;padding:0 18px;border-radius:var(--sm-r-md);background:var(--sm-white);box-shadow:inset 0 0 0 1.5px var(--sm-line)}
+.homeowner-v3 .homeowner-home-v3 .money-input:focus-within{box-shadow:inset 0 0 0 2px var(--sm-pine)}
+.homeowner-v3 .homeowner-home-v3 .money-input>span{font-size:24px;font-weight:700;color:var(--sm-muted)}
+.homeowner-v3 .homeowner-home-v3 .money-input input{flex:1;min-width:0;width:100%;border:0;outline:0;background:none;box-shadow:none;padding:0;font:inherit;font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:inherit}
+.homeowner-v3 .homeowner-home-v3 .money-input small{color:var(--sm-muted);font-size:14px;white-space:nowrap}
+.homeowner-v3 .homeowner-home-v3 .billcard .range{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:none;cursor:pointer;margin:0;padding:0;accent-color:var(--sm-pine)}
+.homeowner-v3 .homeowner-home-v3 .billcard .range::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--sm-pine) var(--fill,15%),var(--sm-line-2) var(--fill,15%))}
+.homeowner-v3 .homeowner-home-v3 .billcard .range::-moz-range-track{height:4px;border-radius:4px;background:var(--sm-line-2)}
+.homeowner-v3 .homeowner-home-v3 .billcard .range::-moz-range-progress{height:4px;border-radius:4px;background:var(--sm-pine)}
+.homeowner-v3 .homeowner-home-v3 .billcard .range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-11px;border-radius:50%;background:var(--sm-white);box-shadow:0 1px 4px rgba(20,45,38,.35),0 0 0 1px rgba(20,45,38,.08)}
+.homeowner-v3 .homeowner-home-v3 .billcard .range::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:var(--sm-white);box-shadow:0 1px 4px rgba(20,45,38,.35)}
+.homeowner-v3 .homeowner-home-v3 .billcard .btn{width:100%}
+.homeowner-v3 .homeowner-home-v3 .form-error{color:var(--sm-danger);font-size:14px;font-weight:600}
+
+@media(max-width:959px){
+  .homeowner-v3 .homeowner-home-v3 .top{--ph:clamp(250px,66vw,380px)}
+  .homeowner-v3 .homeowner-home-v3 .top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(rgba(245,244,239,0),var(--sm-stone));z-index:-1;pointer-events:none}
+  .homeowner-v3 .homeowner-home-v3 .hero3{padding-top:calc(12px + var(--ph) + 22px)}
+  .homeowner-v3 .homeowner-home-v3 .hero-bg{inset:auto var(--gr) auto var(--gl);top:12px;height:var(--ph);border-radius:var(--sm-r-xl);overflow:hidden;box-shadow:var(--hp-lift)}
+  .homeowner-v3 .homeowner-home-v3 .hero3>.credit{top:24px;right:calc(var(--gr) + 12px)}
+  .homeowner-v3 .homeowner-home-v3 .hero3 h1 em{color:var(--sm-green)}
+  .homeowner-v3 .homeowner-home-v3 .billcard{background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 }
+@media(min-width:900px) and (max-width:959px){.homeowner-v3 .homeowner-home-v3 .hero-bg{left:40px;right:40px}.homeowner-v3 .homeowner-home-v3 .hero3>.credit{right:52px}}
+@media(min-width:960px){
+  .homeowner-v3 .homeowner-home-v3 .hero-glow{display:none}
+  .homeowner-v3 .homeowner-home-v3 .hero3{min-height:clamp(620px,calc(100svh - var(--hp-hdr)),880px);display:grid;align-items:center;padding-block:40px 120px}
+  .homeowner-v3 .homeowner-home-v3 .hero-copy{max-width:580px}
+  .homeowner-v3 .homeowner-home-v3 .hero-bg{-webkit-mask-image:linear-gradient(180deg,#000 74%,transparent 100%);mask-image:linear-gradient(180deg,#000 74%,transparent 100%)}
+  .homeowner-v3 .homeowner-home-v3 .hero-bg img{animation:hp-kb 30s ease-in-out infinite alternate}
+  .homeowner-v3 .homeowner-home-v3 .hero-bg::after{background:linear-gradient(90deg,rgba(15,33,27,.86) 0%,rgba(15,33,27,.62) 34%,rgba(15,33,27,0) 62%)}
+  .homeowner-v3 .homeowner-home-v3 .hero3 h1{color:#fff}.homeowner-v3 .homeowner-home-v3 .hero3 h1 em{color:var(--sm-lime)}
+  .homeowner-v3 .homeowner-home-v3 .billcard{background:rgba(245,244,239,.8);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+  .homeowner-v3 .homeowner-home-v3 .billcard .money-input{background:rgba(255,255,255,.72)}
+  .homeowner-v3 .homeowner-home-v3 .hero3 .trust{color:#fff}.homeowner-v3 .homeowner-home-v3 .hero3 .trust svg{color:var(--sm-lime)}
+}
+
+/* ---------- example: dark card, numbers count down, white chart draws itself ---------- */
+.homeowner-v3 .homeowner-home-v3 .excard{display:grid;gap:18px;border-radius:var(--sm-r-xl);padding:20px;overflow:hidden;background:linear-gradient(160deg,var(--sm-pine-2),var(--sm-night));color:#fff;box-shadow:var(--hp-lift);min-width:0}
+@media(min-width:960px){.homeowner-v3 .homeowner-home-v3 .excard{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:28px;padding:28px;align-items:center}}
+.homeowner-v3 .homeowner-home-v3 .exnums{display:grid;gap:10px;align-content:start;min-width:0}
+.homeowner-v3 .homeowner-home-v3 .excard .lbl{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sm-lime)}
+html[lang=th] .homeowner-v3 .homeowner-home-v3 .excard .lbl{letter-spacing:.02em;text-transform:none;font-size:14px}
+.homeowner-v3 .homeowner-home-v3 .ba{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.homeowner-v3 .homeowner-home-v3 .ba .was{font-size:clamp(26px,3.2vw,40px);font-weight:700;letter-spacing:-.03em;text-decoration-thickness:3px;color:var(--sm-coral)}
+.homeowner-v3 .homeowner-home-v3 .ba .now{font-size:clamp(36px,4.6vw,58px);font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--sm-lime)}
+.homeowner-v3 .homeowner-home-v3 .excard .save{font-size:18px;font-weight:700}
+.homeowner-v3 .homeowner-home-v3 .rstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-radius:var(--sm-r-md);overflow:hidden;margin-top:8px;background:rgba(255,255,255,.06);padding:0;gap:0}
+.homeowner-v3 .homeowner-home-v3 .rstats>div{padding:14px;display:grid;gap:2px;min-width:0;background:none;border:0}
+.homeowner-v3 .homeowner-home-v3 .rstats>div+div{box-shadow:-1px 0 0 rgba(255,255,255,.1)}
+.homeowner-v3 .homeowner-home-v3 .rstats b{font-size:clamp(17px,2vw,24px);letter-spacing:-.03em;line-height:1.15;white-space:nowrap;color:#fff}
+.homeowner-v3 .homeowner-home-v3 .rstats span{font-size:12.5px;color:var(--sm-ondark)}
+.homeowner-v3 .homeowner-home-v3 .exc{min-width:0}
+
+/* chart */
+.homeowner-v3 .homeowner-home-v3 .chartbox{margin:0;border-radius:var(--sm-r-lg);padding:14px 12px 10px;background:var(--sm-white);color:var(--sm-pine)}
+.homeowner-v3 .homeowner-home-v3 .chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.homeowner-v3 .homeowner-home-v3 .chartbox .g{stroke:var(--sm-line);stroke-width:1}
+.homeowner-v3 .homeowner-home-v3 .chartbox .ax{font:500 12px var(--sm-font);fill:var(--sm-muted)}
+.homeowner-v3 .homeowner-home-v3 .chartbox .wo{fill:none;stroke:#9AA59D;stroke-width:3;stroke-dasharray:9 8}
+.homeowner-v3 .homeowner-home-v3 .chartbox .wi{fill:none;stroke:var(--sm-pine);stroke-width:3.5;stroke-linejoin:round}
+.homeowner-v3 .homeowner-home-v3 .chartbox .dv{stroke:var(--sm-pine);stroke-width:1.5;stroke-dasharray:3 4}
+.homeowner-v3 .homeowner-home-v3 .chartbox .cross{fill:var(--sm-lime);stroke:var(--sm-pine);stroke-width:3}
+.homeowner-v3 .homeowner-home-v3 .chartbox .lbl{font:700 14px var(--sm-font);fill:var(--sm-pine);color:var(--sm-pine);letter-spacing:0;text-transform:none}
+.homeowner-v3 .homeowner-home-v3 .chartbox .gap{stroke-width:4}
+.homeowner-v3 .homeowner-home-v3 .chartbox .sv{font:800 15px var(--sm-font)}
+.homeowner-v3 .homeowner-home-v3 .legend{display:flex;gap:18px;justify-content:flex-end;font-size:12.5px;color:var(--sm-muted);padding:4px 6px 0}
+.homeowner-v3 .homeowner-home-v3 .legend span{display:inline-flex;align-items:center;gap:7px}
+.homeowner-v3 .homeowner-home-v3 .legend span::before{content:"";width:20px;height:0;border-top:3px solid var(--sm-pine)}
+.homeowner-v3 .homeowner-home-v3 .legend .lw::before{border-top:3px dashed #9AA59D}
+@media(max-width:600px){.homeowner-v3 .homeowner-home-v3 .chartbox{padding:12px 8px 8px}.homeowner-v3 .homeowner-home-v3 .chartbox .ax{font-size:19px}.homeowner-v3 .homeowner-home-v3 .chartbox .lbl,.homeowner-v3 .homeowner-home-v3 .chartbox .sv{font-size:22px}.homeowner-v3 .homeowner-home-v3 .legend{font-size:12px;gap:14px}}
+/* reveal: the before-state is set with transitions off; the crossing pops, labels fade and the saving bar grows after the lines draw.
+   transform-origin is set inline in SVG user units, so no transform-box is needed (Safari-safe). */
+.homeowner-v3 .homeowner-home-v3 [data-settle],.homeowner-v3 .homeowner-home-v3 [data-settle] *,.homeowner-v3 .homeowner-home-v3 [data-settle] *::before,.homeowner-v3 .homeowner-home-v3 [data-settle] *::after{transition:none!important}
+.homeowner-v3 .homeowner-home-v3 .chartbox .pop{transition:transform .5s var(--hp-spring) 1s,opacity .3s 1s}
+.homeowner-v3 .homeowner-home-v3 .chartbox .grow{transition:transform .6s var(--sm-ease) 1.5s}
+.homeowner-v3 .homeowner-home-v3 .chartbox .fade{transition:opacity .5s 1.2s}
+.homeowner-v3 .homeowner-home-v3 .chartbox .dv{transition:opacity .4s 1s}
+.homeowner-v3 .homeowner-home-v3 .chartbox[data-reveal=pre] .pop{transform:scale(.2);opacity:0}
+.homeowner-v3 .homeowner-home-v3 .chartbox[data-reveal=pre] .grow{transform:scaleY(0)}
+.homeowner-v3 .homeowner-home-v3 .chartbox[data-reveal=pre] .fade,.homeowner-v3 .homeowner-home-v3 .chartbox[data-reveal=pre] .dv{opacity:0}
+
+/* ---------- How it works: the installer page's sun path ---------- */
+.homeowner-v3 .homeowner-home-v3 .path{position:relative;margin-top:28px}
+.homeowner-v3 .homeowner-home-v3 .path>svg{display:none}
+.homeowner-v3 .homeowner-home-v3 .path ol{list-style:none;margin:0;padding:0 0 0 54px;display:grid;gap:34px;position:relative}
+.homeowner-v3 .homeowner-home-v3 .path ol::before{content:"";position:absolute;left:19px;top:10px;bottom:10px;width:2px;background:repeating-linear-gradient(180deg,var(--sm-line-2) 0 6px,transparent 6px 12px)}
+.homeowner-v3 .homeowner-home-v3 .path li{position:relative;display:grid;gap:6px}
+.homeowner-v3 .homeowner-home-v3 .path .n{position:absolute;z-index:3;left:-54px;top:-2px;width:40px;height:40px;border-radius:50%;background:var(--sm-white);box-shadow:inset 0 0 0 2px var(--sm-pine);display:grid;place-items:center;font-weight:800;font-size:15px;transition:background .4s,box-shadow .4s}
+.homeowner-v3 .homeowner-home-v3 .path h3{font-size:clamp(21px,2.2vw,28px);padding-top:4px}
+.homeowner-v3 .homeowner-home-v3 .path li.earn h3{color:var(--sm-green)}
+.homeowner-v3 .homeowner-home-v3 .path li.lit .n{background:var(--sm-gold);box-shadow:none}
+.homeowner-v3 .homeowner-home-v3 .sun{position:absolute;left:8px;top:0;width:24px;height:24px;margin-top:-12px;border-radius:50%;background:var(--sm-gold);box-shadow:0 0 0 7px rgba(226,166,43,.22),0 0 26px 6px rgba(226,166,43,.55);z-index:2;pointer-events:none;will-change:transform}
 @media(min-width:860px){
-  .homeowner-v3 .homeowner-home-v3 .steps3{grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
-  .homeowner-v3 .homeowner-home-v3 .steps3 li{flex-direction:column;align-items:flex-start;gap:14px;border:0;padding:0}
-  .homeowner-v3 .homeowner-home-v3 .steps3 li:last-child{border:0}
-  .homeowner-v3 .homeowner-home-v3 .steps3 h3{font-size:22px}
+  .homeowner-v3 .homeowner-home-v3 .path{height:330px;margin-top:8px}
+  /* viewBox 0 0 1000 240, stretched to the width; circle centres sit exactly on the arc at 12% / 50% / 88% */
+  .homeowner-v3 .homeowner-home-v3 .path>svg{display:block;position:absolute;inset:0;width:100%;height:240px;overflow:visible}
+  .homeowner-v3 .homeowner-home-v3 .path ol{padding:0;position:absolute;inset:0;display:block}
+  .homeowner-v3 .homeowner-home-v3 .path ol::before{display:none}
+  .homeowner-v3 .homeowner-home-v3 .path li{position:absolute;z-index:3;width:30%;transform:translateX(-50%);text-align:center;justify-items:center}
+  .homeowner-v3 .homeowner-home-v3 .path li:nth-child(1){left:12%;top:198px}.homeowner-v3 .homeowner-home-v3 .path li:nth-child(2){left:50%;top:76px}.homeowner-v3 .homeowner-home-v3 .path li:nth-child(3){left:88%;top:198px}
+  .homeowner-v3 .homeowner-home-v3 .path .n{position:relative;left:auto;top:auto;margin-bottom:6px}
+  .homeowner-v3 .homeowner-home-v3 .sun{left:0;top:0;margin:-12px 0 0 -12px}
 }
-@media(min-width:900px){
-  .homeowner-v3 .homeowner-home-v3 .hero3{min-height:min(700px,calc(100vh - 104px));display:grid;align-items:center}
-  .homeowner-v3 .homeowner-home-v3 .hero-bg{left:0;bottom:0;height:auto}
-  .homeowner-v3 .homeowner-home-v3 .hero-bg img{object-position:right 40%}
-  .homeowner-v3 .homeowner-home-v3 .hero3.dark .hero-bg::after{background:linear-gradient(90deg,rgba(20,45,38,.8) 0%,rgba(20,45,38,.5) 34%,rgba(20,45,38,0) 60%)}
-  .homeowner-v3 .homeowner-home-v3 .hero-copy{padding-block:56px 72px}
-  .homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(50px,5.2vw,68px);color:#fff}
-  html[lang=th] .homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(42px,4.6vw,58px)}
-  .homeowner-v3 .homeowner-home-v3 .hero3 .lede{font-size:19px;margin-top:16px;color:#E4ECE6}
-  .homeowner-v3 .homeowner-home-v3 .hero3 .trust{color:#fff}
-  .homeowner-v3 .homeowner-home-v3 .hero3 .trust svg{color:var(--lime)}
-  .homeowner-v3 .homeowner-home-v3 .hero3 .credit{background:rgba(20,45,38,.45)}
-  .homeowner-v3 .homeowner-home-v3 .hero3 .billcard{background:rgba(255,255,255,.68);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 18px 40px -20px rgba(20,45,38,.35);border:1px solid rgba(255,255,255,.45)}
-  .homeowner-v3 .homeowner-home-v3 .hero3 .billcard .money-input{background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6)}
-  .homeowner-v3 .homeowner-home-v3 .hero3 .billcard .money-input:focus-within{background:#fff}
-  .homeowner-v3 .homeowner-home-v3 .excard{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px;padding:32px;align-items:center}
-  .homeowner-v3 .homeowner-home-v3 .excard .chartbox{padding:16px 16px 6px}
-}
-@media(max-width:899px){
-  .homeowner-v3 .homeowner-home-v3 .hero-copy{display:flex;flex-direction:column}
-  .homeowner-v3 .homeowner-home-v3 .hero-copy h1{order:1}
-  .homeowner-v3 .homeowner-home-v3 .hero-copy .billcard{order:2;margin-top:18px}
-  .homeowner-v3 .homeowner-home-v3 .hero-copy .lede{order:3;margin-top:16px}
-  .homeowner-v3 .homeowner-home-v3 .hero-copy .trust{order:4;margin-top:12px}
+.homeowner-v3 .homeowner-home-v3 .sun{top:10px}
+@media(min-width:860px){.homeowner-v3 .homeowner-home-v3 .sun{left:12%;top:218px}}
+
+/* ---------- why trust: night panel with a lime and a gold glow; pill rows tick in ---------- */
+.homeowner-v3 .homeowner-home-v3 .trustpanel{display:grid;gap:28px;border-radius:var(--sm-r-xl);padding:clamp(24px,4vw,56px);position:relative;overflow:hidden;isolation:isolate;background:var(--sm-night);color:#fff;box-shadow:var(--hp-lift)}
+.homeowner-v3 .homeowner-home-v3 .trustpanel::before{content:"";position:absolute;width:520px;height:520px;right:-160px;top:-220px;border-radius:50%;background:radial-gradient(closest-side,rgba(214,239,145,.28),transparent);z-index:-1}
+.homeowner-v3 .homeowner-home-v3 .trustpanel::after{content:"";position:absolute;width:420px;height:420px;left:-160px;bottom:-240px;border-radius:50%;background:radial-gradient(closest-side,rgba(226,166,43,.22),transparent);z-index:-1}
+@media(min-width:960px){.homeowner-v3 .homeowner-home-v3 .trustpanel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}}
+.homeowner-v3 .homeowner-home-v3 .trustpanel .eyebrow{color:var(--sm-lime)}
+.homeowner-v3 .homeowner-home-v3 .trustpanel h2{color:#fff}
+.homeowner-v3 .homeowner-home-v3 .trp{margin-top:0;max-width:30em;font-size:17px;color:var(--sm-ondark)}
+.homeowner-v3 .homeowner-home-v3 .sources{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.homeowner-v3 .homeowner-home-v3 .hp-chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:var(--sm-pill);font-size:14px;font-weight:600;text-decoration:none;background:rgba(214,239,145,.1);color:var(--sm-lime)}
+.homeowner-v3 .homeowner-home-v3 .hp-chip:hover{background:rgba(214,239,145,.18)}
+.homeowner-v3 .homeowner-home-v3 .hp-chip svg{width:16px;height:16px;flex:none}
+.homeowner-v3 .homeowner-home-v3 .method-link{margin-top:0}
+.homeowner-v3 .homeowner-home-v3 .trustpanel .link{color:#fff}
+.homeowner-v3 .homeowner-home-v3 .rows{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.homeowner-v3 .homeowner-home-v3 .rows li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 12px 12px 22px;border-radius:var(--sm-pill);background:rgba(255,255,255,.06);font-size:clamp(15.5px,1.5vw,18px);font-weight:600}
+.homeowner-v3 .homeowner-home-v3 .rows b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;flex:none;transition:transform .45s var(--hp-spring)}
+.homeowner-v3 .homeowner-home-v3 .rows b svg{width:17px;height:17px;stroke-width:2.6}
+.homeowner-v3 .homeowner-home-v3 .rows .yes b{background:var(--sm-lime);color:var(--sm-pine)}
+.homeowner-v3 .homeowner-home-v3 .rows .no b{background:rgba(232,131,107,.2);color:var(--sm-coral)}
+.homeowner-v3 .homeowner-home-v3 .rows li:nth-child(2) b{transition-delay:.12s}.homeowner-v3 .homeowner-home-v3 .rows li:nth-child(3) b{transition-delay:.24s}.homeowner-v3 .homeowner-home-v3 .rows li:nth-child(4) b{transition-delay:.36s}.homeowner-v3 .homeowner-home-v3 .rows li:nth-child(5) b{transition-delay:.48s}
+.homeowner-v3 .homeowner-home-v3 .rows[data-reveal=pre] b{transform:scale(0)}
+
+/* ---------- questions ---------- */
+.homeowner-v3 .homeowner-home-v3 .hp-band{position:relative;overflow:hidden;min-height:240px;display:grid;align-items:end;isolation:isolate;border-radius:var(--sm-r-xl)}
+@media(min-width:900px){.homeowner-v3 .homeowner-home-v3 .hp-band{min-height:320px}}
+.homeowner-v3 .homeowner-home-v3 .hp-band img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;z-index:-2;animation:hp-kb 24s ease-in-out infinite alternate}
+.homeowner-v3 .homeowner-home-v3 .hp-band::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(20,45,38,.82),rgba(20,45,38,.05) 70%);z-index:-1}
+.homeowner-v3 .homeowner-home-v3 .hp-band h2{color:#fff;padding:24px;font-size:clamp(30px,4.4vw,52px)}
+.homeowner-v3 .homeowner-home-v3 .hp-band .credit{top:12px;right:12px}
+.homeowner-v3 .homeowner-home-v3 .faq{display:grid;gap:10px;margin-top:20px;max-width:none}
+.homeowner-v3 .homeowner-home-v3 .faq details{background:var(--sm-white);border:0;border-radius:var(--sm-r-md);padding:0 18px;box-shadow:var(--sm-shadow)}
+.homeowner-v3 .homeowner-home-v3 .faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:19px 2px;font-size:clamp(16.5px,1.6vw,19px);font-weight:700;letter-spacing:-.015em}
+.homeowner-v3 .homeowner-home-v3 .faq summary::-webkit-details-marker{display:none}
+.homeowner-v3 .homeowner-home-v3 .faq summary::after{content:none}
+.homeowner-v3 .homeowner-home-v3 .faq .pm{width:28px;height:28px;flex:none;border-radius:50%;background:var(--sm-sage);position:relative;transition:transform .3s var(--sm-ease),background .2s}
+.homeowner-v3 .homeowner-home-v3 .faq .pm::before,.homeowner-v3 .homeowner-home-v3 .faq .pm::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:2px;margin:-1px 0 0 -5.5px;background:var(--sm-pine);border-radius:2px}
+.homeowner-v3 .homeowner-home-v3 .faq .pm::after{transform:rotate(90deg);transition:transform .3s var(--sm-ease)}
+.homeowner-v3 .homeowner-home-v3 .faq details[open] .pm{transform:rotate(180deg);background:var(--sm-lime)}
+.homeowner-v3 .homeowner-home-v3 .faq details[open] .pm::after{transform:rotate(0)}
+.homeowner-v3 .homeowner-home-v3 .faq details p{padding:0 2px 20px;color:var(--sm-muted);max-width:42em}
+.homeowner-v3 .homeowner-home-v3 .faq details[open] p{animation:hp-drop .35s var(--sm-ease)}
+@keyframes hp-drop{from{transform:translateY(-6px)}to{transform:none}}
+
+/* ---------- final call ---------- */
+.homeowner-v3 .homeowner-home-v3 .cta-final{display:grid;justify-items:center;text-align:center;gap:22px}
+.homeowner-v3 .homeowner-home-v3 .hp-final h2{font-size:clamp(30px,4vw,48px);max-width:none}
+
+/* still version: the live site follows prefers-reduced-motion (the reveals also skip arming in script) */
+@media(prefers-reduced-motion:reduce){
+  .homeowner-v3 .homeowner-home-v3 *,.homeowner-v3 .homeowner-home-v3 *::before,.homeowner-v3 .homeowner-home-v3 *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
 }
