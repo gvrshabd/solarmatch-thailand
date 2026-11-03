@@ -12,6 +12,16 @@ export function sunPathLitSteps(progress: number): boolean[] {
   return [.02, .5, .98].map(threshold => progress >= threshold);
 }
 
+/** Vertical centres of the first and last step circles, relative to the path box (the narrow, vertical layout). */
+function sunPathLineEnds(box: HTMLElement, list: HTMLElement): [number, number] {
+  const circles = list.querySelectorAll<HTMLElement>('.n');
+  const first = circles[0], last = circles[circles.length - 1];
+  if (!first || !last) return [10, Math.max(10, list.offsetHeight - 10)];
+  const top = box.getBoundingClientRect().top;
+  const centre = (circle: HTMLElement) => { const rect = circle.getBoundingClientRect(); return rect.top - top + rect.height / 2; };
+  return [centre(first), centre(last)];
+}
+
 /**
  * The "How it works" sun path, shared by the installer landing and the homeowner home page.
  * `note` is an optional element rendered under step 2 (only the installer page uses it).
@@ -38,7 +48,12 @@ export function SunPath({ titles, note }: { titles: readonly [string, string, st
       if (wide.matches) {
         const point = arc.getPointAtLength(progress * length);
         sun.style.transform = `translate(${point.x * box.clientWidth / 1000}px,${point.y}px)`;
-      } else sun.style.transform = `translate(0,${10 + progress * (list.offsetHeight - 20)}px)`;
+      } else {
+        // Ride the dotted line from the centre of circle 1 to the centre of circle 3, so the sun stops on the last
+        // circle even when a step title wraps onto two lines.
+        const [start, end] = sunPathLineEnds(box, list);
+        sun.style.transform = `translate(0,${start + progress * (end - start)}px)`;
+      }
       done.style.strokeDashoffset = String(1 - progress);
       const lit = sunPathLitSteps(progress);
       Array.from(list.children).forEach((step, index) => step.classList.toggle('lit', lit[index]));

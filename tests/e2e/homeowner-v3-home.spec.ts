@@ -90,6 +90,19 @@ for(const locale of ['en','th'] as const){
     }
     await expect(page.locator('#how .path p')).toHaveCount(0);
   });
+  test(`${locale}: on phones the sun starts on circle 1 and stops on circle 3`,async({page})=>{
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.setViewportSize({width:390,height:844});
+    await page.goto(route);
+    await expect(page.locator('#hero-monthly-bill')).toBeEnabled();
+    const centre=async(selector:string)=>{const box=(await page.locator(selector).boundingBox())!;return [box.x+box.width/2,box.y+box.height/2];};
+    const scrollPath=(fraction:number)=>page.evaluate(f=>{const top=document.querySelector('#how .path')!.getBoundingClientRect().top+window.scrollY;window.scrollTo({top:top-innerHeight*f,behavior:'instant'});},fraction);
+    for(const [fraction,circle,lit] of [[.85,0,0],[.2,2,3]] as const){
+      await scrollPath(fraction);
+      await expect(page.locator('#how .path li.lit')).toHaveCount(lit);
+      await expect.poll(async()=>{const [sx,sy]=await centre('#how .sun'),[cx,cy]=await centre(`#how .path li:nth-child(${circle+1}) .n`);return Math.hypot(sx-cx,sy-cy);}).toBeLessThanOrEqual(2);
+    }
+  });
   test(`${locale}: trust marks and questions are accessible with all questions closed and one open`,async({page})=>{
     await page.setViewportSize({width:390,height:844});
     await page.goto(route);
