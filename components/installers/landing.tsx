@@ -2,10 +2,10 @@
 
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import { ArrowRight, Copy, Phone } from 'lucide-react';
-import { designText } from '@/config/design-v2-copy';
+import { ArrowRight } from 'lucide-react';
 import type { InstallerPublicConfig } from '@/lib/installer/public-config';
-import { portalMoney } from '@/lib/installer/presentation';
+import { LandingExamples } from './landing-examples';
+import { LandingSunPath } from './landing-sun-path';
 import { signalLandingFaq, signalLandingText } from './signal-landing-copy';
 
 export function SignalBrand({ en }: { en: boolean }) {
@@ -33,61 +33,40 @@ export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage 
   setLanguage: (english: boolean) => void;
 }) {
   const t = signalLandingText(en);
-  const c = config.commercial;
   const available = config.accountsAvailable;
   const canApply = available && config.registrationAvailable === true;
-  const price = c ? portalMoney(c.creditValueMinor * c.sharedCredits, 'THB', en, (c.creditValueMinor * c.sharedCredits) % 100 === 0) : '—';
-  const faq = signalLandingFaq(en, c);
-  const name = en ? 'Arun' : 'อรุณ';
-  const exampleFacts = [
-    [portalMoney(720000, 'THB', en, true), t.fBill],
-    ['6', t.fAc],
-    [en ? 'Owner' : 'เจ้าของ', t.fOwn],
-    [en ? 'Within 3 months' : 'ภายใน 3 เดือน', t.fWhen],
-  ];
+  const faq = signalLandingFaq(en, config.commercial);
   return <div className="signal landing" lang={en ? 'en' : 'th'}>
-    <a className="sr skip" href="#installer-landing-main">{en ? 'Skip to content' : 'ข้ามไปเนื้อหา'}</a>
-    <header className="a-hdr"><div className="wrap">
+    <a className="sr skip" href="#installer-landing-main">{t.skip}</a>
+    <header className="hdr"><div className="wrap">
       <SignalBrand en={en}/>
-      <nav className="a-nav" aria-label={t.navMain}><a href="#how">{t.navHow}</a><a href="#price">{t.navPrice}</a><a href="#faq">{t.navFaq}</a></nav>
+      <nav className="hnav" aria-label={t.navMain}><a href="#how">{t.navHow}</a><a href="#faq">{t.navFaq}</a></nav>
       <div className="r">
-        <div className="lang"><button type="button" aria-label="Switch to Thai" aria-pressed={!en} onClick={() => setLanguage(false)}>ไทย</button><button type="button" aria-label="Switch to English" aria-pressed={en} onClick={() => setLanguage(true)}>EN</button></div>
-        <button type="button" className="btn ghost sm" disabled={!available} onClick={signIn}>{t.signIn}</button>
+        <div className="lang" role="group" aria-label={en ? 'Language' : 'ภาษา'}><button type="button" lang="th" aria-label="Switch to Thai" aria-pressed={!en} onClick={() => setLanguage(false)}>ไทย</button><button type="button" lang="en" aria-label="Switch to English" aria-pressed={en} onClick={() => setLanguage(true)}>EN</button></div>
+        <button type="button" className="btn ghost sm signin" disabled={!available} onClick={signIn}>{t.signIn}</button>
         <button type="button" className="btn primary sm" disabled={!canApply} onClick={apply}>{canApply ? t.apply : t.unavailable}</button>
       </div>
     </div></header>
     <main id="installer-landing-main" tabIndex={-1}>
-      <section className={'a-hero' + (auth ? ' authing' : '')}><div className="wrap">
-        <div className="copy"><p className="eyebrow">{t.eyebrow}</p><h1>{designText(en ? 'en' : 'th').iH1}</h1><p className="lede">{t.lede}</p><div className="btns">
-          <button type="button" className="btn primary lg" disabled={!canApply} onClick={apply}>{canApply ? t.applyLong : t.unavailable}<ArrowRight className="i" aria-hidden="true"/></button>
-          <button type="button" className="btn ghost lg" disabled={!available} onClick={signIn}>{t.signIn}</button>
-        </div></div>
-        {auth || <div className="stack" role="group" aria-label={t.exLabel}>
-          <div className="notif"><div className="nt"><span className="live" aria-hidden="true"/><b>{t.exNew}</b><span>{t.exNow}</span></div>
-            <div className="nb"><span className="av" aria-hidden="true">{name[0]}</span><div><b>{name}</b><small>{en ? 'Prawet, Bangkok' : 'ประเวศ, กรุงเทพมหานคร'}</small></div></div>
-            <div className="facts4 mini">{exampleFacts.map(([value, label]) => <div key={label}><b>{value}</b><span>{label}</span></div>)}</div>
-            <div className="na"><span className="btn primary"><Phone className="i" aria-hidden="true"/>{en ? `Call ${name}` : `โทรหา${name}`}</span><span className="btn soft"><Copy className="i" aria-hidden="true"/>{t.copy}</span></div>
-          </div><span className="ex-tag">{t.exTag}</span>
-        </div>}
-      </div></section>
-      <section className="a-facts" id="price" aria-label={t.navPrice}><div className="wrap"><div className="fgrid">
-        <div><b>{price}</b><span>{t.fPrice}</span></div>
-        <div><b>{c ? c.recipientLimit : '—'}</b><span>{t.fCos}</span></div>
-        <div><b>{c ? c.trialDeliveries : '—'}</b><span>{t.fFree}</span></div>
-        <div><b>{c ? `${c.claimDays} ${en ? 'days' : 'วัน'}` : '—'}</b><span>{t.fClaim}</span></div>
-      </div><p className="note">{t.fNote}</p></div></section>
-      <section className="a-how" id="how"><div className="wrap"><p className="eyebrow">{t.howEyebrow}</p><h2>{t.howH}</h2><ol className="tl">
-        {[[t.s1t, t.s1p], [t.s2t, t.s2p], [t.s3t, t.s3p]].map(([heading, text], i) => <li key={heading}><span className="n" aria-hidden="true">{i + 1}</span><h3>{heading}</h3><p>{text}</p></li>)}
-      </ol></div></section>
-      <section className="a-faq" id="faq"><div className="wrap"><div className="band">
-        <Image src="/images/design-v2/palms-roof.jpg" alt={t.photoAlt} width={1600} height={1200} loading="eager"/>
-        <span className="credit">Photo: Kindel Media / Pexels</span><h2>{t.faqH}</h2>
-      </div><div className="qas">{faq.map(([question, answer]) => <details className="qa" key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
+      <div className="top">
+        <div className="glow" aria-hidden="true"><span className="blob b1"/><span className="blob b2"/><span className="blob b3"/><span className="blob b4"/><span className="grain"/></div>
+        <section className={'hero' + (auth ? ' authing' : '')}><div className="wrap">
+          <div className="copy"><p className="eyebrow">{t.eyebrow}</p><h1>{t.h1a}<em>{t.h1b}</em></h1><div className="btns">
+            <button type="button" className="btn primary lg" disabled={!canApply} onClick={apply}>{canApply ? t.applyLong : t.unavailable}<ArrowRight className="i arr" aria-hidden="true"/></button>
+            <button type="button" className="btn ghost lg" disabled={!available} onClick={signIn}>{t.signIn}</button>
+          </div></div>
+          {auth || <LandingExamples en={en}/>}
+        </div></section>
+      </div>
+      <section className="how" id="how"><div className="wrap"><h2>{t.howH}</h2><LandingSunPath en={en}/></div></section>
+      <section className="faq" id="faq"><div className="band">
+        <Image src="/images/design-v2/roof-tile.jpg" alt={t.photoAlt} width={1200} height={880} loading="eager"/>
+        <span className="credit">Photo: Kindel Media / Pexels</span><div className="wrap"><h2>{t.faqH}</h2></div>
+      </div><div className="wrap"><div className="qas">{faq.map(([question, answer]) => <details className="qa" key={question}><summary>{question}<span className="pm" aria-hidden="true"/></summary><p>{answer}</p></details>)}</div></div></section>
     </main>
     <footer className="foot"><div className="wrap">
-      <div className="fb"><SignalBrand en={en}/><p>{t.footTag}</p></div>
-      <div><h2 className="h4">{t.footInst}</h2><a href="#how">{t.navHow}</a><a href="#price">{t.navPrice}</a><button type="button" className="tlink" disabled={!available} onClick={signIn}>{t.signIn}</button></div>
-      <div><h2 className="h4">SolarMatch</h2><a href={en ? '/en' : '/'}>{t.homeSite}</a><a href={en ? '/en/privacy' : '/privacy'}>{t.privacy}</a><a href={en ? '/en/terms' : '/terms'}>{t.terms}</a></div>
+      <SignalBrand en={en}/>
+      <nav aria-label={t.footer}><a href="#how">{t.navHow}</a><a href="#faq">{t.navFaq}</a><button type="button" className="tlink" disabled={!available} onClick={signIn}>{t.signIn}</button><a href={en ? '/en' : '/'}>{t.homeSite}</a><a href={en ? '/en/privacy' : '/privacy'}>{t.privacy}</a><a href={en ? '/en/terms' : '/terms'}>{t.terms}</a></nav>
       <p className="fine">{t.footFine}</p>
     </div></footer>
   </div>;

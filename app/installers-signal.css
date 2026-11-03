@@ -107,16 +107,6 @@
 .signal .stmt b{display:block;font-size:15px}.signal .stmt small{color:var(--sm-muted);font-size:13px}
 .signal .amt{font-weight:800;font-variant-numeric:tabular-nums}.signal .amt.plus{color:var(--sm-green)}
 
-.signal .ex-tag{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6E4C0E;background:var(--sm-gold-soft);padding:3px 9px;border-radius:6px}
-.signal .credit{position:absolute;right:12px;top:12px;z-index:2;font-size:10.5px;color:rgba(255,255,255,.9);background:rgba(20,45,38,.4);padding:3px 8px;border-radius:var(--sm-pill)}
-.signal .qa{border-top:1px solid var(--sm-line-2)}
-.signal .qa:last-child{border-bottom:1px solid var(--sm-line-2)}
-.signal .qa summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:19px 2px;font-size:17px;font-weight:700;letter-spacing:-.015em}
-.signal .qa summary::-webkit-details-marker{display:none}
-.signal .qa summary::after{content:"";width:11px;height:11px;flex:none;border-right:2px solid var(--sm-muted);border-bottom:2px solid var(--sm-muted);transform:rotate(45deg) translate(-3px,-3px);transition:transform .25s var(--sm-ease)}
-.signal .qa[open] summary::after{transform:rotate(225deg) translate(-3px,-3px)}
-.signal .qa p{padding:0 2px 20px;color:var(--sm-muted);max-width:44em}
-
 .signal .empty{color:var(--sm-muted);font-size:14px;padding:18px 4px}
 .signal .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--sm-pine);color:#fff;padding:12px 18px;border-radius:var(--sm-pill);font-weight:600;font-size:14.5px;opacity:0;pointer-events:none;transition:all .3s var(--sm-ease);z-index:90;max-width:calc(100% - 32px);box-shadow:var(--sm-shadow)}
 
@@ -131,67 +121,6 @@
 @media(min-width:1000px){.signal .tabbar{display:none}}
 .signal.portal main{padding-bottom:96px}
 @media(min-width:1000px){.signal.portal main{padding-bottom:48px}}
-.signal .foot{background:var(--sm-pine);color:var(--sm-ondark);padding-block:44px 36px;font-size:14px}
-.signal .foot .wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px 16px}
-.signal .foot .fb{grid-column:1/-1}.signal .foot .fb p{margin-top:12px;max-width:26em}
-.signal .foot .brand{color:#fff}.signal .foot .brand small{color:var(--sm-ondark)}
-.signal .foot .h4{color:#fff;font-size:14px;letter-spacing:0;margin-bottom:8px}
-.signal .foot a{display:block;text-decoration:none;padding:4px 0}.signal .foot a:hover{color:#fff}
-.signal .foot .fine{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.12);padding-top:18px;font-size:12.5px}
-@media(min-width:860px){.signal .foot .wrap{grid-template-columns:2fr 1fr 1fr}.signal .foot .fb{grid-column:auto}}
-
-/* ===================== A · SIGNAL ===================== */
-.signal .a-hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(245,244,239,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--sm-line)}
-.signal .a-hdr .wrap{display:flex;align-items:center;gap:20px;min-height:66px}
-.signal .a-nav{display:none;gap:4px}
-.signal .a-nav a{padding:8px 14px;border-radius:var(--sm-pill);text-decoration:none;font-size:14.5px;font-weight:600;color:var(--sm-muted)}.signal .a-nav a:hover{background:var(--sm-sage);color:var(--sm-pine)}
-@media(min-width:900px){.signal .a-nav{display:flex}}
-.signal .a-hdr .r{margin-left:auto;display:flex;gap:8px}
-@media(max-width:420px){.signal .a-hdr .btn.ghost{display:none}}
-.signal .a-hero{background:radial-gradient(60% 70% at 85% 30%,rgba(226,166,43,.16),rgba(226,166,43,0) 70%),var(--sm-stone);padding-block:32px 48px;overflow:hidden}
-.signal .a-hero .wrap{display:grid;gap:30px;align-items:center}
-@media(min-width:960px){.signal .a-hero{padding-block:72px 96px}.signal .a-hero .wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:64px}}
-.signal .a-hero h1{font-size:clamp(38px,6vw,68px);margin-top:14px}
-.signal .a-hero .lede{font-size:clamp(17px,1.5vw,19px);color:var(--sm-muted);margin-top:16px;max-width:30em}
-.signal .a-hero .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
-@media(max-width:599px){.signal .a-hero .btns .btn{flex:1 1 100%}}
-.signal .stack{position:relative;max-width:440px;width:100%;justify-self:center;padding-bottom:22px}
-.signal .stack::before,.signal .stack::after{content:"";position:absolute;left:6%;right:6%;bottom:10px;height:40px;border-radius:var(--sm-r-lg);background:var(--sm-white);opacity:.7;box-shadow:var(--sm-shadow)}
-.signal .stack::after{left:12%;right:12%;bottom:0;opacity:.45}
-.signal .notif{position:relative;z-index:1;background:var(--sm-white);border-radius:var(--sm-r-lg);padding:18px;display:grid;gap:14px;box-shadow:0 2px 4px rgba(20,45,38,.05),0 26px 50px -20px rgba(20,45,38,.3);animation:signal-arrive .7s var(--sm-ease) both .15s}
-@keyframes signal-arrive{from{transform:translateY(18px) scale(.98)}to{transform:none}}
-.signal .nt{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sm-muted)}
-.signal .nt b{color:var(--sm-pine)}.signal .nt span:last-child{margin-left:auto}
-.signal .live{width:9px;height:9px;border-radius:50%;background:var(--sm-green);box-shadow:0 0 0 4px rgba(19,122,80,.15);animation:signal-pulse 1.8s infinite}
-@keyframes signal-pulse{50%{box-shadow:0 0 0 8px rgba(19,122,80,0)}}
-.signal .nb{display:flex;align-items:center;gap:12px}
-.signal .nb b{display:block;font-size:20px;letter-spacing:-.03em}.signal .nb small{color:var(--sm-muted);font-size:14px}
-.signal .na{display:grid;grid-template-columns:1fr 1fr;gap:10px}.signal .na .btn{min-height:46px;cursor:default}
-.signal .stack .ex-tag{position:absolute;z-index:2;top:-10px;right:16px}
-.signal .a-facts{padding-block:8px 64px}
-.signal .fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--sm-line);border-radius:var(--sm-r-lg);overflow:hidden;box-shadow:var(--sm-shadow)}
-@media(min-width:860px){.signal .fgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.signal .fgrid>div{background:var(--sm-white);padding:18px 20px;display:grid;gap:2px}
-.signal .fgrid b{font-size:clamp(26px,3vw,36px);letter-spacing:-.04em;line-height:1.1}
-.signal .fgrid span{font-size:13.5px;color:var(--sm-muted)}
-.signal .a-facts .note{margin-top:12px}
-.signal .a-how{background:var(--sm-sage);padding-block:64px}
-@media(min-width:900px){.signal .a-how{padding-block:96px}}
-.signal .a-how h2{font-size:clamp(30px,4vw,46px);margin:12px 0 32px}
-.signal .tl{list-style:none;margin:0;padding:0;display:grid;gap:22px;position:relative}
-.signal .tl::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:2px;background:var(--sm-line-2)}
-.signal .tl li{position:relative;padding-left:58px;display:grid;gap:4px}
-.signal .tl .n{position:absolute;left:0;top:-4px;width:40px;height:40px;border-radius:50%;background:var(--sm-pine);color:var(--sm-lime);display:grid;place-items:center;font-weight:800}
-.signal .tl h3{font-size:20px}.signal .tl p{color:var(--sm-muted)}
-@media(min-width:860px){.signal .tl{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}.signal .tl::before{left:20px;right:20px;top:19px;bottom:auto;width:auto;height:2px}.signal .tl li{padding-left:0;padding-top:58px}.signal .tl .n{top:0}}
-.signal .a-faq{padding-block:64px}
-@media(min-width:900px){.signal .a-faq{padding-block:96px}}
-.signal .band{position:relative;border-radius:var(--sm-r-xl);overflow:hidden;min-height:220px;display:grid;align-items:end}
-@media(min-width:900px){.signal .band{min-height:320px}}
-.signal .band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.signal .band::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(20,45,38,.8),rgba(20,45,38,.05) 70%)}
-.signal .band h2{position:relative;z-index:1;color:#fff;padding:24px;font-size:clamp(28px,4vw,46px)}
-.signal .qas{margin-top:22px;max-width:880px}
 
 /* A portal */
 .signal .a-app{min-height:calc(100vh - var(--pb))}
@@ -277,16 +206,13 @@
 /* Thai type: no tracking, softer weight, taller lines (matches html[lang=th] rules in the repo) */
 .signal[lang=th] :is(h1,h2,h3,h4){letter-spacing:0;font-weight:600;line-height:1.3}
 .signal[lang=th] .eyebrow{letter-spacing:.02em;text-transform:none;font-size:13.5px}
-.signal[lang=th] .a-hero h1{font-size:clamp(34px,5.2vw,58px)}
-.signal[lang=th] .fgrid b,.signal[lang=th] .bal b{letter-spacing:-.02em}
+.signal[lang=th] .bal b{letter-spacing:-.02em}
 .signal[lang=th] .ltitle,.signal[lang=th] .a-page h1{font-size:30px}
 
 /* language toggle */
 .signal .lang{display:inline-flex;background:var(--sm-stone-2);border-radius:var(--sm-pill);padding:3px;gap:2px;flex:none}
 .signal .lang button{border:0;background:none;min-width:40px;height:30px;padding:0 10px;border-radius:var(--sm-pill);font-weight:700;font-size:13px;cursor:pointer;color:var(--sm-muted)}
 .signal .lang button[aria-pressed=true]{background:var(--sm-white);color:var(--sm-pine);box-shadow:0 1px 3px rgba(20,45,38,.12)}
-.signal .a-hdr .r{align-items:center}
-@media(max-width:380px){.signal .a-hdr .lang button{min-width:34px;padding:0 7px}}
 
 /* auth card: sits where the example card is */
 .signal .auth{position:relative;z-index:1;background:var(--sm-white);border-radius:var(--sm-r-lg);padding:22px;display:grid;gap:14px;box-shadow:0 2px 4px rgba(20,45,38,.05),0 26px 50px -20px rgba(20,45,38,.3);max-width:440px;width:100%;justify-self:center}
@@ -297,7 +223,7 @@
 .signal .auth .alt button,.signal .auth .alt a{border:0;background:none;padding:6px 0;font-weight:700;font-size:14px;color:var(--sm-green);cursor:pointer;text-decoration:none}
 .signal .auth .sent{display:grid;gap:10px;justify-items:start}
 .signal .auth .sent .i{width:28px;height:28px;color:var(--sm-green)}
-@media(max-width:959px){.signal .authing .lede,.signal .authing .btns{display:none}.signal .authing.a-hero h1{font-size:clamp(30px,8vw,40px)}}
+@media(max-width:959px){.signal .authing .lede,.signal .authing .btns{display:none}}
 
 /* account menu (rail avatar on desktop, avatar in page head on phones) */
 .signal .acct{position:relative}
@@ -416,8 +342,6 @@
 
 .signal .ph-only{white-space:nowrap}
 @media(min-width:1000px){.signal .ph-only{display:none}}
-.signal .foot .proto{opacity:.7}
-@media(max-width:420px){.signal .a-hdr .lang{background:none;padding:0}.signal .a-hdr .lang button[aria-pressed=true]{display:none}.signal .a-hdr .lang button{box-shadow:inset 0 0 0 1.5px var(--sm-line-2);height:40px;min-width:44px}.signal .a-hdr .wrap{gap:12px}}
 .signal .tlink{border:0;background:none;padding:10px 0 0;font:700 14px var(--font);color:var(--sm-muted);cursor:pointer}
 .signal .tlink:hover{color:var(--sm-pine)}
 .signal .in2{display:grid;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--sm-line)}
@@ -446,8 +370,6 @@
 .signal .dperson :is(h1,p){overflow-wrap:anywhere}
 .signal .dperson .ph-only{white-space:normal}
 .signal .dperson .num{white-space:nowrap}
-.signal .foot .tlink{display:block;padding:4px 0;color:inherit;font:inherit}
-.signal .foot .tlink:disabled{opacity:.55;cursor:not-allowed}
 .signal .signal-unavailable{min-height:75vh;display:grid;place-items:center;padding:24px}
 .signal .signal-unavailable .card{max-width:480px;display:grid;gap:18px}
 .signal .signal-error{margin:16px}
@@ -455,7 +377,216 @@
 .signal .a-rail .rail-logo .logo{display:inline;vertical-align:baseline}
 .signal .review h1{font-size:clamp(26px,3vw,32px)}
 .signal .portal-skeleton{display:grid;gap:18px}
-@media(max-width:420px){.signal .a-hdr .btn.primary.sm:disabled{white-space:normal;text-align:center;font-size:12px;padding:5px 10px;line-height:1.3;max-width:120px}}
 .signal .eyebrow{font-family:inherit}
 .signal a[aria-disabled=true]{opacity:.5;cursor:not-allowed}
-@media(prefers-reduced-motion:reduce){.signal *, .signal *::before,.signal *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(prefers-reduced-motion:reduce){.signal *, .signal *::before, .signal *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Pulse landing: isolated from the signed-in Signal portal. */
+.signal.landing{--sm-night:#0F211B;--sm-night-2:#17322A;--sm-linegreen:#06C755;--sm-hdr:68px;--sm-gl:var(--gl);--sm-gr:var(--gr)}
+/* SolarMatch for installers · landing page (final: "Pulse light" with the Glow hero)
+   Structure: sticky header → hero (glow background, headline, buttons, live examples feed)
+   → How it works (sun path) → Questions (full-bleed photo + 4 answers) → footer.
+   Everything is scoped under .landing so it can sit beside the portal's .signal styles.
+   Tokens match the repo's --sm-* tokens one-to-one (e.g. --stone = --sm-stone). */
+.signal.landing *{box-sizing:border-box}
+.signal.landing{overflow-x:clip}
+.signal.landing img{max-width:100%;display:block}
+.signal.landing a{color:inherit}
+.signal.landing button{font:inherit;color:inherit}
+.signal.landing :is(h1,h2,h3){margin:0;font-weight:700;letter-spacing:-.035em;line-height:1.04;text-wrap:balance}
+.signal.landing p{margin:0}
+.signal.landing :focus-visible{outline:2.5px solid var(--sm-green);outline-offset:3px;border-radius:8px}
+.signal.landing .feed :focus-visible{outline-color:var(--sm-lime)}
+.signal.landing .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.signal.landing .skip:focus{clip:auto;width:auto;height:auto;z-index:99;background:var(--sm-white);padding:8px 12px;left:8px;top:8px}
+.signal.landing .wrap{max-width:1240px;margin:0 auto;padding-left:var(--sm-gl);padding-right:var(--sm-gr)}
+@media(min-width:900px){.signal.landing .wrap{padding-left:max(40px,env(safe-area-inset-left,0px));padding-right:max(40px,env(safe-area-inset-right,0px))}}
+.signal.landing .i{width:18px;height:18px;flex:none}
+.signal.landing .logo{width:32px;height:28px;flex:none}
+.signal.landing .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sm-muted)}
+/* Thai: no tracking, no uppercase, softer weight, taller lines */
+.signal.landing:lang(th) .eyebrow{letter-spacing:.02em;text-transform:none;font-size:14px}
+.signal.landing:lang(th) :is(h1,h2,h3){letter-spacing:0;font-weight:600;line-height:1.28}
+
+/* ---------- brand, buttons, language ---------- */
+.signal.landing .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--sm-pine);flex:none}
+.signal.landing .brand b{display:block;font-size:18px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.signal.landing .brand small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.18em;color:var(--sm-muted);margin-top:3px}
+.signal.landing:lang(th) .brand small{letter-spacing:.02em;font-size:11px}
+.signal.landing .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:0 22px;border-radius:var(--sm-pill);border:0;font-weight:700;font-size:15.5px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .15s var(--sm-ease),background .15s,box-shadow .15s}
+.signal.landing .btn:active{transform:scale(.97)}
+.signal.landing .btn[disabled]{opacity:.5;cursor:not-allowed}
+.signal.landing .btn.sm{min-height:40px;padding:0 16px;font-size:14px}
+.signal.landing .btn.lg{min-height:56px;padding:0 26px;font-size:16px}
+.signal.landing .btn.primary{background:var(--sm-pine);color:#fff}.signal.landing .btn.primary:hover{background:var(--sm-pine-2)}
+.signal.landing .btn.ghost{background:transparent;color:var(--sm-pine);box-shadow:inset 0 0 0 1.5px var(--sm-line-2)}.signal.landing .btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--sm-pine)}
+.signal.landing .btn.ghostd{background:rgba(255,255,255,.06);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22)}.signal.landing .btn.ghostd:hover{box-shadow:inset 0 0 0 1.5px var(--sm-lime)}
+.signal.landing .btn .i{transition:transform .2s var(--sm-ease)}.signal.landing .btn:hover .i.arr{transform:translateX(3px)}
+.signal.landing .lang{display:inline-flex;background:var(--sm-stone-2);border-radius:var(--sm-pill);padding:3px;gap:2px;flex:none}
+.signal.landing .lang button{border:0;background:none;min-width:40px;height:32px;padding:0 10px;border-radius:var(--sm-pill);font-weight:700;font-size:13px;cursor:pointer;color:var(--sm-muted)}
+.signal.landing .lang button[aria-pressed=true]{background:var(--sm-white);color:var(--sm-pine);box-shadow:0 1px 3px rgba(20,45,38,.12)}
+
+/* ---------- header ---------- */
+.signal.landing .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:rgba(245,244,239,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--sm-line)}
+.signal.landing .hdr .wrap{display:flex;align-items:center;gap:20px;min-height:var(--sm-hdr)}
+.signal.landing .hnav{display:none;gap:4px}
+.signal.landing .hnav a{padding:8px 14px;border-radius:var(--sm-pill);text-decoration:none;font-size:14.5px;font-weight:600;color:var(--sm-muted)}
+.signal.landing .hnav a:hover{color:var(--sm-pine);background:var(--sm-sage)}
+@media(min-width:900px){.signal.landing .hnav{display:flex}}
+.signal.landing .hdr .r{margin-left:auto;display:flex;gap:8px;align-items:center}
+@media(max-width:440px){
+  .signal.landing .hdr .wrap{gap:12px}
+  .signal.landing .hdr .lang{background:none;padding:0}
+  .signal.landing .hdr .lang button[aria-pressed=true]{display:none}
+  .signal.landing .hdr .lang button{box-shadow:inset 0 0 0 1.5px var(--sm-line-2);height:40px;min-width:44px}
+  .signal.landing .hdr .signin{display:none}
+}
+
+/* ---------- hero ---------- */
+.signal.landing .top{position:relative;isolation:isolate;overflow:hidden;background:var(--sm-stone)}
+/* seamless hand-off: the hero fades into the stone that How it works sits on */
+.signal.landing .top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(rgba(245,244,239,0),var(--sm-stone));z-index:-1;pointer-events:none}
+.signal.landing .hero{padding-block:30px 56px}
+.signal.landing .hero>.wrap{width:100%;display:grid;gap:30px;align-items:center}
+@media(min-width:960px){
+  .signal.landing .hero{min-height:clamp(600px,calc(100svh - var(--sm-hdr)),860px);display:grid;align-items:center;padding-block:40px 72px}
+  .signal.landing .hero>.wrap{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:56px}
+}
+.signal.landing .hero h1{font-size:clamp(38px,5.4vw,70px);margin-top:14px;color:var(--sm-pine)}
+.signal.landing:lang(th) .hero h1{font-size:clamp(34px,4.8vw,60px)}
+.signal.landing .hero h1 em{font-style:normal;color:var(--sm-green)}
+.signal.landing .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:32px}
+@media(max-width:599px){.signal.landing .btns .btn{flex:1 1 100%}}
+.signal.landing .hero .btn.ghost{background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+
+/* Glow background: slow aurora in the brand colours with a fine grain */
+.signal.landing .glow{position:absolute;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.signal.landing .blob{position:absolute;border-radius:50%;filter:blur(72px);will-change:transform}
+.signal.landing .b1{width:560px;height:560px;right:-140px;top:-180px;background:rgba(214,239,145,.95);animation:landing-drift1 22s ease-in-out infinite alternate}
+.signal.landing .b2{width:420px;height:420px;right:26%;top:34%;background:rgba(226,166,43,.42);animation:landing-drift2 26s ease-in-out infinite alternate}
+.signal.landing .b3{width:480px;height:480px;left:-180px;bottom:-140px;background:rgba(150,205,176,.7);animation:landing-drift3 24s ease-in-out infinite alternate}
+.signal.landing .b4{width:320px;height:320px;left:32%;top:-160px;background:rgba(255,255,255,.95);animation:landing-drift2 19s ease-in-out infinite alternate-reverse}
+@keyframes landing-drift1{to{transform:translate(-140px,90px) scale(1.15)}}
+@keyframes landing-drift2{to{transform:translate(100px,-70px) scale(.88)}}
+@keyframes landing-drift3{to{transform:translate(160px,-50px) scale(1.12)}}
+.signal.landing .grain{position:absolute;inset:0;opacity:.22;mix-blend-mode:multiply;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.18 0 0 0 0 0.15 0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+@media(max-width:959px){
+  .signal.landing .b1{width:340px;height:340px;right:-120px;top:-110px}.signal.landing .b2{width:260px;height:260px;right:10%;top:52%}
+  .signal.landing .b3{width:300px;height:300px;left:-140px;bottom:-60px}.signal.landing .b4{width:220px;height:220px;left:20%;top:-120px}
+  .signal.landing .blob{filter:blur(56px)}
+}
+
+/* ---------- examples feed ---------- */
+.signal.landing .feed{position:relative;border-radius:28px;padding:16px;min-width:0;background:linear-gradient(165deg,var(--sm-pine-2),var(--sm-night));box-shadow:0 2px 6px rgba(20,45,38,.08),0 34px 60px -26px rgba(20,45,38,.55)}
+.signal.landing .feed-h{display:flex;align-items:center;gap:9px;padding:2px 4px 12px}
+.signal.landing .feed-h b{color:var(--sm-ondark);text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700}
+.signal.landing:lang(th) .feed-h b{letter-spacing:.02em;font-size:13px;text-transform:none}
+.signal.landing .feed-h .fp{margin-left:auto;min-height:34px;padding:0 10px}
+.signal.landing .live{width:9px;height:9px;border-radius:50%;flex:none;background:var(--sm-lime);box-shadow:0 0 0 4px rgba(214,239,145,.18);animation:landing-pulseL 1.8s infinite}
+@keyframes landing-pulseL{50%{box-shadow:0 0 0 9px rgba(214,239,145,0)}}
+.signal.landing .feed-v{height:440px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y;-webkit-mask-image:linear-gradient(180deg,transparent,#000 12%,#000 86%,transparent);mask-image:linear-gradient(180deg,transparent,#000 12%,#000 86%,transparent)}
+.signal.landing .feed-v::-webkit-scrollbar{display:none}
+/* the list is rendered twice; padding-bottom = gap so the loop point is seamless */
+.signal.landing .feed-l{display:grid;gap:10px;padding-bottom:10px}
+.signal.landing .pc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;background:var(--sm-night-2);border-radius:20px;padding:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);transition:box-shadow .3s,transform .3s var(--sm-ease)}
+.signal.landing .pc:hover{box-shadow:inset 0 0 0 1px rgba(214,239,145,.45);transform:translateX(-3px)}
+.signal.landing .pc .av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--sm-lime);color:var(--sm-pine);grid-row:span 2}
+.signal.landing .pc b{font-size:16.5px;color:#fff;letter-spacing:-.02em;line-height:1.25}
+.signal.landing .pc small{color:var(--sm-ondark);font-size:13px;line-height:1.3}
+.signal.landing .pc time{font-size:12px;color:var(--sm-ondark);text-align:right;white-space:nowrap}
+.signal.landing .pc .call{justify-self:end;width:38px;height:38px;border-radius:50%;background:var(--sm-lime);color:var(--sm-pine);display:grid;place-items:center}
+.signal.landing .pc .tags{grid-column:2/4;display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.signal.landing .pc .tags span{font-size:12px;font-weight:700;color:var(--sm-lime);background:rgba(214,239,145,.1);border-radius:var(--sm-pill);padding:3px 9px;white-space:nowrap}
+/* phones and tablets: a slimmer panel that runs sideways, with thinner cards */
+@media(max-width:959px){
+  .signal.landing .feed{padding:10px 0 10px 10px;border-radius:20px}
+  .signal.landing .feed-h{padding:0 10px 8px 4px;gap:8px}
+  .signal.landing .feed-h .fp{min-height:28px;padding:0 8px}.signal.landing .feed-h .fp .i{width:15px;height:15px}
+  .signal.landing .feed-v{height:auto;overflow-x:auto;overflow-y:hidden;touch-action:pan-x;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 84%,transparent)}
+  .signal.landing .feed-l{display:flex;gap:10px;padding:0 10px 0 0;width:max-content}
+  .signal.landing .pc{width:min(68vw,256px);padding:9px 11px;gap:1px 10px;border-radius:15px}
+  .signal.landing .pc .av{width:34px;height:34px;font-size:14px}
+  .signal.landing .pc b{font-size:15px}.signal.landing .pc small{font-size:12px}.signal.landing .pc time{font-size:11px}
+  .signal.landing .pc .call{width:30px;height:30px}.signal.landing .pc .call .i{width:15px;height:15px}
+  .signal.landing .pc .tags{grid-column:1/-1;margin-top:6px;gap:5px;flex-wrap:nowrap}
+  .signal.landing .pc .tags span{font-size:11px;padding:2px 7px}
+}
+
+/* ---------- How it works: the sun path ---------- */
+.signal.landing .how{background:var(--sm-stone);padding-block:32px 64px}
+@media(min-width:900px){.signal.landing .how{padding-block:48px 104px}}
+.signal.landing .how h2{font-size:clamp(32px,4.4vw,52px)}
+.signal.landing .path{position:relative;margin-top:28px}
+.signal.landing .path>svg{display:none}
+.signal.landing .path ol{list-style:none;margin:0;padding:0 0 0 54px;display:grid;gap:34px;position:relative}
+.signal.landing .path ol::before{content:"";position:absolute;left:19px;top:10px;bottom:10px;width:2px;background:repeating-linear-gradient(180deg,var(--sm-line-2) 0 6px,transparent 6px 12px)}
+.signal.landing .path li{position:relative;display:grid;gap:6px}
+.signal.landing .path .n{position:absolute;z-index:3;left:-54px;top:-2px;width:40px;height:40px;border-radius:50%;background:var(--sm-white);box-shadow:inset 0 0 0 2px var(--sm-pine);display:grid;place-items:center;font-weight:800;font-size:15px;transition:background .4s,box-shadow .4s}
+.signal.landing .path h3{font-size:clamp(21px,2.2vw,28px);padding-top:4px}
+.signal.landing .path li.earn h3{color:var(--sm-green)}
+.signal.landing .path li.lit .n{background:var(--sm-gold);box-shadow:none}
+.signal.landing .st-ic{display:inline-flex;align-items:center;gap:8px;color:var(--sm-muted);font-size:15px}
+.signal.landing .chip-line,.signal.landing .chip-mail{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px}
+.signal.landing .chip-line{background:var(--sm-linegreen);color:#fff}.signal.landing .chip-mail{background:var(--sm-pine);color:var(--sm-lime)}
+.signal.landing .chip-line .i,.signal.landing .chip-mail .i{width:14px;height:14px}
+.signal.landing .sun{position:absolute;left:8px;top:0;width:24px;height:24px;margin-top:-12px;border-radius:50%;background:var(--sm-gold);box-shadow:0 0 0 7px rgba(226,166,43,.22),0 0 26px 6px rgba(226,166,43,.55);z-index:2;pointer-events:none;will-change:transform}
+@media(min-width:860px){
+  .signal.landing .path{height:330px;margin-top:8px}
+  /* viewBox 0 0 1000 240, stretched to the width; circle centres sit exactly on the arc at 12% / 50% / 88% */
+  .signal.landing .path>svg{display:block;position:absolute;inset:0;width:100%;height:240px;overflow:visible}
+  .signal.landing .path ol{padding:0;position:absolute;inset:0;display:block}
+  .signal.landing .path ol::before{display:none}
+  .signal.landing .path li{position:absolute;z-index:3;width:30%;transform:translateX(-50%);text-align:center;justify-items:center}
+  .signal.landing .path li:nth-child(1){left:12%;top:198px}.signal.landing .path li:nth-child(2){left:50%;top:76px}.signal.landing .path li:nth-child(3){left:88%;top:198px}
+  .signal.landing .path .n{position:relative;left:auto;top:auto;margin-bottom:6px}
+  .signal.landing .sun{left:0;top:0;margin:-12px 0 0 -12px}
+}
+
+/* ---------- Questions ---------- */
+.signal.landing .faq{background:var(--sm-stone);padding-bottom:64px}
+@media(min-width:900px){.signal.landing .faq{padding-bottom:104px}}
+.signal.landing .band{position:relative;overflow:hidden;min-height:260px;display:grid;align-items:end;isolation:isolate}
+@media(min-width:900px){.signal.landing .band{min-height:380px}}
+.signal.landing .band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;animation:landing-kb 22s ease-in-out infinite alternate}
+@keyframes landing-kb{from{transform:scale(1)}to{transform:scale(1.1) translate(-2%,-1%)}}
+.signal.landing .band::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(20,45,38,.82),rgba(20,45,38,.05) 70%);z-index:-1}
+.signal.landing .band .wrap{width:100%;padding-block:32px}
+.signal.landing .band h2{color:#fff;font-size:clamp(30px,4.4vw,52px)}
+.signal.landing .credit{position:absolute;right:12px;top:12px;font-size:10.5px;color:rgba(255,255,255,.92);background:rgba(20,45,38,.45);padding:3px 8px;border-radius:var(--sm-pill)}
+.signal.landing .qas{display:grid;gap:10px;margin-top:24px;max-width:900px}
+.signal.landing .qa{background:var(--sm-white);border-radius:var(--sm-r-md);padding:0 18px;box-shadow:var(--sm-shadow)}
+.signal.landing .qa summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 2px;font-size:clamp(17px,1.6vw,19px);font-weight:700;letter-spacing:-.015em}
+.signal.landing .qa summary::-webkit-details-marker{display:none}
+.signal.landing .qa .pm{width:28px;height:28px;flex:none;border-radius:50%;background:var(--sm-sage);position:relative;transition:transform .3s var(--sm-ease),background .2s}
+.signal.landing .qa .pm::before,.signal.landing .qa .pm::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:2px;margin:-1px 0 0 -5.5px;background:var(--sm-pine);border-radius:2px}
+.signal.landing .qa .pm::after{transform:rotate(90deg);transition:transform .3s var(--sm-ease)}
+.signal.landing .qa[open] .pm{transform:rotate(180deg);background:var(--sm-lime)}.signal.landing .qa[open] .pm::after{transform:rotate(0)}
+.signal.landing .qa p{padding:0 2px 22px;color:var(--sm-muted);max-width:40em}
+.signal.landing .qa[open] p{animation:landing-drop .35s var(--sm-ease)}
+@keyframes landing-drop{from{transform:translateY(-6px)}to{transform:none}}
+
+/* ---------- footer ---------- */
+.signal.landing .foot{background:var(--sm-night);color:var(--sm-ondark);padding-block:40px 32px;font-size:14px}
+.signal.landing .foot .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:20px 28px}
+.signal.landing .foot .brand{color:#fff}.signal.landing .foot .brand small{color:var(--sm-ondark)}
+.signal.landing .foot nav{display:flex;flex-wrap:wrap;gap:6px 22px;margin-left:auto}
+.signal.landing .foot nav a{text-decoration:none}.signal.landing .foot nav a:hover{color:#fff}
+.signal.landing .foot .fine{flex-basis:100%;font-size:12.5px}
+.signal.landing .foot :focus-visible{outline-color:var(--sm-lime)}
+@media(max-width:700px){.signal.landing .foot nav{margin-left:0;flex-basis:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}}
+
+@media (prefers-reduced-motion:reduce){
+  .signal.landing *,.signal.landing *::before,.signal.landing *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* Real-control adapters: availability labels can be longer than prototype buttons. */
+@media(max-width:440px){.signal.landing .hdr .btn.primary.sm:disabled{white-space:normal;text-align:center;font-size:12px;padding:5px 10px;line-height:1.3;max-width:120px}}
+.signal.landing .foot .tlink{padding:0;color:inherit;font:inherit;text-align:left}
+.signal.landing .foot .tlink:disabled{opacity:.55;cursor:not-allowed}
+.signal.landing .hero::before,.signal.landing .hero::after{display:none}
+/* The prototype's button font shorthand inherits regular weight. */
+.signal.landing button.btn{font-weight:400}
+@media(max-width:959px){.signal.landing .hero.authing .btns{display:none}}
+.signal.landing .sun{top:10px}
+@media(min-width:860px){.signal.landing .sun{left:12%;top:218px}}
+.signal.landing :is(#how,#faq,.auth){scroll-margin-top:84px}
