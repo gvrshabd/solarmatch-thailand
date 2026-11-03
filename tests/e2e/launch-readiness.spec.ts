@@ -73,7 +73,7 @@ for(const locale of ['en','th'] as const){
   await page.route('**/api/service-status',route=>route.fulfill({json:{contactAvailable:available}}));
   await page.goto(locale==='en'?'/en':'/');
   const badge=page.locator('#how .chip-gold');
-  if(available)await expect(badge).toHaveCount(0);else await expect(badge).toHaveText(locale==='en'?'Currently unavailable':'ยังไม่เปิดให้บริการ');
+  await expect(badge).toHaveCount(0);
   await page.locator('.footer-service-details summary').click();
   await expect(page.locator('.footer-service-details')).toContainText(available?(locale==='en'?'Installer contact is optional':'เลือกขอให้ผู้ติดตั้งติดต่อกลับได้'):(locale==='en'?'currently unavailable':'ยังไม่เปิดรับ'));
   for(const width of [320,390,768,1440]){

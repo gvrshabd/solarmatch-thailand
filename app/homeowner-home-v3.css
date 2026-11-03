@@ -47,6 +47,9 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .sec-h{font-size:clamp(26px,3.4vw
 .homeowner-v3 .homeowner-home-v3 .compare{align-self:center}
 .homeowner-v3 .homeowner-home-v3 .compare b{color:#fff;white-space:nowrap}
 .homeowner-v3 .homeowner-home-v3 .compare .inc b{color:var(--lime)}
+.homeowner-v3 .homeowner-home-v3 .compare b svg{width:24px;height:24px;stroke-width:3;display:block}
+.homeowner-v3 .homeowner-home-v3 .compare .mark-yes{color:#3ddc84}
+.homeowner-v3 .homeowner-home-v3 .compare .mark-no{color:#ff6b6b}
 .homeowner-v3 .homeowner-home-v3 .faqband+.faq{margin-top:24px}
 @media(max-width:699px){
   .homeowner-v3 .homeowner-home-v3 .faqband{min-height:200px}
