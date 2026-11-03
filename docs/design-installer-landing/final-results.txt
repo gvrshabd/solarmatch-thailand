@@ -1,0 +1,37 @@
+Final local source: aaec678836e920826e9ba82f514c9ca04ad0e7d2
+Date: 3 November 2026
+
+Production build: passed.
+TypeScript: passed.
+Full lint: zero errors, 14 existing archived/generated-file warnings.
+Changed-file lint (including both new scripts): zero errors/warnings.
+Full unit suite: 695 passed across 85 files.
+Final landing/helper unit rerun: 10 passed.
+Existing installer browser regressions: 228 passed.
+Isolated synthetic persistent workflows: 6 passed.
+
+New landing browser acceptance:
+  Desktop Chromium: 18 passed; final touch/animation-relevant case also rerun.
+  Mobile Chromium: 18 passed; final real-tap pause/resume addition passed.
+  Mobile WebKit: 17 passed, 1 failed (normal-motion feed timing).
+  Desktop WebKit: 18 passed, including normal-motion feed and sun path.
+Unique cases across these four projects: 71 passed / 1 failed.
+Do not add the repeated motion reruns to the unique passing-case total.
+
+The remaining mobile WebKit timing failure is retained, not skipped or relaxed.
+An independent rAF probe reproduced matching high-density slowdown in the
+untouched prototype. See VERIFICATION.txt for diagnosis, measured densities,
+initial failures, fixes and the limits of browser emulation evidence.
+
+Axe: all tested EN/TH layouts passed with FAQs closed and open using wcag2a,
+wcag2aa, wcag21a, wcag21aa, wcag22aa and best-practice tags. No manual screen-reader
+or physical-device certification is claimed.
+
+Final isolated local safety check: passed. Collection, payments and notifications
+false; platform and delivery paused; test clock null; activation flags off/absent.
+Synthetic counts: 2 leads, 2 enquiries, 0 deliveries, 5 ledger rows, 0 claims,
+3 legal versions, 19 applied LOCAL migrations. Existing demo/remote data untouched.
+
+No release, remote migration, real notification or charge performed.
+Native Thai review, exact roof-photo provenance and physical Safari motion
+acceptance remain outstanding. Main, production and Milly's were not changed.

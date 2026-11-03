@@ -1,0 +1,158 @@
+SolarMatch Pulse / Glow installer landing — local implementation review
+Date: 3 November 2026
+Branch: feature/installer-landing-pulse
+Base main: 3fabe03330bb89465736124b11e61b74b82e3456
+Original handoff commit: c358d26
+Implementation commit: aaec678836e920826e9ba82f514c9ca04ad0e7d2
+Input ZIP SHA-256:
+758B32B68AD40C07A5F7A82178E18D62426DF8E0FCC950E2E85D83B79BDEACE4
+
+SCOPE AND STATUS
+The two supplied executor prompts were implemented locally. The original
+README, LANDING_SPEC, SONNET_PROMPTS, prototype and reference images are intact.
+Only the signed-out installer landing and associated tests/tooling changed.
+No push, main merge, deployment, remote migration or business activation occurred.
+No Milly's repository, service or configuration was targeted.
+
+The implementation is ready for local visual review. Do NOT describe all browser
+checks as green: high-density Windows WebKit animation acceptance remains open.
+No physical iPhone/iPad, native Thai or screen-reader acceptance is claimed.
+
+IMPLEMENTED
+- Original Pulse layout and Glow background, sticky header, bilingual headline,
+  independent sign-in/application controls and real existing auth replacement.
+- Six fictional example cards, duplicated accessibly for continuous looping,
+  vertical/horizontal motion, pause/play, user-interaction hold and reduced motion.
+- Scroll-linked sun on the supplied quadratic arc; all three circles align to
+  the reference points. Reduced motion lights all three and ends the path.
+- Existing roof-tile photograph, full-width questions banner and supplied credit.
+- Four FAQs use live commercial configuration, including correct satang conversion.
+- Existing legal links, skip link, single main landmark and compact preview footer.
+- Old landing-only pricing strip, copy and styles removed per explicit handoff.
+- Shared brand/logo, portal interface, authentication APIs, commercial rules,
+  homeowner pages, calculator, claims and all operations gates preserved.
+
+VERIFIED FIXES DURING IMPLEMENTATION
+1. Scoped away inherited homeowner hero pseudo-elements that faded the new title.
+2. Matched the prototype's actual button font-weight cascade and exact geometry.
+3. Fixed mobile specificity so the real auth panel hides obsolete hero actions.
+4. Added sticky-header scroll clearance so the auth Close control is clickable.
+5. Wrapped the disabled application label at narrow widths without clipping.
+6. Retained fractional feed position across asynchronous programmatic scroll
+   events; user-originated scrolling alone resets the auto-scroll position.
+7. Reproduced an actual touch defect in Chromium: a tap synthesized mouseenter,
+   left :hover active, and kept the feed paused after 4.3 seconds. Hover now pauses
+   only on hover-capable devices. A real-touch resume regression assertion passes.
+
+ACTUAL CHECKS
+- pnpm lint: PASS, zero errors; 14 existing warnings in archived/generated files.
+- Changed implementation/tests/tooling lint: PASS, zero warnings.
+- pnpm typecheck: PASS after final application edit.
+- pnpm test: 695/695 tests, 85 files, PASS.
+- Final targeted landing/helper unit rerun: 10/10 PASS.
+- pnpm build: PASS after final application edit, ordinary production configuration.
+- Existing installer-signal, signal-notes, studio, payment-return, repair-portal:
+  228/228 PASS across desktop Chromium, mobile Chromium and mobile WebKit.
+- Isolated installer-workflow with INSTALLER_E2E=1: 6/6 PASS across both Chromium
+  projects. Real local persistence, synthetic verification/recovery, no-contact
+  results, optional verified request and mock-payment idempotency were exercised.
+  No real SMS, email, LINE delivery or payment provider was used.
+- New landing suite: 53/54 PASS across those three browser projects. This includes
+  both languages, 360/390/768/860/1180/1440 widths, zero-overflow assertions,
+  exact arc centres, real auth/close/language controls, actual disabled server
+  configuration and axe checks with FAQs closed and open.
+- Final motion rerun after the touch fix: both Chromium cases PASS; high-density
+  mobile WebKit remains FAIL. The test and all its assertions remain enabled.
+- Additional Desktop Safari/WebKit run: see final-results.txt.
+- git diff --check: PASS.
+
+FAILURE HISTORY (NOT HIDDEN BY RERUNS)
+- Initial mobile auth tests found visible redundant hero buttons; fixed (#3).
+- Initial WebKit tests found sticky-header obstruction of Close; fixed (#4).
+- Four assertions in the combined 258-case run incorrectly expected an API 503
+  to render disabled landing controls. Existing behavior correctly shows Retry.
+  Corrected the test and separately tested a truly disabled local server at 3002.
+  The combined run was 254 passed / 4 failed; all 228 existing suites passed.
+- An intermediate desktop WebKit run was interrupted for the final touch-fix
+  rebuild and is not counted as acceptance evidence. Final rerun is separate.
+- High-density mobile WebKit's feed movement/resume poll still exceeds 5 seconds.
+  Increasing the timeout, skipping the test or changing the design to hide the
+  issue was deliberately avoided.
+
+WEBKIT MOTION INVESTIGATION
+The independent requestAnimationFrame probe was also slow, with document.hidden
+false. The untouched original prototype reproduces essentially the same slowdown
+in the same Windows headless WebKit/device contexts. Over 1.5-second samples:
+  scale 1 / 390px: implementation 32 frames, prototype 31
+  scale 1 / 1180px: implementation 12 frames, prototype 13
+  scale 2 / 390px: implementation 8 frames, prototype 6
+  scale 2 / 1180px: implementation 2 frames, prototype 2
+  scale 3 / 390px: implementation 2 frames, prototype 2
+  scale 3 / 1180px: implementation 1 frame, prototype 2
+Raw non-sensitive samples: comparison/webkit-density-diagnostic.json.
+Reproduction: run scripts/installer-landing-motion-diagnostic.mjs with both local
+servers running. It writes a fresh .wrangler/pulse-webkit-motion-diagnostic.json.
+Disabling grain, blur, masking or promoting layers individually did not restore
+normal motion. Temporary diagnostic styles were NOT committed to the product.
+Evidence points to the prototype's rendering cost under this WebKit environment,
+not an implementation-only failure. It does NOT prove smoothness on real Safari.
+Remaining acceptance: real Safari/iPhone/iPad motion review, or a separately
+reviewed rendering optimization preserving the supplied visual direction.
+
+VISUAL COMPARISON
+comparison/ contains ten matched pairs (20 full-page PNGs): EN/TH, widths
+360, 390, 768, 1180x820, 1440. Same Chromium, viewport, fonts, scale 1 and reduced
+motion; same fictional examples and equivalent configured commercial values.
+Original supplied reference images are unchanged.
+Measured header, hero, heading, buttons, feed/card, path, banner, questions and
+footer rectangles match exactly (maximum geometry delta 0 CSS pixels).
+0.03–0.08% of pixels differ by more than 16 in any color channel. This is a
+comparison metric, not proof of universal browser/device fidelity.
+Intentional differences: existing repository Lucide icons, existing compressed
+roof photo, real availability/auth behavior, keyboard landmarks, privacy links,
+sticky-auth scroll clearance and disabled-label wrapping. No independent redesign.
+
+PREVIEWS
+English: http://127.0.0.1:3000/installers?lang=en
+Thai: http://127.0.0.1:3000/installers?lang=th
+Disabled configuration: http://127.0.0.1:3002/installers?lang=en
+Comparison viewer: http://127.0.0.1:4174/comparison/
+Untouched clickable reference: http://127.0.0.1:4174/prototype/
+These are loopback previews on the development computer, NOT public phone URLs.
+
+Preview commands (Node 22+ project toolchain):
+  pnpm build
+  pnpm exec wrangler dev --config .installer-test/preview-ipv4.jsonc --local --persist-to .wrangler/installer-pulse-e2e --port 3000 --ip 127.0.0.1 --log-level error
+  node scripts/installer-landing-comparison.mjs --serve
+For disabled-configuration tests, create .wrangler/pulse-held-preview.jsonc from
+the tracked .installer-test/preview-ipv4.jsonc, replacing only vars with:
+  { "INSTALLER_PLATFORM_MODE": "off", "OUTBOUND_MESSAGES_ENABLED": "false" }
+Both configuration directories are one level below the repository root, so the
+existing relative build paths remain valid. Keep the fictitious database/bucket
+bindings; never substitute production bindings. Start its independent store:
+  pnpm exec wrangler dev --config .wrangler/pulse-held-preview.jsonc --local --persist-to .wrangler/installer-pulse-held --port 3002 --ip 127.0.0.1 --log-level error
+Run the focused browser suite with PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000:
+  pnpm exec playwright test tests/e2e/installer-landing-pulse.spec.ts --project=desktop-webkit --project=installer-mobile-webkit --project=desktop-chromium --project=mobile-chromium
+Capture fresh comparison pairs after stopping the viewer process:
+  node scripts/installer-landing-comparison.mjs
+The helper serves only this documentation folder on loopback and never enters
+the Worker bundle. Prototype mock controls do not call live APIs.
+
+ISOLATION AND DATA
+Only a new disposable .wrangler/installer-pulse-e2e store received the existing
+19 local migrations and synthetic workflow data. Existing demo stores and all
+remote databases were left intact. The separate held preview has its own store.
+After synthetic workflows, local collection/payments/notifications were disabled,
+platform/allocation paused, test clock cleared; safety check passes. Local
+synthetic fixture mode uses mock providers and OUTBOUND_MESSAGES_ENABLED=false.
+No credentials, private DBs, backups, tokens or browser traces are committed.
+
+REMAINING EXTERNAL ITEMS
+- Native-speaker review of supplied new Thai copy (explicitly a handoff draft).
+- Exact original source/license record for roof-tile.jpg: existing unresolved item
+  documented in docs/design-v2-review/PHOTO_PROVENANCE.txt. Supplied credit remains;
+  no invented provenance or replacement image.
+- Physical Safari motion acceptance as described above.
+- Existing business/legal/provider launch prerequisites remain unchanged. This
+  redesign intentionally does not enable applications, homeowner collection or
+  notifications in production, and does not resolve those separate prerequisites.

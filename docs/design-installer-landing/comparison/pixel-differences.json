@@ -1,0 +1,72 @@
+[
+  {
+    "language": "en",
+    "width": 360,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.07
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.06
+  },
+  {
+    "language": "en",
+    "width": 768,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.05
+  },
+  {
+    "language": "en",
+    "width": 1180,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.03
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.03
+  },
+  {
+    "language": "th",
+    "width": 360,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.08
+  },
+  {
+    "language": "th",
+    "width": 390,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.07
+  },
+  {
+    "language": "th",
+    "width": 768,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.05
+  },
+  {
+    "language": "th",
+    "width": 1180,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.03
+  },
+  {
+    "language": "th",
+    "width": 1440,
+    "dimensionsMatch": true,
+    "maxMeasuredGeometryDeltaCssPx": 0,
+    "percentPixelsAbove16": 0.03
+  }
+]

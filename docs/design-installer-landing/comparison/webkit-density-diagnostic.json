@@ -1,0 +1,86 @@
+[
+  {
+    "name": "implementation",
+    "scale": 1,
+    "width": 390,
+    "frames": 32,
+    "movement": 47
+  },
+  {
+    "name": "prototype",
+    "scale": 1,
+    "width": 390,
+    "frames": 31,
+    "movement": 45
+  },
+  {
+    "name": "implementation",
+    "scale": 1,
+    "width": 1180,
+    "frames": 12,
+    "movement": 15
+  },
+  {
+    "name": "prototype",
+    "scale": 1,
+    "width": 1180,
+    "frames": 13,
+    "movement": 17
+  },
+  {
+    "name": "implementation",
+    "scale": 2,
+    "width": 390,
+    "frames": 8,
+    "movement": 13
+  },
+  {
+    "name": "prototype",
+    "scale": 2,
+    "width": 390,
+    "frames": 6,
+    "movement": 10
+  },
+  {
+    "name": "implementation",
+    "scale": 2,
+    "width": 1180,
+    "frames": 2,
+    "movement": 2
+  },
+  {
+    "name": "prototype",
+    "scale": 2,
+    "width": 1180,
+    "frames": 2,
+    "movement": 3
+  },
+  {
+    "name": "implementation",
+    "scale": 3,
+    "width": 390,
+    "frames": 2,
+    "movement": 3
+  },
+  {
+    "name": "prototype",
+    "scale": 3,
+    "width": 390,
+    "frames": 2,
+    "movement": 3
+  },
+  {
+    "name": "implementation",
+    "scale": 3,
+    "width": 1180,
+    "frames": 1,
+    "movement": 2
+  },
+  {
+    "name": "prototype",
+    "scale": 3,
+    "width": 1180,
+    "frames": 2,
+    "movement": 3
+  }
+]

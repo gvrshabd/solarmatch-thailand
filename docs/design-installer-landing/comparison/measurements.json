@@ -1,0 +1,1912 @@
+[
+  {
+    "lang": "en",
+    "width": 360,
+    "height": 844,
+    "captures": {
+      "prototype": "prototype-en-360.png",
+      "implementation": "implementation-en-360.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 360,
+          "height": 615.59375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 133,
+          "width": 328,
+          "height": 158.0625,
+          "fontSize": "38px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 323.0625,
+          "width": 328,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 475.0625,
+          "width": 328,
+          "height": 153.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 521.0625,
+          "width": 244.796875,
+          "height": 97.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 684.59375,
+          "width": 360,
+          "height": 354.578125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 777.859375,
+          "width": 328,
+          "height": 197.3125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1039.171875,
+          "width": 360,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1323.171875,
+          "width": 328,
+          "height": 354.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1741.921875,
+          "width": 360,
+          "height": 251.359375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 360,
+          "height": 615.59375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 133,
+          "width": 328,
+          "height": 158.0625,
+          "fontSize": "38px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 323.0625,
+          "width": 328,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 475.0625,
+          "width": 328,
+          "height": 153.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 521.0625,
+          "width": 244.796875,
+          "height": 97.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 684.59375,
+          "width": 360,
+          "height": 354.578125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 777.859375,
+          "width": 328,
+          "height": 197.3125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1039.171875,
+          "width": 360,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1323.171875,
+          "width": 328,
+          "height": 354.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1741.921875,
+          "width": 360,
+          "height": 251.359375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "height": 844,
+    "captures": {
+      "prototype": "prototype-en-390.png",
+      "implementation": "implementation-en-390.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 390,
+          "height": 576.078125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 133,
+          "width": 358,
+          "height": 118.546875,
+          "fontSize": "38px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 283.546875,
+          "width": 358,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 435.546875,
+          "width": 358,
+          "height": 153.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 481.546875,
+          "width": 256,
+          "height": 97.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 645.078125,
+          "width": 390,
+          "height": 332.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 738.34375,
+          "width": 358,
+          "height": 175.484375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 977.828125,
+          "width": 390,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1261.828125,
+          "width": 358,
+          "height": 354.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1680.578125,
+          "width": 390,
+          "height": 251.359375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 390,
+          "height": 576.078125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 133,
+          "width": 358,
+          "height": 118.546875,
+          "fontSize": "38px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 283.546875,
+          "width": 358,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 435.546875,
+          "width": 358,
+          "height": 153.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 481.546875,
+          "width": 256,
+          "height": 97.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 645.078125,
+          "width": 390,
+          "height": 332.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 738.34375,
+          "width": 358,
+          "height": 175.484375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 977.828125,
+          "width": 390,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1261.828125,
+          "width": 358,
+          "height": 354.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1680.578125,
+          "width": 390,
+          "height": 251.359375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "en",
+    "width": 768,
+    "height": 900,
+    "captures": {
+      "prototype": "prototype-en-768.png",
+      "implementation": "implementation-en-768.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 768,
+          "height": 477.78125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 133,
+          "width": 736,
+          "height": 86.25,
+          "fontSize": "41.472px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 251.25,
+          "width": 736,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 337.25,
+          "width": 736,
+          "height": 153.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 383.25,
+          "width": 256,
+          "height": 97.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 546.78125,
+          "width": 768,
+          "height": 334.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 641.921875,
+          "width": 736,
+          "height": 175.484375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 881.40625,
+          "width": 768,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1165.40625,
+          "width": 736,
+          "height": 302,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1531.40625,
+          "width": 768,
+          "height": 190.578125,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 768,
+          "height": 477.78125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 133,
+          "width": 736,
+          "height": 86.25,
+          "fontSize": "41.472px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 251.25,
+          "width": 736,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 337.25,
+          "width": 736,
+          "height": 153.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 383.25,
+          "width": 256,
+          "height": 97.53125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 546.78125,
+          "width": 768,
+          "height": 334.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 641.921875,
+          "width": 736,
+          "height": 175.484375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 881.40625,
+          "width": 768,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1165.40625,
+          "width": 736,
+          "height": 302,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1531.40625,
+          "width": 768,
+          "height": 190.578125,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "en",
+    "width": 1180,
+    "height": 820,
+    "captures": {
+      "prototype": "prototype-en-1180.png",
+      "implementation": "implementation-en-1180.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1180,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1180,
+          "height": 752,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 40,
+          "y": 302.59375,
+          "width": 574.1875,
+          "height": 198.796875,
+          "fontSize": "63.72px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 40,
+          "y": 533.390625,
+          "width": 574.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 670.1875,
+          "y": 169,
+          "width": 469.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 686.1875,
+          "y": 233,
+          "width": 437.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 821,
+          "width": 1180,
+          "height": 543.984375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 40,
+          "y": 930.984375,
+          "width": 1100,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1364.984375,
+          "width": 1180,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 40,
+          "y": 1768.984375,
+          "width": 900,
+          "height": 310.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2183.734375,
+          "width": 1180,
+          "height": 148.1875,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1180,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1180,
+          "height": 752,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 40,
+          "y": 302.59375,
+          "width": 574.1875,
+          "height": 198.796875,
+          "fontSize": "63.72px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 40,
+          "y": 533.390625,
+          "width": 574.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 670.1875,
+          "y": 169,
+          "width": 469.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 686.1875,
+          "y": 233,
+          "width": 437.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 821,
+          "width": 1180,
+          "height": 543.984375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 40,
+          "y": 930.984375,
+          "width": 1100,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1364.984375,
+          "width": 1180,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 40,
+          "y": 1768.984375,
+          "width": 900,
+          "height": 310.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2183.734375,
+          "width": 1180,
+          "height": 148.1875,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "height": 900,
+    "captures": {
+      "prototype": "prototype-en-1440.png",
+      "implementation": "implementation-en-1440.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1440,
+          "height": 832,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 140,
+          "y": 296.40625,
+          "width": 607.1875,
+          "height": 291.1875,
+          "fontSize": "70px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 140,
+          "y": 619.59375,
+          "width": 607.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 803.1875,
+          "y": 209,
+          "width": 496.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 819.1875,
+          "y": 273,
+          "width": 464.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 901,
+          "width": 1440,
+          "height": 544.078125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 140,
+          "y": 1011.078125,
+          "width": 1160,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1445.078125,
+          "width": 1440,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 140,
+          "y": 1849.078125,
+          "width": 900,
+          "height": 311.5625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2264.640625,
+          "width": 1440,
+          "height": 148.1875,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1440,
+          "height": 832,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 140,
+          "y": 296.40625,
+          "width": 607.1875,
+          "height": 291.1875,
+          "fontSize": "70px",
+          "fontWeight": "700"
+        },
+        ".btns": {
+          "x": 140,
+          "y": 619.59375,
+          "width": 607.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 803.1875,
+          "y": 209,
+          "width": 496.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 819.1875,
+          "y": 273,
+          "width": 464.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 901,
+          "width": 1440,
+          "height": 544.078125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 140,
+          "y": 1011.078125,
+          "width": 1160,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1445.078125,
+          "width": 1440,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 140,
+          "y": 1849.078125,
+          "width": 900,
+          "height": 311.5625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2264.640625,
+          "width": 1440,
+          "height": 148.1875,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "th",
+    "width": 360,
+    "height": 844,
+    "captures": {
+      "prototype": "prototype-th-360.png",
+      "implementation": "implementation-th-360.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 360,
+          "height": 545.765625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 135.390625,
+          "width": 328,
+          "height": 87.03125,
+          "fontSize": "34px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 254.421875,
+          "width": 328,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 406.421875,
+          "width": 328,
+          "height": 152.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 452.421875,
+          "width": 244.796875,
+          "height": 96.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 614.765625,
+          "width": 360,
+          "height": 355.578125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 715.71875,
+          "width": 328,
+          "height": 190.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 970.34375,
+          "width": 360,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1254.34375,
+          "width": 328,
+          "height": 328.375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1646.71875,
+          "width": 360,
+          "height": 253.765625,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 360,
+          "height": 545.765625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 135.390625,
+          "width": 328,
+          "height": 87.03125,
+          "fontSize": "34px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 254.421875,
+          "width": 328,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 406.421875,
+          "width": 328,
+          "height": 152.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 452.421875,
+          "width": 244.796875,
+          "height": 96.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 614.765625,
+          "width": 360,
+          "height": 355.578125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 715.71875,
+          "width": 328,
+          "height": 190.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 970.34375,
+          "width": 360,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1254.34375,
+          "width": 328,
+          "height": 328.375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1646.71875,
+          "width": 360,
+          "height": 253.765625,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "th",
+    "width": 390,
+    "height": 844,
+    "captures": {
+      "prototype": "prototype-th-390.png",
+      "implementation": "implementation-th-390.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 390,
+          "height": 545.765625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 135.390625,
+          "width": 358,
+          "height": 87.03125,
+          "fontSize": "34px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 254.421875,
+          "width": 358,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 406.421875,
+          "width": 358,
+          "height": 152.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 452.421875,
+          "width": 256,
+          "height": 96.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 614.765625,
+          "width": 390,
+          "height": 355.578125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 715.71875,
+          "width": 358,
+          "height": 190.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 970.34375,
+          "width": 390,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1254.34375,
+          "width": 358,
+          "height": 302,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1620.34375,
+          "width": 390,
+          "height": 253.765625,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 390,
+          "height": 545.765625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 135.390625,
+          "width": 358,
+          "height": 87.03125,
+          "fontSize": "34px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 254.421875,
+          "width": 358,
+          "height": 122,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 406.421875,
+          "width": 358,
+          "height": 152.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 452.421875,
+          "width": 256,
+          "height": 96.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 614.765625,
+          "width": 390,
+          "height": 355.578125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 715.71875,
+          "width": 358,
+          "height": 190.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 970.34375,
+          "width": 390,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1254.34375,
+          "width": 358,
+          "height": 302,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1620.34375,
+          "width": 390,
+          "height": 253.765625,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "th",
+    "width": 768,
+    "height": 900,
+    "captures": {
+      "prototype": "prototype-th-768.png",
+      "implementation": "implementation-th-768.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 768,
+          "height": 439.90625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 135.390625,
+          "width": 736,
+          "height": 47.171875,
+          "fontSize": "36.864px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 214.5625,
+          "width": 736,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 300.5625,
+          "width": 736,
+          "height": 152.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 346.5625,
+          "width": 256,
+          "height": 96.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 508.90625,
+          "width": 768,
+          "height": 357.875,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 612.15625,
+          "width": 736,
+          "height": 190.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 866.78125,
+          "width": 768,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1150.78125,
+          "width": 736,
+          "height": 302,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1516.78125,
+          "width": 768,
+          "height": 192.984375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 768,
+          "height": 439.90625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 16,
+          "y": 135.390625,
+          "width": 736,
+          "height": 47.171875,
+          "fontSize": "36.864px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 16,
+          "y": 214.5625,
+          "width": 736,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 16,
+          "y": 300.5625,
+          "width": 736,
+          "height": 152.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 26,
+          "y": 346.5625,
+          "width": 256,
+          "height": 96.34375,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 508.90625,
+          "width": 768,
+          "height": 357.875,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 16,
+          "y": 612.15625,
+          "width": 736,
+          "height": 190.625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 866.78125,
+          "width": 768,
+          "height": 260,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 16,
+          "y": 1150.78125,
+          "width": 736,
+          "height": 302,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 1516.78125,
+          "width": 768,
+          "height": 192.984375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "th",
+    "width": 1180,
+    "height": 820,
+    "captures": {
+      "prototype": "prototype-th-1180.png",
+      "implementation": "implementation-th-1180.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1180,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1180,
+          "height": 752,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 40,
+          "y": 330.6875,
+          "width": 574.1875,
+          "height": 145,
+          "fontSize": "56.64px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 40,
+          "y": 507.6875,
+          "width": 574.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 670.1875,
+          "y": 169,
+          "width": 469.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 686.1875,
+          "y": 233,
+          "width": 437.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 821,
+          "width": 1180,
+          "height": 556.453125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 40,
+          "y": 943.453125,
+          "width": 1100,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1377.453125,
+          "width": 1180,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 40,
+          "y": 1781.453125,
+          "width": 900,
+          "height": 310.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2196.203125,
+          "width": 1180,
+          "height": 150.59375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1180,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1180,
+          "height": 752,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 40,
+          "y": 330.6875,
+          "width": 574.1875,
+          "height": 145,
+          "fontSize": "56.64px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 40,
+          "y": 507.6875,
+          "width": 574.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 670.1875,
+          "y": 169,
+          "width": 469.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 686.1875,
+          "y": 233,
+          "width": 437.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 821,
+          "width": 1180,
+          "height": 556.453125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 40,
+          "y": 943.453125,
+          "width": 1100,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1377.453125,
+          "width": 1180,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 40,
+          "y": 1781.453125,
+          "width": 900,
+          "height": 310.75,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2196.203125,
+          "width": 1180,
+          "height": 150.59375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "lang": "th",
+    "width": 1440,
+    "height": 900,
+    "captures": {
+      "prototype": "prototype-th-1440.png",
+      "implementation": "implementation-th-1440.png"
+    },
+    "geometry": {
+      "prototype": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1440,
+          "height": 832,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 140,
+          "y": 366.390625,
+          "width": 607.1875,
+          "height": 153.59375,
+          "fontSize": "60px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 140,
+          "y": 551.984375,
+          "width": 607.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 803.1875,
+          "y": 209,
+          "width": 496.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 819.1875,
+          "y": 273,
+          "width": 464.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 901,
+          "width": 1440,
+          "height": 556.546875,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 140,
+          "y": 1023.546875,
+          "width": 1160,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1457.546875,
+          "width": 1440,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 140,
+          "y": 1861.546875,
+          "width": 900,
+          "height": 311.5625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2277.109375,
+          "width": 1440,
+          "height": 150.59375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "implementation": {
+        ".hdr": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 69,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero": {
+          "x": 0,
+          "y": 69,
+          "width": 1440,
+          "height": 832,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".hero h1": {
+          "x": 140,
+          "y": 366.390625,
+          "width": 607.1875,
+          "height": 153.59375,
+          "fontSize": "60px",
+          "fontWeight": "600"
+        },
+        ".btns": {
+          "x": 140,
+          "y": 551.984375,
+          "width": 607.1875,
+          "height": 56,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".feed": {
+          "x": 803.1875,
+          "y": 209,
+          "width": 496.8125,
+          "height": 520,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".pc": {
+          "x": 819.1875,
+          "y": 273,
+          "width": 464.8125,
+          "height": 125.8125,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".how": {
+          "x": 0,
+          "y": 901,
+          "width": 1440,
+          "height": 556.546875,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".path": {
+          "x": 140,
+          "y": 1023.546875,
+          "width": 1160,
+          "height": 330,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".band": {
+          "x": 0,
+          "y": 1457.546875,
+          "width": 1440,
+          "height": 380,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".qas": {
+          "x": 140,
+          "y": 1861.546875,
+          "width": 900,
+          "height": 311.5625,
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        ".foot": {
+          "x": 0,
+          "y": 2277.109375,
+          "width": 1440,
+          "height": 150.59375,
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      }
+    }
+  }
+]
