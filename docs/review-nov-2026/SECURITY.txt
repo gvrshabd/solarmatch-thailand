@@ -1,0 +1,84 @@
+SolarMatch security review — 2026-11-05
+
+Scope: source inspection of lib/server authentication, preview/staging access,
+assessment token, admin request/CSRF boundaries; app/admin/api routes; installer
+authentication/configuration, portal company ownership, share links, rate limits,
+phone proof, payment and LINE provider/webhook processing, and privacy redaction.
+Inspected public lead submission gates and local-only test endpoints. Dependency
+audit evidence is dependency-audit-before.json (full dependency graph, before
+central dependency remediation). No credentials or real customer data were read.
+
+Verified fixes:
+1. Medium — administrative uploads parsed the entire multipart body before
+   enforcing individual file size limits. Extra fields, multiple files, or a large
+   file could consume memory before rejection. Both media and contract routes now
+   cap actual streamed envelope bytes before multipart parsing: 5,000,000 bytes
+   plus 64 KiB for media; 10 MiB plus 64 KiB for contracts. Declared lengths are an
+   early rejection only; absent/false lengths cannot bypass actual-byte counting.
+   Oversized requests return 413. Cancellation is not awaited indefinitely.
+2. Medium application exposure / high dependency advisory — image upload trusted
+   a caller-controlled JPEG/PNG/WebP MIME label before dispatching arbitrary
+   content into image-size. Version 2.0.2 has high infinite-loop advisories in
+   ICNS/JXL/HEIF parsers (GHSA-w3rx-r6r6-pgpr, GHSA-5p2g-fcmc-qvqq). Actual raster
+   magic must now match the declared permitted format before any dimension parser
+   invocation. Unsupported and mismatched bytes return 400 before storage. This
+   also prevents relabeled SVG from entering the raster media pipeline. Package
+   upgrades are handled centrally and should retain this independent boundary.
+
+Tests: tests/unit/admin-upload-boundaries.test.ts exercises route rejection before
+parser/storage, declared and actual-stream envelope limits, a stalled cancellation,
+normal multipart parsing, extra-field overflow, and relabeled SVG/ICNS/JXL. Focused
+existing suites cover administrator sessions/CSRF, installer auth, tenant/share
+isolation, privacy, provider signatures/payment matching, phone proof, rate limits.
+Final test results and dependency audit after remediation are in the parent review.
+
+Observed controls: administrative mutations use authenticated identity and CSRF;
+installer mutations require exact origin and bounded JSON; account actions scope
+company ownership; staff shares are hashed high-entropy expiring/revocable bearer
+tokens with limited projection; contact disclosure uses suppression/withdrawal
+conditions; OTP attempts are charged atomically and proofs bound to phone/session;
+provider webhook signatures and provider-side payment/order/amount matching are
+checked; production platform mode/origin and local-only boundaries fail closed.
+No concrete bypass of those controls was verified in this review.
+
+Limits: source and local tests, not an external penetration test or proof of all
+possible races. Deployed Cloudflare Access, bucket policies, secrets, account
+configuration, real provider behavior and real-data retention were not inspected.
+PDF magic validation is not malware scanning. The new envelope cap does not impose
+a network read deadline. Other authenticated admin JSON endpoints still rely on
+runtime request limits rather than a shared explicit application byte cap.
+Audit advisory severity describes dependency reachability risk, not proof that
+every advisory is exploitable through this vinext deployment. No remote changes,
+deployment, business-operation enabling, messages, or data writes were performed.
+
+Dependency remediation and final local validation:
+- Parent upgraded direct dependencies; this review added exact pnpm overrides for
+  vulnerable transitive copies: brace-expansion 1.1.21/5.0.12, fast-uri 3.1.9,
+  image-size 2.0.3, js-yaml 4.3.2, source-map-js 1.2.2, undici 7.30.1,
+  ws 8.21.0, zod 4.6.6, esbuild 0.28.2, sharp 0.35.5. Registry metadata,
+  repository ownership fields, engine constraints and advisory patched ranges
+  were checked. All versions are pinned; no automatic major toolchain updates.
+- esbuild 0.28's documented compatibility boundary concerns installer integrity
+  checks and Go internals; local Vite-resolved TypeScript transform and in-memory
+  bundling passed. Sharp 0.35 removes several deprecated APIs; the inspected
+  Miniflare image consumer does not use them. Its resolved sharp passed synthetic
+  image creation, metadata, resize, rotate and WebP output smoke checks on Node24.
+  Upstream compatibility notes:
+  https://github.com/evanw/esbuild/releases/tag/v0.28.0
+  https://sharp.pixelplumbing.com/changelog/v0.35.0/
+- Final full audit: 0 critical, 0 high, 2 moderate, 0 low. Evidence is
+  dependency-audit-after.json. Exit 1 is expected because two advisories remain.
+- Residual moderate GHSA-wx4j-mvgx-mqwp: vinext 1.0.0-beta.3 -> @vercel/og 0.8.6
+  -> satori 0.16.0. Patched satori starts at 0.33.5. Registry has no newer 0.8.x
+  OG release; OG 1.0.3 and vinext 1.4.3 would change broader runtime APIs. No
+  application ImageResponse/next-og/@vercel-og call was found; OG metadata uses
+  static /og.png. The vulnerable SVG generation feature was not shown reachable
+  from this application's routes; dependency remains present and must be tracked.
+- Residual moderate GHSA-g3hv-75wg-m249: eslint-config-next -> typescript-eslint
+  parser -> typescript-estree -> minimatch 10.2.6. Patch starts at 11.0.1;
+  upstream latest typescript-estree 8.72.1 still declares minimatch ^10.2.2.
+  Lint tooling processes repository files, not public request input. A forced
+  incompatible minimatch major was deliberately not applied without parent support.
+- Final focused regression run: 8 test files, 52 tests passed cleanly, including
+  all six new upload tests. TypeScript typecheck passed. Full build/full-suite
+  results remain owned by the parent review. No package process is left running.

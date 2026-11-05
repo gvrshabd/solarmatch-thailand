@@ -2,10 +2,10 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type TestInfo } from '@playwright/test';
 
 const contentRoutes = [
-  '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide', '/methodology',
+  '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide',
   '/contact', '/resources', '/privacy', '/terms', '/cookies',
   '/en', '/en/estimate', '/en/estimate/results', '/en/how-it-works', '/en/solar-guide',
-  '/en/methodology', '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
+  '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
 ];
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 
@@ -75,12 +75,12 @@ test('public HTML is fetchable with browser, generic automation, and Anthropic u
       const html = await response.text();
       expect(html, `${userAgent} SSR ${path}`).toMatch(/<h1[\s>]/i);
     }
-    const head = await request.head('/methodology', { headers: { 'user-agent': userAgent } });
-    expect(head.status(), `${userAgent} HEAD /methodology`).toBe(200);
+    const head = await request.head('/resources', { headers: { 'user-agent': userAgent } });
+    expect(head.status(), `${userAgent} HEAD /resources`).toBe(200);
     expect(head.headers()['content-type']).toContain('text/html');
   }
 
-  for (const path of ['/en/methodology', '/estimate/results']) {
+  for (const path of ['/resources', '/estimate/results']) {
     const response = await request.get(path, { headers: { 'user-agent': 'SolarMatchAudit/1.0' } });
     expect(response.status(), `generic automation GET ${path}`).toBe(200);
     expect((await response.text()), `generic automation SSR ${path}`).toMatch(/<h1[\s>]/i);
@@ -89,20 +89,20 @@ test('public HTML is fetchable with browser, generic automation, and Anthropic u
 
 test('SSR metadata, language boundaries, and images are safe', async ({ request }, testInfo) => {
   desktopOnly(testInfo);
-  const thai = await (await request.get('/methodology')).text();
+  const thai = await (await request.get('/resources')).text();
   expect(thai).toMatch(/<meta name="robots" content="noindex, follow"/i);
-  expect(thai).toContain('rel="canonical" href="https://solarmatch-thailand.deluxejahseh.workers.dev/methodology"');
+  expect(thai).toContain('rel="canonical" href="https://solarmatch-thailand.deluxejahseh.workers.dev/resources"');
   expect(thai).toMatch(/hrefLang="en-US"/i);
 
-  const english = await (await request.get('/en/methodology')).text();
+  const english = await (await request.get('/en/resources')).text();
   expect(english).toContain('lang="en" data-locale="en"');
   expect(english).toMatch(/hrefLang="th-TH"/i);
-  expect(english).toContain('How we calculate your estimate');
+  expect(english).toContain('Sources behind our solar facts');
 
   const home = await (await request.get('/')).text();
   expect(home).toMatch(/<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/i);
   expect(home).not.toMatch(/user-scalable=no|maximum-scale=1/i);
-  expect(home).toContain('/images/design-v2/home-hero-m.jpg');
+  expect(home).toContain('/design-v3/home-hero-wide-m.jpg');
   expect(home).not.toContain('solar-home-hero.jpg');
   expect(home).not.toContain('solar-home-ai-');
   expect(home).not.toMatch(/<img[^>]+src="https?:\/\//i);

@@ -4,6 +4,7 @@ import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { sha256 } from '@/lib/server/crypto';
 import { getRuntimeEnv, requireDatabase } from '@/lib/server/runtime';
+import { limitedUploadForm, UploadTooLarge } from '@/lib/server/admin-upload';
 
 export const dynamic = 'force-dynamic';
 const metadataSchema = z.object({ partnerId: z.string().uuid(), effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u).nullable(), expiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u).nullable() });
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
   const bucket = getRuntimeEnv().MEDIA;
   if (!bucket) return NextResponse.json({ error: 'private_storage_unavailable' }, { status: 503 });
   let form: FormData;
-  try { form = await request.formData(); } catch { return NextResponse.json({ error: 'invalid_form' }, { status: 400 }); }
+  try { form = await limitedUploadForm(request, 10_485_760 + 65_536); } catch (error) { return NextResponse.json({ error: error instanceof UploadTooLarge ? 'upload_too_large' : 'invalid_form' }, { status: error instanceof UploadTooLarge ? 413 : 400 }); }
   const file = form.get('file');
   const parsed = metadataSchema.safeParse({ partnerId: form.get('partnerId'), effectiveDate: form.get('effectiveDate') || null, expiryDate: form.get('expiryDate') || null });
   if (!parsed.success || !(file instanceof File) || file.type !== 'application/pdf' || file.size < 5 || file.size > 10_485_760) return NextResponse.json({ error: 'invalid_contract_pdf' }, { status: 400 });

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Pause, Phone, Play } from 'lucide-react';
 import { landingExamples, landingExampleTimeframes } from './landing-example-data';
 import { signalLandingText } from './signal-landing-copy';
+import { createVisibleFrameLoop } from '@/lib/home/visible-frame-loop';
 
 export function wrapFeedPosition(position: number, scrollSize: number): number {
   const half = scrollSize / 2;
@@ -35,13 +36,13 @@ export function LandingExamples({ en }: { en: boolean }) {
     const mq = window.matchMedia('(max-width:959px)');
     let sideways = mq.matches;
     let position = sideways ? v.scrollLeft : v.scrollTop;
-    let last = 0, holdUntil = 0, frameId = 0;
+    let holdUntil = 0;
+    let visible = true;
     let hover = false;
-    const frame = (time: number) => {
+    const loop = createVisibleFrameLoop((time, elapsed) => {
       // Use elapsed visible time. A 50ms cap makes a delayed Safari frame slow
       // the feed itself, on top of the rendering delay (e.g. 26px/s becomes 2px/s).
-      const dt = last ? Math.max(0, time - Math.max(last, holdUntil)) : 0;
-      last = time;
+      const dt = Math.max(0, Math.min(elapsed, time - holdUntil));
       if (sideways !== mq.matches) {
         sideways = mq.matches;
         position = sideways ? v.scrollLeft : v.scrollTop;
@@ -51,8 +52,8 @@ export function LandingExamples({ en }: { en: boolean }) {
         if (sideways) v.scrollLeft = position;
         else v.scrollTop = position;
       }
-      frameId = requestAnimationFrame(frame);
-    };
+    }, callback => requestAnimationFrame(callback), id => cancelAnimationFrame(id));
+    const sync = () => loop.setActive(!paused && !hover && visible && !document.hidden);
     const user = () => { holdUntil = performance.now() + 3500; };
     const scroll = () => {
       // Safari may deliver a programmatic scroll asynchronously and round it to
@@ -69,19 +70,26 @@ export function LandingExamples({ en }: { en: boolean }) {
     };
     // Touch browsers synthesize mouseenter on tap and may never send mouseleave.
     // Their temporary hold is handled by user(), not a permanent hover pause.
-    const enter = () => { hover = window.matchMedia('(hover: hover)').matches; };
-    const leave = () => { hover = false; };
+    const enter = () => { hover = window.matchMedia('(hover: hover)').matches; sync(); };
+    const leave = () => { hover = false; sync(); };
     // rAF may be suspended in a background tab. Never catch up that hidden time.
-    const visibility = () => { last = 0; };
+    const visibility = sync;
+    // Stop the loop entirely below the fold; preserve position and speed on return.
+    const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver(entries => {
+      visible = entries.some(entry => entry.isIntersecting);
+      sync();
+    });
+    observer?.observe(v);
     const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
     v.addEventListener('scroll', scroll, { passive: true });
     events.forEach(event => v.addEventListener(event, user, { passive: true }));
     v.addEventListener('mouseenter', enter);
     v.addEventListener('mouseleave', leave);
     document.addEventListener('visibilitychange', visibility);
-    frameId = requestAnimationFrame(frame);
+    sync();
     return () => {
-      cancelAnimationFrame(frameId);
+      loop.dispose();
+      observer?.disconnect();
       v.removeEventListener('scroll', scroll);
       events.forEach(event => v.removeEventListener(event, user));
       v.removeEventListener('mouseenter', enter);

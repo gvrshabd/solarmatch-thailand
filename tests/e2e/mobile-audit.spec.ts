@@ -3,8 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 const widths = [320, 360, 375, 384, 390, 393, 402, 412, 414, 430, 432, 768];
 const sliderWidths = [320, 360, 375, 390, 393, 402, 414, 430];
 const routes = [
-  '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide', '/methodology', '/contact', '/resources', '/privacy', '/terms', '/cookies',
-  '/en', '/en/estimate', '/en/estimate/results', '/en/how-it-works', '/en/solar-guide', '/en/methodology', '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
+  '/', '/estimate', '/estimate/results', '/how-it-works', '/solar-guide',  '/contact', '/resources', '/privacy', '/terms', '/cookies',
+  '/en', '/en/estimate', '/en/estimate/results', '/en/how-it-works', '/en/solar-guide',  '/en/contact', '/en/resources', '/en/privacy', '/en/terms', '/en/cookies',
   '/missing-page', '/en/missing-page',
 ];
 

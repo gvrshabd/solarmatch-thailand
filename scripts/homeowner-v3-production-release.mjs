@@ -83,7 +83,7 @@ async function main(){
   const git=(...args)=>execFileSync('git',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
   const branch=git('branch','--show-current');
   const readinessStaging=branch==='feature/nonlegal-launch-readiness'&&targetName==='staging';
-  if(git('remote','get-url','origin')!=='https://github.com/gvrshabd/solarmatch-thailand.git'||(!readinessStaging&&!['feature/homeowner-design-v3-integration','feature/homeowner-contact-and-quote-guide','feature/installer-signal-integration','main'].includes(branch)))throw Error('Wrong repository/branch');
+  if(git('remote','get-url','origin')!=='https://github.com/gvrshabd/solarmatch-thailand.git'||(!readinessStaging&&!['feature/homeowner-design-v3-integration','feature/homeowner-contact-and-quote-guide','feature/installer-signal-integration','review/methodology-security-performance-2026-11','main'].includes(branch)))throw Error('Wrong repository/branch');
   const remoteMain=git('ls-remote','origin','refs/heads/main').split(/\s+/)[0];
   if(!/^[a-f0-9]{40}$/.test(remoteMain))throw Error('Remote main unavailable');
   const config=JSON.parse(await readFile(target.config,'utf8'));

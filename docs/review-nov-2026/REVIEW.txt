@@ -1,0 +1,75 @@
+SolarMatch methodology, security and performance review
+5 November 2026
+
+Scope and preservation
+SolarMatch only. Baseline origin/main f3de7426bfbf5cb257aece97915d2c5c2fcefbe7.
+Preserved the newer homepage work, calculator formulae/model versions, historical
+consent, lead data, installer design, business gates and production bindings.
+No migration, provider message, charge or business activation is part of this work.
+
+Methodology
+Removed the Thai and English public Methodology routes (404), navigation links,
+metadata entries, sitemap/llms listings and unused page component. The private
+Word review and bilingual source snapshot are saved outside this repository.
+Result explanations, limitations, consumer controls and official references remain.
+This does not make browser-delivered calculation code or historical Git content
+secret; no paywall or private server-side calculation rewrite was requested.
+
+Rechecked current PEA tariff/Ft, official tax conditions, export-programme sources,
+catalogue price evidence and resource assumptions. No supported numerical change
+was identified. Optional solar-tax source review date is updated, not the rule or
+calculation. Independent MEA evidence, measured household/site calibration and
+tax-inclusive installation quotations remain gaps. No legal/tax approval claimed.
+The detailed private report records sources, date windows and interpretation limits.
+
+Security
+See SECURITY.txt and before/after dependency-audit JSON. Streamed admin uploads
+are bounded before multipart parsing and raster MIME labels must match magic bytes
+before dimension parsing. Patched direct and transitive dependencies reduce the
+audit from 3 critical/29 high/34 moderate/10 low to 0/0/2/0. Two moderate upstream
+issues remain: unused Satori OG generation and ESLint minimatch. This is a scoped
+source/dependency/local-test review, not an external penetration-test certificate.
+
+Performance and usability
+Installer feed schedules no animation frames while paused, hovered, hidden or
+offscreen, and resumes without catching up hidden time. Homepage count-up frames
+are cancelled on unmount. The below-fold homeowner photo loads lazily and decodes
+asynchronously; dimensions and full-quality asset remain. No image downsampling,
+layout redesign, calculator approximation or artificial speed claim was introduced.
+Scheduler tests establish fewer idle callbacks, not a measured device FPS gain.
+
+Verification history
+Typecheck passed. Lint passed with 14 existing image/prototype warnings, no errors.
+Clean production build passed with patched packages. Full unit suite: 716 tests
+across 88 files passed using two workers and unchanged five-second assertions.
+First run alongside build/lint: two Workerd startup timeouts, 714 passed.
+Second run: one Windows Vite compiler-import resolution failure, 714 passed.
+The two provider-runtime tests now load their Node-side TypeScript compiler with
+createRequire rather than passing that tooling through Vite's symlink resolver.
+Actual provider implementations, redirects, mock boundaries and assertions remain.
+Final full run: all 716 passed. No real provider traffic was sent.
+
+Initial browser setup incorrectly used the held-service preview as the interactive
+base and omitted port 3002; sign-in/disabled-host checks therefore failed. The run
+was stopped, original synthetic demo preserved, and a disposable SQLite backup
+used with separate interactive/held local previews. A too-long Windows SQLite
+destination failed to open; a shorter disposable path succeeded. Neither issue
+involved production data. Correctly configured broad browser run: 104 passed,
+one mobile WebKit homepage-readiness timeout. Its trace showed all responses 200
+and no console/page errors; a cause was not proven. The complete affected Thai/EN
+home and calculator WebKit suite then passed 21/21 unchanged, without concurrent
+browser captures. No timeout or assertion was weakened. Chromium, desktop/mobile
+WebKit, axe, reduced motion, touch hold, resizing, public-route/auth boundaries,
+no-contact journeys and methodology retirement were exercised. This is browser
+emulation, not physical-device or screen-reader certification. Private traces and
+screenshots are kept under ignored .wrangler/review-* paths.
+
+Recovery
+Fresh production export: production-2026-11-05T13-32-46-542Z-7Kbbnv under the ignored
+.wrangler/homeowner-v3-release directory. AES-256-GCM encrypted with a Windows
+CurrentUser DPAPI-protected key; plaintext removed only after decrypt/restore,
+foreign-key, ledger and all-60-table snapshot verification passed. Seven leads,
+three legal versions and zero ledger mismatches at backup. No schema change.
+Previous Worker: 505c4389-0cb1-4365-9eb4-bba916e21653.
+Rollback: revert this application commit through normal main/deployment workflow;
+do not restore the database absent an actual data problem. Keep operation flags off.

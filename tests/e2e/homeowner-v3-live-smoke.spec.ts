@@ -52,7 +52,7 @@ for(const locale of ['en','th'] as const){
     await page.setViewportSize({width:390,height:844});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
     await page.screenshot({path:`${screenshotRoot}/live-production-negative-${locale}-390.png`});
-    for(const path of ['/methodology','/resources','/contact','/privacy','/terms','/cookies']){
+    for(const path of ['/resources','/contact','/privacy','/terms','/cookies']){
       const response=await page.goto(prefix+path);expect(response?.status()).toBe(200);await expect(page.locator('main')).toBeVisible();
     }
     expect(failures).toEqual([]);

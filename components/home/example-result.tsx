@@ -1,6 +1,6 @@
 'use client';
 
-import {useRef,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {designExampleResult} from '@/config/design-example-result';
 import {designText} from '@/config/design-v2-copy';
 import {homeownerText} from '@/config/homeowner-v3-copy';
@@ -25,6 +25,7 @@ export function ExampleResult({locale}:{locale:Locale}) {
     };
     frame.current=requestAnimationFrame(step);
   },()=>{run.current++;cancelAnimationFrame(frame.current);setNow(r.currentMonthlyBillThb);setPrice(0);});
+  useEffect(()=>()=>{run.current++;cancelAnimationFrame(frame.current);},[]);
   return <div className="excard" data-testid="home-example" ref={ref}>
     <div className="exnums">
       <p className="lbl">{v3.exampleBill}</p>

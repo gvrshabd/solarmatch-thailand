@@ -1,8 +1,4 @@
-import { MethodologyContent } from '@/components/pages/methodology-content';
-import { thaiMetadata } from '@/lib/seo/localized-metadata';
+import { notFound } from 'next/navigation';
 
-export const metadata = thaiMetadata('วิธีคำนวณและสมมติฐาน', '/methodology');
-
-export default function MethodologyPage() {
-  return <MethodologyContent locale="th" />;
-}
+export const metadata = { robots: { index: false, follow: false } };
+export default function MethodologyPage() { notFound(); }

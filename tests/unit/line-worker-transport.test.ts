@@ -1,7 +1,8 @@
 import {readFileSync,realpathSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import ts from 'typescript';
 import {expect,it} from 'vitest';
+// Resolve the compiler through Node, avoiding Vite's Windows symlink aliases.
+const ts=createRequire(import.meta.url)('typescript') as typeof import('typescript');
 
 const require=createRequire(realpathSync('node_modules/wrangler/package.json'));
 const {Miniflare}=require('miniflare');

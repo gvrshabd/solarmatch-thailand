@@ -1,7 +1,8 @@
 import {readFileSync,realpathSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import ts from 'typescript';
 import {expect,it} from 'vitest';
+// The compiler is Node-side test tooling, not a Vite-transformed application module.
+const ts=createRequire(import.meta.url)('typescript') as typeof import('typescript');
 const require=createRequire(realpathSync('node_modules/wrangler/package.json'));
 const {Miniflare}=require('miniflare');
 function source(file:string){return ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText.replace(/^import .*;\s*$/gm,'');}

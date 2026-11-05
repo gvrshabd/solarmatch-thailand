@@ -1,0 +1,30 @@
+SolarMatch performance review - 2026-11-05
+Scope: homeowner/installer presentation motion and public assets only.
+
+Finding and fix: installer example feed queued requestAnimationFrame continuously
+while paused, hovered, outside the viewport, and (when browser permitted) hidden.
+New visibility-aware loop cancels pending frames while paused/hovered/offscreen/
+hidden and restarts with zero elapsed time. IntersectionObserver and listeners
+are disconnected on unmount. Animation appearance, 26px/s vertical / 32px/s
+horizontal speed, repeated cards, user hold and reduced-motion controls remain.
+Before: one feed callback per rendered frame in idle states (~60/s on 60Hz).
+After: zero queued callbacks in those states (deterministic scheduler test),
+with the normal per-frame callback while visible and playing. This is scheduling
+evidence, not a measured browser FPS or battery improvement.
+
+Home example count-up had no unmount frame cleanup (unlike the lifetime chart).
+Added cancellation and run-token invalidation to prevent post-unmount updates.
+
+Inspection: shared sun path coalesces scroll events into one frame and removes
+listeners/ResizeObserver. Reveal hook disconnects IntersectionObserver. No
+listener leak found there. Largest public asset inspected: terrace-house-1920.jpg
+489,509 bytes; other leading files og.png 434,006 and home-hero.jpg 377,612.
+No image recompression, animation quality reduction, dependency update or bundle
+rewrite was justified by this review. Existing responsive hero is high priority.
+Below-fold homeowner FAQ image lazy-loading opportunity passed to parent reviewer.
+
+Validation: visible-frame-loop + landing-animation: 2 files, 5 tests passed.
+Additional visible-loop/home-page-motion/signal-landing run: 3 files, 21 tests passed. Targeted ESLint process still running without output; not reported as passed.
+No full build, deployment, data mutation, or production measurements performed.
+Browser behavior and real-device FPS require the coordinating review's smoke test.
+

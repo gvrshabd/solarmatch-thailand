@@ -5,6 +5,7 @@ import { isAdminError, requireAdminRequest } from '@/lib/server/admin-api';
 import { auditStatement } from '@/lib/server/audit';
 import { sha256 } from '@/lib/server/crypto';
 import { getRuntimeEnv, requireDatabase } from '@/lib/server/runtime';
+import { limitedUploadForm, rasterImageMatchesType, UploadTooLarge } from '@/lib/server/admin-upload';
 
 export const dynamic = 'force-dynamic';
 const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   const bucket = getRuntimeEnv().MEDIA;
   if (!bucket) return NextResponse.json({ error: 'media_storage_unavailable' }, { status: 503 });
   let form: FormData;
-  try { form = await request.formData(); } catch { return NextResponse.json({ error: 'invalid_form' }, { status: 400 }); }
+  try { form = await limitedUploadForm(request, 5_000_000 + 65_536); } catch (error) { return NextResponse.json({ error: error instanceof UploadTooLarge ? 'upload_too_large' : 'invalid_form' }, { status: error instanceof UploadTooLarge ? 413 : 400 }); }
   const file = form.get('file');
   const purpose = String(form.get('purpose') ?? '').trim();
   const altEn = String(form.get('altEn') ?? '').trim();
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
   if (!(file instanceof File) || !allowedTypes.has(file.type) || file.size < 1 || file.size > 5_000_000) return NextResponse.json({ error: 'invalid_image' }, { status: 400 });
   if (!purpose || purpose.length > 100 || !altEn || altEn.length > 300 || !altTh || altTh.length > 300) return NextResponse.json({ error: 'invalid_metadata' }, { status: 400 });
   const bytes = new Uint8Array(await file.arrayBuffer());
+  if (!rasterImageMatchesType(bytes, file.type)) return NextResponse.json({ error: 'invalid_image_content' }, { status: 400 });
   let dimensions: ReturnType<typeof imageSize>;
   try { dimensions = imageSize(bytes); } catch { return NextResponse.json({ error: 'invalid_image_content' }, { status: 400 }); }
   if (!dimensions.width || !dimensions.height || dimensions.width > 8000 || dimensions.height > 8000) return NextResponse.json({ error: 'invalid_dimensions' }, { status: 400 });

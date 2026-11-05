@@ -27,7 +27,6 @@ export function SiteFooter() {
           <h2>SolarMatch</h2>
           <Link href={link('/estimate')}>{english ? 'Solar estimate' : 'ประเมินโซลาร์'}</Link>
           <Link href={link('/how-it-works')}>{english ? 'How it works' : 'วิธีการทำงาน'}</Link>
-          <Link href={link('/methodology')}>{english ? 'Methodology' : 'วิธีคำนวณ'}</Link>
           <Link href={link('/solar-guide')}>{english ? 'Solar guide' : 'คู่มือโซลาร์'}</Link>
         </div>
         <div>

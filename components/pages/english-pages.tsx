@@ -8,7 +8,6 @@ import {
   MessagesSquare,
 } from 'lucide-react';
 import { HomePage } from '@/components/home/home-page';
-import { MethodologyContent } from '@/components/pages/methodology-content';
 import { ResourcesContent } from '@/components/pages/resources-content';
 import { SolarGuideContent } from '@/components/pages/solar-guide-content';
 import { QuotationComparison } from '@/components/pages/quotation-comparison';
@@ -25,7 +24,7 @@ function EnglishHowItWorks() {
   return <main><PageHero eyebrow="How it works" title="How SolarMatch works"><p>SolarMatch breaks complicated information into three stages, showing what is known, what still needs checking, and what to ask an installer.</p></PageHero>
     <section className="site-shell numbered-sections">
       <article><span>01</span><ClipboardList /><div><h2>Start with available information</h2><p>Answer what you know about province, bills, usage, and the roof. There is no need to guess or upload documents.</p></div></article>
-      <article><span>02</span><Calculator /><div><h2>Prepare a practical planning figure</h2><p>Your assessment answers produce a starting system size, production, price, savings, and payback with a method and source trail you can inspect.</p></div></article>
+      <article><span>02</span><Calculator /><div><h2>Prepare a practical planning figure</h2><p>Your assessment answers produce a starting system size, production, price, savings, and payback with clear limitations and reference sources.</p></div></article>
       <article><span>03</span><MessagesSquare /><div><h2>Prepare your next step</h2><p>View the full estimate without contact details and prepare questions for a professional assessment.</p><p><ServiceAvailabilityNotice locale="en"/></p></div></article>
     </section>
     <section className="content-cta"><div className="site-shell"><h2>Ready to try it with your electricity bill?</h2><Link className="button" href={en('/estimate')}>Start estimate <ArrowRight size={18} /></Link></div></section>
@@ -34,10 +33,6 @@ function EnglishHowItWorks() {
 
 function EnglishSolarGuide() {
   return <SolarGuideContent locale="en" />;
-}
-
-function EnglishMethodology() {
-  return <MethodologyContent locale="en" />;
 }
 
 function EnglishContact() {
@@ -90,7 +85,6 @@ export function EnglishPage({ slug }: { slug: string }) {
     case 'how-it-works': return <EnglishHowItWorks />;
     case 'solar-guide': return <EnglishSolarGuide />;
     case 'quotation-comparison': return <QuotationComparison locale="en" />;
-    case 'methodology': return <EnglishMethodology />;
     case 'contact': return <EnglishContact />;
     case 'resources': return <EnglishResources />;
     case 'privacy': return <EnglishPrivacy />;
