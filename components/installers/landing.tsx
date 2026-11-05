@@ -1,7 +1,6 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import type { InstallerPublicConfig } from '@/lib/installer/public-config';
 import { LandingExamples } from './landing-examples';
@@ -51,7 +50,7 @@ export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage 
       <div className="top">
         <div className="glow" aria-hidden="true"><span className="blob b1"/><span className="blob b2"/><span className="blob b3"/><span className="blob b4"/><span className="grain"/></div>
         <section className={'hero' + (auth ? ' authing' : '')}><div className="wrap">
-          <div className="copy"><p className="eyebrow">{t.eyebrow}</p><h1>{t.h1a}<em>{t.h1b}</em></h1><div className="btns">
+          <div className="copy"><p className="eyebrow">{t.eyebrow}</p><h1 aria-label={t.h1a + t.h1b}><span aria-hidden="true">{t.headlineLines.map((line, i) => <span className={i >= 2 ? "headline-line accent" : "headline-line"} key={line}>{line}</span>)}</span></h1><div className="btns">
             <button type="button" className="btn primary lg" disabled={!canApply} onClick={apply}>{canApply ? t.applyLong : t.unavailable}<ArrowRight className="i arr" aria-hidden="true"/></button>
             <button type="button" className="btn ghost lg" disabled={!available} onClick={signIn}>{t.signIn}</button>
           </div></div>
@@ -59,10 +58,10 @@ export function InstallerLanding({ en, config, apply, signIn, auth, setLanguage 
         </div></section>
       </div>
       <section className="how" id="how"><div className="wrap"><h2>{t.howH}</h2><LandingSunPath en={en}/></div></section>
-      <section className="faq" id="faq"><div className="band">
-        <Image src="/images/design-v2/roof-tile.jpg" alt={t.photoAlt} width={1200} height={880} loading="eager"/>
+      <section className="faq" id="faq"><div className="wrap"><div className="band">
+        <img src="/design-v3/palms-roof.jpg" alt={t.photoAlt} width={1600} height={1200} loading="lazy" decoding="async"/>
         <span className="credit">Photo: Kindel Media / Pexels</span><div className="wrap"><h2>{t.faqH}</h2></div>
-      </div><div className="wrap"><div className="qas">{faq.map(([question, answer]) => <details className="qa" key={question}><summary>{question}<span className="pm" aria-hidden="true"/></summary><p>{answer}</p></details>)}</div></div></section>
+      </div></div><div className="wrap"><div className="qas">{faq.map(([question, answer]) => <details className="qa" key={question}><summary>{question}<span className="pm" aria-hidden="true"/></summary><p>{answer}</p></details>)}</div></div></section>
     </main>
     <footer className="foot"><div className="wrap">
       <SignalBrand en={en}/>

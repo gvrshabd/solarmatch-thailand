@@ -44,7 +44,7 @@ describe('Signal installer landing safeguards', () => {
       expect(html).toContain(en ? 'Examples' : 'ตัวอย่าง');
       expect(html.match(/<article class="pc"/g)).toHaveLength(12);
       expect(html.match(/<article class="pc" aria-hidden="true"/g)).toHaveLength(6);
-      expect(html).toContain('loading="eager"');
+      expect(html).toContain('loading="lazy"');
       expect(html).toContain('Photo: Kindel Media / Pexels');
       expect(html).toContain(`<a class="sr skip" href="#installer-landing-main">${en ? 'Skip to content' : 'ข้ามไปเนื้อหา'}</a>`);
       expect(html.match(/<main\b/g)).toHaveLength(1);
