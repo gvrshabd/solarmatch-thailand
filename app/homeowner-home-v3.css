@@ -42,7 +42,7 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .eyebrow{letter-spacing:.02em;tex
 .homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(40px,5.8vw,78px)}
 html[lang=th] .homeowner-v3 .homeowner-home-v3 .hero3 h1{font-size:clamp(34px,5vw,64px)}
 .homeowner-v3 .homeowner-home-v3 .hero3 h1 em{font-style:normal}
-.homeowner-v3 .homeowner-home-v3 .trust{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-size:15px;font-weight:600}
+.homeowner-v3 .homeowner-home-v3 .trust{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-size:15px;font-weight:700;color:var(--sm-pine)}
 .homeowner-v3 .homeowner-home-v3 .trust span{display:inline-flex;align-items:center;gap:7px;white-space:normal}
 .homeowner-v3 .homeowner-home-v3 .trust svg{width:17px;height:17px;flex:none;color:var(--sm-green)}
 /* glow: pre-rendered soft circles (no CSS blur, so Safari stays smooth) drifting slowly, plus fine grain */
