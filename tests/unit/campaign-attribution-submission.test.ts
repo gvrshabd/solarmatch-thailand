@@ -50,9 +50,10 @@ describe('campaign capture belongs only to the authorised final submission trans
     expect(fixture.sqlite.prepare('SELECT count(*) n FROM leads').get()?.n).toBe(1);
     expect(fixture.sqlite.prepare('SELECT count(*) n FROM lead_campaign_attribution').get()?.n).toBe(0);
   });
-  it('stores unknown for an older client with no attribution, never infers direct from server referrer',async()=>{
+  it('keeps the contact request but stores no attribution when the browser omits it',async()=>{
     const {body}=await verifiedRequest();expect((await POST(request({...body,attribution:undefined}))).status).toBe(201);
-    expect(fixture.sqlite.prepare('SELECT campaign_code FROM lead_campaign_attribution').get()?.campaign_code).toBe('unknown');
+    expect(fixture.sqlite.prepare('SELECT count(*) n FROM leads').get()?.n).toBe(1);
+    expect(fixture.sqlite.prepare('SELECT count(*) n FROM lead_campaign_attribution').get()?.n).toBe(0);
   });
   it('a valid request rejected by qualification is captured as original rejected acquisition',async()=>{
     const {body}=await verifiedRequest();expect((await POST(request({...body,answers:{...body.answers,ownershipStatus:'renter',ownerPermission:'yes'}}))).status).toBe(201);

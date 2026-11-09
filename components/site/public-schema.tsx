@@ -7,5 +7,6 @@ export function PublicSchema({locale,faq}:{locale:Locale;faq:readonly (readonly 
   {'@type':'WebSite','@id':siteConfig.url+'/#website',name:siteConfig.name,url:siteConfig.url,inLanguage:['th','en'],publisher:{'@id':siteConfig.url+'/#brand'}},
   {'@type':'FAQPage',inLanguage:locale,mainEntity:faq.map(([q,a])=>({'@type':'Question',name:q,acceptedAnswer:{'@type':'Answer',text:a}}))},
  ]};
- return <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(data).replaceAll('<','\\u003c')}}/>;
+ const json = JSON.stringify(data).replaceAll('<', '\\u003c');
+ return <script type="application/ld+json">{json}</script>;
 }

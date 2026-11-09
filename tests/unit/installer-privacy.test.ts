@@ -1,6 +1,12 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 const runtime=vi.hoisted(()=>({PHONE_VERIFICATION_SECRET:'fixture-secret-at-least-32-characters',INSTALLER_PLATFORM_MODE:'local-test',DB:undefined as D1Database|undefined}));
 vi.mock('@/lib/server/runtime',()=>({getRuntimeEnv:()=>runtime,requireDatabase:()=>runtime.DB!}));
+vi.mock('@/lib/server/admin-api', () => ({
+  requireAdminRequest: async () => ({ email: 'synthetic-administrator@example.test' }),
+  isAdminError: () => false,
+}));
+import { POST as savePrivacyRequest } from '@/app/admin/api/legal-launch/route';
+import { POST as manageLeads } from '@/app/admin/api/leads/route';
 import { FixtureDatabase,seedFixture,seedLead } from '../installer/fixtures';
 import { purgeInstallerLeads,redactInstallerLeads } from '@/lib/installer/privacy';
 import { allocateEnquiry } from '@/lib/installer/deliveries';
@@ -9,7 +15,7 @@ describe('canonical personal-data redaction',()=>{
   let fixture:FixtureDatabase;
   beforeEach(async()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-11T03:00:00Z'));fixture=new FixtureDatabase();runtime.INSTALLER_PLATFORM_MODE='local-test';runtime.DB=fixture.d1();await seedFixture(fixture.d1());});
   afterEach(()=>{fixture.close();vi.useRealTimers();});
-  it('redacts known personal markers including notes/snapshots while retaining delivery slots',async()=>{
+  it('records a synthetic deletion request and redacts related personal data while retaining delivery slots',async()=>{
     const first=await seedLead(fixture.d1());const duplicate=await seedLead(fixture.d1());
     await allocateEnquiry(fixture.d1(),first.enquiryId,'fixture');
     const marker='PRIVATE_PERSON_MARKER';
@@ -17,9 +23,33 @@ describe('canonical personal-data redaction',()=>{
     fixture.sqlite.prepare('INSERT INTO lead_notes(id,lead_id,note,actor_email) VALUES(?,?,?,?)').run('private-note',first.leadId,marker,'fixture');
     fixture.sqlite.prepare('INSERT INTO export_batches(id,created_by,lead_count,export_scope,format_version) VALUES(?,?,?,?,?)').run('private-export','fixture',1,'solar_match_validation_followup','fixture-v1');
     fixture.sqlite.prepare('INSERT INTO export_batch_items(export_batch_id,lead_id,snapshot_json) VALUES(?,?,?)').run('private-export',first.leadId,JSON.stringify({contact:marker}));
-    const result=await purgeInstallerLeads(fixture.d1(),new Request('http://localhost:3000/admin/api/leads'),[first.leadId],'fixture');
-    expect(result.purged).toBe(2);
-    for(const table of ['leads','lead_notes','export_batch_items','lead_score_history','audit_events']) expect(JSON.stringify(fixture.sqlite.prepare(`SELECT * FROM ${table}`).all())).not.toContain(marker);
+    const request = (path: string, body: object) => new Request('http://localhost:3000' + path, {
+      method: 'POST',
+      headers: { Origin: 'http://localhost:3000', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const intake = await savePrivacyRequest(request('/admin/api/legal-launch', {
+      action: 'save-privacy-request',
+      request: {
+        leadId: first.leadId,
+        requestType: 'deletion',
+        receivedChannel: 'email',
+        receivedAt: new Date().toISOString(),
+        identityVerificationState: 'verified',
+        dueAt: null,
+        resolutionNotes: marker,
+      },
+    }));
+    expect(intake.status).toBe(200);
+    const { requestId } = await intake.json() as { requestId: string };
+    const purge = await manageLeads(request('/admin/api/leads', {
+      action: 'purge', leadIds: [first.leadId], confirmation: 'PERMANENTLY DELETE',
+    }));
+    expect(purge.status).toBe(200);
+    expect(await purge.json()).toMatchObject({ ok: true, purged: 2, redacted: true });
+    for(const table of ['leads','lead_notes','export_batch_items','lead_score_history','audit_events','privacy_rights_requests']) expect(JSON.stringify(fixture.sqlite.prepare(`SELECT * FROM ${table}`).all())).not.toContain(marker);
+    expect(fixture.sqlite.prepare('SELECT request_type,suppression_applied FROM privacy_rights_requests WHERE id=?').get(requestId))
+      .toMatchObject({ request_type: 'deletion', suppression_applied: 1 });
     expect(fixture.sqlite.prepare('SELECT COUNT(*) AS count FROM lead_recipient_deliveries').get()?.count).toBe(3);
     expect(fixture.sqlite.prepare('SELECT COUNT(*) AS count FROM installer_credit_ledger WHERE kind=?').get('delivery')?.count).toBe(3);
     expect(fixture.sqlite.prepare("SELECT COUNT(*) AS count FROM installer_outbox WHERE kind='withdrawal'").get()?.count).toBe(3);

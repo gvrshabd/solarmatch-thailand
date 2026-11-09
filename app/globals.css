@@ -3535,3 +3535,35 @@ body.calculation-loading-active .site-footer { display: none; }
   .admin-export-scope { grid-template-columns: 1fr; }
   .admin-field-wide { grid-column: auto; }
 }
+
+.campaign-consent {
+  width: min(520px, calc(100% - 32px));
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+.campaign-consent:not(.campaign-preferences) {
+  position: fixed;
+  z-index: 80;
+  inset-inline-end: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  max-height: 70svh;
+  overflow: auto;
+  box-shadow: 0 8px 30px rgb(16 37 27 / 20%);
+}
+.campaign-preferences { margin: 16px auto; }
+.campaign-consent p { margin: 6px 0; }
+.campaign-consent a { text-decoration: underline; }
+.campaign-consent-actions { display: flex; gap: 8px; margin-top: 12px; }
+.campaign-consent-actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--dark);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
