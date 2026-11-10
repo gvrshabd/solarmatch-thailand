@@ -181,6 +181,7 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .excard .lbl{letter-spacing:.02em
 @media(min-width:960px){.homeowner-v3 .homeowner-home-v3 .trustpanel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}}
 .homeowner-v3 .homeowner-home-v3 .trustpanel h2{color:#fff}
 .homeowner-v3 .homeowner-home-v3 .trp{margin-top:18px;max-width:30em;font-size:17px;color:var(--sm-ondark)}
+.homeowner-v3 .homeowner-home-v3 .trp:lang(en){font-size:15px}
 .homeowner-v3 .homeowner-home-v3 .sources{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
 .homeowner-v3 .homeowner-home-v3 .hp-chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:var(--sm-pill);font-size:14px;font-weight:600;text-decoration:none;background:rgba(214,239,145,.1);color:var(--sm-lime)}
 .homeowner-v3 .homeowner-home-v3 .hp-chip:hover{background:rgba(214,239,145,.18)}
