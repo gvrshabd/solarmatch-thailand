@@ -14,7 +14,7 @@ const copy = {
     exampleBill: 'Monthly bill', today: 'Today', withSolar: 'With solar',
     howHeading: 'How it works', steps: ['Answer a few questions', 'See your savings', 'Get real quotes from real installers.'],
     trustH2: 'Conservative on purpose.',
-    trustBody: 'an estimate to help you plan, not a quote.',
+    trustBody: 'An estimate to help you plan, not a quote.',
     sources: ['MEA residential tariff', 'PEA residential tariff', 'Current solar market rates'],
     rows: [
       {label: 'Package price', mark: 'yes', aria: 'Modelled'},
