@@ -174,14 +174,13 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .excard .lbl{letter-spacing:.02em
 .homeowner-v3 .homeowner-home-v3 .sun{top:18px}
 @media(min-width:860px){.homeowner-v3 .homeowner-home-v3 .sun{left:12%;top:218px}}
 
-/* ---------- why trust: night panel with a lime and a gold glow; pill rows tick in ---------- */
+/* ---------- why trust: night panel with emerald and gold glows; pill marks pop in ---------- */
 .homeowner-v3 .homeowner-home-v3 .trustpanel{display:grid;gap:28px;border-radius:var(--sm-r-xl);padding:clamp(24px,4vw,56px);position:relative;overflow:hidden;isolation:isolate;background:var(--sm-night);color:#fff;box-shadow:var(--hp-lift)}
-.homeowner-v3 .homeowner-home-v3 .trustpanel::before{content:"";position:absolute;width:520px;height:520px;right:-160px;top:-220px;border-radius:50%;background:radial-gradient(closest-side,rgba(214,239,145,.28),transparent);z-index:-1}
-.homeowner-v3 .homeowner-home-v3 .trustpanel::after{content:"";position:absolute;width:420px;height:420px;left:-160px;bottom:-240px;border-radius:50%;background:radial-gradient(closest-side,rgba(226,166,43,.22),transparent);z-index:-1}
+.homeowner-v3 .homeowner-home-v3 .trustpanel::before{content:"";position:absolute;width:520px;height:520px;left:-160px;top:-220px;border-radius:50%;background:radial-gradient(closest-side,rgba(47,158,108,.34),transparent);z-index:-1}
+.homeowner-v3 .homeowner-home-v3 .trustpanel::after{content:"";position:absolute;width:420px;height:420px;right:-160px;bottom:-240px;border-radius:50%;background:radial-gradient(closest-side,rgba(226,166,43,.22),transparent);z-index:-1}
 @media(min-width:960px){.homeowner-v3 .homeowner-home-v3 .trustpanel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}}
-.homeowner-v3 .homeowner-home-v3 .trustpanel .eyebrow{color:var(--sm-lime)}
 .homeowner-v3 .homeowner-home-v3 .trustpanel h2{color:#fff}
-.homeowner-v3 .homeowner-home-v3 .trp{margin-top:0;max-width:30em;font-size:17px;color:var(--sm-ondark)}
+.homeowner-v3 .homeowner-home-v3 .trp{margin-top:18px;max-width:30em;font-size:17px;color:var(--sm-ondark)}
 .homeowner-v3 .homeowner-home-v3 .sources{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
 .homeowner-v3 .homeowner-home-v3 .hp-chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:var(--sm-pill);font-size:14px;font-weight:600;text-decoration:none;background:rgba(214,239,145,.1);color:var(--sm-lime)}
 .homeowner-v3 .homeowner-home-v3 .hp-chip:hover{background:rgba(214,239,145,.18)}
@@ -189,11 +188,19 @@ html[lang=th] .homeowner-v3 .homeowner-home-v3 .excard .lbl{letter-spacing:.02em
 .homeowner-v3 .homeowner-home-v3 .method-link{margin-top:0}
 .homeowner-v3 .homeowner-home-v3 .trustpanel .link{color:#fff}
 .homeowner-v3 .homeowner-home-v3 .rows{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.homeowner-v3 .homeowner-home-v3 .rows li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 12px 12px 22px;border-radius:var(--sm-pill);background:rgba(255,255,255,.06);font-size:clamp(15.5px,1.5vw,18px);font-weight:600}
+.homeowner-v3 .homeowner-home-v3 .rows li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 12px 12px 22px;border-radius:var(--sm-pill);font-size:clamp(15.5px,1.5vw,18px);font-weight:600}
+.homeowner-v3 .homeowner-home-v3 .rows .yes{background:rgba(255,255,255,.075)}
+.homeowner-v3 .homeowner-home-v3 .rows .no{background:rgba(255,255,255,.035);color:rgba(255,255,255,.76)}
 .homeowner-v3 .homeowner-home-v3 .rows b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;flex:none;transition:transform .45s var(--hp-spring)}
 .homeowner-v3 .homeowner-home-v3 .rows b svg{width:17px;height:17px;stroke-width:2.6}
-.homeowner-v3 .homeowner-home-v3 .rows .yes b{background:var(--sm-lime);color:var(--sm-pine)}
-.homeowner-v3 .homeowner-home-v3 .rows .no b{background:rgba(232,131,107,.2);color:var(--sm-coral)}
+.homeowner-v3 .homeowner-home-v3 .rows .yes b{
+  width:32px;height:32px;
+  background:linear-gradient(155deg,#ECFBA8 0%,#C4EC5E 100%);
+  color:var(--sm-night);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 0 0 3px rgba(196,236,94,.13),0 6px 18px -6px rgba(196,236,94,.7)
+}
+.homeowner-v3 .homeowner-home-v3 .rows .yes b svg{width:18px;height:18px;stroke-width:3.2;stroke-linecap:square;stroke-linejoin:miter}
+.homeowner-v3 .homeowner-home-v3 .rows .no b{background:rgba(214,239,145,.15);color:#B3CDA4}
 .homeowner-v3 .homeowner-home-v3 .rows li:nth-child(2) b{transition-delay:.12s}.homeowner-v3 .homeowner-home-v3 .rows li:nth-child(3) b{transition-delay:.24s}.homeowner-v3 .homeowner-home-v3 .rows li:nth-child(4) b{transition-delay:.36s}.homeowner-v3 .homeowner-home-v3 .rows li:nth-child(5) b{transition-delay:.48s}
 .homeowner-v3 .homeowner-home-v3 .rows[data-reveal=pre] b{transform:scale(0)}
 

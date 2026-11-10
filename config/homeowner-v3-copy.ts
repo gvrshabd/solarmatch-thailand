@@ -13,13 +13,13 @@ const copy = {
     exampleEyebrow: 'Example estimate · Sathon',
     exampleBill: 'Monthly bill', today: 'Today', withSolar: 'With solar',
     howHeading: 'How it works', steps: ['Answer a few questions', 'See your savings', 'Get real quotes from real installers.'],
-    trustH2: 'Official tariffs. Published prices.',
+    trustH2: 'Conservative on purpose.',
     trustBody: 'A planning estimate, not a quote. Your final price comes from an installer’s survey.',
-    sources: ['MEA residential tariff', 'PEA residential tariff', 'Solar resource & price evidence'],
+    sources: ['MEA residential tariff', 'PEA residential tariff', 'Current solar market rates'],
     rows: [
-      {label: 'Package price + planning allowance', mark: 'yes', aria: 'Modelled'},
+      {label: 'Package price', mark: 'yes', aria: 'Modelled'},
       {label: 'Maintenance & component reserve', mark: 'yes', aria: 'Modelled'},
-      {label: 'Panels ageing 0.5% a year', mark: 'yes', aria: 'Modelled'},
+      {label: 'Panel degradation', mark: 'yes', aria: 'Modelled'},
       {label: 'Export income', mark: 'no', aria: 'Separate conditional scenario'},
       {label: 'Personal tax relief', mark: 'no', aria: 'Separate conditional scenario'},
     ] as readonly Row[],
@@ -44,14 +44,18 @@ const copy = {
       'ดูว่าคุณประหยัดได้เท่าไร', // needs native review
       'รับใบเสนอราคาจริงจากผู้ติดตั้งจริง',
     ],
-    trustH2: 'อัตราค่าไฟทางการ ราคาที่เผยแพร่จริง', // needs native review
+    trustH2: 'ตั้งใจประเมินแบบระมัดระวัง', // needs native review
     trustBody: 'เป็นผลประเมินเพื่อวางแผน ไม่ใช่ใบเสนอราคา ราคาสุดท้ายขึ้นอยู่กับการสำรวจหน้างานของผู้\u2060ติดตั้ง', // needs native review (\u2060 keeps “ผู้ติดตั้ง” on one line)
-    sources: ['อัตราค่าไฟบ้าน กฟน.', 'อัตราค่าไฟบ้าน กฟภ.', 'ข้อมูลแสงแดดและราคาอ้างอิง'],
+    sources: [
+      'อัตราค่าไฟบ้าน กฟน.',
+      'อัตราค่าไฟบ้าน กฟภ.',
+      'ราคาตลาดโซลาร์ปัจจุบัน', // needs native review
+    ],
     // Row labels need native review.
     rows: [
-      {label: 'ราคาแพ็กเกจ รวมเงินเผื่อวางแผน', mark: 'yes', aria: 'รวมอยู่ในแบบจำลอง'},
+      {label: 'ราคาแพ็กเกจ', mark: 'yes', aria: 'รวมอยู่ในแบบจำลอง'}, // needs native review
       {label: 'เงินสำรองค่าบำรุงรักษาและชิ้นส่วน', mark: 'yes', aria: 'รวมอยู่ในแบบจำลอง'},
-      {label: 'ประสิทธิภาพแผงลดลงปีละ 0.5%', mark: 'yes', aria: 'รวมอยู่ในแบบจำลอง'},
+      {label: 'การเสื่อมสภาพของแผง', mark: 'yes', aria: 'รวมอยู่ในแบบจำลอง'}, // needs native review
       {label: 'รายได้จากการขายไฟส่วนเกิน', mark: 'no', aria: 'แสดงแยกเป็นกรณีตามเงื่อนไข ไม่รวมในผลหลัก'},
       {label: 'สิทธิลดหย่อนภาษีบุคคลธรรมดา', mark: 'no', aria: 'แสดงแยกเป็นกรณีตามเงื่อนไข ไม่รวมในผลหลัก'},
     ] as readonly Row[],
