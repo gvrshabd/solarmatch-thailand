@@ -37,7 +37,7 @@ const adminSession = await (await request('/admin/api/session', {}, adminCookie)
 if (!adminSession.csrfToken) throw new Error('Synthetic admin CSRF session unavailable.');
 // Fresh local stores need the stock assessment release before the first fictional
 // homeowner can request a quote. This existing authenticated admin read prepares it.
-const localLeads = await request('/admin/api/leads?submissionType=test&pageSize=1', {}, adminCookie);
+const localLeads = await request('/admin/api/leads?submissionType=test', {}, adminCookie);
 await localLeads.arrayBuffer();
 
 const adminPost = body => json('/admin/api/installer-platform', body, adminCookie, adminSession.csrfToken);

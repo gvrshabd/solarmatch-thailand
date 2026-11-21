@@ -1,7 +1,7 @@
 import { expect, test, type Locator } from '@playwright/test';
 import type { InstallerPortalData } from '../../lib/installer/portal-contract';
 import { signalGroup } from '../../components/installers/signal-state';
-import { mockSignalPortal, signalId } from './signal-fixtures';
+import { mockSignalPortal, signalId, SIGNAL_NOW } from './signal-fixtures';
 
 const app = '/installers/app';
 
@@ -57,6 +57,71 @@ test('an unanswered call opens an editable text and a wrong number prepares a cl
     {action:'log-activity', deliveryId:id, revision:0, kind:'call-no-answer'},
     {action:'log-activity', deliveryId:id, revision:0, kind:'call-wrong'},
   ]);
+});
+
+test('the decision card sends each close reason, reopens the saved stage, and undoes a win', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const id = signalId(28);
+  const { data } = await mockSignalPortal(page, 'approved', 'en');
+  const delivery = data.deliveries.find(item => item.id === id)!;
+  delivery.workflowRevision = 3;
+  delivery.reopenOutcome = 'quoted';
+  const undoId = signalId(700);
+  const requests: unknown[] = [];
+  await page.route('**/api/installer/portal**', async route => {
+    if (route.request().method() !== 'POST') return route.fallback();
+    const body = route.request().postDataJSON();
+    requests.push(body);
+    // Each next GET returns the state the real API projects after this response.
+    delivery.outcome = body.action === 'undo-activity' ? 'quoted' : body.outcome;
+    delivery.closeReason = body.closeReason ?? null;
+    delivery.workflowRevision = (delivery.workflowRevision ?? 0) + 1;
+    return route.fulfill({ json: { ok: true, undoId, undoExpiresAt: new Date(SIGNAL_NOW + 6000).toISOString() } });
+  });
+  await page.goto(`${app}/enquiry/${id}?lang=en&tab=active`);
+  const card = page.getByRole('region', { name: 'Next step' });
+  const reasons = [
+    ['Chose another company', 'other-company', 'lost'], ['Price', 'price', 'lost'],
+    ['Not ready yet', 'not-ready', 'lost'], ['Couldn’t reach them', 'unreachable', 'lost'],
+    ['Not suitable for solar', 'not-suitable', 'not-suitable'],
+  ];
+  let revision = 3;
+  for (const [label, closeReason, outcome] of reasons) {
+    await card.getByRole('button', { name: 'Not this time' }).click();
+    await card.getByRole('radio', { name: label, exact: true }).check();
+    await card.getByRole('button', { name: 'Close enquiry', exact: true }).click();
+    const reopen = card.getByRole('button', { name: 'Reopen' });
+    await expect(reopen).toBeVisible();
+    expect(requests.at(-1)).toEqual({ action: 'report-outcome', outcome, deliveryId: id, closeReason, revision: revision++ });
+    await reopen.click();
+    await expect(card.getByRole('button', { name: 'They agreed' })).toBeVisible();
+    expect(requests.at(-1)).toEqual({ action: 'report-outcome', outcome: 'quoted', deliveryId: id, revision: revision++ });
+  }
+  await card.getByRole('button', { name: 'They agreed' }).click();
+  await expect(card.getByRole('heading', { name: 'Sale agreed' })).toBeVisible();
+  expect(requests.at(-1)).toEqual({ action: 'report-outcome', outcome: 'won', deliveryId: id, revision });
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await expect(card.getByRole('button', { name: 'They agreed' })).toBeVisible();
+  expect(requests.at(-1)).toEqual({ action: 'undo-activity', deliveryId: id, undoId });
+});
+
+test('desktop previous and next stay in the tab and Next waiting opens the oldest waiting enquiry', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 930 });
+  await mockSignalPortal(page, 'approved', 'en');
+  // The active fixture is ordered Ploy, Somsak, Wichai. The oldest waiting enquiry is Kanya.
+  await page.goto(`${app}/enquiry/${signalId(30)}?tab=active&lang=en`);
+  const pager = page.getByRole('navigation', { name: 'Browse enquiries' });
+  await expect(pager).toContainText('2 of 3');
+  await pager.getByRole('link', { name: 'Previous enquiry' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Ploy' })).toBeVisible();
+  await expect(pager.getByRole('button', { name: 'Previous enquiry' })).toBeDisabled();
+  await pager.getByRole('link', { name: 'Next enquiry' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Somsak' })).toBeVisible();
+  const waiting = page.getByRole('link', { name: /^Next waiting: Kanya/ });
+  await expect(waiting).toHaveAttribute('href', new RegExp(`${app}/enquiry/${signalId(36)}.*tab=waiting`));
+  await waiting.click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Kanya' })).toBeVisible();
+  await expect(pager).toContainText('1 of 3');
 });
 
 test('a denied delivery detail removes contact data from an older list projection', async ({ page }) => {
