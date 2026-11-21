@@ -1,0 +1,225 @@
+package th.solarmatch.installers;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.CalendarContract;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowInsets;
+import android.webkit.CookieManager;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
+import java.net.URI;
+
+public final class InstallerActivity extends Activity {
+    private PortalLinks links;
+    private WebView web;
+    private FrameLayout root;
+    private ScrollView errorView;
+    private boolean english;
+
+    @Override protected void onCreate(Bundle state) {
+        super.onCreate(state);
+        english = getPreferences(MODE_PRIVATE).getBoolean("english", false);
+        links = new PortalLinks(BuildConfig.PORTAL_ORIGIN);
+        root = new FrameLayout(this);
+        root.setBackgroundColor(getColor(R.color.stone));
+        if (Build.VERSION.SDK_INT >= 30) {
+            getWindow().setDecorFitsSystemWindows(false);
+            root.setOnApplyWindowInsetsListener((view, insets) -> {
+                android.graphics.Insets edges = insets.getInsets(WindowInsets.Type.systemBars() |
+                        WindowInsets.Type.displayCutout() | WindowInsets.Type.ime());
+                view.setPadding(edges.left, edges.top, edges.right, edges.bottom);
+                return WindowInsets.CONSUMED;
+            });
+        }
+        setContentView(root);
+        web = new WebView(this);
+        root.addView(web);
+        configureWebView();
+        if (Build.VERSION.SDK_INT >= 33) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::backOrExit);
+        }
+        openInstaller();
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private void configureWebView() {
+        WebSettings settings = web.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setGeolocationEnabled(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+        settings.setTextZoom(Math.round(getResources().getConfiguration().fontScale * 100));
+        settings.setUserAgentString(settings.getUserAgentString() + " SolarMatchInstallers/Android");
+        CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
+        web.setWebChromeClient(new WebChromeClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (!request.isForMainFrame()) return false;
+                URI target = parse(request.getUrl().toString());
+                if (target == null) return true;
+                URI current = parse(view.getUrl());
+                PortalLinks.Action action = links.classify(target, request.hasGesture(), current != null && links.isPortal(current));
+                if (action == PortalLinks.Action.INTERNAL) return false;
+                if (!"GET".equalsIgnoreCase(request.getMethod())) return true;
+                switch (action) {
+                    case DIAL:
+                        handOff(new Intent(Intent.ACTION_DIAL, request.getUrl()));
+                        break;
+                    case SMS:
+                        Intent sms = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("smsto", PortalLinks.smsRecipient(target), null));
+                        sms.putExtra("sms_body", PortalLinks.smsBody(target));
+                        handOff(sms);
+                        break;
+                    case CALENDAR:
+                        long start = PortalLinks.calendarStart(target);
+                        Intent calendar = new Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI);
+                        calendar.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, start);
+                        calendar.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, start + 60 * 60 * 1000);
+                        calendar.putExtra(CalendarContract.Events.TITLE, label("สำรวจหน้างาน SolarMatch", "SolarMatch site visit"));
+                        handOff(calendar);
+                        break;
+                    case BROWSER:
+                        new AlertDialog.Builder(InstallerActivity.this)
+                                .setTitle(label("เปิดลิงก์ภายนอก", "Open external link"))
+                                .setMessage(target.getHost())
+                                .setNegativeButton(label("ยกเลิก", "Cancel"), null)
+                                .setPositiveButton(label("เปิด", "Open"), (dialog, which) ->
+                                        handOff(new Intent(Intent.ACTION_VIEW, request.getUrl()).addCategory(Intent.CATEGORY_BROWSABLE)))
+                                .show();
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+            @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                // WebView does not call shouldOverrideUrlLoading for POST navigations.
+                // Keep top-level form navigations inside the same installer boundary.
+                if (request.isForMainFrame()) {
+                    URI target = parse(request.getUrl().toString());
+                    if (target == null || !links.isPortal(target)) {
+                        return new WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden", null, null);
+                    }
+                }
+                return null;
+            }
+            @Override public void doUpdateVisitedHistory(WebView view, String url, boolean reload) {
+                URI page = parse(url);
+                if (page != null && links.isPortal(page)) {
+                    String lang = Uri.parse(url).getQueryParameter("lang");
+                    if ("th".equals(lang) || "en".equals(lang)) rememberLanguage("en".equals(lang));
+                }
+            }
+            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame()) showError();
+            }
+            @Override public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response) {
+                if (request.isForMainFrame() && response.getStatusCode() >= 400) showError();
+            }
+        });
+    }
+
+    private static URI parse(String value) {
+        if (value == null) return null;
+        try { return URI.create(value); } catch (IllegalArgumentException invalid) { return null; }
+    }
+
+    private void handOff(Intent intent) {
+        try { startActivity(intent); }
+        catch (ActivityNotFoundException e) {
+            Toast.makeText(this, label("ไม่พบแอปที่เปิดรายการนี้ได้", "No app is available for this action."), Toast.LENGTH_LONG).show();
+        }
+    }
+    private String label(String thai, String en) { return english ? en : thai; }
+    private void rememberLanguage(boolean useEnglish) {
+        if (useEnglish != english) {
+            english = useEnglish;
+            getPreferences(MODE_PRIVATE).edit().putBoolean("english", english).apply();
+        }
+    }
+    private void openInstaller() {
+        if (errorView != null) {
+            root.removeView(errorView);
+            errorView = null;
+        }
+        web.setVisibility(View.VISIBLE);
+        // Retry is a fresh read. Never resubmit a payment, note or other mutation.
+        web.loadUrl(BuildConfig.PORTAL_ORIGIN + "/installers/app" + (english ? "?lang=en" : ""));
+    }
+
+    private void showError() {
+        if (errorView != null) root.removeView(errorView);
+        web.setVisibility(View.GONE);
+        errorView = new ScrollView(this);
+        errorView.setFillViewport(true);
+        errorView.setBackgroundColor(getColor(R.color.stone));
+        LinearLayout panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setGravity(Gravity.CENTER_VERTICAL);
+        panel.setPadding(dp(28), dp(28), dp(28), dp(28));
+        TextView title = new TextView(this);
+        title.setText(label("เปิดแอปผู้ติดตั้งไม่ได้", "Can’t open the installer app"));
+        title.setTextSize(26);
+        title.setTextColor(Color.rgb(20, 45, 38));
+        if (Build.VERSION.SDK_INT >= 28) title.setAccessibilityHeading(true);
+        panel.addView(title);
+        TextView note = new TextView(this);
+        note.setText(label("ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง", "Check your connection, then try again."));
+        note.setTextSize(18);
+        note.setPadding(0, dp(12), 0, dp(24));
+        panel.addView(note);
+        Button retry = new Button(this);
+        retry.setText(label("ลองอีกครั้ง", "Try again"));
+        retry.setAllCaps(false);
+        retry.setMinHeight(dp(52));
+        retry.setOnClickListener(v -> openInstaller());
+        panel.addView(retry);
+        Button language = new Button(this);
+        language.setText(label("English", "ภาษาไทย"));
+        language.setAllCaps(false);
+        language.setMinHeight(dp(48));
+        language.setOnClickListener(v -> { rememberLanguage(!english); showError(); });
+        panel.addView(language);
+        errorView.addView(panel);
+        root.addView(errorView);
+        title.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+    }
+    private int dp(int value) { return Math.round(getResources().getDisplayMetrics().density * value); }
+    private void backOrExit() {
+        if (errorView == null && web.canGoBack()) web.goBack();
+        else finish();
+    }
+    @Override public void onBackPressed() { backOrExit(); }
+    @Override protected void onDestroy() {
+        root.removeView(web);
+        web.destroy();
+        super.onDestroy();
+    }
+}

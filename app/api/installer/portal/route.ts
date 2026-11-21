@@ -11,9 +11,13 @@ import { beginLineLink,unlinkLine } from '@/lib/installer/line-linking';
 import {allowInstallerRequest} from '@/lib/installer/rate-limit';
 import {normalizeServiceArea} from '@/lib/installer/service-areas';
 
+import { changeWorkflow, undoWorkflow, contactActivities, closeReasons, workflowOutcomes, installerAuditActor } from '@/lib/installer/enquiry-workflow';
+
 export const dynamic='force-dynamic';
 const companySchema=z.object({name:z.string().trim().min(2).max(160),contactName:z.string().trim().min(1).max(160),phone:z.string().trim().min(6).max(40),serviceAreas:z.array(z.string().trim().min(1).max(100).transform(normalizeServiceArea)).min(1).max(100).transform(areas=>[...new Set(areas)]),supportedProducts:z.array(z.literal('shared_residential')).min(1).max(1),dailyLimit:z.number().int().min(0).max(100),paused:z.boolean()});
-const actionSchema=z.object({action:z.enum(['create-company','update-company','set-accepting','accept-terms','checkout','authorize-payment','reconcile-order','create-claim','rotate-share-link','revoke-share-link','report-outcome','save-team-notes','link-line','unlink-line']),accepting:z.boolean().optional(),name:z.unknown().optional(),contactName:z.unknown().optional(),phone:z.unknown().optional(),serviceAreas:z.unknown().optional(),supportedProducts:z.unknown().optional(),dailyLimit:z.unknown().optional(),paused:z.unknown().optional(),version:z.string().max(100).optional(),packageId:z.string().max(100).optional(),method:z.string().max(60).optional(),orderId:z.string().uuid().optional(),tokenOrSourceId:z.string().max(100).optional(),deliveryId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(200).optional(),notes:z.string().max(2000).optional(),revision:z.number().int().min(0).optional(),outcome:z.enum(['open','won','lost','not-suitable','contacted','site_visit','quoted']).optional(),linkRequest:z.string().max(200).optional()}).strict();
+const actionSchema=z.object({action:z.enum(['create-company','update-company','set-accepting','accept-terms','checkout','authorize-payment','reconcile-order','create-claim','rotate-share-link','revoke-share-link','report-outcome','log-activity','undo-activity','save-team-notes','link-line','unlink-line']),accepting:z.boolean().optional(),name:z.unknown().optional(),contactName:z.unknown().optional(),phone:z.unknown().optional(),serviceAreas:z.unknown().optional(),supportedProducts:z.unknown().optional(),dailyLimit:z.unknown().optional(),paused:z.unknown().optional(),version:z.string().max(100).optional(),packageId:z.string().max(100).optional(),method:z.string().max(60).optional(),orderId:z.string().uuid().optional(),tokenOrSourceId:z.string().max(100).optional(),deliveryId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(200).optional(),notes:z.string().max(2000).optional(),revision:z.number().int().min(0).optional(),outcome:z.enum(workflowOutcomes).optional(),
+  onlyIfMissing:z.boolean().optional(),kind:z.enum(contactActivities).optional(),undoId:z.string().uuid().optional(),siteVisitAt:z.iso.datetime({offset:true}).transform(at=>new Date(at).toISOString()).nullable().optional(),
+  quoteAmountThb:z.number().int().nonnegative().nullable().optional(),closeReason:z.enum(closeReasons).nullable().optional(),linkRequest:z.string().max(200).optional()}).strict();
 export async function GET(request:Request) {
   try{assertPlatformRequest(request);const session=await getInstallerSession(request);if(!session)return platformJson({error:'unauthorized'},401);const deliveryId=new URL(request.url).searchParams.get('deliveryId');if(deliveryId&&!z.string().uuid().safeParse(deliveryId).success)return platformJson({error:'invalid_delivery'},400);return platformJson(await getPortalData(requireDatabase(),session,deliveryId??undefined));}
   catch{return platformJson({error:'portal_unavailable'},503);}
@@ -47,32 +51,38 @@ export async function POST(request:Request) {
     }else if(data.action==='reconcile-order'){
       if(!data.orderId)throw new Error('invalid_order');return platformJson(await reconcileOrder(db,companyId,data.orderId,request));
     }else if(data.action==='create-claim'){
-      if(!data.deliveryId||!data.reason)throw new Error('invalid_claim');return platformJson(await createClaim(db,companyId,data.deliveryId,data.reason,data.notes??''),201);
+      if(!data.deliveryId||!data.reason)throw new Error('invalid_claim');return platformJson(await createClaim(db,companyId,data.deliveryId,data.reason,data.notes??'',installerAuditActor(session.user.id)),201);
     }else if(data.action==='rotate-share-link'){
-      if(!data.deliveryId)throw new Error('invalid_delivery');return platformJson(await rotateShareLink(db,companyId,data.deliveryId,actor,new URL(request.url).origin));
+      if(!data.deliveryId)throw new Error('invalid_delivery');
+      try {return platformJson(await rotateShareLink(db,companyId,data.deliveryId,actor,new URL(request.url).origin,data.onlyIfMissing));}
+      catch(error) {
+        if(error instanceof Error && error.message==='active_share_exists_or_unavailable')return platformJson({error:error.message},409);
+        throw error;
+      }
     }else if(data.action==='revoke-share-link'){
       await db.batch([db.prepare('UPDATE installer_share_tokens SET revoked_at=? WHERE delivery_id IN (SELECT id FROM lead_recipient_deliveries WHERE id=? AND partner_id=?) AND revoked_at IS NULL').bind(now,data.deliveryId??'',companyId),platformAudit(db,actor,'revoke-share-link',data.deliveryId??'')]);
-    }else if(data.action==='report-outcome'){
-      if(!data.outcome||!data.deliveryId)throw new Error('invalid_outcome');
-      // Enforce contact availability in the write itself so a withdrawal between
-      // authentication and commit cannot update the outcome or create a false audit.
-      const results=await db.batch([
-        db.prepare(`UPDATE lead_recipient_deliveries SET outcome_status=?,portal_progress_stage=?,updated_at=? WHERE id=? AND partner_id=? AND id IN
-          (SELECT d.id FROM lead_recipient_deliveries d JOIN leads l ON l.id=d.lead_id JOIN installer_enquiries e ON e.id=d.enquiry_id
-          WHERE ${activeDelivery} AND l.archived_at IS NULL AND d.delivery_status IN ('delivered','accepted'))`).bind(['contacted','site_visit','quoted'].includes(data.outcome)?'open':data.outcome,['contacted','site_visit','quoted'].includes(data.outcome)?data.outcome:null,now,data.deliveryId,companyId),
-        db.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json)
-          SELECT ?,?,'installer.outcome','installer_platform',?,? WHERE changes()=1`).bind(crypto.randomUUID(),actor,data.deliveryId,JSON.stringify({outcome:data.outcome})),
-      ]);
-      if(results[0].meta.changes!==1)return platformJson({error:'delivery_unavailable'},400);
+    }else if(data.action==='report-outcome'||data.action==='log-activity'){
+      if(!data.deliveryId)throw new Error('invalid_delivery');
+      const edit=data.action==='report-outcome' && data.outcome
+        ? {action:data.action,outcome:data.outcome,siteVisitAt:data.siteVisitAt,quoteAmountThb:data.quoteAmountThb,closeReason:data.closeReason,revision:data.revision}
+        : data.action==='log-activity' && data.kind ? {action:data.action,kind:data.kind,revision:data.revision} : null;
+      if (!edit) throw new Error('invalid_workflow_action');
+      const result=await changeWorkflow(db,companyId,session.user.id,data.deliveryId,edit);
+      return platformJson(result,'error' in result ? result.error==='workflow_changed'?409:400 : 200);
+    }else if(data.action==='undo-activity'){
+      if(!data.deliveryId||!data.undoId)throw new Error('invalid_undo');
+      const result=await undoWorkflow(db,companyId,session.user.id,data.deliveryId,data.undoId);
+      return platformJson(result,'error' in result?409:200);
     }else if(data.action==='save-team-notes'){
       if(!data.deliveryId||data.notes===undefined||data.revision===undefined)throw new Error('invalid_notes');
       const results=await db.batch([
         db.prepare(`UPDATE lead_recipient_deliveries SET portal_team_notes=?,portal_notes_revision=portal_notes_revision+1,portal_notes_updated_at=? WHERE id=? AND partner_id=? AND portal_notes_revision=? AND id IN
         (SELECT d.id FROM lead_recipient_deliveries d JOIN leads l ON l.id=d.lead_id JOIN installer_enquiries e ON e.id=d.enquiry_id
         WHERE ${activeDelivery} AND l.archived_at IS NULL AND d.delivery_status IN ('delivered','accepted'))`).bind(data.notes.trim(),now,data.deliveryId,companyId,data.revision),
-        db.prepare("INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json) SELECT ?,?,'installer.team-notes','installer_platform',?,'{\"changed\":true}' WHERE changes()=1").bind(crypto.randomUUID(),actor,data.deliveryId),
+        db.prepare("INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json,created_at) SELECT ?,?,'installer.team-notes','installer_platform',?,'{\"changed\":true}',? WHERE changes()=1").bind(crypto.randomUUID(),installerAuditActor(session.user.id),data.deliveryId,now),
       ]);
       if(results[0].meta.changes!==1)return platformJson({error:'notes_changed_or_unavailable'},409);
+      return platformJson({ok:true,notesUpdatedAt:now});
     }else if(data.action==='link-line')return platformJson(await beginLineLink(db,companyId,request,data.linkRequest));
     else if(data.action==='unlink-line')return platformJson(await unlinkLine(db,companyId,actor));
     return platformJson({ok:true});

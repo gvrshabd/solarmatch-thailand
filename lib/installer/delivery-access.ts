@@ -1,0 +1,1 @@
+export const activeDelivery=`d.delivery_channel='portal' AND d.withdrawal_suppressed=0 AND e.suppressed_at IS NULL AND l.suppressed=0 AND l.consent_withdrawn_at IS NULL AND l.purged_at IS NULL AND l.deleted_at IS NULL`;

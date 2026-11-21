@@ -35,6 +35,11 @@ const adminCookie = cookies(adminLogin);
 if (!adminCookie.includes('solarmatch_local_admin=')) throw new Error('Synthetic admin sign in failed. Rebuild the local preview with the isolated keys.');
 const adminSession = await (await request('/admin/api/session', {}, adminCookie)).json();
 if (!adminSession.csrfToken) throw new Error('Synthetic admin CSRF session unavailable.');
+// Fresh local stores need the stock assessment release before the first fictional
+// homeowner can request a quote. This existing authenticated admin read prepares it.
+const localLeads = await request('/admin/api/leads?submissionType=test&pageSize=1', {}, adminCookie);
+await localLeads.arrayBuffer();
+
 const adminPost = body => json('/admin/api/installer-platform', body, adminCookie, adminSession.csrfToken);
 const adminGet = async () => (await (await request('/admin/api/installer-platform', {}, adminCookie)).json());
 

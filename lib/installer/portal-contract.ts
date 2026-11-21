@@ -4,7 +4,26 @@ export type InstallerCompany = {
   serviceAreas: string[]; supportedProducts: string[]; dailyLimit: number; paused: boolean;
   lineLinked: boolean; termsAcceptedVersion: string | null;
 };
+export type CloseReason = 'other-company' | 'price' | 'not-ready' | 'unreachable' | 'not-suitable';
+export type ContactActivity = 'call-spoke' | 'call-no-answer' | 'call-wrong' | 'text';
+export type OpenOutcome = 'open' | 'contacted' | 'site_visit' | 'quoted';
+export type DeliveryActivity = {
+  at: string;
+  actor?: string;
+  isYou?: boolean;
+  kind: ContactActivity | 'received' | 'outcome' | 'visit' | 'quote' | 'won' | 'closed' | 'reopened' | 'share-link' | 'claim' | 'notes' | 'undone';
+  detail?: Record<string, string | number>;
+};
 export type InstallerDelivery = {
+  siteVisitAt?: string | null;
+  quoteAmountThb?: number | null;
+  closeReason?: CloseReason | null;
+  workflowRevision?: number;
+  reopenOutcome?: OpenOutcome;
+  estimate?: { systemKw: number; installedCostThb: number; monthlySavingsThb: number; paybackYears: number | null };
+  activity?: DeliveryActivity[];
+  activityHasMore?: boolean;
+  hasActiveShareLink?: boolean;
   id: string; enquiryId: string; reference: string; product: string; fundingSource: string;
   creditCost: number; deliveredAt: string; notificationStatus: string; claimDeadline: string;
   withdrawn: boolean;
@@ -36,8 +55,11 @@ export type InstallerPortalAction =
   | { action: 'reconcile-order'; orderId: string }
   | { action: 'authorize-payment'; orderId: string; tokenOrSourceId: string }
   | { action: 'create-claim'; deliveryId: string; reason: string; notes: string }
-  | { action: 'rotate-share-link' | 'revoke-share-link'; deliveryId: string }
-  | { action: 'report-outcome'; deliveryId: string; outcome: string }
+  | { action: 'rotate-share-link'; deliveryId: string; onlyIfMissing?: boolean }
+  | { action: 'revoke-share-link'; deliveryId: string }
+  | { action: 'report-outcome'; deliveryId: string; outcome: string; revision?: number; siteVisitAt?: string | null; quoteAmountThb?: number | null; closeReason?: CloseReason | null }
+  | { action: 'log-activity'; deliveryId: string; kind: ContactActivity; revision?: number }
+  | { action: 'undo-activity'; deliveryId: string; undoId: string }
   | { action: 'save-team-notes'; deliveryId: string; notes: string; revision: number }
   | { action: 'link-line'; linkRequest?: string }
   | { action: 'unlink-line' };

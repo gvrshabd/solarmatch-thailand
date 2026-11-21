@@ -125,3 +125,105 @@ describe('Design v2 bounded workspace actions',()=>{
    expect((await post({action:'report-outcome',deliveryId:d.id,outcome:'contacted'})).status).toBe(400);
  });
 });
+
+describe('installer enquiry workflow',()=>{
+  const portal=async(id:string)=>{
+    const {getPortalData}=await import('@/lib/installer/portal-data');
+    const data=await getPortalData(fixture.d1(),{user:{id:state.userId,name:'Synthetic',email:state.userId+'@example.test',emailVerified:true}},id);
+    return data.deliveries[0];
+  };
+  it('uses the saved model defaults for the disclosed estimate, hides incomplete and undisclosed results',async()=>{
+    const d=await delivered();
+    const {calculateEstimate}=await import('@/lib/calculator');
+    const {syntheticAnswers}=await import('../installer/fixtures');
+    const expected=calculateEstimate({...syntheticAnswers,estimateModelVersion:'legacy-v5',calculationReferenceDate:'2026-10-17'});
+    expect((await portal(d.id)).estimate).toEqual({systemKw:expected.planningSystemKw,installedCostThb:expected.planningInstalledCostThb,
+      monthlySavingsThb:expected.planningMonthlySavingsThb,paybackYears:expected.planningPaybackYears});
+    fixture.sqlite.prepare("UPDATE lead_recipient_deliveries SET fields_disclosed_json='[]' WHERE id=?").run(d.id);
+    expect((await portal(d.id)).estimate).toBeUndefined();
+    fixture.sqlite.prepare(`UPDATE lead_recipient_deliveries SET fields_disclosed_json='["assessmentAnswers"]' WHERE id=?`).run(d.id);
+    fixture.sqlite.prepare("UPDATE leads SET answers_json='{}' WHERE id=?").run(d.leadId);
+    expect((await portal(d.id)).estimate).toBeUndefined();
+  });
+
+  it('persists typed stages, bounds invalid edits and restores the actual preceding visit and quote',async()=>{
+    const d=await delivered();
+    const send=(body:Record<string,unknown>)=>post({action:'report-outcome',deliveryId:d.id,...body});
+    const visit='2026-10-13T03:00:00.000Z';
+    expect((await send({outcome:'site_visit',siteVisitAt:visit,revision:0})).status).toBe(200);
+    expect((await send({outcome:'quoted',quoteAmountThb:100,revision:0})).status).toBe(409);
+    expect((await send({outcome:'lost',quoteAmountThb:5,revision:1})).status).toBe(400);
+    expect((await send({outcome:'quoted',quoteAmountThb:-1})).status).toBe(400);
+    expect((await send({outcome:'site_visit',siteVisitAt:'next week'})).status).toBe(400);
+    expect((await send({outcome:'quoted',quoteAmountThb:0,revision:1})).status).toBe(200);
+    const before=await portal(d.id);
+    expect(before).toMatchObject({outcome:'quoted',siteVisitAt:visit,quoteAmountThb:0,workflowRevision:2});
+    const quote=await send({outcome:'quoted',quoteAmountThb:150000,revision:2});
+    const edit=await quote.json() as {undoId:string};
+    expect((await portal(d.id)).quoteAmountThb).toBe(150000);
+    expect((await post({action:'undo-activity',deliveryId:d.id,undoId:edit.undoId})).status).toBe(200);
+    expect(await portal(d.id)).toMatchObject({outcome:'quoted',siteVisitAt:visit,quoteAmountThb:0,workflowRevision:4});
+    expect((await post({action:'undo-activity',deliveryId:d.id,undoId:edit.undoId})).status).toBe(409);
+    await send({outcome:'lost',closeReason:'price',revision:4});
+    const closed=await portal(d.id);
+    expect(closed).toMatchObject({outcome:'lost',reopenOutcome:'quoted',closeReason:'price'});
+    await send({outcome:closed.reopenOutcome,revision:5});
+    expect(await portal(d.id)).toMatchObject({outcome:'quoted',closeReason:null});
+  });
+
+  it('logs contact without message content, attributes actor safely, hides a cancelled attempt and expires undo',async()=>{
+    const d=await delivered();
+    const report=(kind:string,revision:number)=>post({action:'log-activity',deliveryId:d.id,kind,revision});
+    const noAnswer=await (await report('call-no-answer',0)).json() as {undoId:string};
+    expect((await portal(d.id)).activity?.[0]).toMatchObject({kind:'call-no-answer',actor:'Synthetic',isYou:true});
+    expect((await post({action:'undo-activity',deliveryId:d.id,undoId:noAnswer.undoId})).status).toBe(200);
+    expect((await portal(d.id)).activity?.map(event=>event.kind)).toEqual(['undone','received']);
+    expect((await report('call-spoke',2)).status).toBe(200);
+    const text=await (await report('text',3)).json() as {undoId:string};
+    expect((await portal(d.id)).outcome).toBe('contacted');
+    vi.advanceTimersByTime(6001);
+    expect((await post({action:'undo-activity',deliveryId:d.id,undoId:text.undoId})).status).toBe(409);
+    expect((await portal(d.id)).activity?.map(event=>event.kind)).toEqual(['text','call-spoke','undone','received']);
+    const audit=fixture.sqlite.prepare("SELECT actor_email,next_json FROM audit_events WHERE action='installer.contact-activity' ORDER BY rowid DESC").all();
+    expect(audit[0]).toMatchObject({actor_email:'installer-user:owner1',next_json:'{"kind":"text"}'});
+  });
+
+  it('rejects concurrent and cross-tenant changes, and erases new fields and undo on suppression',async()=>{
+    const d=await delivered();
+    const send=(kind:string,revision:number)=>post({action:'log-activity',deliveryId:d.id,kind,revision});
+    const attempted=await Promise.all([send('call-wrong',0),send('call-no-answer',0)]);
+    expect(attempted.map(a=>a.status).sort()).toEqual([200,409]);
+    const receipt=await attempted.find(a=>a.ok)!.json() as {undoId:string};
+    state.userId='owner2';
+    expect(await portal(d.id)).toBeUndefined();
+    expect((await send('call-spoke',1)).status).toBe(400);
+    expect((await post({action:'undo-activity',deliveryId:d.id,undoId:receipt.undoId})).status).toBe(409);
+    state.userId='owner1';
+    const visit=await post({action:'report-outcome',deliveryId:d.id,outcome:'site_visit',siteVisitAt:'2026-10-13T03:00:00.000Z',revision:1});
+    expect(visit.status).toBe(200);
+    expect((await post({action:'undo-activity',deliveryId:d.id,undoId:receipt.undoId})).status).toBe(409);
+    await suppressEnquiry(fixture.d1(),d.enquiryId,'Synthetic withdrawal','fixture');
+    const privateData=await portal(d.id);
+    for(const key of ['siteVisitAt','quoteAmountThb','closeReason','activity','estimate','workflowRevision']) expect(privateData).not.toHaveProperty(key);
+    expect(fixture.sqlite.prepare('SELECT portal_site_visit_at,portal_undo_json FROM lead_recipient_deliveries WHERE id=?').get(d.id)).toEqual({portal_site_visit_at:null,portal_undo_json:null});
+    expect((await send('text',2)).status).toBe(400);
+  });
+  it('adds share, approved claim codes, and notes metadata without copying sensitive contents into activity',async()=>{
+    const d=await delivered();
+    const link=await post({action:'rotate-share-link',deliveryId:d.id});
+    expect(link.status).toBe(200);
+    const {url}=await link.json() as {url:string};
+    expect((await post({action:'rotate-share-link',deliveryId:d.id,onlyIfMissing:true})).status).toBe(409);
+    const {readShareLink}=await import('@/lib/installer/share');
+    expect(await readShareLink(fixture.d1(),new URL(url).hash.slice(7))).not.toBeNull();
+    expect((await post({action:'save-team-notes',deliveryId:d.id,notes:'Synthetic private note',revision:0})).status).toBe(200);
+    expect((await post({action:'create-claim',deliveryId:d.id,reason:'incorrect-contact',notes:'Sensitive synthetic detail'})).status).toBe(201);
+    const detail=await portal(d.id);
+    expect(detail.hasActiveShareLink).toBe(true);
+    const feed=detail.activity!;
+    expect(feed.map(e=>e.kind).sort()).toEqual(['claim','notes','received','share-link']);
+    expect(feed.find(e=>e.kind==='claim')?.detail).toEqual({reason:'incorrect-contact'});
+    const values=JSON.stringify(feed);
+    for(const privateValue of [new URL(url).hash.slice(7),'Sensitive synthetic detail','Synthetic private note','@example.test', '+668']) expect(values).not.toContain(privateValue);
+  });
+});

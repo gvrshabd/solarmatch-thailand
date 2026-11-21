@@ -1,0 +1,60 @@
+.signal.installer-entry {
+  min-height: 100svh;
+  background: var(--sm-stone);
+  font-size: 1rem;
+}
+.installer-entry .entry-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .5rem;
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: max(.625rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) .625rem max(1rem, env(safe-area-inset-left));
+}
+.installer-entry .entry-brand { display: flex; gap: .625rem; align-items: center; font-size: 1.25rem; font-weight: 800; letter-spacing: -.045em; }
+.installer-entry .entry-language { display: inline-flex; border: 1px solid var(--sm-line-2); background: white; padding: 2px; border-radius: 2rem; }
+.installer-entry .entry-language button { min-height: 3rem; min-width: 3rem; border: none; border-radius: 2rem; background: transparent; font-weight: 700; cursor: pointer; }
+.installer-entry .entry-language button[aria-pressed=true] { background: var(--sm-pine); color: white; }
+.installer-entry main { width: min(100%, 42rem); margin: auto; padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
+.installer-entry .entry-cover {
+  min-height: 10rem;
+  display: flex;
+  align-items: end;
+  padding: 2rem max(1.5rem, env(safe-area-inset-right)) 2.5rem max(1.5rem, env(safe-area-inset-left));
+  background: linear-gradient(90deg, rgba(15,38,30,.95), rgba(15,38,30,.65) 60%, rgba(15,38,30,.3)), url('/images/design-v2/installer.jpg') center 46%/cover;
+  color: white;
+}
+.installer-entry h1 { font-size: clamp(2rem, 7vw, 2.75rem); max-width: 13em; line-height: 1.15; }
+.installer-entry .entry-panel { margin: -1.25rem max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left)); padding: clamp(1.25rem, 5vw, 2.5rem); border-radius: var(--sm-r-lg); background: var(--sm-white); box-shadow: var(--sm-shadow); }
+.installer-entry .entry-state, .installer-entry .entry-auth { display: grid; gap: 1rem; }
+.installer-entry h2 { font-size: 1.625rem; line-height: 1.25; }
+.installer-entry p { color: var(--sm-muted); }
+.installer-entry .entry-fields { display: grid; gap: 1rem; }
+.installer-entry .entry-fields label { display: grid; gap: .375rem; font-weight: 600; }
+.installer-entry .entry-fields .tx { font-size: 1rem; min-height: 3.25rem; height: auto; padding: .75rem 1rem; }
+.installer-entry .btn { min-height: 3.25rem; font-size: 1rem; white-space: normal; text-align: center; }
+.installer-entry .entry-links { display: flex; justify-content: space-between; gap: .25rem 1rem; flex-wrap: wrap; }
+.installer-entry .entry-links button { min-height: 3rem; padding: .375rem .125rem; border: none; cursor: pointer; font-weight: 700; color: var(--sm-green); text-align: start; background: transparent; }
+.installer-entry .entry-error { color: var(--sm-danger); }
+@media (min-width: 44rem) {
+  .installer-entry .entry-cover { border-radius: var(--sm-r-lg); min-height: 13rem; }
+  .installer-entry .entry-panel { margin-inline: 2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .installer-entry .btn { transition: none; }
+  .installer-entry .btn:active { transform: none; }
+}
+.signal.installer-payment-app {
+  min-height: 100svh;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  background: var(--sm-stone);
+}
+.installer-payment-app .installer-card { display: grid; gap: 1rem; max-width: 38rem; margin: 0 auto; padding: clamp(1rem, 4vw, 2rem); overflow-wrap: anywhere; border-radius: var(--sm-r-lg); background: white; }
+.installer-payment-app h1 { font-size: 2rem; line-height: 1.2; }
+.installer-payment-app h2 { font-size: 1.5rem; line-height: 1.25; }
+.installer-payment-app button, .installer-payment-app a { min-height: 3rem; display: inline-flex; align-items: center; font-weight: 700; }
+.installer-payment-app button { justify-content: center; padding: .625rem 1rem; border: 0; border-radius: var(--sm-pill); background: var(--sm-pine); color: white; cursor: pointer; }
+.installer-payment-app button:disabled { opacity: .55; }
+.installer-payment-app .payment-lang { justify-self: end; background: var(--sm-sage); color: var(--sm-pine); }

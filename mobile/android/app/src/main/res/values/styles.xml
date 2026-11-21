@@ -1,0 +1,13 @@
+<resources>
+    <color name="stone">#F5F4EF</color>
+    <style name="InstallerTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/stone</item>
+        <item name="android:colorAccent">#137A50</item>
+        <item name="android:statusBarColor">@color/stone</item>
+        <item name="android:navigationBarColor">@color/stone</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <string name="app_name">SolarMatch Installers</string>
+</resources>
