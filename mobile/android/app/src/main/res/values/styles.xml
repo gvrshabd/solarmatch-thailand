@@ -1,0 +1,14 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="stone">#F5F4EF</color>
+    <style name="InstallerTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/stone</item>
+        <item name="android:colorAccent">#137A50</item>
+        <item name="android:statusBarColor">@color/stone</item>
+        <item name="android:navigationBarColor">@color/stone</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Android 8.0 keeps light icons on the navigation bar; 8.1 and later use dark ones. -->
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <string name="app_name">SolarMatch Installers</string>
+</resources>

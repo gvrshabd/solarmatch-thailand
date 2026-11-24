@@ -16,7 +16,7 @@ export function mergeCompanyDraft(draft:CompanyDraft,base:CompanyDraft,server:Co
   return {name:draft.name===base.name?server.name:draft.name,contactName:draft.contactName===base.contactName?server.contactName:draft.contactName,phone:draft.phone===base.phone?server.phone:draft.phone,areas:same(draft.areas,base.areas)?server.areas:draft.areas,limit:draft.limit===base.limit?server.limit:draft.limit};
 }
 
-export function InstallerCompanySettings({data,en,busy,action,navigate}:{data:InstallerPortalData;en:boolean;busy:boolean;action:InstallerAction;navigate:(view:'claims'|'terms')=>void}) {
+export function InstallerCompanySettings({data,en,busy,action,navigate,basePath='/installers'}:{basePath?:string;data:InstallerPortalData;en:boolean;busy:boolean;action:InstallerAction;navigate:(view:'claims'|'terms')=>void}) {
   // Signal Thai copy is a draft and needs native review.
   const c=data.company, t=(th:string,english:string)=>en?english:th, id=useId();
   const server=companyDraft(data), serverKey=JSON.stringify(server);
@@ -34,7 +34,7 @@ export function InstallerCompanySettings({data,en,busy,action,navigate}:{data:In
   const toggle=(area:string)=>edit({areas:draft.areas.includes(area)?draft.areas.filter(v=>v!==area):[...draft.areas,area]});
   const accepted=!!data.terms.acceptedAt&&c?.termsAcceptedVersion===data.terms.version;
   const acceptedDate=data.terms.acceptedAt?new Date(data.terms.acceptedAt).toLocaleDateString(en?'en-GB':'th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short'}):'';
-  const link=(view:'claims'|'terms')=>'/installers?view='+view+'&lang='+(en?'en':'th');
+  const link=(view:'claims'|'terms')=>basePath+'?view='+view+'&lang='+(en?'en':'th');
   return <form onSubmit={async event=>{
     event.preventDefault();
     if(locked||!draft.areas.length||(!dirty&&c)) return;

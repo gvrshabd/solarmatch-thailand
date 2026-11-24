@@ -130,12 +130,16 @@ export async function grantTrial(db:D1Database,companyId:string,actor:string) {
     platformAudit(db,actor,'trial-grant',companyId),
   ]);
 }
-export async function createClaim(db:D1Database,companyId:string,deliveryId:string,reason:string,notes:string) {
+export async function createClaim(db:D1Database,companyId:string,deliveryId:string,reason:string,notes:string,actor='installer') {
   const id=crypto.randomUUID();const now=isoNow();
-  const inserted=await db.prepare(`INSERT INTO installer_claims(id,delivery_id,company_id,reason,notes,status,submitted_at)
+  const inserted=await db.batch([db.prepare(`INSERT INTO installer_claims(id,delivery_id,company_id,reason,notes,status,submitted_at)
     SELECT ?,id,partner_id,?,?,'submitted',? FROM lead_recipient_deliveries WHERE id=? AND partner_id=? AND delivery_channel='portal'
-    AND julianday(claim_deadline)>=julianday(?) RETURNING id`).bind(id,reason,notes,now,deliveryId,companyId,now).first();
-  if(!inserted) throw new Error('claim_window_closed');
+    AND julianday(claim_deadline)>=julianday(?) RETURNING id`).bind(id,reason,notes,now,deliveryId,companyId,now),
+    db.prepare(`INSERT INTO audit_events(id,actor_email,action,entity_type,entity_id,next_json,created_at)
+      SELECT ?,?,'installer.claim-submitted','installer_platform',?,?,? WHERE changes()=1`).bind(crypto.randomUUID(),actor,deliveryId,
+        JSON.stringify(['incorrect-contact','duplicate','outside-criteria','no-request','withdrawn'].includes(reason)?{reason}:{}),now),
+  ]);
+  if(!inserted[0].results.length) throw new Error('claim_window_closed');
   return {id};
 }
 export async function decideClaim(db:D1Database,claimId:string,decision:string,notes:string,actor:string) {

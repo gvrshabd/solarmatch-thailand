@@ -1,0 +1,162 @@
+/* The app shares the web portal's controls and the Signal palette. */
+.installer-app-workspace .a-detail { gap: 14px; }
+.installer-app-workspace .detail-pager { display: none; }
+.installer-app-workspace .dtop .back { min-height: 48px; }
+.installer-app-workspace .wait { font-size: .875rem; }
+.installer-app-workspace .wait-recent { background: #e3f1e4; color: #0f6b45; }
+.installer-app-workspace .wait-waiting { background: #f7ebd0; color: #7a5410; }
+.installer-app-workspace .wait-overdue { background: #fbe6df; color: #8a3520; }
+.installer-app-workspace .wait-received { background: var(--sm-stone-2); color: var(--sm-muted); }
+.installer-app-workspace .ref { overflow-wrap: anywhere; text-align: end; margin-inline-start: auto; }
+
+.installer-app-workspace .enquiry-home { container-type: inline-size; }
+.installer-app-workspace .enquiry-home :is(h2, h3) { font-size: 1.1875rem; line-height: 1.4; }
+.installer-app-workspace .enquiry-home h3 { font-size: 1rem; }
+.installer-app-workspace .enquiry-home dl { margin: 0; }
+.installer-app-workspace .enquiry-home dd { font-variant-numeric: tabular-nums; margin: 0; }
+.installer-app-workspace .home-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--sm-line);
+  background: var(--sm-line);
+  border-radius: 15px;
+  overflow: hidden;
+}
+.installer-app-workspace .enquiry-home > .home-facts { margin: .85rem 0 1rem; }
+.installer-app-workspace .home-facts > div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  padding: .75rem;
+  min-width: 0;
+  background: white;
+  overflow-wrap: anywhere;
+}
+.installer-app-workspace .home-facts dt { color: var(--sm-muted); font-size: .875rem; }
+.installer-app-workspace .home-facts dd { font-size: 1.125rem; font-weight: 750; line-height: 1.4; }
+.installer-app-workspace .home-estimate {
+  background: #f5f8ea;
+  border: 1px solid #d6e2bb;
+  border-radius: 16px;
+  padding: .875rem;
+  margin-block: .875rem 1.15rem;
+}
+.installer-app-workspace .home-estimate h3 { display: flex; align-items: center; gap: .5rem; color: #195442; }
+.installer-app-workspace .home-estimate svg { flex: none; }
+.installer-app-workspace .estimate-figures { border: 0; background: transparent; margin-block: .65rem; gap: .65rem; }
+.installer-app-workspace .estimate-figures > div { padding: 0; background: transparent; }
+.installer-app-workspace .roof-details { display: grid; column-gap: 1.25rem; }
+.installer-app-workspace .roof-details > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .75rem;
+  padding: .625rem 0;
+  border-bottom: 1px solid var(--sm-line);
+  overflow-wrap: anywhere;
+}
+.installer-app-workspace .roof-details dt { color: var(--sm-muted); }
+.installer-app-workspace .roof-details dd { text-align: end; font-weight: 650; }
+.installer-app-workspace .enquiry-activity ol { list-style: none; margin: .5rem 0 0; padding: 0; }
+.installer-app-workspace .enquiry-activity li { display: flex; align-items: flex-start; gap: .75rem; padding-block: .625rem; }
+.installer-app-workspace .enquiry-activity li + li { border-top: 1px solid var(--sm-line); }
+.installer-app-workspace .enquiry-activity p { color: var(--sm-muted); font-size: .875rem; }
+.installer-app-workspace .event-icon {
+  width: 2.25rem; height: 2.25rem; flex: none;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  color: var(--sm-pine); background: var(--sm-sage);
+}
+.installer-app-workspace .event-call-spoke { background: #e3f1e4; color: #0f6b45; }
+.installer-app-workspace :is(.event-call-no-answer,.event-call-wrong,.event-claim,.event-closed) { background: #fbe6df; color: #8a3520; }
+.installer-app-workspace :is(.event-visit,.event-quote) { background: var(--sm-gold-soft); color: #7a5410; }
+.installer-app-workspace .event-won { background: var(--sm-lime); }
+.installer-app-workspace .disc > summary { min-height: 48px; justify-content: flex-start; overflow-wrap: anywhere; }
+.installer-app-workspace .disc > summary::after { flex: none; margin-inline-start: auto; }
+.installer-app-workspace .days-left { margin-inline-start: auto; font-size: .8125rem; font-weight: 600; color: var(--sm-muted); }
+.installer-app-workspace .days-left + * { margin-inline-start: 0; }
+.installer-app-workspace .wrong-number-hint { padding: .75rem; border-radius: 12px; color: #8a3520; background: #fbe6df; }
+.installer-app-workspace .next-waiting { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; max-width: 100%; min-height: 48px; padding: .5rem .875rem; border: 1px dashed currentColor; border-radius: 24px; text-decoration: none; overflow-wrap: anywhere; }
+.installer-app-workspace .next-waiting svg { flex: none; }
+
+@container (min-width: 620px) {
+  .installer-app-workspace .home-facts { grid-template-columns: repeat(4,minmax(0,1fr)); }
+  .installer-app-workspace .roof-details { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (min-width: 1000px) {
+  .installer-app-workspace .a-detail { width: 100%; max-width: 864px; padding-inline: 32px; justify-self: center; }
+  .installer-app-workspace .detail-pager { display: flex; align-items: center; gap: .45rem; color: var(--sm-muted); font-size: .9375rem; }
+  .installer-app-workspace .detail-pager :is(a,button) { display: grid; place-items: center; min-width: 48px; min-height: 48px; border: 1px solid var(--sm-line); border-radius: 50%; background: white; color: var(--sm-pine); }
+  .installer-app-workspace .detail-pager button:disabled { opacity: .45; }
+  .installer-app-workspace .detail-pager svg { width: 18px; }
+  .installer-app-workspace .dtop .back { display: none; }
+  .installer-app-workspace .dperson .ph-only { display: inline; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .installer-app-workspace .wait-overdue svg { animation: installer-wait-clock 2.8s ease-in-out infinite; }
+  .installer-app-workspace .enquiry-activity li:first-child { animation: installer-activity-in .3s ease-out; }
+}
+@keyframes installer-wait-clock { 0%, 14%, 100% { transform: rotate(0); } 5% { transform: rotate(-10deg); } 9% { transform: rotate(8deg); } }
+@keyframes installer-activity-in { from { opacity: .5; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 999px) {
+  .installer-app-workspace { font-size: 1rem; }
+  .installer-app-workspace .a-list, .installer-app-workspace .a-page { gap: 1rem; }
+  .installer-app-workspace .a-split { grid-template-columns: minmax(0,1fr); }
+  .installer-app-workspace .a-list { grid-template-columns: minmax(0,1fr); }
+  .installer-app-workspace .lhead .who b { white-space: normal; overflow-wrap: anywhere; font-size: 1rem; }
+  .installer-app-workspace .lhead .who small, .installer-app-workspace .r1 time { font-size: .875rem; }
+  .installer-app-workspace .switch { min-height: 48px; border-block: 9px solid transparent; background-clip: padding-box; border-radius: 25px; }
+  .installer-app-workspace .acct summary, .installer-app-workspace .acct .av { width: 48px; height: 48px; }
+  .installer-app-workspace .acct .pop { width: min(18rem, calc(100vw - 2.5rem)); }
+  .installer-app-workspace .acct .prow { flex-wrap: wrap; }
+  .installer-app-workspace .seg3 button { min-height: 48px; font-size: .9375rem; white-space: normal; overflow-wrap: anywhere; }
+  .installer-app-workspace .search { min-height: 50px; height: auto; border-radius: 16px; }
+  .installer-app-workspace .search:focus-within { outline: 2px solid var(--sm-green); outline-offset: 2px; }
+  .installer-app-workspace .search input, .installer-app-workspace .tx, .installer-app-workspace .ta, .installer-app-workspace select { font-size: 1rem; }
+  .installer-app-workspace .rows { gap: .625rem; }
+  .installer-app-workspace .rows .row { min-width: 0; padding: 1rem .875rem; border-radius: 18px; border: 1px solid var(--sm-line); background: white; }
+  .installer-app-workspace .rows .row::after { display: none; }
+  .installer-app-workspace .row.unread::before { left: 0; top: 24px; width: 3px; height: 24px; border-radius: 0 2px 2px 0; }
+  .installer-app-workspace .r1 { flex-wrap: wrap; align-items: baseline; gap: .25rem .5rem; }
+  .installer-app-workspace .r1 b { font-size: 1.0625rem; overflow-wrap: anywhere; }
+  .installer-app-workspace .r2 { white-space: normal; overflow-wrap: anywhere; font-size: .9375rem; }
+  .installer-app-workspace .r3, .installer-app-workspace .setrow, .installer-app-workspace .pr { flex-wrap: wrap; }
+  .installer-app-workspace .pill { font-size: .8125rem; min-height: 24px; height: auto; white-space: normal; overflow-wrap: anywhere; }
+  .installer-app-workspace :is(.field label, .muted.sm, .stmt small, .hint, .note, .meta) { font-size: .875rem; }
+  .installer-app-workspace .field label { font-size: 1rem; }
+  .installer-app-workspace .a-detail { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom,0px)); }
+  .installer-app-workspace .a-detail > .card { border-radius: 24px; }
+  .installer-app-workspace .a-detail .dperson h1 { font-size: clamp(1.875rem, 6vw, 2.5rem); }
+  .installer-app-workspace .dperson { column-gap: .75rem; row-gap: .55rem; }
+  .installer-app-workspace .dperson .wait { margin-left: 0; }
+  .installer-app-workspace .tabbar a { min-height: 48px; font-size: .875rem; line-height: 1.35; }
+  .installer-app-workspace .tabbar a[aria-current=page] { background: var(--sm-sage); border-radius: 14px; }
+  .installer-app-workspace .tabbar em { font-size: .75rem; }
+  .installer-app-workspace .btn { min-height: 48px; white-space: normal; text-align: center; max-width: 100%; line-height: 1.35; }
+  .installer-app-workspace .btn.sm, .installer-app-workspace .notice .btn { min-height: 48px; font-size: .9375rem; }
+  .installer-app-workspace .stepper button, .installer-app-workspace .lang button { min-width: 48px; min-height: 48px; }
+  .installer-app-workspace :is(.crumb,.tlink,.lnk3,.lnk2,.chk a,.clist .lnk,.acct .pop a) { min-height: 48px; display: inline-flex; align-items: center; white-space: normal; }
+  .installer-app-workspace .enquiry-home, .installer-app-workspace .enquiry-activity { overflow-wrap: anywhere; }
+  .installer-app-workspace .a-page form:has(.savebar) { padding-bottom: 5rem; }
+  .installer-app-workspace .savebar { bottom: calc(3.55rem + 12px + env(safe-area-inset-bottom,0px)); flex-wrap: wrap; }
+  .installer-app-workspace .extra .row2, .installer-app-workspace .share-out .row2 { flex-wrap: wrap; }
+}
+@media (max-width: 380px) {
+  .installer-app-workspace .a-detail .card { padding-inline: 1rem; }
+  .installer-app-workspace .lhead { flex-wrap: wrap; }
+  .installer-app-workspace .agrid { grid-template-columns: repeat(auto-fit,minmax(min(100%,7rem),1fr)); }
+  .installer-app-workspace .chk li, .installer-app-workspace .clist > div { flex-wrap: wrap; }
+  .installer-app-workspace .chk .wait-l { white-space: normal; }
+}
+
+/* Account: sign-out and self-service deletion. Coral marks the one destructive action. */
+.signal .btn.danger{background:#b4492f;color:#fff}.signal .btn.danger:hover{background:#97381f}
+.signal .account-section{display:grid;gap:.75rem;justify-items:start}
+.signal .account-section .account-email{overflow-wrap:anywhere}
+.signal .account-section .account-delete{width:100%}
+.signal .account-section .account-delete .form{display:grid;gap:.75rem}
+.signal .store-app-credits h2{margin-top:0}
+/* An empty inbox explains itself in readable type rather than a faint footnote. */
+.installer-app-workspace .a-list .empty{margin:12px 0;padding:28px 20px;border-radius:24px;background:#fff;border:1px dashed var(--sm-line-2,#cfd6cc);color:var(--sm-pine,#142D26);font-size:1.0625rem;line-height:1.6;text-align:center}

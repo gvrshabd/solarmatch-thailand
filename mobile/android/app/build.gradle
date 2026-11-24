@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Debug always uses the isolated local origin through adb reverse.
+def ownerOrigin = providers.gradleProperty('installerReleaseOrigin').orElse('').get()
+def checkedOrigin = ''
+if (ownerOrigin) {
+    def origin = new URI(ownerOrigin)
+    if (origin.scheme != 'https' || !origin.host || origin.userInfo != null ||
+            !(origin.path in ['', '/']) || origin.query != null || origin.fragment != null ||
+            origin.port == 0 || origin.port > 65535) {
+        throw new GradleException('installerReleaseOrigin must be a bare HTTPS origin.')
+    }
+    checkedOrigin = 'https://' + origin.rawAuthority
+}
+
+android {
+    namespace 'th.solarmatch.installers'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'th.solarmatch.installers'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '0.1.0'
+    }
+    buildFeatures { buildConfig true }
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            buildConfigField 'String', 'PORTAL_ORIGIN', '"http://localhost:3000"'
+        }
+        release {
+            buildConfigField 'String', 'PORTAL_ORIGIN', '"' + checkedOrigin + '"'
+        }
+    }
+}
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    doFirst {
+        if (!checkedOrigin) throw new GradleException('Supply -PinstallerReleaseOrigin with the approved HTTPS origin before building a release.')
+    }
+}
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}

@@ -28,7 +28,7 @@ export function statementAmount(entry:InstallerPortalData['ledger'][number]|unde
 export function orderCanReconcile(status:string) {
   return ['pending','authorizing','reconciliation-required'].includes(status);
 }
-export function InstallerCredits({data,en,busy,action,qrImage,qrOrderId,qrAmountMinor}:{data:InstallerPortalData;en:boolean;busy:boolean;action:InstallerAction;qrImage?:string;qrOrderId?:string;qrAmountMinor?:number}) {
+export function InstallerCredits({data,en,busy,action,qrImage,qrOrderId,qrAmountMinor,storeApp=false}:{data:InstallerPortalData;en:boolean;busy:boolean;action:InstallerAction;qrImage?:string;qrOrderId?:string;qrAmountMinor?:number;storeApp?:boolean}) {
   // Signal Thai copy is a draft and needs native review.
   const t=(th:string,english:string)=>en?english:th;
   const shared=data.commercial?.sharedCredits;
@@ -42,6 +42,8 @@ export function InstallerCredits({data,en,busy,action,qrImage,qrOrderId,qrAmount
   const qrAmount=qrOrder?.amountMinor??qrAmountMinor;
   const perEnquiry=data.commercial&&shared?data.commercial.creditValueMinor*shared:undefined;
   const chargingNote=t('คิดเครดิตเมื่อคำขอพร้อมใช้ในพอร์ทัล ไม่คิดเพิ่มเมื่อเปิดดูหรือโทร ไม่มีการเติมเครดิตอัตโนมัติ','Credits are charged when an enquiry becomes available in the portal—not again when you open it or call. No automatic top-up.');
+  // Store builds are companion apps: balance and history only, with no purchase or call to buy elsewhere.
+  const storeCredits=<section className="card pkg store-app-credits"><h2 className="h3">{t('การซื้อเครดิต','Buying credits')}</h2><p className="muted">{t('ไม่สามารถซื้อเครดิตในแอปนี้ได้ ยอดคงเหลือและรายการทั้งหมดของบริษัทแสดงอยู่ที่นี่','Credits can’t be bought in this app. Your company’s balance and full history are shown here.')}</p><p className="note">{chargingNote}</p></section>;
   const packages=data.packages.map(pack=><section className="card pkg" key={pack.id}>
     <div className="pr"><b>{pack.credits} {t('เครดิต','credits')}</b><b>{portalMoney(pack.amountMinor,pack.currency,en,pack.amountMinor%100===0)}</b></div>
     <p className="muted">{t((shared&&shared>0?pack.credits/shared:'—')+' คำขอ คำขอละ '+(perEnquiry===undefined?'—':portalMoney(perEnquiry,pack.currency,en,perEnquiry%100===0)),(shared&&shared>0?pack.credits/shared:'—')+' enquiries at '+(perEnquiry===undefined?'—':portalMoney(perEnquiry,pack.currency,en,perEnquiry%100===0))+' each')}</p>
@@ -59,7 +61,7 @@ export function InstallerCredits({data,en,busy,action,qrImage,qrOrderId,qrAmount
         </div>}
         {data.balance.debt>0&&<p className="sm">{t('บริษัทจะยังรับคำขอใหม่ไม่ได้จนกว่าจะชำระยอดนี้ เครดิตที่ซื้อเพิ่มหรือได้รับคืนจะหักยอดค้างก่อน ส่วนที่เหลือจึงเป็นเครดิตพร้อมใช้ สิทธิ์ทดลองแยกจากยอดนี้','New deliveries are blocked until this debt is cleared. Purchased credits and purchased-credit restorations offset debt first; only the remainder becomes available. Trial entitlements are separate.')}</p>}
       </section>
-      {qrImage?<section className="card qr"><h2 className="h3">{t('สแกนชำระเงิน','Scan to pay')}</h2><div className="code">{/* Provider-created QR only; credits require server confirmation. */}<img src={qrImage} alt={t('คิวอาร์โค้ดสำหรับชำระเงิน','Payment QR code')} width={168} height={168}/></div><b className="amt2">{qrAmount===undefined?'—':portalMoney(qrAmount,qrOrder?.currency||'THB',en,qrAmount%100===0)}</b><p className="note">{t('เครดิตจะเข้าเมื่อผู้ให้บริการยืนยันการชำระเงินแล้ว ตรวจสอบสถานะในประวัติการซื้อ','Credits are issued after provider confirmation. Check the purchase history for payment status.')}</p><button type="button" className="btn soft block" disabled={paymentLocked||!qrOrderId||(!!qrOrder&&!orderCanReconcile(qrOrder.status))} onClick={()=>{if(qrOrderId)void action({action:'reconcile-order',orderId:qrOrderId});}}>{t('ตรวจสอบสถานะ','Check status')}</button></section>:packages.length===1?packages:<div className="pkg">{packages}</div>}
+      {qrImage&&!storeApp?<section className="card qr"><h2 className="h3">{t('สแกนชำระเงิน','Scan to pay')}</h2><div className="code">{/* Provider-created QR only; credits require server confirmation. */}<img src={qrImage} alt={t('คิวอาร์โค้ดสำหรับชำระเงิน','Payment QR code')} width={168} height={168}/></div><b className="amt2">{qrAmount===undefined?'—':portalMoney(qrAmount,qrOrder?.currency||'THB',en,qrAmount%100===0)}</b><p className="note">{t('เครดิตจะเข้าเมื่อผู้ให้บริการยืนยันการชำระเงินแล้ว ตรวจสอบสถานะในประวัติการซื้อ','Credits are issued after provider confirmation. Check the purchase history for payment status.')}</p><button type="button" className="btn soft block" disabled={paymentLocked||!qrOrderId||(!!qrOrder&&!orderCanReconcile(qrOrder.status))} onClick={()=>{if(qrOrderId)void action({action:'reconcile-order',orderId:qrOrderId});}}>{t('ตรวจสอบสถานะ','Check status')}</button></section>:storeApp?storeCredits:packages.length===1?packages:<div className="pkg">{packages}</div>}
     </div>
     <section className="card"><h2 className="h3">{t('รายการเคลื่อนไหว','Statement')}</h2><div className="stmt">{creditStatement(data).map(row=>{
       const available=row.entry?.availableDelta??row.entry?.units??0;

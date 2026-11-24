@@ -1,0 +1,92 @@
+/* Installer enquiry, Next step handoff. Thai copy needs native review. */
+.signal .ns-card {
+  --ns-glass: rgb(255 255 255 / .08);
+  container: next-step / inline-size;
+  --ns-edge: rgb(255 255 255 / .25);
+  min-width:0; padding:clamp(1.15rem, 4vw, 2.25rem); border-radius:28px;
+  background:radial-gradient(ellipse at top right, #385443 0, transparent 64%),linear-gradient(145deg,#18332a,#0e241e);
+  color:#fff; box-shadow:0 8px 22px rgb(20 45 38 / .14); scroll-margin-block:1rem 7rem;
+}
+.signal .ns-card:focus-visible {outline:3px solid var(--sm-green);outline-offset:3px}
+.signal .ns-eyebrow {color:var(--sm-lime);font-weight:750;font-size:.84rem;letter-spacing:.075em;text-transform:uppercase}
+.signal [lang=th] .ns-eyebrow,.signal:lang(th) .ns-eyebrow {letter-spacing:.02em;text-transform:none}
+.signal .ns-content h2 {color:#fff;font:inherit;font-weight:700;font-size:clamp(1.55rem,4.5vw,2.2rem);line-height:1.25;margin:.45rem 0;overflow-wrap:anywhere}
+.signal .ns-content p,.signal .ns-card>p {color:#e0e7df;font-size:1rem;line-height:1.6;margin:.3rem 0 1rem}
+.signal .ns-content {animation:sm-step-in .28s ease-out}
+.signal .ns-actions,.signal .ns-choices {display:flex;flex-wrap:wrap;gap:.55rem}
+.signal .ns-card :is(button,a),.signal .ns-dock :is(button,a),.signal .ns-desktop-contact :is(button,a) {font:inherit;font-weight:650;cursor:pointer}
+.signal .ns-actions :is(button,a),.signal .ns-choices button,.signal .ns-form>.ns-primary {
+  display:inline-flex;justify-content:center;align-items:center;gap:.55rem;min-height:54px;line-height:1.35;
+  padding:.65rem 1.15rem;border:1px solid var(--ns-edge);border-radius:2rem;background:var(--ns-glass);color:white;text-decoration:none;text-align:center;
+}
+.signal .ns-card svg,.signal .ns-dock svg,.signal .ns-desktop-contact svg {width:19px;height:19px;flex-shrink:0}
+.signal .ns-actions .ns-square {padding-inline:1rem}
+.signal .ns-card .ns-primary {background:var(--sm-lime);border-color:var(--sm-lime);color:var(--sm-pine);box-shadow:0 3px 10px rgb(214 239 145 / .15)}
+.signal .ns-actions :is(a,button):hover,.signal .ns-links button:hover {text-decoration:underline}
+.signal .ns-card :disabled:not([aria-current=step]),.signal .ns-dock [aria-disabled=true] {opacity:.62;cursor:default}
+.signal .ns-card :focus-visible,.signal .ns-toast :focus-visible {outline:3px solid #f8ce6e;outline-offset:3px}
+.signal .ns-links {display:flex;flex-wrap:wrap;gap:.15rem 1.25rem}
+.signal .ns-links button {min-height:48px;text-align:start;border:0;padding:.4em 0;background:none;color:#f3f5ee;text-decoration:underline;text-underline-offset:3px;font-size:.93rem}
+.signal .ns-choices button {border-radius:15px;justify-content:flex-start;min-height:58px;flex:1 1 9rem}
+.signal .ns-choices button svg {box-sizing:content-box;color:var(--sm-lime);padding:8px;border-radius:50%;background:#475c46}
+.signal .ns-choices button:last-child svg {color:#ffc2b8;background:#58453c}
+.signal .ns-track {display:grid;grid-template-columns:minmax(44px,1fr) minmax(0,1.45fr) minmax(44px,.85fr) minmax(0,1.1fr) minmax(44px,.85fr);border-top:1px solid var(--ns-edge);padding-top:1rem;margin-top:.7rem}
+.signal .ns-track button {position:relative;min-width:0;min-height:60px;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;color:#e2e7e1;line-height:1.3;padding:0 1px;font-size:.875rem;overflow-wrap:anywhere}
+.signal .ns-track button>span {display:grid;place-items:center;width:30px;height:30px;z-index:1;border:2px solid #779084;border-radius:50%;background:#182e25}
+.signal .ns-track button:not(:last-child)::after {content:'';position:absolute;height:2px;top:14px;left:50%;width:100%;background:#627c6e}
+.signal .ns-track button[data-state=done]::after,.signal .ns-track button[data-state=done]>span,.signal .ns-track button[data-state=current] i {background:var(--sm-lime)}
+.signal .ns-track button[data-state=done]>span,.signal .ns-track button[data-state=current]>span {border-color:var(--sm-lime);color:var(--sm-pine)}
+.signal .ns-track button[data-state=current] i {display:block;border-radius:50%;width:10px;height:10px}
+.signal .ns-track.is-closed {opacity:.8}
+/* Keep each stage name on one line when the card has room; narrow or enlarged text still wraps. */
+@container next-step (min-width:19.5rem) {
+ .signal .ns-track {grid-template-columns:repeat(5,minmax(0,1fr))}
+ .signal .ns-track button {white-space:nowrap;overflow-wrap:normal;font-size:.8125rem}
+}
+.signal .ns-card p.ns-error {margin:.2rem 0 .8rem;padding:.7rem .9rem;border-radius:12px;background:#fbe6df;color:#8a3520;font-weight:650;line-height:1.45}
+.signal .ns-form {display:grid;gap:.8rem}
+.signal .ns-form fieldset {padding:0;margin:0;min-width:0;border:0}
+.signal .ns-form legend,.signal .ns-field {display:grid;gap:.45rem;color:white;font-size:1rem;font-weight:650}
+.signal .ns-form legend {margin-bottom:.35rem}
+.signal .ns-days {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.signal .ns-days label {position:relative;min-width:0}
+.signal .ns-days input {position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.signal .ns-days span {display:flex;flex-direction:column;align-items:center;line-height:1.25;padding:.5rem .05rem;font-size:.86rem;overflow-wrap:anywhere;border:1px solid var(--ns-edge);background:var(--ns-glass);border-radius:12px}
+.signal .ns-days b {font-size:1.2rem}
+.signal .ns-days input:checked+span {color:var(--sm-pine);background:var(--sm-lime)}
+.signal .ns-days input:focus-visible+span {outline:3px solid #f8ce6e;outline-offset:2px}
+.signal .ns-field :is(select,input,textarea),.signal .ns-card>textarea {box-sizing:border-box;width:100%;min-height:50px;padding:.6rem .75rem;border:1px solid #a4b9a9;border-radius:12px;background:#293f35;color:#fff;font:inherit;line-height:1.5}
+.signal .ns-field input::placeholder {color:#c0cbbf}.signal .ns-field select option {background:#20372d;color:white}
+.signal .ns-field textarea {margin-bottom:.6rem;resize:vertical}
+.signal .ns-reasons label {display:flex;align-items:center;gap:.65rem;padding:.65rem .85rem;border-radius:12px;border:1px solid var(--ns-edge);min-height:50px;margin-bottom:.35rem;color:white;cursor:pointer}
+.signal .ns-reasons input {accent-color:var(--sm-lime);width:1.2rem;height:1.2rem}
+.signal .ns-toast {position:fixed;bottom:calc(6rem + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 2rem);display:flex;align-items:center;gap:1rem;padding:.2rem .5rem .2rem 1rem;z-index:60;border-radius:15px;background:#18382a;color:#fff;border:1px solid #91a78f;box-shadow:0 4px 18px #142d2633}
+.signal .ns-toast button {min-height:48px;background:none;border:0;color:var(--sm-lime);font:inherit;font-weight:700;padding:0 .65rem;text-decoration:underline}
+.signal .ns-dock {position:fixed;inset:auto 0 0;z-index:30;display:flex;gap:.5rem;padding:.65rem max(1rem,env(safe-area-inset-right)) calc(.65rem + env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));background:#f5f4eff5;border-top:1px solid var(--sm-line)}
+.signal .ns-dock :is(a,button),.signal .ns-desktop-contact :is(a,button) {min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:.55rem;border:0;border-radius:2rem;text-decoration:none;line-height:1.3;color:var(--sm-pine);background:#e5eadf;padding:.65rem 1.1rem}
+.signal .ns-dock .ns-primary {flex:1;color:white;background:var(--sm-pine)}
+.signal .ns-desktop-contact {display:none}
+/* While typing, the keyboard already covers half the screen; give the dock's space back to the field. */
+.signal:has(:is(textarea,input:not([type=checkbox],[type=radio])):focus) .ns-dock {display:none}
+/* Android WebView enlarges text without changing what container queries measure, so the portal sets
+   data-large-text itself. Use the narrow layouts and a shorter dock label. */
+html[data-large-text] .signal .ns-track {grid-template-columns:repeat(3,minmax(0,1fr));row-gap:.6rem}
+html[data-large-text] .signal .ns-track button {white-space:normal;overflow-wrap:anywhere}
+html[data-large-text] .signal .ns-track button:nth-child(3)::after {display:none}
+html[data-large-text] .signal .ns-days {grid-template-columns:repeat(3,minmax(0,1fr))}
+html[data-large-text] .signal .ns-dock-name {display:none}
+@media(max-width:599px){
+ .signal .ns-actions .ns-primary,.signal .ns-choices button {flex-basis:100%}
+ .signal .ns-actions button:not(.ns-square),.signal .ns-actions a:not(.ns-square) {flex-grow:1}
+}
+@media(min-width:1000px){
+ .signal .ns-dock {display:none}.signal .ns-desktop-contact {display:flex;gap:.55rem;flex-wrap:wrap}.signal .ns-toast {bottom:1.5rem}
+}
+@keyframes sm-step-in {from {opacity:.8;transform:translateY(5px)} to {opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.signal .ns-content {animation:none}}
+
+@container next-step (max-width:15rem) {
+ .signal .ns-track {grid-template-columns:repeat(3,minmax(0,1fr));row-gap:.6rem}
+ .signal .ns-track button:nth-child(3)::after {display:none}
+ .signal .ns-days {grid-template-columns:repeat(3,minmax(0,1fr))}
+}

@@ -35,7 +35,14 @@ describe('payment return route and selected merchant method',()=>{
     const result=await createHostedOrder(order,{mode:'sandbox',sandboxEnabled:true,secretKey:'skey_test_fixture',publicKey:'pkey_test_fixture',activatedMethods:['credit_card','promptpay']});
     expect(result.methods).toEqual(['promptpay']);expect(result.checkout?.otherPaymentMethods).toBe('');
   });
-  it('returns authorisation to an implemented page with the exact order and language',async()=>{
+  it.each([
+    ['', '/installers/payment'],
+    ['installer-app', '/installers/app/payment'],
+    ['https://other.example.test', '/installers/payment'],
+  ])('returns authorisation to a fixed same-origin page for surface %s',async(surface,expectedPath)=>{
+    const origin=new URL(request.url);
+    if(surface)origin.searchParams.set('surface',surface);
+    const paymentRequest=new Request(origin);
     const created=await createOrder(fixture.d1(),'synthetic-company-1',request,'promptpay');
     let returnUri='';
     vi.stubGlobal('fetch',vi.fn(async(url:string,init?:RequestInit)=>{
@@ -43,9 +50,10 @@ describe('payment return route and selected merchant method',()=>{
       returnUri=new URLSearchParams(String(init?.body)).get('return_uri')!;
       return Response.json({id:'chrg_test_fixture',object:'charge',livemode:false,amount:400000,currency:'thb',paid:false,capture:true,status:'pending',metadata:{solarmatch_order_id:created.orderId},authorize_uri:'https://payments.example.test/authorize'});
     }));
-    await authorizeOrder(fixture.d1(),'synthetic-company-1',created.orderId,'src_test_fixture',request);
+    await authorizeOrder(fixture.d1(),'synthetic-company-1',created.orderId,'src_test_fixture',paymentRequest);
     const returned=new URL(returnUri);
-    expect(returned.pathname).toBe('/installers/payment');
+    expect(returned.origin).toBe(origin.origin);
+    expect(returned.pathname).toBe(expectedPath);
     expect(returned.searchParams.get('orderId')).toBe(created.orderId);
     expect(returned.searchParams.get('lang')).toBe('en');
     expect(existsSync(`app${returned.pathname}/page.tsx`)).toBe(true);

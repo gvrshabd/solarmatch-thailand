@@ -15,9 +15,11 @@ async function orderFor(db: D1Database, companyId: string | null, orderId: strin
   if (!row) throw new Error('payment_order_not_found'); return row;
 }
 function providerOrder(row: StoredPaymentOrder, request: Request): PaymentOrder {
-  const returnUrl=new URL('/installers/payment',request.url);
+  const params=new URL(request.url).searchParams;
+  const returnPath=params.get('surface')==='installer-app'?'/installers/app/payment':'/installers/payment';
+  const returnUrl=new URL(returnPath,request.url);
   returnUrl.searchParams.set('orderId',row.id);
-  returnUrl.searchParams.set('lang',new URL(request.url).searchParams.get('lang')==='en'?'en':'th');
+  returnUrl.searchParams.set('lang',params.get('lang')==='en'?'en':'th');
   return { orderId: row.id, amountMinor: row.amount_minor, currency: row.currency, description: `SolarMatch ${row.credits} credits`, returnUrl:returnUrl.href };
 }
 export async function createOrder(db: D1Database, companyId: string, request: Request, requestedMethod?: string) {
