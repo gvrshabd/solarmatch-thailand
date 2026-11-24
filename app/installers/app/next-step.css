@@ -66,6 +66,15 @@
 .signal .ns-dock :is(a,button),.signal .ns-desktop-contact :is(a,button) {min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:.55rem;border:0;border-radius:2rem;text-decoration:none;line-height:1.3;color:var(--sm-pine);background:#e5eadf;padding:.65rem 1.1rem}
 .signal .ns-dock .ns-primary {flex:1;color:white;background:var(--sm-pine)}
 .signal .ns-desktop-contact {display:none}
+/* While typing, the keyboard already covers half the screen; give the dock's space back to the field. */
+.signal:has(:is(textarea,input:not([type=checkbox],[type=radio])):focus) .ns-dock {display:none}
+/* Android WebView enlarges text without changing what container queries measure, so the portal sets
+   data-large-text itself. Use the narrow layouts and a shorter dock label. */
+html[data-large-text] .signal .ns-track {grid-template-columns:repeat(3,minmax(0,1fr));row-gap:.6rem}
+html[data-large-text] .signal .ns-track button {white-space:normal;overflow-wrap:anywhere}
+html[data-large-text] .signal .ns-track button:nth-child(3)::after {display:none}
+html[data-large-text] .signal .ns-days {grid-template-columns:repeat(3,minmax(0,1fr))}
+html[data-large-text] .signal .ns-dock-name {display:none}
 @media(max-width:599px){
  .signal .ns-actions .ns-primary,.signal .ns-choices button {flex-basis:100%}
  .signal .ns-actions button:not(.ns-square),.signal .ns-actions a:not(.ns-square) {flex-grow:1}

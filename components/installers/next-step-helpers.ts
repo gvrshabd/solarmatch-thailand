@@ -14,9 +14,10 @@ export function textTemplate(name: string, company: string, attempted: boolean, 
   if (en) return attempted
     ? `Hi ${name}, this is ${company}. We got your solar quote request from SolarMatch and tried to call you. When is a good time to talk? Just reply to this message.`
     : `Hi ${name}, this is ${company}. We got your solar quote request from SolarMatch and will call you shortly from this number.`;
+  // “ทาง” introduces the sender, so a Latin homeowner name never runs into the company name.
   return attempted
-    ? `สวัสดีคุณ${name} ${company} ได้รับคำขอใบเสนอราคาโซลาร์ของคุณจาก SolarMatch และได้โทรหาคุณ สะดวกคุยช่วงไหน ตอบกลับข้อความนี้ได้เลย`
-    : `สวัสดีคุณ${name} ${company} ได้รับคำขอใบเสนอราคาโซลาร์ของคุณจาก SolarMatch แล้ว จะโทรหาคุณจากเบอร์นี้ในไม่ช้า`;
+    ? `สวัสดี${khun(name)} ทาง ${company} ได้รับคำขอใบเสนอราคาโซลาร์ของคุณจาก SolarMatch และได้โทรหาคุณ สะดวกคุยช่วงไหน ตอบกลับข้อความนี้ได้เลย`
+    : `สวัสดี${khun(name)} ทาง ${company} ได้รับคำขอใบเสนอราคาโซลาร์ของคุณจาก SolarMatch แล้ว จะโทรหาคุณจากเบอร์นี้ในไม่ช้า`;
 }
 
 const bangkokOffset = 7 * 60 * 60 * 1000;
@@ -48,6 +49,11 @@ export function localizedDate(iso: string, en: boolean) {
 /** Thai honorific before a first name. Thai names join คุณ directly; other scripts get a space. */
 export function khun(name: string) {
   return 'คุณ' + (/^[฀-๿]/.test(name) ? '' : ' ') + name;
+}
+
+/** Space between a name and the Thai text that follows it, needed only after other scripts. */
+export function nameGap(name: string) {
+  return /[฀-๿]$/.test(name) ? '' : ' ';
 }
 
 export function calendarFile(start: string, deliveryId: string, en: boolean, now: number) {

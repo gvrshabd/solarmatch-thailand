@@ -5,7 +5,7 @@ import { CalendarDays, Check, Copy, MessageSquare, Phone, PhoneMissed, PhoneOff,
 import type { InstallerDelivery, InstallerPortalAction } from '@/lib/installer/portal-contract';
 import { thaiPhone } from '@/lib/installer/presentation';
 import type { InstallerAction } from './action-result';
-import { calendarFile, clearPendingCall, closeReasons, khun, localizedDate, localizedTime, pendingCall, savePendingCall, stages, textTemplate } from './next-step-helpers';
+import { calendarFile, clearPendingCall, closeReasons, khun, localizedDate, nameGap, localizedTime, pendingCall, savePendingCall, stages, textTemplate } from './next-step-helpers';
 import { CloseForm, QuoteForm, VisitForm } from './next-step-forms';
 import { signalGroup } from './signal-state';
 
@@ -122,7 +122,9 @@ export function NextStep({ item, en, disabled, action, companyName, recipientLim
     const link = document.createElement('a'); link.href = url; link.download = 'SolarMatch-visit.ics';
     document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
-  const call = (label: string, className = '') => hasPhone && <a className={className} href={disabled ? undefined : 'tel:' + phone} aria-disabled={disabled} onClick={e => { if (disabled) e.preventDefault(); else startCall(); }}><Phone aria-hidden="true" size={19}/>{label}</a>;
+  // Keep hand-off hrefs stable while a save is running: a save started by the tap re-renders
+  // before the phone follows the link, and a link without an href opens nothing.
+  const call = (label: ReactNode, className = '') => hasPhone && <a className={className} href={'tel:' + phone} aria-disabled={disabled} onClick={e => { if (disabled) e.preventDefault(); else startCall(); }}><Phone aria-hidden="true" size={19}/>{label}</a>;
   const closeButton = <button type="button" onClick={() => changeFlow('close')}>{t('ปิดคำขอ…','Close enquiry…')}</button>;
   const active = (content: ReactNode, title: string, help?: string) => <div key={step} className="ns-content"><h2>{title}</h2>{help && <p>{help}</p>}{content}</div>;
   const quotedHelp = (amount: string, sent?: string) => amount
@@ -137,9 +139,9 @@ export function NextStep({ item, en, disabled, action, companyName, recipientLim
     </div><div className="ns-links"><button onClick={() => {clearPendingCall(); changeFlow(null);}}>{t('ยังไม่ได้โทร','I didn’t call')}</button></div></>, t('ผลการโทรเป็นอย่างไร?','How did the call go?'), t('กำลังโทรหา ' + thaiPhone(phone) + ' วางสายแล้วกลับมาบันทึกผลที่นี่','Your phone is calling ' + thaiPhone(phone) + '. Come back here when you hang up.'));
   } else if (step === 'text') {
     content = active(<><label className="ns-field">{t('ข้อความ','Message')}<textarea rows={6} value={message} onChange={e => setMessage(e.target.value)} /></label><div className="ns-actions">
-      <a className="ns-primary" href={disabled || !hasPhone ? undefined : 'sms:' + phone + '?body=' + encodeURIComponent(message)} aria-disabled={disabled || !hasPhone} onClick={e => { if (disabled || !hasPhone) e.preventDefault(); else log('text', t('เปิดแอปข้อความแล้ว','Opened Messages')); }}><MessageSquare/>{t('เปิดแอปข้อความ','Open Messages')}</a>
+      <a className="ns-primary" href={hasPhone ? 'sms:' + phone + '?body=' + encodeURIComponent(message) : undefined} aria-disabled={disabled || !hasPhone} onClick={e => { if (disabled || !hasPhone) e.preventDefault(); else log('text', t('เปิดแอปข้อความแล้ว','Opened Messages')); }}><MessageSquare/>{t('เปิดแอปข้อความ','Open Messages')}</a>
       <button onClick={() => void copy(message, t('คัดลอกข้อความแล้ว','Text copied'))}><Copy/>{t('คัดลอกข้อความ','Copy text')}</button></div><div className="ns-links"><button onClick={() => changeFlow(null)}>{attempted ? t('ข้าม','Skip') : t('ยกเลิก','Cancel')}</button></div></>,
-      t('ส่ง SMS ถึง' + khun(firstName),'Text ' + firstName), attempted ? t('ไม่มีผู้รับสาย ส่งข้อความสั้น ๆ ให้' + khun(firstName) + 'รู้ว่าใครโทรมา จะได้รับสายครั้งต่อไป','No answer. A short text tells ' + firstName + ' who’s calling, so they pick up next time.') : t('ส่งจากโทรศัพท์ของคุณเอง แก้ไขข้อความได้ก่อนส่ง','Sent from your own phone. Edit it before you send.'));
+      t('ส่ง SMS ถึง' + khun(firstName),'Text ' + firstName), attempted ? t('ไม่มีผู้รับสาย ส่งข้อความสั้น ๆ ให้' + khun(firstName) + nameGap(firstName) + 'รู้ว่าใครโทรมา จะได้รับสายครั้งต่อไป','No answer. A short text tells ' + firstName + ' who’s calling, so they pick up next time.') : t('ส่งจากโทรศัพท์ของคุณเอง แก้ไขข้อความได้ก่อนส่ง','Sent from your own phone. Edit it before you send.'));
   } else if (step === 'visit' || step === 'contacted') {
     content = active(<VisitForm en={en} disabled={disabled} saved={item.siteVisitAt} now={now} onCancel={() => changeFlow(null)} onQuote={() => changeFlow('quote')} onClose={() => changeFlow('close')} onSave={siteVisitAt => void save({action:'report-outcome',deliveryId:item.id,outcome:'site_visit',revision,siteVisitAt}, t('บันทึกนัดหมายแล้ว','Visit booked'))}/>,
       t('นัดสำรวจหน้างาน','Book a site visit'), t('เลือกวันและเวลาที่ตกลงกับ' + khun(firstName),'Pick the day and time you agreed with ' + firstName + '.'));
@@ -181,6 +183,6 @@ export function NextStep({ item, en, disabled, action, companyName, recipientLim
       {feedback && !undo && <p role="status">{feedback}</p>}
     </section>
     {undo && <div className="ns-toast" role="status"><span>{undo.label}</span><button disabled={disabled} onClick={() => void undoLast()}>{t('เลิกทำ','Undo')}</button></div>}
-    {hasPhone && !closed && <aside className="ns-dock" aria-label={t('ติดต่อเจ้าของบ้าน','Contact homeowner')}>{call(t('โทรหา' + khun(firstName),'Call ' + firstName),'ns-primary')}<button aria-label={t('ส่ง SMS','Text homeowner')} disabled={disabled} onClick={() => openText(false)}><MessageSquare/></button></aside>}
+    {hasPhone && !closed && <aside className="ns-dock" aria-label={t('ติดต่อเจ้าของบ้าน','Contact homeowner')}>{call(<span>{t('โทร','Call')}<span className="ns-dock-name">{t('หา' + khun(firstName),' ' + firstName)}</span></span>,'ns-primary')}<button aria-label={t('ส่ง SMS','Text homeowner')} disabled={disabled} onClick={() => openText(false)}><MessageSquare/></button></aside>}
   </>;
 }

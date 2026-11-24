@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { calendarFile, callKey, clearPendingCall, khun, localizedDate, pendingCall, savePendingCall, textTemplate, visitDays } from '@/components/installers/next-step-helpers';
+import { calendarFile, callKey, clearPendingCall, khun, localizedDate, nameGap, pendingCall, savePendingCall, textTemplate, visitDays } from '@/components/installers/next-step-helpers';
 import { isStoreApp } from '@/components/installers/store-app';
 
 function memoryStorage(): Storage {
@@ -32,6 +32,12 @@ describe('installer visit and contact handoffs', () => {
   it('joins คุณ to Thai names and spaces it before other scripts', () => {
     expect(khun('กัญญา')).toBe('คุณกัญญา');
     expect(khun('Arun')).toBe('คุณ Arun');
+    expect(nameGap('กัญญา')).toBe('');
+    expect(nameGap('Arun')).toBe(' ');
+  });
+  it('keeps a Latin homeowner name apart from the company in the Thai text', () => {
+    expect(textTemplate('Arun','Sun Co',true,false)).toMatch(/^สวัสดีคุณ Arun ทาง Sun Co ได้รับ/);
+    expect(textTemplate('กัญญา','บริษัท ก',false,false)).toMatch(/^สวัสดีคุณกัญญา ทาง บริษัท ก ได้รับ/);
   });
   it('writes dates in Thailand time without the year', () => {
     expect(localizedDate('2026-11-24T17:30:00Z', true)).toBe('Wed 25 Nov');

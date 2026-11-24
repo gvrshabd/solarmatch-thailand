@@ -46,6 +46,8 @@ export function InstallerPortal({deliveryId,appMode=false,publicConfig={accounts
  const refreshAdvice=t('ระบบบันทึกรายการแล้ว แต่ยังโหลดข้อมูลล่าสุดไม่ได้ กรุณาโหลดหน้าใหม่ก่อนทำรายการอีกครั้ง','Your change was saved. Reload this page to see the latest details before repeating it.');
  const displayMessage=message==='Saved.'||message==='บันทึกแล้ว'?t('บันทึกแล้ว','Saved.'):['Check your email to continue if this account exists.','ตรวจสอบอีเมลเพื่อดำเนินการต่อ หากบัญชีนี้มีอยู่ในระบบ'].includes(message)?t('ตรวจสอบอีเมลเพื่อดำเนินการต่อ หากบัญชีนี้มีอยู่ในระบบ','Check your email to continue if this account exists.'):message;
  useEffect(()=>{document.documentElement.lang=en?'en':'th';},[en]);
+ // Android WebView's text size enlarges fonts but not the sizes CSS container queries measure, so flag large text for the stylesheet.
+ useEffect(()=>{document.documentElement.toggleAttribute('data-large-text',parseFloat(getComputedStyle(document.documentElement).fontSize)>=18);},[]);
  useEffect(()=>{queueMicrotask(()=>setViewTime(Date.now()));const id=window.setInterval(()=>setViewTime(Date.now()),appMode?15000:30000);return()=>clearInterval(id);},[appMode]);
  useEffect(()=>{if(!message||!data)return;const id=window.setTimeout(()=>setMessage(''),5000);return()=>clearTimeout(id);},[message,data]);
  function clearAccountState(){

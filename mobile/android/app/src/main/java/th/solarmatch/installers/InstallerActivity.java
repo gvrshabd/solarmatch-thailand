@@ -39,10 +39,21 @@ public final class InstallerActivity extends Activity {
     private boolean english;
     /** The last installer page shown, so a restarted renderer reopens the same enquiry. */
     private String lastPortalUrl;
+    /** android.window.OnBackInvokedCallback on Android 13+; typed as Object so older versions never load it. */
+    private Object backCallback;
+    private boolean backRegistered;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
-        english = getPreferences(MODE_PRIVATE).getBoolean("english", false);
+        // When the task was first opened another way (Play's or the installer's "Open" button), the
+        // launcher icon would stack a second, empty copy over the open enquiry. Show the existing one.
+        Intent launch = getIntent();
+        if (!isTaskRoot() && launch != null && Intent.ACTION_MAIN.equals(launch.getAction()) &&
+                launch.hasCategory(Intent.CATEGORY_LAUNCHER)) {
+            finish();
+            return;
+        }
+        english =getPreferences(MODE_PRIVATE).getBoolean("english", false);
         links = new PortalLinks(BuildConfig.PORTAL_ORIGIN);
         root = new FrameLayout(this);
         root.setBackgroundColor(getColor(R.color.stone));
@@ -59,14 +70,11 @@ public final class InstallerActivity extends Activity {
         web = new WebView(this);
         root.addView(web);
         configureWebView();
-        if (Build.VERSION.SDK_INT >= 33) {
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::backOrExit);
-        }
         // Android may end the app while the dialer, Messages or Calendar is in front. Reopen the
         // same enquiry and its history instead of starting again at the inbox. The page restores
         // its own "How did the call go?" step; notes are saved before the app leaves the screen.
         if (state == null || !restorePortal(state)) openInstaller();
+        updateBack();
     }
 
     private boolean restorePortal(Bundle state) {
@@ -166,6 +174,7 @@ public final class InstallerActivity extends Activity {
                     String lang = Uri.parse(url).getQueryParameter("lang");
                     if ("th".equals(lang) || "en".equals(lang)) rememberLanguage("en".equals(lang));
                 }
+                updateBack();
             }
             @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
                 // Under memory pressure the system may stop the page while another app is in front.
@@ -179,6 +188,7 @@ public final class InstallerActivity extends Activity {
                 URI saved = parse(lastPortalUrl);
                 if (saved != null && links.isPortal(saved)) web.loadUrl(lastPortalUrl);
                 else openInstaller();
+                updateBack();
                 return true;
             }
             @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
@@ -216,6 +226,7 @@ public final class InstallerActivity extends Activity {
         web.setVisibility(View.VISIBLE);
         // Retry is a fresh read. Never resubmit a payment, note or other mutation.
         web.loadUrl(BuildConfig.PORTAL_ORIGIN + "/installers/app" + (english ? "?lang=en" : ""));
+        updateBack();
     }
 
     private void showError() {
@@ -254,16 +265,43 @@ public final class InstallerActivity extends Activity {
         errorView.addView(panel);
         root.addView(errorView);
         title.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        updateBack();
     }
     private int dp(int value) { return Math.round(getResources().getDisplayMetrics().density * value); }
-    private void backOrExit() {
-        if (errorView == null && web.canGoBack()) web.goBack();
-        else finish();
+
+    private boolean canGoBackInPortal() { return errorView == null && web != null && web.canGoBack(); }
+
+    /**
+     * Back walks the installer history. From the first page it leaves to the home screen the way
+     * Android 12+ does for any app: the task stays alive, so reopening is instant. On Android 13+
+     * the callback is registered only while there is history, so the system's predictive back
+     * animation shows when Back will leave the app.
+     */
+    private void updateBack() {
+        if (Build.VERSION.SDK_INT < 33) return;
+        boolean wanted = canGoBackInPortal();
+        if (wanted == backRegistered) return;
+        if (backCallback == null) backCallback = (android.window.OnBackInvokedCallback) this::goBackInPortal;
+        android.window.OnBackInvokedCallback callback = (android.window.OnBackInvokedCallback) backCallback;
+        if (wanted) getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback);
+        else getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(callback);
+        backRegistered = wanted;
     }
-    @Override public void onBackPressed() { backOrExit(); }
+    private void goBackInPortal() {
+        if (canGoBackInPortal()) web.goBack();
+        updateBack();
+    }
+    // Reached only before Android 13. From 13 the manifest opts in to OnBackInvokedCallback (updateBack).
+    @SuppressLint("GestureBackNavigation")
+    @Override public void onBackPressed() {
+        if (canGoBackInPortal()) web.goBack();
+        else moveTaskToBack(true);
+    }
     @Override protected void onDestroy() {
-        root.removeView(web);
-        web.destroy();
+        if (web != null) {
+            root.removeView(web);
+            web.destroy();
+        }
         super.onDestroy();
     }
 }
