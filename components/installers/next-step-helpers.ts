@@ -38,6 +38,18 @@ export function localizedTime(iso: string, en: boolean, withDate = true) {
   }).format(new Date(iso));
 }
 
+/** Weekday, day and month in Thailand time, as in “Tue 24 Nov”. */
+export function localizedDate(iso: string, en: boolean) {
+  return new Intl.DateTimeFormat(en ? 'en-GB' : 'th-TH', {
+    timeZone: 'Asia/Bangkok', weekday: 'short', day: 'numeric', month: 'short',
+  }).format(new Date(iso));
+}
+
+/** Thai honorific before a first name. Thai names join คุณ directly; other scripts get a space. */
+export function khun(name: string) {
+  return 'คุณ' + (/^[฀-๿]/.test(name) ? '' : ' ') + name;
+}
+
 export function calendarFile(start: string, deliveryId: string, en: boolean, now: number) {
   const stamp = (date: Date) => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   // Only opaque IDs and dates enter the file. A stable UID lets calendar clients match repeat exports.
@@ -52,6 +64,45 @@ export function calendarFile(start: string, deliveryId: string, en: boolean, now
 }
 
 export const callKey = 'solarmatch-installer-call';
+const callLifetime = 30 * 60000;
+type PendingCall = { deliveryId: string; startedAt: number };
+// A phone may end the app while the dialer is in front, which also ends sessionStorage.
+// Keep only the opaque delivery ID and start time, in local storage, for 30 minutes.
+function stores(): Storage[] {
+  const found: Storage[] = [];
+  for (const read of [() => window.localStorage, () => window.sessionStorage]) {
+    try { const store = read(); if (store) found.push(store); } catch { /* Storage may be disabled. */ }
+  }
+  return found;
+}
+export function savePendingCall(deliveryId: string, now = Date.now()) {
+  const value = JSON.stringify({ deliveryId, startedAt: now });
+  for (const store of stores()) {
+    try { store.setItem(callKey, value); return; } catch { /* Try the next store; the in-memory flow still works. */ }
+  }
+}
+/**
+ * The pending call for this delivery and the milliseconds it remains valid; 'expired' once a
+ * call for this delivery has lapsed; otherwise null. Invalid and expired entries are removed.
+ */
+export function pendingCall(deliveryId: string, now = Date.now()): { remaining: number } | 'expired' | null {
+  let expired = false;
+  for (const store of stores()) {
+    let pending: Partial<PendingCall> | null = null;
+    try { pending = JSON.parse(store.getItem(callKey) || 'null'); } catch { pending = {}; }
+    if (!pending) continue;
+    const remaining = Number(pending.startedAt) + callLifetime - now;
+    if (!Number.isFinite(remaining) || remaining <= 0 || remaining > callLifetime || typeof pending.deliveryId !== 'string') {
+      try { store.removeItem(callKey); } catch { /* Storage may be disabled. */ }
+      expired ||= pending.deliveryId === deliveryId;
+      continue;
+    }
+    if (pending.deliveryId === deliveryId) return { remaining };
+  }
+  return expired ? 'expired' : null;
+}
 export function clearPendingCall() {
-  try { sessionStorage.removeItem(callKey); } catch { /* Storage may be disabled. */ }
+  for (const store of stores()) {
+    try { store.removeItem(callKey); } catch { /* Storage may be disabled. */ }
+  }
 }

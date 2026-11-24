@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, type FormEventHandler, type ReactNode } from 'react';
-import { CloudOff, LockKeyhole, Mail, RefreshCw } from 'lucide-react';
+import { useEffect, useRef, useState, type FormEventHandler, type ReactNode } from 'react';
+import { CloudOff, Eye, EyeOff, LockKeyhole, Mail, RefreshCw } from 'lucide-react';
 import { SignalLogo } from './landing';
 
 export type AuthMode = 'login' | 'register' | 'recovery' | 'reset';
@@ -55,6 +55,8 @@ export function InstallerAppAuth({ en, mode, sent, error, message, busy, registr
   const title = {login:t('เข้าสู่ระบบ','Sign in'), register:t('สร้างบัญชีบริษัท','Create a company account'), recovery:t('กู้คืนบัญชี','Recover your account'), reset:t('ตั้งรหัสผ่านใหม่','Set a new password')}[mode];
   const intro = {login:t('ใช้อีเมลและรหัสผ่านของบัญชีผู้ติดตั้ง SolarMatch', 'Use the email and password for your SolarMatch installer account.'), register:t('เราจะส่งอีเมลให้คุณยืนยันบัญชีก่อนกรอกข้อมูลบริษัท', 'We’ll email you a verification link before you set up your company.'), recovery:t('กรอกอีเมลที่ใช้สมัครเพื่อรับลิงก์ตั้งรหัสผ่านใหม่', 'Enter your installer email to request a password reset link.'), reset:t('เลือกรหัสผ่านใหม่สำหรับบัญชีของคุณ', 'Choose a new password for your installer account.')}[mode];
   const heading = useRef<HTMLHeadingElement>(null);
+  // Typing a long password on a phone is error-prone; let people check it before submitting.
+  const [showPassword, setShowPassword] = useState(false);
   const previousStep = useRef({ mode, sent });
   useEffect(() => {
     if (previousStep.current.mode !== mode || previousStep.current.sent !== sent) heading.current?.focus();
@@ -71,7 +73,9 @@ export function InstallerAppAuth({ en, mode, sent, error, message, busy, registr
       <form key={mode} onSubmit={onSubmit} className="entry-fields">
         {mode === 'register' && <label htmlFor="auth-name">{t('ชื่อผู้ติดต่อ','Your name')}<input className="tx" name="name" id="auth-name" autoComplete="name" maxLength={120} required/></label>}
         {mode !== 'reset' && <label htmlFor="auth-email">{t('อีเมล','Email')}<input className="tx" name="email" id="auth-email" type="email" autoComplete="email" autoCapitalize="none" spellCheck={false} maxLength={254} required/></label>}
-        {mode !== 'recovery' && <label htmlFor="auth-password">{mode === 'login' ? t('รหัสผ่าน','Password') : t('รหัสผ่าน (อย่างน้อย 12 ตัวอักษร)','Password (at least 12 characters)')}<input className="tx" name="password" id="auth-password" type="password" autoComplete={mode==='login'?'current-password':'new-password'} minLength={12} maxLength={128} required/></label>}
+        {mode !== 'recovery' && <div className="entry-password"><label htmlFor="auth-password">{mode === 'login' ? t('รหัสผ่าน','Password') : t('รหัสผ่าน (อย่างน้อย 12 ตัวอักษร)','Password (at least 12 characters)')}</label>
+          <div><input className="tx" name="password" id="auth-password" type={showPassword ? 'text' : 'password'} autoComplete={mode==='login'?'current-password':'new-password'} autoCapitalize="none" spellCheck={false} minLength={12} maxLength={128} required/>
+          <button type="button" className="entry-reveal" aria-controls="auth-password" aria-pressed={showPassword} onClick={()=>setShowPassword(v=>!v)}>{showPassword ? <EyeOff aria-hidden="true" size={18}/> : <Eye aria-hidden="true" size={18}/>}{showPassword ? t('ซ่อน','Hide') : t('แสดง','Show')}</button></div></div>}
         {error && <p className="entry-error" role="alert">{error}</p>}
         {message && !error && <p role="status">{message}</p>}
         <button className="btn primary" disabled={busy}>{busy ? t('กำลังดำเนินการ…','Working…') : mode === 'recovery' ? t('ส่งลิงก์ตั้งรหัสผ่าน','Send reset link') : title}</button>

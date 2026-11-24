@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowInsets;
 import android.webkit.CookieManager;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -36,6 +37,8 @@ public final class InstallerActivity extends Activity {
     private FrameLayout root;
     private ScrollView errorView;
     private boolean english;
+    /** The last installer page shown, so a restarted renderer reopens the same enquiry. */
+    private String lastPortalUrl;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -60,7 +63,33 @@ public final class InstallerActivity extends Activity {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::backOrExit);
         }
-        openInstaller();
+        // Android may end the app while the dialer, Messages or Calendar is in front. Reopen the
+        // same enquiry and its history instead of starting again at the inbox. The page restores
+        // its own "How did the call go?" step; notes are saved before the app leaves the screen.
+        if (state == null || !restorePortal(state)) openInstaller();
+    }
+
+    private boolean restorePortal(Bundle state) {
+        if (web.restoreState(state) == null) return false;
+        lastPortalUrl = state.getString("portalUrl");
+        URI page = parse(web.getUrl());
+        if (page != null && links.isPortal(page)) return true;
+        URI saved = parse(lastPortalUrl);
+        if (saved == null || !links.isPortal(saved)) return false;
+        web.loadUrl(lastPortalUrl);
+        return true;
+    }
+
+    @Override protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        if (errorView == null) web.saveState(state);
+        if (lastPortalUrl != null) state.putString("portalUrl", lastPortalUrl);
+    }
+
+    @Override protected void onPause() {
+        super.onPause();
+        // Persist the secure session cookie before the system can stop the process.
+        CookieManager.getInstance().flush();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -133,9 +162,24 @@ public final class InstallerActivity extends Activity {
             @Override public void doUpdateVisitedHistory(WebView view, String url, boolean reload) {
                 URI page = parse(url);
                 if (page != null && links.isPortal(page)) {
+                    lastPortalUrl = url;
                     String lang = Uri.parse(url).getQueryParameter("lang");
                     if ("th".equals(lang) || "en".equals(lang)) rememberLanguage("en".equals(lang));
                 }
+            }
+            @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                // Under memory pressure the system may stop the page while another app is in front.
+                // Replace the WebView and reopen the last installer page rather than closing the app.
+                if (view != web) return false;
+                root.removeView(web);
+                web.destroy();
+                web = new WebView(InstallerActivity.this);
+                root.addView(web, 0);
+                configureWebView();
+                URI saved = parse(lastPortalUrl);
+                if (saved != null && links.isPortal(saved)) web.loadUrl(lastPortalUrl);
+                else openInstaller();
+                return true;
             }
             @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (request.isForMainFrame()) showError();

@@ -88,4 +88,12 @@ describe('Signal credits financial presentation',()=>{
     expect(html).toContain('VAT included');
     expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Pay with/);
   });
+  it('shows store app users their balance and history with no purchase or call to buy elsewhere',()=>{
+    const data=fixture();
+    data.orders=[{id:'order',status:'paid',amountMinor:900000,currency:'THB',credits:30,createdAt:'2026-10-02T00:00:00Z',receiptReference:null}];
+    const html=credits(data,{storeApp:true,qrImage:'https://provider.example/qr.png',qrOrderId:'order'});
+    expect(html).toContain('Credits can’t be bought in this app.');
+    expect(html).toContain('Statement');
+    for(const purchase of ['Pay with','Payment QR code','https://',' href=']) expect(html).not.toContain(purchase);
+  });
 });

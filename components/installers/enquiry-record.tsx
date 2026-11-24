@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import type { DeliveryActivity, InstallerDelivery } from '@/lib/installer/portal-contract';
 import { assessmentRows } from '@/lib/installer/assessment-display';
+import { khun } from './next-step-helpers';
 
 export function EnquiryHome({ item, en }: { item: InstallerDelivery; en: boolean }) {
   const t = (th: string, english: string) => en ? english : th;
@@ -16,16 +17,28 @@ export function EnquiryHome({ item, en }: { item: InstallerDelivery; en: boolean
     ['planningTimeframe', t('ช่วงเวลาติดตั้ง', 'timeframe')],
   ];
   const details = rows.filter(row => !facts.some(([key]) => key === row.key));
+  // The four facts are read at a glance on a phone: the label already says “monthly”, and the
+  // timeframe answer drops its leading “Yes —”. The full wording stays in the assessment rows.
+  const fact = (key: string) => {
+    const raw = item.assessment[key];
+    if (key === 'monthlyBillThb' && typeof raw === 'number' && Number.isFinite(raw)) return '฿' + number(raw);
+    const value = rows.find(row => row.key === key)?.value;
+    if (key === 'planningTimeframe' && value) {
+      const short = value.replace(/^(?:yes|ใช่)\s*[—–-]\s*/i, '');
+      return short.charAt(0).toLocaleUpperCase(en ? 'en' : 'th') + short.slice(1);
+    }
+    return value;
+  };
   const name = item.homeownerName.trim().split(/\s+/)[0];
   const number = (n: number, digits = 0) => n.toLocaleString(en ? 'en-GB' : 'th-TH', { maximumFractionDigits: digits });
   const estimate = item.estimate;
   return <section className="card enquiry-home">
     <h2 className="h3">{t('ข้อมูลบ้าน', 'The home')}</h2>
     <dl className="home-facts">{facts.map(([key, label]) => <div key={key}>
-      <dt>{label}</dt><dd>{rows.find(row => row.key === key)?.value || t('ไม่ได้ระบุ', 'Not specified')}</dd>
+      <dt>{label}</dt><dd>{fact(key) || t('ไม่ได้ระบุ', 'Not specified')}</dd>
     </div>)}</dl>
     {estimate && <div className="home-estimate">
-      <h3><Sun size={18} aria-hidden="true"/>{name ? t('ผลประเมิน SolarMatch จากคำตอบของคุณ' + name, 'SolarMatch estimate from ' + name + '’s answers') : t('ผลประเมินจาก SolarMatch', 'SolarMatch estimate')}</h3>
+      <h3><Sun size={18} aria-hidden="true"/>{name ? t('ผลประเมิน SolarMatch จากคำตอบของ' + khun(name), 'SolarMatch estimate from ' + name + '’s answers') : t('ผลประเมินจาก SolarMatch', 'SolarMatch estimate')}</h3>
       <dl className="home-facts estimate-figures">
         <div><dt>{t('ขนาดระบบ', 'system')}</dt><dd>{number(estimate.systemKw, 2)} kWp</dd></div>
         <div><dt>{t('ราคาประเมิน', 'estimated price')}</dt><dd>฿{number(estimate.installedCostThb)}</dd></div>
@@ -78,7 +91,7 @@ function activityLabel(event: DeliveryActivity, item: InstallerDelivery, en: boo
   const name = item.homeownerName.trim().split(/\s+/)[0];
   switch (event.kind) {
     case 'received': return t('ได้รับคำขอ', 'Enquiry received') + ' · ' + (item.fundingSource === 'trial' ? t('ทดลองฟรี', 'Free trial') : item.creditCost + t(' เครดิต', ' credits'));
-    case 'call-spoke': return name ? t('โทรแล้ว · ได้คุยกับคุณ' + name, 'Called · spoke with ' + name) : t('โทรแล้ว · ได้คุยกับเจ้าของบ้าน', 'Called · spoke with homeowner');
+    case 'call-spoke': return name ? t('โทรแล้ว · ได้คุยกับ' + khun(name), 'Called · spoke with ' + name) : t('โทรแล้ว · ได้คุยกับเจ้าของบ้าน', 'Called · spoke with homeowner');
     case 'call-no-answer': return t('โทรแล้ว · ไม่รับสาย', 'Called · no answer');
     case 'call-wrong': return t('โทรแล้ว · เบอร์ผิด', 'Called · wrong number');
     case 'text': return t('เปิดแอปข้อความ', 'Opened Messages');

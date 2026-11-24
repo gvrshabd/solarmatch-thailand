@@ -38,6 +38,12 @@
 .signal .ns-track button[data-state=done]>span,.signal .ns-track button[data-state=current]>span {border-color:var(--sm-lime);color:var(--sm-pine)}
 .signal .ns-track button[data-state=current] i {display:block;border-radius:50%;width:10px;height:10px}
 .signal .ns-track.is-closed {opacity:.8}
+/* Keep each stage name on one line when the card has room; narrow or enlarged text still wraps. */
+@container next-step (min-width:19.5rem) {
+ .signal .ns-track {grid-template-columns:repeat(5,minmax(0,1fr))}
+ .signal .ns-track button {white-space:nowrap;overflow-wrap:normal;font-size:.8125rem}
+}
+.signal .ns-card p.ns-error {margin:.2rem 0 .8rem;padding:.7rem .9rem;border-radius:12px;background:#fbe6df;color:#8a3520;font-weight:650;line-height:1.45}
 .signal .ns-form {display:grid;gap:.8rem}
 .signal .ns-form fieldset {padding:0;margin:0;min-width:0;border:0}
 .signal .ns-form legend,.signal .ns-field {display:grid;gap:.45rem;color:white;font-size:1rem;font-weight:650}

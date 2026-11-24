@@ -10,14 +10,15 @@ import { createOrder,authorizeOrder,reconcileOrder } from '@/lib/installer/payme
 import { beginLineLink,unlinkLine } from '@/lib/installer/line-linking';
 import {allowInstallerRequest} from '@/lib/installer/rate-limit';
 import {normalizeServiceArea} from '@/lib/installer/service-areas';
+import { deleteInstallerAccount } from '@/lib/installer/account-deletion';
 
 import { changeWorkflow, undoWorkflow, contactActivities, closeReasons, workflowOutcomes, installerAuditActor } from '@/lib/installer/enquiry-workflow';
 
 export const dynamic='force-dynamic';
 const companySchema=z.object({name:z.string().trim().min(2).max(160),contactName:z.string().trim().min(1).max(160),phone:z.string().trim().min(6).max(40),serviceAreas:z.array(z.string().trim().min(1).max(100).transform(normalizeServiceArea)).min(1).max(100).transform(areas=>[...new Set(areas)]),supportedProducts:z.array(z.literal('shared_residential')).min(1).max(1),dailyLimit:z.number().int().min(0).max(100),paused:z.boolean()});
-const actionSchema=z.object({action:z.enum(['create-company','update-company','set-accepting','accept-terms','checkout','authorize-payment','reconcile-order','create-claim','rotate-share-link','revoke-share-link','report-outcome','log-activity','undo-activity','save-team-notes','link-line','unlink-line']),accepting:z.boolean().optional(),name:z.unknown().optional(),contactName:z.unknown().optional(),phone:z.unknown().optional(),serviceAreas:z.unknown().optional(),supportedProducts:z.unknown().optional(),dailyLimit:z.unknown().optional(),paused:z.unknown().optional(),version:z.string().max(100).optional(),packageId:z.string().max(100).optional(),method:z.string().max(60).optional(),orderId:z.string().uuid().optional(),tokenOrSourceId:z.string().max(100).optional(),deliveryId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(200).optional(),notes:z.string().max(2000).optional(),revision:z.number().int().min(0).optional(),outcome:z.enum(workflowOutcomes).optional(),
+const actionSchema=z.object({action:z.enum(['create-company','update-company','set-accepting','accept-terms','checkout','authorize-payment','reconcile-order','create-claim','rotate-share-link','revoke-share-link','report-outcome','log-activity','undo-activity','save-team-notes','link-line','unlink-line','delete-account']),accepting:z.boolean().optional(),name:z.unknown().optional(),contactName:z.unknown().optional(),phone:z.unknown().optional(),serviceAreas:z.unknown().optional(),supportedProducts:z.unknown().optional(),dailyLimit:z.unknown().optional(),paused:z.unknown().optional(),version:z.string().max(100).optional(),packageId:z.string().max(100).optional(),method:z.string().max(60).optional(),orderId:z.string().uuid().optional(),tokenOrSourceId:z.string().max(100).optional(),deliveryId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(200).optional(),notes:z.string().max(2000).optional(),revision:z.number().int().min(0).optional(),outcome:z.enum(workflowOutcomes).optional(),
   onlyIfMissing:z.boolean().optional(),kind:z.enum(contactActivities).optional(),undoId:z.string().uuid().optional(),siteVisitAt:z.iso.datetime({offset:true}).transform(at=>new Date(at).toISOString()).nullable().optional(),
-  quoteAmountThb:z.number().int().nonnegative().nullable().optional(),closeReason:z.enum(closeReasons).nullable().optional(),linkRequest:z.string().max(200).optional()}).strict();
+  quoteAmountThb:z.number().int().nonnegative().nullable().optional(),closeReason:z.enum(closeReasons).nullable().optional(),linkRequest:z.string().max(200).optional(),password:z.string().min(1).max(128).optional()}).strict();
 export async function GET(request:Request) {
   try{assertPlatformRequest(request);const session=await getInstallerSession(request);if(!session)return platformJson({error:'unauthorized'},401);const deliveryId=new URL(request.url).searchParams.get('deliveryId');if(deliveryId&&!z.string().uuid().safeParse(deliveryId).success)return platformJson({error:'invalid_delivery'},400);return platformJson(await getPortalData(requireDatabase(),session,deliveryId??undefined));}
   catch{return platformJson({error:'portal_unavailable'},503);}
@@ -27,6 +28,13 @@ export async function POST(request:Request) {
     const data=actionSchema.parse(await platformBody(request));const session=await getInstallerSession(request);
     if(!session||!session.user.emailVerified)return platformJson({error:'verified_account_required'},401);
     const db=requireDatabase();if(!await allowInstallerRequest(db,`portal:${session.user.id}`,30,60))return platformJson({error:'too_many_requests'},429);const company=await membership(db,session.user.id);const actor=session.user.email;const now=isoNow();
+    if(data.action==='delete-account'){
+      // Any member may delete their own sign-in account; the current password confirms it is them.
+      if(!data.password)throw new Error('password_required');
+      if(!await allowInstallerRequest(db,`account-deletion:${session.user.id}`,5,900))return platformJson({error:'too_many_requests'},429);
+      const result=await deleteInstallerAccount(db,{id:session.user.id,email:session.user.email},data.password);
+      return platformJson(result,'error' in result?403:200);
+    }
     if(data.action==='create-company'){
       if(company)throw new Error('company_already_exists');const profile=companySchema.parse(data);const id=crypto.randomUUID();
       await db.batch([

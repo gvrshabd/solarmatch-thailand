@@ -58,3 +58,9 @@
 .installer-payment-app button { justify-content: center; padding: .625rem 1rem; border: 0; border-radius: var(--sm-pill); background: var(--sm-pine); color: white; cursor: pointer; }
 .installer-payment-app button:disabled { opacity: .55; }
 .installer-payment-app .payment-lang { justify-self: end; background: var(--sm-sage); color: var(--sm-pine); }
+.installer-entry .entry-password { display: grid; gap: .375rem; }
+.installer-entry .entry-password > label { font-weight: 600; }
+.installer-entry .entry-password > div { position: relative; }
+.installer-entry .entry-password .tx { width: 100%; box-sizing: border-box; padding-inline-end: 6.5rem; }
+.installer-entry .entry-reveal { position: absolute; inset-block: .25rem; inset-inline-end: .25rem; display: inline-flex; align-items: center; gap: .35rem; min-width: 48px; padding: 0 .85rem; border: 0; border-radius: 999px; background: #e7ece1; color: var(--sm-pine, #142D26); font: inherit; font-weight: 650; cursor: pointer; }
+.installer-entry .entry-reveal:focus-visible { outline: 3px solid var(--sm-green, #137A50); outline-offset: 2px; }

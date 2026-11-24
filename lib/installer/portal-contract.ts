@@ -62,4 +62,5 @@ export type InstallerPortalAction =
   | { action: 'undo-activity'; deliveryId: string; undoId: string }
   | { action: 'save-team-notes'; deliveryId: string; notes: string; revision: number }
   | { action: 'link-line'; linkRequest?: string }
-  | { action: 'unlink-line' };
+  | { action: 'unlink-line' }
+  | { action: 'delete-account'; password: string };

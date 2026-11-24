@@ -47,6 +47,15 @@ export function EnquiryDetail({ item, en, busy, action, share, clearShare, now, 
   useEffect(() => { heading.current?.focus(); }, [item.id, item.withdrawn]);
   useEffect(() => registerNotesGuard?.(() => item.withdrawn ? Promise.resolve(true) : editor.flush()), [editor, item.withdrawn, registerNotesGuard]);
   useEffect(() => {
+    // Save a draft before the dialer, Messages or another app comes to the front. A phone may
+    // end the backgrounded app, and drafts are deliberately kept in memory only.
+    const save = () => { if (!item.withdrawn && emailVerified && canManage && editor.getSnapshot().dirty) void editor.flush(); };
+    const hidden = () => { if (document.visibilityState === 'hidden') save(); };
+    document.addEventListener('visibilitychange', hidden);
+    window.addEventListener('pagehide', save);
+    return () => { document.removeEventListener('visibilitychange', hidden); window.removeEventListener('pagehide', save); };
+  }, [canManage, editor, emailVerified, item.withdrawn]);
+  useEffect(() => {
     const beforeUnload = (event: BeforeUnloadEvent) => { if (editor.getSnapshot().dirty && !item.withdrawn) { event.preventDefault(); event.returnValue = ''; } };
     window.addEventListener('beforeunload', beforeUnload);
     return () => window.removeEventListener('beforeunload', beforeUnload);
@@ -94,11 +103,16 @@ export function EnquiryDetail({ item, en, busy, action, share, clearShare, now, 
     setWrongNumber(true);
     const reason = problemPanel.current.querySelector('select');
     if (reason) reason.value = 'incorrect-contact';
-    // The completed call action re-enables the form on React's next paint.
-    requestAnimationFrame(() => {
+    // The form stays disabled until the call action's refresh finishes, which can take several
+    // frames on a slow phone. Wait for it (up to about half a second) before falling back.
+    const focusDetails = (frames = 0) => requestAnimationFrame(() => {
       const panel = problemPanel.current;
-      (panel?.querySelector<HTMLTextAreaElement>('textarea:not(:disabled)') || panel?.querySelector('summary'))?.focus();
+      const details = panel?.querySelector<HTMLTextAreaElement>('textarea');
+      if (details && !details.disabled) details.focus();
+      else if (frames < 30) focusDetails(frames + 1);
+      else panel?.querySelector('summary')?.focus();
     });
+    focusDetails();
   }
   function showShare() {
     if (!sharePanel.current) return;

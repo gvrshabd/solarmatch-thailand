@@ -28,6 +28,9 @@ final class PortalController: UIViewController, WKNavigationDelegate,
     private let language = UIButton(type: .system)
     private var english = false
     private var retryURL: URL?
+    private var lastTermination: Date?
+    private static let lastPageKey = "lastInstallerPage"
+    private static let lastPageAtKey = "lastInstallerPageAt"
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,7 +82,33 @@ final class PortalController: UIViewController, WKNavigationDelegate,
             messageView.topAnchor.constraint(greaterThanOrEqualTo: scroll.contentLayoutGuide.topAnchor, constant: 24),
             messageView.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -24), center
         ])
+        // iOS may end the app while Phone, Messages or Calendar is in front. Reopen the same
+        // installer page for 30 minutes; the page restores its own "How did the call go?" step.
+        let defaults = UserDefaults.standard
+        if let saved = defaults.string(forKey: Self.lastPageKey).flatMap({ URL(string: $0) }),
+           let at = defaults.object(forKey: Self.lastPageAtKey) as? Date,
+           Date().timeIntervalSince(at) < 30 * 60, origin?.isPortalPage(saved) == true {
+            retryURL = saved
+        }
+        NotificationCenter.default.addObserver(self, selector: #selector(rememberPage),
+                                               name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(applyTextSize),
+                                               name: UIContentSizeCategory.didChangeNotification, object: nil)
+        applyTextSize()
         start()
+    }
+
+    /// The page navigates with the History API, so read the WebView's current URL, not the last load.
+    @objc private func rememberPage() {
+        guard let url = web.url.flatMap({ origin?.isPortalPage($0) == true ? $0 : nil }) ?? retryURL else { return }
+        UserDefaults.standard.set(url.absoluteString, forKey: Self.lastPageKey)
+        UserDefaults.standard.set(Date(), forKey: Self.lastPageAtKey)
+    }
+
+    /// Follow the system text size (Settings > Display & Brightness > Text Size), capped so layouts stay usable.
+    @objc private func applyTextSize() {
+        let scale = UIFontMetrics(forTextStyle: .body).scaledValue(for: 17) / 17
+        web.pageZoom = min(max(scale, 1), 1.6)
     }
 
     private weak var messageContainer: UIScrollView?
@@ -179,7 +208,15 @@ final class PortalController: UIViewController, WKNavigationDelegate,
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { loadFailed(error) }
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { loadFailed(error) }
-    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { showMessage() }
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        // iOS may stop the page while another app is in front. Reload the same page once;
+        // a second failure within ten seconds shows the retry screen instead of looping.
+        let now = Date()
+        if let last = lastTermination, now.timeIntervalSince(last) < 10 { showMessage(); return }
+        lastTermination = now
+        if let url = webView.url, origin?.isPortalPage(url) == true { retryURL = url }
+        start()
+    }
 
     private func notify(_ message: String) {
         guard presentedViewController == nil else { return }

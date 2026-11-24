@@ -44,10 +44,19 @@ export function QuoteForm({ en, disabled, onCancel, amount, estimate, onSave }: 
 
 export function CloseForm({ en, disabled, onCancel, onSave }: FormProps & { onSave: (reason: CloseReason) => void }) {
   const [selected, setSelected] = useState<CloseReason | null>(null);
-  return <form className="ns-form" onSubmit={e => { e.preventDefault(); if (selected) onSave(selected); }}>
-    <fieldset disabled={disabled} className="ns-reasons"><legend>{en ? 'Reason for closing' : 'เหตุผลที่ปิดคำขอ'}</legend>
-      {closeReasons.map(([id, th, english]) => <label key={id}><input type="radio" name="close-reason" checked={id === selected} onChange={() => setSelected(id)} required/>{en ? english : th}</label>)}
-    </fieldset><button type="submit" disabled={disabled || !selected} className="ns-primary">{en ? 'Close enquiry' : 'ปิดคำขอ'}</button>
+  const [missing, setMissing] = useState(false);
+  // Keep the button usable so a tap always explains what is needed, rather than silently doing nothing.
+  return <form className="ns-form" noValidate onSubmit={e => {
+    e.preventDefault();
+    if (selected) { onSave(selected); return; }
+    setMissing(true);
+    e.currentTarget.querySelector<HTMLInputElement>('input[name=close-reason]')?.focus();
+  }}>
+    <fieldset disabled={disabled} className="ns-reasons" aria-describedby={missing ? 'close-reason-missing' : undefined}><legend>{en ? 'Reason for closing' : 'เหตุผลที่ปิดคำขอ'}</legend>
+      {closeReasons.map(([id, th, english]) => <label key={id}><input type="radio" name="close-reason" checked={id === selected} onChange={() => { setSelected(id); setMissing(false); }} required/>{en ? english : th}</label>)}
+    </fieldset>
+    {missing && <p className="ns-error" id="close-reason-missing" role="alert">{en ? 'Choose a reason first.' : 'เลือกเหตุผลก่อนปิดคำขอ'}</p>}
+    <button type="submit" disabled={disabled} className="ns-primary">{en ? 'Close enquiry' : 'ปิดคำขอ'}</button>
     <div className="ns-links"><button type="button" onClick={onCancel}>{en ? 'Cancel' : 'ยกเลิก'}</button></div>
   </form>;
 }

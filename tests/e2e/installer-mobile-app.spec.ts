@@ -236,6 +236,112 @@ test('synthetic installer signs in, logs a call, books a visit, records and undo
   }
 });
 
+test('a failed save keeps the step open and explains why inside the card', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockSignalPortal(page, 'approved', 'en');
+  await page.addInitScript(() => document.addEventListener('click', event => {
+    if ((event.target as Element).closest('a[href^="tel:"]')) event.preventDefault();
+  }));
+  await page.goto(`${app}/enquiry/${signalId(39)}?lang=en`);
+  const card = page.getByRole('region', { name: 'Next step' });
+  await card.locator('a[href^="tel:"]').click();
+  await expect(card.getByText('Your phone is calling 081 234 5678. Come back here when you hang up.')).toBeVisible();
+  await page.route('**/api/installer/portal**', route => route.request().method() === 'POST'
+    ? route.fulfill({ status: 503, json: { error: 'temporarily_unavailable' } }) : route.fallback());
+  await card.getByRole('button', { name: 'Spoke with them' }).click();
+  await expect(card.getByRole('alert')).toHaveText('The service is temporarily unavailable. Please try again later.');
+  await expect(card.getByRole('heading', { name: 'How did the call go?' })).toBeVisible();
+  await page.unroute('**/api/installer/portal**');
+  await mockSignalPortal(page, 'approved', 'en');
+  await card.getByRole('button', { name: 'Spoke with them' }).click();
+  await expect(card.getByRole('alert')).toHaveCount(0);
+});
+
+test('closing asks for a reason instead of silently doing nothing', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const { actions } = await mockSignalPortal(page, 'approved', 'th');
+  await page.goto(`${app}/enquiry/${signalId(28)}?lang=th&tab=active`);
+  const card = page.getByRole('region', { name: 'ขั้นต่อไป' });
+  await expect(card.getByRole('heading', { name: 'รอคุณวิชัย ตัดสินใจ' })).toBeVisible();
+  await card.getByRole('button', { name: 'ยังไม่ตกลง' }).click();
+  await card.getByRole('button', { name: 'ปิดคำขอ', exact: true }).click();
+  await expect(card.getByRole('alert')).toHaveText('เลือกเหตุผลก่อนปิดคำขอ');
+  await expect(card.getByRole('radio').first()).toBeFocused();
+  expect(actions).toEqual([]);
+  await card.getByRole('radio', { name: 'ราคา' }).check();
+  await expect(card.getByRole('alert')).toHaveCount(0);
+});
+
+test('a won enquiry shows every stage done and when it was won', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const { data } = await mockSignalPortal(page, 'approved', 'en');
+  const won = data.deliveries.find(item => item.id === signalId(22))!;
+  won.activity = [{ at: '2026-10-25T05:00:00.000Z', kind: 'won' }];
+  await page.goto(`${app}/enquiry/${won.id}?lang=en&tab=closed`);
+  const card = page.getByRole('region', { name: 'Next step' });
+  await expect(card.getByText('Marked as won Sun 25 Oct.')).toBeVisible();
+  await expect(card.locator('.ns-track button[data-state=done]')).toHaveCount(5);
+});
+
+test('the store apps show credit balances and history without purchasing', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block',
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 SolarMatchInstallers/iOS' });
+  const page = await context.newPage();
+  await mockSignalPortal(page, 'nocredits', 'en');
+  await page.goto(`${app}?view=credits&lang=en`);
+  await expect(page.getByText('Credits can’t be bought in this app.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Statement' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Pay with/ })).toHaveCount(0);
+  await page.goto(`${app}?lang=en`);
+  await expect(page.getByRole('button', { name: 'Top up' })).toHaveCount(0);
+  await context.close();
+});
+
+test('an installer can delete their account from the app after confirming their password', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const { data } = await mockSignalPortal(page, 'approved', 'en');
+  const attempts: unknown[] = [];
+  let deleted = false;
+  await page.route('**/api/installer/portal**', async route => {
+    if (route.request().method() === 'GET' && deleted) return route.fulfill({ status: 401, json: { error: 'unauthorized' } });
+    if (route.request().method() !== 'POST') return route.fallback();
+    const body = route.request().postDataJSON() as { action: string; password?: string };
+    if (body.action !== 'delete-account') return route.fallback();
+    attempts.push(body);
+    if (body.password !== 'synthetic correct password') return route.fulfill({ status: 403, json: { error: 'password_incorrect' } });
+    deleted = true;
+    return route.fulfill({ json: { ok: true, companyReviewRequired: true } });
+  });
+  await page.goto(`${app}?lang=en`);
+  await page.locator('details.acct:visible summary').first().click();
+  await page.getByRole('button', { name: 'Account and deletion' }).first().click();
+  await expect(page).toHaveURL(/view=profile/);
+  const section = page.getByRole('region', { name: 'Your account' });
+  await expect(section.getByText(data.session.user.email)).toBeVisible();
+  await section.getByText('Delete account', { exact: true }).click();
+  await section.getByRole('button', { name: 'Delete my account permanently' }).click();
+  await expect(section.getByRole('alert')).toHaveText('Enter your current password to confirm.');
+  expect(attempts).toEqual([]);
+  await section.getByLabel('Current password').fill('wrong synthetic password');
+  await section.getByRole('button', { name: 'Delete my account permanently' }).click();
+  await expect(section.getByRole('alert')).toHaveText('That password isn’t right. Your account has not been deleted.');
+  await section.getByLabel('Current password').fill('synthetic correct password');
+  await section.getByRole('button', { name: 'Delete my account permanently' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByText('Your account has been deleted.')).toBeVisible();
+  expect(attempts).toHaveLength(2);
+});
+
+test('the public deletion page explains the steps in both languages without sign-in', async ({ page }) => {
+  for (const [lang, heading, step] of [['en', 'Delete your SolarMatch Installers account', 'Delete my account permanently'], ['th', 'ลบบัญชี SolarMatch Installers', 'ลบบัญชีถาวร']] as const) {
+    const response = await page.goto(`/installers/delete-account?lang=${lang}`);
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    await expect(page.getByText(step, { exact: false })).toBeVisible();
+    await expect(page.locator('form, input')).toHaveCount(0);
+  }
+});
+
 test.describe('installed workspace', () => {
   test.use({ serviceWorkers: 'allow' });
   test('offline relaunch shows the retry page without storing private responses', async ({ page, context, browserName }) => {

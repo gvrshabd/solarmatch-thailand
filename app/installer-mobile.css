@@ -150,3 +150,13 @@
   .installer-app-workspace .chk li, .installer-app-workspace .clist > div { flex-wrap: wrap; }
   .installer-app-workspace .chk .wait-l { white-space: normal; }
 }
+
+/* Account: sign-out and self-service deletion. Coral marks the one destructive action. */
+.signal .btn.danger{background:#b4492f;color:#fff}.signal .btn.danger:hover{background:#97381f}
+.signal .account-section{display:grid;gap:.75rem;justify-items:start}
+.signal .account-section .account-email{overflow-wrap:anywhere}
+.signal .account-section .account-delete{width:100%}
+.signal .account-section .account-delete .form{display:grid;gap:.75rem}
+.signal .store-app-credits h2{margin-top:0}
+/* An empty inbox explains itself in readable type rather than a faint footnote. */
+.installer-app-workspace .a-list .empty{margin:12px 0;padding:28px 20px;border-radius:24px;background:#fff;border:1px dashed var(--sm-line-2,#cfd6cc);color:var(--sm-pine,#142D26);font-size:1.0625rem;line-height:1.6;text-align:center}
